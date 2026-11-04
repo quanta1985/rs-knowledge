@@ -1,0 +1,151 @@
+{
+ "hanoi": {
+  "center_lonlat": [
+   105.833,
+   21.055
+  ],
+  "months": [
+   {
+    "m": 1,
+    "acq_per_year": 6.0,
+    "usable_per_year": 1.0
+   },
+   {
+    "m": 2,
+    "acq_per_year": 6.0,
+    "usable_per_year": 0.67
+   },
+   {
+    "m": 3,
+    "acq_per_year": 5.67,
+    "usable_per_year": 0.5
+   },
+   {
+    "m": 4,
+    "acq_per_year": 6.0,
+    "usable_per_year": 1.17
+   },
+   {
+    "m": 5,
+    "acq_per_year": 6.0,
+    "usable_per_year": 0.83
+   },
+   {
+    "m": 6,
+    "acq_per_year": 6.0,
+    "usable_per_year": 1.5
+   },
+   {
+    "m": 7,
+    "acq_per_year": 6.17,
+    "usable_per_year": 1.83
+   },
+   {
+    "m": 8,
+    "acq_per_year": 6.5,
+    "usable_per_year": 0.67
+   },
+   {
+    "m": 9,
+    "acq_per_year": 6.0,
+    "usable_per_year": 1.33
+   },
+   {
+    "m": 10,
+    "acq_per_year": 6.17,
+    "usable_per_year": 1.5
+   },
+   {
+    "m": 11,
+    "acq_per_year": 5.83,
+    "usable_per_year": 1.83
+   },
+   {
+    "m": 12,
+    "acq_per_year": 5.83,
+    "usable_per_year": 2.5
+   }
+  ],
+  "total_dates": 433,
+  "usable_dates": 92
+ },
+ "angiang": {
+  "center_lonlat": [
+   105.08,
+   10.45
+  ],
+  "months": [
+   {
+    "m": 1,
+    "acq_per_year": 6.33,
+    "usable_per_year": 3.17
+   },
+   {
+    "m": 2,
+    "acq_per_year": 5.17,
+    "usable_per_year": 2.0
+   },
+   {
+    "m": 3,
+    "acq_per_year": 6.5,
+    "usable_per_year": 2.0
+   },
+   {
+    "m": 4,
+    "acq_per_year": 6.0,
+    "usable_per_year": 2.0
+   },
+   {
+    "m": 5,
+    "acq_per_year": 6.0,
+    "usable_per_year": 2.5
+   },
+   {
+    "m": 6,
+    "acq_per_year": 6.0,
+    "usable_per_year": 2.0
+   },
+   {
+    "m": 7,
+    "acq_per_year": 5.83,
+    "usable_per_year": 1.0
+   },
+   {
+    "m": 8,
+    "acq_per_year": 6.0,
+    "usable_per_year": 1.17
+   },
+   {
+    "m": 9,
+    "acq_per_year": 6.0,
+    "usable_per_year": 0.5
+   },
+   {
+    "m": 10,
+    "acq_per_year": 6.17,
+    "usable_per_year": 1.83
+   },
+   {
+    "m": 11,
+    "acq_per_year": 5.83,
+    "usable_per_year": 1.67
+   },
+   {
+    "m": 12,
+    "acq_per_year": 6.33,
+    "usable_per_year": 3.33
+   }
+  ],
+  "total_dates": 433,
+  "usable_dates": 139
+ },
+ "provenance": {
+  "collection": "COPERNICUS/S2_SR_HARMONIZED + GOOGLE/CLOUD_SCORE_PLUS/V1/S2_HARMONIZED",
+  "box": "2 x 2 km around center_lonlat",
+  "usable": "clear share (cs_cdf >= 0.6) >= 0.9",
+  "period": "2019-2024; values are means per calendar month per year",
+  "note": "Sentinel-2A and 2B both operating for the whole period (5-day revisit at the equator)",
+  "script": "scripts/data/export_revisit.py",
+  "exported": "2026-11-04T03:43:40+00:00"
+ }
+}

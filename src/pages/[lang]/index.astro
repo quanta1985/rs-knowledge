@@ -1,0 +1,55 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { CHAPTERS, type Part } from '../../data/chapters';
+import { LANGS, t, url, type Lang } from '../../i18n/ui';
+
+export const getStaticPaths = () => LANGS.map((lang) => ({ params: { lang } }));
+const lang = Astro.params.lang as Lang;
+const ready = new Set((await getCollection('chapters')).map((e) => e.id));
+const vi = lang === 'vi';
+const parts: [Part, 'partA' | 'partB' | 'partC'][] = [['A', 'partA'], ['B', 'partB'], ['C', 'partC']];
+const features = vi
+  ? [
+      ['Ảnh thật Việt Nam', 'Mỗi khái niệm có ví dụ trên ảnh Sentinel-2/Landsat thật: Hồ Tây, sông Hồng, ruộng lúa An Giang…'],
+      ['Ba tầng độ sâu', 'Cơ bản cho sinh viên nhập môn, Nâng cao cho cao học, Tra cứu cho kỹ sư: đổi bằng một nút.'],
+      ['Tính toán ngay trong trình duyệt', 'Đổi tổ hợp màu, tính chỉ số, kéo ngưỡng, đo diện tích — không cần cài đặt.'],
+      ['Song ngữ & thực hành', 'Việt–Anh, thuật ngữ di chuột là hiện, kèm notebook Colab và script GEE.'],
+    ]
+  : [
+      ['Real imagery of Viet Nam', 'Every concept has a worked example on real Sentinel-2/Landsat data: West Lake, the Red River, An Giang rice…'],
+      ['Three depth levels', 'Basic for undergraduates, Advanced for graduate students, Reference for practitioners — one switch.'],
+      ['Computed in your browser', 'Change composites, compute indices, drag thresholds, measure area — nothing to install.'],
+      ['Bilingual & hands-on', 'Vietnamese–English, hover glossary, with Colab notebooks and GEE scripts.'],
+    ];
+---
+<Base lang={lang} title={t(lang, 'siteTitle')}>
+  <main id="main" class="layout" style="display:block;max-width:1100px">
+    <section class="hero">
+      <h1>{t(lang, 'siteTitle')}</h1>
+      <p>{t(lang, 'tagline')}</p>
+      <a class="btn primary" href={url(`${lang}/ch06-spectral/`)}>{t(lang, 'start')} →</a>
+    </section>
+    <section class="cards" aria-label={vi ? 'Đặc điểm' : 'Features'} style="margin-bottom:var(--s7)">
+      {features.map(([h, p]) => <div class="card"><h3 style="margin-top:0">{h}</h3><p class="muted" style="margin:0">{p}</p></div>)}
+    </section>
+    {parts.map(([p, key]) => (
+      <section aria-labelledby={`part-${p}`}>
+        <h2 id={`part-${p}`}>{t(lang, key)}</h2>
+        <div class="cards">
+          {CHAPTERS.filter((c) => c.part === p).map((c) => ready.has(`${lang}/${c.slug}`) ? (
+            <a class="card ready" href={url(`${lang}/${c.slug}/`)}>
+              <span class="badge">{vi ? 'Đã có' : 'Ready'}</span>
+              <div class="n">{t(lang, 'chapter')} {c.n}</div><strong>{c.title[lang]}</strong>
+            </a>
+          ) : (
+            <div class="card planned" aria-disabled="true">
+              <span class="badge">{t(lang, 'planned')}</span>
+              <div class="n">{t(lang, 'chapter')} {c.n}</div><strong>{c.title[lang]}</strong>
+            </div>
+          ))}
+        </div>
+      </section>
+    ))}
+  </main>
+</Base>

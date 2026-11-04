@@ -1,0 +1,206 @@
+---
+title: The four resolutions & sensors
+n: 4
+summary: Whether a satellite image is "good" depends on the question. This chapter compares Sentinel-2, Landsat and MODIS over the same West Lake frame to show how bigger pixels, fewer bands, fewer bits or fewer cloud-free images change the answer.
+objectives:
+  - Distinguish spatial, spectral, radiometric and temporal resolution and quote them for common satellites.
+  - Explain why mixed pixels bias area estimates, and quantify it with a linear mixing model.
+  - Recognise when more bands or more bits help, and when clouds are the real limit.
+  - Match a sensor to object size, required revisit and the study area's climate.
+updated: "2026-11-04"
+---
+import Term from '../../../components/Term.astro';
+import Depth from '../../../components/Depth.astro';
+import Figure from '../../../components/Figure.astro';
+import LabLinks from '../../../components/LabLinks.astro';
+import SensorCompare from '../../../islands/SensorCompare.tsx';
+import AggregateLab from '../../../islands/AggregateLab.tsx';
+import MixedPixel from '../../../islands/MixedPixel.tsx';
+import SpectralSampling from '../../../islands/SpectralSampling.tsx';
+import Quantization from '../../../islands/Quantization.tsx';
+import RevisitChart from '../../../islands/RevisitChart.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/ch04.json';
+
+## 4.1 Four questions about an image
+
+Before choosing imagery, ask four questions:
+
+1. **How big is a pixel?** That is <Term id="spatial-resolution">spatial resolution</Term>.
+2. **Which spectral bands does it have?** That is <Term id="spectral-resolution">spectral resolution</Term>.
+3. **How many value levels can each pixel take?** That is <Term id="radiometric-resolution">radiometric resolution</Term>.
+4. **How often is a place revisited, and how many images are cloud-free?** That is <Term id="temporal-resolution">temporal resolution</Term>.
+
+No satellite wins on all four. Small pixels usually come with a narrow <Term id="swath">swath</Term>, so the satellite returns to the same place less often. This chapter uses the same 5.12 × 5.12 km frame around West Lake (Chapter 6) to show each trade-off.
+
+<Depth level="ref" title="Reference: common satellites">
+
+<div class="table-wrap">
+
+| Satellite / sensor | Spatial | Spectral bands | Radiometric | Revisit | Swath |
+|---|---|---|---|---|---|
+| Sentinel-2 MSI | 10 / 20 / 60 m | 13 | 12-bit | 5 days (2 satellites) | 290 km |
+| Landsat 8 OLI / 9 OLI-2 | 30 m (pan 15 m; thermal 100 m) | 9 + 2 thermal | 12 / 14-bit | 16 days each, 8 days combined | 185 km |
+| MODIS (Terra, Aqua) | 250 / 500 / 1000 m | 36 | 12-bit | 1–2 days | 2330 km |
+| VNREDSat-1 | 2.5 m pan; 10 m multispectral | 4 MS + 1 pan | — | Tasked | 17.5 km |
+| Sentinel-1 (radar, Chapter 11) | ~5 × 20 m (IW mode) | C-band, 2 polarisations | — | 12 days each | 250 km |
+
+</div>
+
+Sources: ESA (Sentinel-2, Sentinel-1), USGS/NASA (Landsat, MODIS), VNSC (VNREDSat-1). "—" marks values not yet included in the handbook.
+
+</Depth>
+
+## 4.2 Spatial resolution
+
+### One lake, four sensors
+
+Figure 4.1 shows the same West Lake frame through four real products. Turn on "Native pixel grid" to see each sensor's true pixel size.
+
+<Figure
+  title="Figure 4.1 — West Lake seen by Sentinel-2 (10 m), Landsat 9 (30 m), MODIS (250 m, 500 m)"
+  try="Step through 10 m → 30 m → 250 m → 500 m. How many cells are left for West Lake at 500 m? Read 'Area with NDVI < 0' at each level."
+  source="Sentinel-2B L2A 12 Feb 2024; Landsat 9 C2 L2 22 Dec 2023 (closest clear scene: no Landsat scene in Jan–Apr 2024 was clear enough); MODIS Terra MOD09GQ/MOD09GA 7 Dec 2023 (≥ 95 % clear, view zenith ≤ 30°). Landsat and MODIS resampled by nearest neighbour to a UTM 48N grid sharing the same corner. Same fixed stretch for every sensor."
+>
+  <SensorCompare client:visible lang="en" />
+</Figure>
+
+The area with NDVI < 0 (mostly water) **shrinks as pixels grow**: 6.98 km² with Sentinel-2, 6.67 km² with Landsat, 3.59 km² with MODIS 250 m and only 1.68 km² with MODIS 500 m. The three products were acquired on different dates, so part of the difference may come from timing (water level, crops on the floodplain). To isolate the effect of pixel size, Figure 4.2 runs a cleaner experiment.
+
+### Experiment: aggregate one image
+
+Take the 10 m Sentinel-2 image and average reflectance over blocks of 2×2, 4×4, … 64×64 pixels. This simulates sensors with 20–640 m pixels imaging at the **same moment**. NDVI is computed afterwards.
+
+<Figure
+  title="Figure 4.2 — Simulating coarser pixels by block averaging"
+  try="Drag the slider from 10 m to 640 m and watch the area curve. At what pixel size does the area start to fall quickly?"
+  source="Simulated from the Sentinel-2B L2A image of 12 Feb 2024: block mean of B4 and B8 reflectance, then NDVI. Not real sensor data; real sensors also have their own point-spread function (PSF) and view geometry."
+>
+  <AggregateLab client:visible lang="en" />
+</Figure>
+
+Same image, same moment, and the NDVI < 0 area still falls from **6.98 km² (10 m)** to **4.40 km² (320 m)** and **2.87 km² (640 m)**. The cause is <Term id="mixed-pixel">mixed pixels</Term>.
+
+### Why mixed pixels "swallow" water
+
+Along the shore a large pixel contains both water and vegetation. Under the <Term id="linear-mixing">linear mixing model</Term>, the pixel spectrum is the area-weighted mean of the pure spectra:
+
+<code class="formula">ρ(pixel) = f · ρ(water) + (1 − f) · ρ(vegetation)</code>
+
+Floodplain vegetation has NIR − Red = 0.431 − 0.033 = **+0.398**. West Lake water has only 0.031 − 0.038 = **−0.007**. NDVI < 0 requires NIR < Red, i.e.:
+
+<code class="formula">−0.007 · f + 0.398 · (1 − f) &lt; 0  ⇒  f &gt; 0.398 / 0.405 ≈ 98.3 %</code>
+
+A pixel must be **more than 98 % water** before its NDVI turns negative. A 50/50 pixel has NDVI ≈ 0.73, not the average of the two NDVIs (0.38). NDVI is a ratio and **does not mix linearly**.
+
+<Figure
+  title="Figure 4.3 — Mixed pixels: blending two real spectra"
+  try="Keep 'West Lake water' and 'Floodplain vegetation', push the water share to 90 % and then 99 %. Then switch component 2 to 'Roofs and streets': how much water is needed now?"
+  source="3×3-pixel reference spectra from the Sentinel-2B image of 12 Feb 2024 (Figure 6.1). Linear mixing assumed; multiple scattering between surfaces ignored."
+>
+  <MixedPixel client:visible lang="en" />
+</Figure>
+
+<Depth level="advanced" title="Pixel size, GSD and 'true' resolution">
+
+- **GSD (Ground Sampling Distance)** is the ground distance between neighbouring pixel centres. The ability to separate objects also depends on the optics' **point-spread function (PSF/MTF)**: light from one point spills into neighbouring pixels. A 10 m image therefore usually cannot separate two objects exactly 10 m apart.
+- **Resampling** (e.g. 20 m → 10 m) adds pixels but **not** detail.
+- **Off-nadir viewing** enlarges pixels, mostly across the swath. At the edge of the MODIS swath, pixels are several times larger than at nadir. That is why only scenes with view zenith ≤ 30° are used here.
+- **Scale**: Woodcock & Strahler (1987) showed that local image variance peaks when the pixel is about ½–¾ of the object size. Choose pixels well below the size of what you measure.
+- Multi-band **spectral unmixing** can estimate the fraction f per pixel instead of a hard "water / not water" label.
+
+</Depth>
+
+## 4.3 Spectral resolution
+
+A normal camera has three bands: blue, green, red. Sentinel-2 adds the red edge, NIR and SWIR. Figure 4.4 shows the same reference spectra seen through 3, 6 or 10 bands.
+
+<Figure
+  title="Figure 4.4 — More bands separate more surfaces"
+  try="Pick 'RGB camera' and compare 'Urban trees' with 'West Lake water': the spectral distance is almost zero. Switch to 10 bands."
+  source="Simulated by keeping a subset of Sentinel-2 bands (the 6-band set uses B8A, B11, B12 in place of Landsat OLI's NIR, SWIR1, SWIR2). Reference spectra as in Figure 6.1."
+>
+  <SpectralSampling client:visible lang="en" />
+</Figure>
+
+In the visible, urban trees and West Lake water are both dark: their spectral distance over the 3 RGB bands is only **0.013**. Adding NIR and SWIR raises it to **0.228** (6 bands) and **0.356** (10 bands), about 27 times more. By contrast, West Lake and Red River water stay close however many bands are used (0.042–0.048). Separating two kinds of water needs narrower visible bands or <Term id="hyperspectral">hyperspectral</Term> data.
+
+<Depth level="advanced" title="Multispectral versus hyperspectral">
+
+- **Multispectral** (Sentinel-2, Landsat): a few to a few dozen broad, non-contiguous bands.
+- **Hyperspectral** (EnMAP, PRISMA): hundreds of contiguous ~10 nm bands from 400 to 2500 nm, used for minerals, algal pigments and leaf moisture. In exchange, pixels are usually 30 m and swaths narrow (~30 km).
+- Spectral resolution has three parts: **number of bands**, **band position** (do they fall where surfaces differ?) and **band width** (narrow bands catch narrow absorption features).
+
+</Depth>
+
+## 4.4 Radiometric resolution
+
+A sensor turns a continuous signal into integers: n bits give 2ⁿ levels (<Term id="quantization">quantisation</Term>). Sentinel-2 MSI and Landsat 8 OLI use 12 bits (4096 levels), Landsat 9 OLI-2 uses 14 bits, and the older Landsat TM only 8 bits.
+
+<Figure
+  title="Figure 4.5 — Fewer bits, lost detail in dark areas"
+  try="Go from 12 bits down to 4 bits with the green band and watch the orange box in West Lake. The land stays recognisable while the lake turns into flat patches."
+  source="Simulated: Sentinel-2 reflectance (0–1 range) re-quantised to n bits. The original data are stored in steps of 0.0001."
+>
+  <Quantization client:visible lang="en" />
+</Figure>
+
+In the green band, the West Lake window keeps **244** grey levels at 12 bits, **28** at 8 bits, **9** at 6 bits and only **3** at 4 bits. Dark surfaces such as water occupy a narrow value range (0.04–0.06), so they lose detail first. That matters for water-quality work, where the signal of interest is tiny.
+
+## 4.5 Temporal resolution
+
+The two Sentinel-2 satellites revisit a place about every 5 days (<Term id="revisit">revisit time</Term>), or about 6 times a month. The number of **usable** images, however, depends on clouds.
+
+<Figure
+  title="Figure 4.6 — Usable Sentinel-2 images per month: Hanoi and An Giang"
+  try="Find the worst month at each site. If you need winter–spring rice imagery in the north (February–March), what would you do?"
+  source="Sentinel-2 L2A 2019–2024, 2 × 2 km boxes around West Lake and around Tri Ton (An Giang). 'Usable' = ≥ 90 % of pixels clear by Cloud Score+ (cs_cdf ≥ 0.6); same-day tiles merged."
+>
+  <RevisitChart client:visible lang="en" />
+</Figure>
+
+Over six years Hanoi had 433 acquisition dates but only **92 usable** ones (about 15 a year). An Giang had **139**. The two regions have different cloudy seasons:
+
+- **Hanoi**: February–March is worst (0.5–0.7 images per month), consistent with the low cloud and drizzle of late winter–spring. December is best (2.5 per month).
+- **An Giang**: September is worst (0.5 per month), in the middle of the wet season. December–January is best (about 3.2–3.3 per month).
+
+Landsat (16 days per satellite) has it harder: over Hanoi **no Landsat scene was clear from January to April 2024**, which is why Figure 4.1 uses a December 2023 scene. When clouds are the main limit, the options are multi-date composites, combining satellites (Harmonized Landsat–Sentinel) or radar (Chapter 11).
+
+## 4.6 Choosing a sensor: always a trade-off
+
+<div class="table-wrap">
+
+| Question | What you need | Suggestion |
+|---|---|---|
+| Area of small lakes, ponds, built-up land | Pixels much smaller than the object | Sentinel-2 10 m; commercial imagery under 3 m for objects of a few tens of metres |
+| Crop monitoring over a region | Many images per month | Sentinel-2 + Landsat (HLS); MODIS for very large fields |
+| A big flood across a delta, daily | Wide swath, sees through cloud | MODIS for the overview; Sentinel-1 SAR under cloud |
+| Water quality, minerals | Many narrow bands, many bits | Narrow Sentinel-2 / Sentinel-3 OLCI bands; hyperspectral |
+| Long-term change (1980s → now) | Long, consistent record | Landsat 5/7/8/9 (Collection 2) |
+
+</div>
+
+## 4.7 Hands-on
+
+The notebook pulls the same West Lake frame from Sentinel-2, Landsat and MODIS, computes the NDVI < 0 area at each resolution, and simulates pixel aggregation. The GEE script charts usable images per month for any point in Viet Nam.
+
+<LabLinks notebook="labs/ch04_resolution.ipynb" gee="labs/ch04_resolution.js" />
+
+**Suggested exercises**
+
+1. Repeat Figure 4.6 for where you live. Which month is hardest to image?
+2. Measure a small lake (under 0.5 km²) with Sentinel-2 and Landsat. How large is the percentage difference?
+3. Use the linear mixing model to estimate the water fraction f for shoreline pixels of West Lake at 30 m.
+
+## 4.8 Review
+
+<Quiz client:visible lang="en" items={quiz} />
+
+## References
+
+- Drusch, M. et al. (2012). Sentinel-2: ESA's optical high-resolution mission for GMES operational services. *Remote Sensing of Environment*, 120, 25–36.
+- Justice, C. O. et al. (1998). The Moderate Resolution Imaging Spectroradiometer (MODIS): Land remote sensing for global change research. *IEEE Transactions on Geoscience and Remote Sensing*, 36(4), 1228–1249.
+- Masek, J. G. et al. (2020). Landsat 9: Empowering open science and applications through continuity. *Remote Sensing of Environment*, 248, 111968.
+- Pasquarella, V. J., Brown, C. F., Czerwinski, W., & Rucklidge, W. J. (2023). Comprehensive quality assessment of optical satellite imagery using weakly supervised video learning. *CVPR Workshops*, 2125–2135.
+- Roy, D. P. et al. (2014). Landsat-8: Science and product vision for terrestrial global change research. *Remote Sensing of Environment*, 145, 154–172.
+- Woodcock, C. E., & Strahler, A. H. (1987). The factor of scale in remote sensing. *Remote Sensing of Environment*, 21(3), 311–332.

@@ -1,0 +1,19 @@
+---
+// Glossary term with a native popover (no JS): <Term id="ndvi">NDVI</Term>
+import glossary from '../data/glossary.json';
+import { langFromUrl, url, t } from '../i18n/ui';
+
+interface Props { id: string }
+const { id } = Astro.props;
+const lang = langFromUrl(Astro.url);
+const entry = glossary.find((g) => g.id === id);
+if (!entry) throw new Error(`Glossary term "${id}" not found`);
+const other = lang === 'vi' ? 'en' : 'vi';
+const popId = `term-${id}-${Math.random().toString(36).slice(2, 7)}`;
+---
+<button type="button" class="term" popovertarget={popId}><slot>{entry[lang]}</slot></button>
+<span id={popId} popover class="term-pop" role="note">
+  <strong>{entry[lang]}</strong> <span class="alt" lang={other}>({entry[other]})</span><br />
+  {entry.def[lang]}<br />
+  <a href={url(`${lang}/glossary/#${id}`)}>{t(lang, 'glossaryMore')} →</a>
+</span>

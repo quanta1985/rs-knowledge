@@ -1,0 +1,52 @@
+{
+  "name": {
+    "vi": "Hồ Tây – sông Hồng, Hà Nội",
+    "en": "West Lake – Red River, Hanoi"
+  },
+  "width": 512,
+  "height": 512,
+  "resolution_m": 10,
+  "crs": "EPSG:32648",
+  "origin_xy": [
+    583980,
+    2331020
+  ],
+  "bbox_lonlat": [
+    105.80820537260801,
+    21.031742821893975,
+    105.85774009975263,
+    21.078241745030187
+  ],
+  "bands": [
+    "B2",
+    "B3",
+    "B4",
+    "B5",
+    "B6",
+    "B7",
+    "B8",
+    "B8A",
+    "B11",
+    "B12"
+  ],
+  "dtype": "uint16",
+  "layout": "BSQ",
+  "scale": 0.0001,
+  "scene": {
+    "MGRS_TILE": "48QWJ",
+    "PROCESSING_BASELINE": "05.10",
+    "SENSING_ORBIT_NUMBER": 18,
+    "SPACECRAFT_NAME": "Sentinel-2B",
+    "clear_frac": 1,
+    "system:index": "20240212T032849_20240212T033821_T48QWJ"
+  },
+  "date": "2024-02-12",
+  "provenance": {
+    "collection": "COPERNICUS/S2_SR_HARMONIZED (Level-2A surface reflectance)",
+    "cloud_mask": "none applied; scene chosen by Cloud Score+ cs_cdf >= 0.6",
+    "resampling": "20 m bands (B5,B6,B7,B8A,B11,B12) nearest-neighbour to 10 m",
+    "script": "scripts/data/export_hanoi_s2.py",
+    "exported": "2026-11-04T01:51:43+00:00",
+    "attribution": "Contains modified Copernicus Sentinel data 2024"
+  }
+}

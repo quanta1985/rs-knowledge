@@ -1,0 +1,220 @@
+---
+title: Spectral signatures & spectral indices
+n: 6
+summary: Every surface "reflects" light in its own way. This chapter shows how to read spectral curves, build colour composites and compute spectral indices (NDVI, NDWI, MNDWI, NDBI) on real Sentinel-2 imagery of Hanoi and An Giang.
+objectives:
+  - Read and compare the reflectance curves of water, vegetation, built-up land and bare soil.
+  - Choose a suitable colour composite and explain the colours in it.
+  - Compute normalized-difference indices by hand and on an image; choose thresholds for a reason.
+  - Read an NDVI time series to recognise crop seasons and cloud noise.
+updated: "2026-11-04"
+---
+import Term from '../../../components/Term.astro';
+import Depth from '../../../components/Depth.astro';
+import Figure from '../../../components/Figure.astro';
+import WorkedExample from '../../../components/WorkedExample.astro';
+import LabLinks from '../../../components/LabLinks.astro';
+import SpectralExplorer from '../../../islands/SpectralExplorer.tsx';
+import BandComposer from '../../../islands/BandComposer.tsx';
+import IndexLab from '../../../islands/IndexLab.tsx';
+import NdviSeries from '../../../islands/NdviSeries.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/ch06.json';
+
+## 6.1 What is spectral reflectance?
+
+A leaf looks green because it absorbs most red and blue light and sends back relatively more green. The fraction of incoming energy a surface sends back, at each wavelength, is its <Term id="reflectance">spectral reflectance</Term>. Plotted against wavelength it gives a <Term id="spectral-signature">spectral signature</Term>, a kind of fingerprint of the surface.
+
+Our eyes see roughly 400–700 nm. Sentinel-2 also measures the <Term id="red-edge">red edge</Term>, <Term id="nir">near infrared (NIR)</Term> and <Term id="swir">shortwave infrared (SWIR)</Term>. These "invisible" regions are what separate surfaces that look alike to the eye.
+
+<Figure
+  title="Figure 6.1 — Spectral curves on a Sentinel-2 image of Hanoi (12 Feb 2024)"
+  try="Move the pointer from West Lake to the Red River floodplain. How does the thick line (selected pixel) change at 833 nm (B8)? Switch on 'Landsat 8/9 OLI' to compare the two satellites' band positions."
+  source="Copernicus Sentinel-2B Level-2A (S2_SR_HARMONIZED), scene 20240212T032849_T48QWJ, 512 × 512 pixels at 10 m. Display stretch 2–98 %. Labels of the six reference points come from image interpretation and are not field-verified."
+>
+  <SpectralExplorer client:visible lang="en" />
+</Figure>
+
+Reading the six reference curves in Figure 6.1:
+
+- **Water** (West Lake, Red River): low in every band and near zero in NIR and SWIR, because water strongly absorbs infrared. The Red River is brighter than West Lake in green (0.082 versus 0.048).
+- **Vegetation** (floodplain, urban trees): low in blue and red (chlorophyll absorption), a small green peak, then a **sharp rise** through the red edge into NIR. The floodplain pixel reaches 0.431 in B8, 13 times its red reflectance (0.033).
+- **Built-up land and bare soil**: flatter curves rising towards SWIR. Bare soil is brightest in SWIR (0.33–0.34 in B11–B12).
+
+<Depth level="advanced" title="Why do the curves look like this?">
+
+- **Chlorophyll a and b** absorb strongly around 430–450 nm and 640–680 nm. These are the blue and red "valleys" of vegetation.
+- The **spongy mesophyll** inside leaves has many air–cell interfaces that scatter NIR strongly. NIR is therefore high, and it rises with more leaf layers.
+- **Leaf water** absorbs in bands around 1450 nm and 1940 nm, lowering SWIR reflectance. Dry or wilted vegetation has higher SWIR.
+- **Surface water** reflectance comes mainly from suspended matter and algae in the water column. The Red River reflects more in green–red than West Lake, consistent with more suspended material. West Lake has higher NIR (0.031) than the Red River (0.022), possibly from algae; water-quality data would be needed to confirm.
+- **Mixed pixels**: a 10 m pixel on a lake or river bank holds both water and trees, so its spectrum is intermediate (a <Term id="mixed-pixel">mixed pixel</Term>). Reference points were therefore taken in homogeneous areas, with a 3×3-pixel standard deviation below 0.012.
+- The 20 m bands (B5, B6, B7, B8A, B11, B12) were resampled to 10 m by **nearest neighbour**, so they add no spatial detail.
+
+</Depth>
+
+## 6.2 Sensor bands
+
+A sensor does not measure a continuous curve. It averages over **wavelength intervals** called <Term id="band">spectral bands</Term>. Sentinel-2 has 13 bands; Landsat 8/9 OLI has 9. Choose "Band positions" in Figure 6.1 to see Sentinel-2's bands crowd into the red edge, where Landsat has none.
+
+<Depth level="ref" title="Reference: Sentinel-2 bands used in this handbook">
+
+<div class="table-wrap">
+
+| S2 band | Name | Centre (S2B) | Width | Resolution | Landsat 8/9 equivalent |
+|---|---|---|---|---|---|
+| B2 | Blue | 492 nm | 66 nm | 10 m | B2 |
+| B3 | Green | 559 nm | 36 nm | 10 m | B3 |
+| B4 | Red | 665 nm | 31 nm | 10 m | B4 |
+| B5 | Red edge 1 | 704 nm | 16 nm | 20 m | — |
+| B6 | Red edge 2 | 739 nm | 15 nm | 20 m | — |
+| B7 | Red edge 3 | 780 nm | 20 nm | 20 m | — |
+| B8 | NIR | 833 nm | 106 nm | 10 m | (B5 is narrower) |
+| B8A | Narrow NIR | 864 nm | 22 nm | 20 m | B5 |
+| B11 | SWIR 1 | 1610 nm | 94 nm | 20 m | B6 |
+| B12 | SWIR 2 | 2186 nm | 185 nm | 20 m | B7 |
+
+</div>
+
+Sources: ESA, Sentinel-2 Spectral Response Functions; USGS, Landsat 8–9 OLI band designations.
+
+</Depth>
+
+## 6.3 Colour composites: seeing the invisible
+
+A screen has only three colours, red, green and blue. A <Term id="composite">colour composite</Term> assigns any three spectral bands to them. Put NIR into red and vegetation turns bright red, because NIR is where vegetation is brightest.
+
+<Figure
+  title="Figure 6.2 — Build your own composite"
+  try="Pick 'True colour', then 'False-colour infrared': the floodplain east of the Red River turns from dark green to red. Then set the stretch to 'No stretch (0–1)': the image goes almost black, because real reflectance rarely exceeds 0.3."
+  source="As Figure 6.1. Per-band stretch limits are printed under the image."
+>
+  <BandComposer client:visible lang="en" />
+</Figure>
+
+A <Term id="stretch">contrast stretch</Term> only changes the **display**. Every calculation in the next section uses the original reflectance. When you put an image in a report, state the band combination and the stretch.
+
+## 6.4 Normalized-difference indices
+
+Instead of looking at bands one by one, we combine two "contrasting" bands into one number:
+
+<code class="formula">Index = (A − B) / (A + B)</code>
+
+A is a band where the target surface is bright, B a band where it is dark. The result always lies between −1 and 1. Dividing by the sum also reduces the effect of overall brightness, such as shaded slopes or scene-to-scene differences. The best-known index is <Term id="ndvi">NDVI</Term> = (NIR − Red) / (NIR + Red).
+
+<WorkedExample index="NDVI" a="B8" b="B4" points={['crops', 'west-lake']} />
+
+Same formula, opposite signs: 0.86 for vegetation, −0.10 for West Lake water. Now do it for all 262,144 pixels:
+
+<Figure
+  title="Figure 6.3 — Spectral index lab"
+  try="Choose MNDWI, press 'Otsu threshold', then switch to 'Area ≥ threshold': water shows in blue. Now pick NDWI and set the threshold to 0.40: most of West Lake disappears. Why?"
+  source="As Figure 6.1. The colour scale is fixed at −1 to +1 for every index so maps are comparable. Area = pixel count × 100 m²."
+>
+  <IndexLab client:visible lang="en" initial="NDVI" />
+</Figure>
+
+### Example: mapping West Lake, NDWI or MNDWI?
+
+West Lake covers roughly 5 km², yet the two water indices disagree strongly on this image:
+
+<div class="table-wrap">
+
+| | <Term id="ndwi">NDWI</Term> (B3, B8) | <Term id="mndwi">MNDWI</Term> (B3, B11) |
+|---|---|---|
+| Value at West Lake | 0.22 | 0.63 |
+| Value at the Red River | 0.58 | 0.79 |
+| Area ≥ 0 | 7.28 km² | 7.42 km² |
+| Area ≥ 0.4 | **1.55 km²** | 6.73 km² |
+| Otsu threshold | −0.04 | 0.10 |
+
+</div>
+
+At a threshold of 0 the two indices nearly agree. A "textbook" threshold of 0.4, however, makes NDWI miss most of West Lake, because the lake's NIR is not as low as the river's. MNDWI uses SWIR, which water absorbs almost completely, and is more robust. **Lesson: no threshold fits every scene.** Look at the histogram, try an automatic threshold such as Otsu, and check the result on the image.
+
+Likewise, <Term id="ndbi">NDBI</Term> ≥ 0 covers 42 % of the frame and includes both roofs (0.21) and bare soil (0.12). NDBI alone cannot separate built-up land from bare soil.
+
+<Depth level="advanced" title="Limitations and improved indices">
+
+- **NDVI saturation**: as ρRed → 0, NDVI → 1 whatever the NIR, so very dense canopies become hard to tell apart (<Term id="saturation">saturation</Term>). EVI (Huete et al., 2002) reduces this:
+  <code class="formula">EVI = 2.5 · (NIR − Red) / (NIR + 6·Red − 7.5·Blue + 1)</code>
+- **Soil background**: where vegetation is sparse, soil makes NDVI vary. SAVI (Huete, 1988) adds a factor L (often 0.5):
+  <code class="formula">SAVI = (1 + L) · (NIR − Red) / (NIR + Red + L)</code>
+- **Two NDWIs**: McFeeters' (1996) NDWI uses green and NIR and maps open water. Gao's (1996) NDWI uses NIR and SWIR and measures **leaf moisture**. Always state the formula when you cite it.
+- **Otsu (1979)** picks the threshold that maximises between-class variance. It works well with a clearly bimodal histogram (like MNDWI here) and poorly when one class covers very few pixels.
+- Indices computed on **surface reflectance (Level-2A)** differ from those computed on top-of-atmosphere reflectance (Level-1C). Do not mix the two.
+
+</Depth>
+
+<Depth level="ref" title="Reference: normalized-difference indices">
+
+<div class="table-wrap">
+
+| Index | Formula | Sentinel-2 | Landsat 8/9 | Used for | Source |
+|---|---|---|---|---|---|
+| NDVI | (NIR − Red)/(NIR + Red) | (B8 − B4)/(B8 + B4) | (B5 − B4)/(B5 + B4) | Vegetation | Rouse et al. 1974; Tucker 1979 |
+| NDWI | (Green − NIR)/(Green + NIR) | (B3 − B8)/(B3 + B8) | (B3 − B5)/(B3 + B5) | Open water | McFeeters 1996 |
+| MNDWI | (Green − SWIR1)/(Green + SWIR1) | (B3 − B11)/(B3 + B11) | (B3 − B6)/(B3 + B6) | Water, incl. in cities | Xu 2006 |
+| NDBI | (SWIR1 − NIR)/(SWIR1 + NIR) | (B11 − B8)/(B11 + B8) | (B6 − B5)/(B6 + B5) | Built-up / bare land | Zha et al. 2003 |
+| NDMI (Gao's NDWI) | (NIR − SWIR1)/(NIR + SWIR1) | (B8 − B11)/(B8 + B11) | (B5 − B6)/(B5 + B6) | Leaf moisture | Gao 1996 |
+
+</div>
+
+Re-select thresholds for each scene from its histogram and check them on the image. There is no universal threshold.
+
+</Depth>
+
+## 6.5 NDVI through time: three rice crops in An Giang
+
+One image is one moment. Put many dates side by side and the crop's <Term id="phenology">phenology</Term> appears. Figure 6.4 shows NDVI for a 2 × 2 km box in Tri Ton district (An Giang), where ESA WorldCover maps 96 % of the area as cropland.
+
+<Figure
+  title="Figure 6.4 — NDVI of rice fields in Tri Ton, An Giang, 2023–2024"
+  try="Count the NDVI peaks in 2024. Find the Jul–Sep 2024 gap and the 'sudden dips' in January 2023."
+  source="Copernicus Sentinel-2 L2A 2023–2024; cropland pixels only (ESA WorldCover 2021, class 40) that are cloud-free (Cloud Score+ cs_cdf ≥ 0.6). Lines break where two acquisitions are more than 40 days apart."
+>
+  <NdviSeries client:visible lang="en" />
+</Figure>
+
+Reading the 2024 series:
+
+1. **Winter–spring crop**: NDVI peaks around 0.93 in late January 2024, falls quickly from mid-March and reaches 0.05 on 30 March, at harvest and land preparation.
+2. **Summer–autumn crop**: NDVI rises again from late April to about 0.89 in late May. After 18 June there is no cloud-free image until 16 September.
+3. **Autumn–winter crop**: peaks around 0.89 on 21 October, then drops to 0.14 on 30 November.
+
+This is an **interpretation** based on the curve's shape and the usual cropping calendar of the Long Xuyen Quadrangle. It has not been checked against actual sowing records.
+
+Two data-quality points stand out:
+
+- **Clouds**: only 70 of 296 acquisitions were kept. The wet season leaves a gap of nearly three months. That is why radar is needed (Chapter 11).
+- **Noise**: in January 2023 NDVI jumps 0.88 → 0.67 → 0.59 → 0.91 in just 20 days. Rice cannot wilt and recover that fast. Most likely haze or thin cloud slipped through the <Term id="cloud-mask">cloud mask</Term>. These points are kept on the chart. In analysis the series is usually smoothed (for example Savitzky–Golay) or its upper envelope is used.
+
+## 6.6 Hands-on
+
+The Python notebook pulls the same Hanoi scene from Google Earth Engine, computes the four indices, plots histograms, picks an Otsu threshold and measures water area. The GEE script does the same in the Code Editor, with map layers.
+
+<LabLinks notebook="labs/ch06_spectral_indices.ipynb" gee="labs/ch06_spectral_indices.js" />
+
+**Suggested exercises**
+
+1. Repeat the MNDWI calculation on a wet-season image (September–October). How does the Red River's water area change?
+2. Pick 5 built-up and 5 bare-soil pixels. Find a two-band combination that separates them better than NDBI.
+3. Plot an NDVI series for a rice area in the Red River Delta. How many crops per year?
+
+## 6.7 Review
+
+<Quiz client:visible lang="en" items={quiz} />
+
+## References
+
+- Drusch, M. et al. (2012). Sentinel-2: ESA's optical high-resolution mission for GMES operational services. *Remote Sensing of Environment*, 120, 25–36.
+- Gao, B.-C. (1996). NDWI — A normalized difference water index for remote sensing of vegetation liquid water from space. *Remote Sensing of Environment*, 58(3), 257–266.
+- Huete, A. R. (1988). A soil-adjusted vegetation index (SAVI). *Remote Sensing of Environment*, 25(3), 295–309.
+- Huete, A., Didan, K., Miura, T., Rodriguez, E. P., Gao, X., & Ferreira, L. G. (2002). Overview of the radiometric and biophysical performance of the MODIS vegetation indices. *Remote Sensing of Environment*, 83(1–2), 195–213.
+- McFeeters, S. K. (1996). The use of the Normalized Difference Water Index (NDWI) in the delineation of open water features. *International Journal of Remote Sensing*, 17(7), 1425–1432.
+- Otsu, N. (1979). A threshold selection method from gray-level histograms. *IEEE Transactions on Systems, Man, and Cybernetics*, 9(1), 62–66.
+- Pasquarella, V. J., Brown, C. F., Czerwinski, W., & Rucklidge, W. J. (2023). Comprehensive quality assessment of optical satellite imagery using weakly supervised video learning. *CVPR Workshops*, 2125–2135.
+- Rouse, J. W., Haas, R. H., Schell, J. A., & Deering, D. W. (1974). Monitoring vegetation systems in the Great Plains with ERTS. *Third ERTS Symposium*, NASA SP-351, 309–317.
+- Tucker, C. J. (1979). Red and photographic infrared linear combinations for monitoring vegetation. *Remote Sensing of Environment*, 8(2), 127–150.
+- Xu, H. (2006). Modification of normalised difference water index (NDWI) to enhance open water features in remotely sensed imagery. *International Journal of Remote Sensing*, 27(14), 3025–3033.
+- Zanaga, D. et al. (2022). *ESA WorldCover 10 m 2021 v200*. Zenodo. https://doi.org/10.5281/zenodo.7254221
+- Zha, Y., Gao, J., & Ni, S. (2003). Use of normalized difference built-up index in automatically mapping urban areas from TM imagery. *International Journal of Remote Sensing*, 24(3), 583–594.

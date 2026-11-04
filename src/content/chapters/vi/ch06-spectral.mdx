@@ -1,0 +1,220 @@
+---
+title: Đặc trưng phổ & chỉ số phổ
+n: 6
+summary: Mỗi bề mặt "phản chiếu" ánh sáng theo một kiểu riêng. Chương này dạy cách đọc đường cong phổ, ghép tổ hợp màu và tính chỉ số phổ (NDVI, NDWI, MNDWI, NDBI) trên ảnh Sentinel-2 thật của Hà Nội và An Giang.
+objectives:
+  - Đọc và so sánh đường cong phản xạ phổ của nước, thực vật, đô thị, đất trống.
+  - Chọn tổ hợp màu phù hợp và giải thích màu sắc trên ảnh.
+  - Tính tay và tính trên ảnh các chỉ số chênh lệch chuẩn hóa; chọn ngưỡng có lý do.
+  - Đọc chuỗi NDVI theo thời gian để nhận ra mùa vụ và nhiễu do mây.
+updated: "2026-11-04"
+---
+import Term from '../../../components/Term.astro';
+import Depth from '../../../components/Depth.astro';
+import Figure from '../../../components/Figure.astro';
+import WorkedExample from '../../../components/WorkedExample.astro';
+import LabLinks from '../../../components/LabLinks.astro';
+import SpectralExplorer from '../../../islands/SpectralExplorer.tsx';
+import BandComposer from '../../../islands/BandComposer.tsx';
+import IndexLab from '../../../islands/IndexLab.tsx';
+import NdviSeries from '../../../islands/NdviSeries.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/ch06.json';
+
+## 6.1 Phản xạ phổ là gì?
+
+Chiếc lá có màu xanh vì nó hấp thụ phần lớn ánh sáng đỏ và lam, chỉ hắt lại nhiều ánh sáng lục hơn. Tỷ lệ năng lượng mà bề mặt hắt lại so với năng lượng chiếu tới, tại từng bước sóng, gọi là <Term id="reflectance">phản xạ phổ</Term>. Vẽ phản xạ theo bước sóng ta được <Term id="spectral-signature">đường cong phổ</Term>, giống như "vân tay" của bề mặt.
+
+Mắt người chỉ thấy khoảng 400–700 nm. Vệ tinh Sentinel-2 đo thêm vùng <Term id="red-edge">rìa đỏ</Term>, <Term id="nir">cận hồng ngoại (NIR)</Term> và <Term id="swir">hồng ngoại sóng ngắn (SWIR)</Term>. Chính những vùng "vô hình" này giúp tách các bề mặt mà mắt thường thấy giống nhau.
+
+<Figure
+  title="Hình 6.1 — Đường cong phổ trên ảnh Sentinel-2 Hà Nội (12/02/2024)"
+  try="Di chuột từ Hồ Tây sang bãi bồi sông Hồng. Đường đậm (pixel đang chọn) thay đổi thế nào ở bước sóng 833 nm (B8)? Bật 'Landsat 8/9 OLI' để so vị trí kênh hai vệ tinh."
+  source="Copernicus Sentinel-2B Level-2A (S2_SR_HARMONIZED), cảnh 20240212T032849_T48QWJ, 512 × 512 pixel 10 m. Kéo giãn hiển thị 2–98 %. Nhãn 6 điểm mẫu do giải đoán ảnh, chưa kiểm chứng thực địa."
+>
+  <SpectralExplorer client:visible lang="vi" />
+</Figure>
+
+Đọc sáu đường mẫu trong Hình 6.1:
+
+- **Nước** (Hồ Tây, sông Hồng): phản xạ thấp ở mọi kênh và gần bằng 0 ở NIR, SWIR, vì nước hấp thụ mạnh hồng ngoại. Nước sông Hồng sáng hơn Hồ Tây ở vùng lục (0,082 so với 0,048).
+- **Thực vật** (bãi bồi, cây xanh đô thị): thấp ở lam và đỏ (diệp lục hấp thụ), có một đỉnh nhỏ ở lục, rồi **tăng vọt** qua rìa đỏ lên NIR. Pixel bãi bồi đạt 0,431 ở B8, gấp 13 lần kênh đỏ (0,033).
+- **Đô thị và đất trống**: phổ "phẳng" hơn, tăng dần về phía SWIR. Đất trống sáng nhất ở SWIR (0,33–0,34 ở B11–B12).
+
+<Depth level="advanced" title="Vì sao các đường cong có hình dạng như vậy?">
+
+- **Diệp lục a, b** hấp thụ mạnh quanh 430–450 nm và 640–680 nm. Đó là "thung lũng" lam và đỏ của thực vật.
+- **Mô xốp** trong lá có nhiều mặt tiếp xúc khí–tế bào, tán xạ mạnh NIR. Do đó NIR cao, và càng nhiều lớp lá NIR càng cao.
+- **Nước trong lá** hấp thụ ở các dải quanh 1450 nm và 1940 nm, kéo phản xạ SWIR xuống. Thực vật khô hoặc héo có SWIR cao hơn.
+- **Nước mặt**: phản xạ chủ yếu do vật chất lơ lửng và tảo trong cột nước. Sông Hồng có phản xạ lục–đỏ cao hơn Hồ Tây, phù hợp với lượng vật chất lơ lửng lớn hơn. Hồ Tây có NIR (0,031) cao hơn sông Hồng (0,022), có thể do tảo; cần số liệu chất lượng nước để kiểm chứng.
+- **Pixel hỗn hợp**: một pixel 10 m ở bờ hồ hay bờ sông chứa cả nước lẫn cây, nên phổ là trung gian (<Term id="mixed-pixel">pixel hỗn hợp</Term>). Vì vậy các điểm mẫu được chọn ở vùng đồng nhất, có độ lệch chuẩn 3×3 pixel nhỏ hơn 0,012.
+- Các kênh 20 m (B5, B6, B7, B8A, B11, B12) đã được lấy mẫu lại về 10 m theo **láng giềng gần nhất**. Đường cong không có thêm chi tiết không gian ở các kênh này.
+
+</Depth>
+
+## 6.2 Kênh phổ của cảm biến
+
+Cảm biến không đo một đường cong liên tục mà đo trung bình trong từng **khoảng bước sóng**, gọi là <Term id="band">kênh phổ</Term>. Sentinel-2 có 13 kênh, Landsat 8/9 OLI có 9 kênh. Chọn "Vị trí kênh" trong Hình 6.1 để thấy các kênh Sentinel-2 dày đặc ở rìa đỏ, nơi Landsat không có kênh nào.
+
+<Depth level="ref" title="Bảng tra: kênh Sentinel-2 dùng trong sổ tay">
+
+<div class="table-wrap">
+
+| Kênh S2 | Tên | Bước sóng trung tâm (S2B) | Độ rộng | Độ phân giải | Tương đương Landsat 8/9 |
+|---|---|---|---|---|---|
+| B2 | Lam | 492 nm | 66 nm | 10 m | B2 |
+| B3 | Lục | 559 nm | 36 nm | 10 m | B3 |
+| B4 | Đỏ | 665 nm | 31 nm | 10 m | B4 |
+| B5 | Rìa đỏ 1 | 704 nm | 16 nm | 20 m | — |
+| B6 | Rìa đỏ 2 | 739 nm | 15 nm | 20 m | — |
+| B7 | Rìa đỏ 3 | 780 nm | 20 nm | 20 m | — |
+| B8 | NIR | 833 nm | 106 nm | 10 m | (B5 hẹp hơn) |
+| B8A | NIR hẹp | 864 nm | 22 nm | 20 m | B5 |
+| B11 | SWIR 1 | 1610 nm | 94 nm | 20 m | B6 |
+| B12 | SWIR 2 | 2186 nm | 185 nm | 20 m | B7 |
+
+</div>
+
+Nguồn: ESA, Sentinel-2 Spectral Response Functions; USGS, Landsat 8–9 OLI band designations.
+
+</Depth>
+
+## 6.3 Tổ hợp màu: nhìn thấy cái "vô hình"
+
+Màn hình chỉ có ba màu Đỏ–Lục–Lam. <Term id="composite">Tổ hợp màu</Term> là việc chọn ba kênh phổ bất kỳ để gán vào ba màu đó. Gán NIR vào màu Đỏ thì thực vật hiện đỏ rực, vì NIR là kênh thực vật sáng nhất.
+
+<Figure
+  title="Hình 6.2 — Tự ghép tổ hợp màu"
+  try="Chọn 'Màu thật' rồi 'Hồng ngoại giả': bãi bồi phía đông sông Hồng đổi từ xanh sẫm sang đỏ. Sau đó đổi kéo giãn sang 'Không kéo giãn (0–1)': ảnh tối gần đen, vì phản xạ thực tế hiếm khi vượt 0,3."
+  source="Như Hình 6.1. Giới hạn kéo giãn của từng kênh được ghi dưới ảnh."
+>
+  <BandComposer client:visible lang="vi" />
+</Figure>
+
+<Term id="stretch">Kéo giãn tương phản</Term> chỉ thay đổi cách **hiển thị**. Mọi phép tính ở mục sau vẫn dùng phản xạ gốc. Khi đưa ảnh vào báo cáo, hãy ghi rõ tổ hợp kênh và cách kéo giãn.
+
+## 6.4 Chỉ số phổ chênh lệch chuẩn hóa
+
+Thay vì nhìn từng kênh, ta gộp hai kênh "tương phản nhau" thành một con số:
+
+<code class="formula">Chỉ số = (A − B) / (A + B)</code>
+
+Chọn A là kênh bề mặt cần tìm phản xạ mạnh, B là kênh nó phản xạ yếu. Kết quả luôn nằm trong khoảng −1 đến 1. Phép chia cho tổng còn làm giảm ảnh hưởng của độ sáng chung, ví dụ sườn dốc khuất nắng hay chênh lệch giữa các cảnh. Chỉ số nổi tiếng nhất là <Term id="ndvi">NDVI</Term> = (NIR − Đỏ) / (NIR + Đỏ).
+
+<WorkedExample index="NDVI" a="B8" b="B4" points={['crops', 'west-lake']} />
+
+Cùng công thức nhưng kết quả trái dấu: thực vật cho NDVI 0,86, nước Hồ Tây cho −0,10. Bây giờ hãy làm điều đó cho cả 262 144 pixel:
+
+<Figure
+  title="Hình 6.3 — Phòng thí nghiệm chỉ số phổ"
+  try="Chọn MNDWI, bấm 'Ngưỡng Otsu' rồi chuyển sang 'Vùng ≥ ngưỡng': vùng nước hiện màu lam. Đổi sang NDWI và đặt ngưỡng 0,40: Hồ Tây biến mất gần hết. Vì sao?"
+  source="Như Hình 6.1. Thang màu cố định từ −1 đến +1 cho mọi chỉ số để so sánh được. Diện tích = số pixel × 100 m²."
+>
+  <IndexLab client:visible lang="vi" initial="NDVI" />
+</Figure>
+
+### Ví dụ: tìm mặt nước Hồ Tây, NDWI hay MNDWI?
+
+Hồ Tây rộng khoảng 5 km², nhưng trên ảnh này hai chỉ số nước cho kết quả rất khác nhau:
+
+<div class="table-wrap">
+
+| | <Term id="ndwi">NDWI</Term> (B3, B8) | <Term id="mndwi">MNDWI</Term> (B3, B11) |
+|---|---|---|
+| Giá trị tại Hồ Tây | 0,22 | 0,63 |
+| Giá trị tại sông Hồng | 0,58 | 0,79 |
+| Diện tích ≥ 0 | 7,28 km² | 7,42 km² |
+| Diện tích ≥ 0,4 | **1,55 km²** | 6,73 km² |
+| Ngưỡng Otsu | −0,04 | 0,10 |
+
+</div>
+
+Ở ngưỡng 0, hai chỉ số gần như đồng ý với nhau. Nhưng một ngưỡng "sách giáo khoa" như 0,4 làm NDWI bỏ sót gần hết Hồ Tây, vì NIR của hồ không thấp bằng sông. MNDWI dùng SWIR, kênh bị nước hấp thụ gần như hoàn toàn, nên ổn định hơn. **Bài học: không có ngưỡng chung cho mọi cảnh.** Hãy nhìn histogram, thử ngưỡng tự động như Otsu, và kiểm tra lại trên ảnh.
+
+Tương tự, <Term id="ndbi">NDBI</Term> ≥ 0 phủ 42 % khung ảnh, gồm cả mái nhà (0,21) lẫn đất trống (0,12). NDBI đơn lẻ không tách được đô thị khỏi đất trống.
+
+<Depth level="advanced" title="Giới hạn và các chỉ số cải tiến">
+
+- **Bão hòa NDVI**: khi ρĐỏ → 0, NDVI → 1 bất kể NIR. Tán lá rất dày vì vậy khó phân biệt (<Term id="saturation">bão hòa</Term>). EVI (Huete và cs., 2002) giảm hiện tượng này:
+  <code class="formula">EVI = 2,5 · (NIR − Đỏ) / (NIR + 6·Đỏ − 7,5·Lam + 1)</code>
+- **Nền đất**: ở nơi thực vật thưa, đất làm NDVI biến động. SAVI (Huete, 1988) thêm hệ số L (thường 0,5):
+  <code class="formula">SAVI = (1 + L) · (NIR − Đỏ) / (NIR + Đỏ + L)</code>
+- **Trùng tên NDWI**: NDWI của McFeeters (1996) dùng Lục và NIR, đo mặt nước. NDWI của Gao (1996) dùng NIR và SWIR, đo **độ ẩm lá**. Khi trích dẫn, ghi rõ công thức.
+- **Otsu (1979)** chọn ngưỡng làm cực đại phương sai giữa hai lớp. Phương pháp hiệu quả khi histogram có hai đỉnh rõ (như MNDWI ở đây), kém khi một lớp chiếm rất ít pixel.
+- Chỉ số tính trên **phản xạ bề mặt (Level-2A)** khác với khi tính trên phản xạ đỉnh khí quyển (Level-1C). Đừng so sánh lẫn hai loại.
+
+</Depth>
+
+<Depth level="ref" title="Bảng tra: chỉ số chênh lệch chuẩn hóa">
+
+<div class="table-wrap">
+
+| Chỉ số | Công thức | Sentinel-2 | Landsat 8/9 | Dùng cho | Nguồn |
+|---|---|---|---|---|---|
+| NDVI | (NIR − Đỏ)/(NIR + Đỏ) | (B8 − B4)/(B8 + B4) | (B5 − B4)/(B5 + B4) | Thực vật | Rouse và cs. 1974; Tucker 1979 |
+| NDWI | (Lục − NIR)/(Lục + NIR) | (B3 − B8)/(B3 + B8) | (B3 − B5)/(B3 + B5) | Mặt nước | McFeeters 1996 |
+| MNDWI | (Lục − SWIR1)/(Lục + SWIR1) | (B3 − B11)/(B3 + B11) | (B3 − B6)/(B3 + B6) | Mặt nước, kể cả trong đô thị | Xu 2006 |
+| NDBI | (SWIR1 − NIR)/(SWIR1 + NIR) | (B11 − B8)/(B11 + B8) | (B6 − B5)/(B6 + B5) | Xây dựng / đất trống | Zha và cs. 2003 |
+| NDMI (NDWI Gao) | (NIR − SWIR1)/(NIR + SWIR1) | (B8 − B11)/(B8 + B11) | (B5 − B6)/(B5 + B6) | Độ ẩm lá | Gao 1996 |
+
+</div>
+
+Ngưỡng phải chọn lại cho từng cảnh, dựa vào histogram và kiểm tra trên ảnh. Không có ngưỡng chung.
+
+</Depth>
+
+## 6.5 NDVI theo thời gian: ba vụ lúa An Giang
+
+Một ảnh chỉ là một khoảnh khắc. Đặt NDVI của nhiều ngày cạnh nhau, ta thấy <Term id="phenology">vật hậu</Term> của cây trồng. Hình 6.4 là NDVI của một ô 2 × 2 km ở huyện Tri Tôn (An Giang), nơi 96 % diện tích là đất canh tác theo ESA WorldCover.
+
+<Figure
+  title="Hình 6.4 — NDVI ruộng lúa Tri Tôn, An Giang, 2023–2024"
+  try="Đếm số đỉnh NDVI trong năm 2024. Tìm khoảng trống tháng 7–9/2024 và các điểm 'tụt bất thường' tháng 1/2023."
+  source="Copernicus Sentinel-2 L2A 2023–2024; chỉ lấy pixel đất canh tác (ESA WorldCover 2021, lớp 40) và không mây (Cloud Score+ cs_cdf ≥ 0,6). Đường nối bị ngắt khi hai lần chụp cách nhau quá 40 ngày."
+>
+  <NdviSeries client:visible lang="vi" />
+</Figure>
+
+Cách đọc chuỗi năm 2024:
+
+1. **Vụ Đông Xuân**: NDVI lên đỉnh khoảng 0,93 cuối tháng 1/2024, giảm nhanh từ giữa tháng 3 và xuống 0,05 ngày 30/3, lúc thu hoạch và làm đất.
+2. **Vụ Hè Thu**: NDVI tăng lại từ cuối tháng 4 lên khoảng 0,89 cuối tháng 5. Sau ngày 18/6 không còn ảnh không mây nào cho tới 16/9.
+3. **Vụ Thu Đông**: đỉnh khoảng 0,89 ngày 21/10, rồi xuống 0,14 ngày 30/11.
+
+Đây là cách **diễn giải** dựa trên hình dạng đường cong và lịch thời vụ phổ biến ở Tứ giác Long Xuyên, chưa đối chiếu với số liệu gieo sạ thực tế.
+
+Hai điều đáng chú ý về chất lượng dữ liệu:
+
+- **Mây**: chỉ 70 trong 296 lần chụp được giữ lại. Mùa mưa để lại khoảng trống gần 3 tháng. Đây là lý do cần đến radar (Chương 11).
+- **Nhiễu**: tháng 1/2023 NDVI nhảy 0,88 → 0,67 → 0,59 → 0,91 chỉ trong 20 ngày. Lúa không thể "héo rồi tươi lại" nhanh như vậy. Nhiều khả năng đây là mù hoặc mây mỏng lọt qua <Term id="cloud-mask">mặt nạ mây</Term>. Các điểm này vẫn được giữ trên đồ thị. Khi phân tích, thường làm trơn chuỗi (ví dụ Savitzky–Golay) hoặc lấy đường bao trên.
+
+## 6.6 Thực hành
+
+Notebook Python tải đúng cảnh ảnh Hà Nội trên từ Google Earth Engine, tính bốn chỉ số, vẽ histogram, chọn ngưỡng Otsu và tính diện tích nước. Script GEE làm cùng việc đó trong Code Editor, kèm bản đồ lớp.
+
+<LabLinks notebook="labs/ch06_spectral_indices.ipynb" gee="labs/ch06_spectral_indices.js" />
+
+**Bài tập gợi ý**
+
+1. Lặp lại phép tính MNDWI cho ảnh mùa mưa (tháng 9–10). Diện tích mặt nước sông Hồng thay đổi thế nào?
+2. Chọn 5 pixel đô thị và 5 pixel đất trống. Tìm một tổ hợp hai kênh tách được hai nhóm này tốt hơn NDBI.
+3. Vẽ chuỗi NDVI cho một vùng lúa ở đồng bằng sông Hồng. Có mấy vụ mỗi năm?
+
+## 6.7 Ôn tập
+
+<Quiz client:visible lang="vi" items={quiz} />
+
+## Tài liệu tham khảo
+
+- Drusch, M. và cs. (2012). Sentinel-2: ESA's optical high-resolution mission for GMES operational services. *Remote Sensing of Environment*, 120, 25–36.
+- Gao, B.-C. (1996). NDWI — A normalized difference water index for remote sensing of vegetation liquid water from space. *Remote Sensing of Environment*, 58(3), 257–266.
+- Huete, A. R. (1988). A soil-adjusted vegetation index (SAVI). *Remote Sensing of Environment*, 25(3), 295–309.
+- Huete, A., Didan, K., Miura, T., Rodriguez, E. P., Gao, X., & Ferreira, L. G. (2002). Overview of the radiometric and biophysical performance of the MODIS vegetation indices. *Remote Sensing of Environment*, 83(1–2), 195–213.
+- McFeeters, S. K. (1996). The use of the Normalized Difference Water Index (NDWI) in the delineation of open water features. *International Journal of Remote Sensing*, 17(7), 1425–1432.
+- Otsu, N. (1979). A threshold selection method from gray-level histograms. *IEEE Transactions on Systems, Man, and Cybernetics*, 9(1), 62–66.
+- Pasquarella, V. J., Brown, C. F., Czerwinski, W., & Rucklidge, W. J. (2023). Comprehensive quality assessment of optical satellite imagery using weakly supervised video learning. *CVPR Workshops*, 2125–2135.
+- Rouse, J. W., Haas, R. H., Schell, J. A., & Deering, D. W. (1974). Monitoring vegetation systems in the Great Plains with ERTS. *Third ERTS Symposium*, NASA SP-351, 309–317.
+- Tucker, C. J. (1979). Red and photographic infrared linear combinations for monitoring vegetation. *Remote Sensing of Environment*, 8(2), 127–150.
+- Xu, H. (2006). Modification of normalised difference water index (NDWI) to enhance open water features in remotely sensed imagery. *International Journal of Remote Sensing*, 27(14), 3025–3033.
+- Zanaga, D. và cs. (2022). *ESA WorldCover 10 m 2021 v200*. Zenodo. https://doi.org/10.5281/zenodo.7254221
+- Zha, Y., Gao, J., & Ni, S. (2003). Use of normalized difference built-up index in automatically mapping urban areas from TM imagery. *International Journal of Remote Sensing*, 24(3), 583–594.

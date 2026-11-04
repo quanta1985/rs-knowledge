@@ -1,0 +1,103 @@
+---
+import '../styles/global.css';
+import { t, url, type Lang } from '../i18n/ui';
+
+interface Props { lang: Lang; title: string; description?: string; showDepth?: boolean }
+const { lang, title, description = t(lang, 'tagline'), showDepth = false } = Astro.props;
+const other: Lang = lang === 'vi' ? 'en' : 'vi';
+const otherPath = Astro.url.pathname.replace(`/${lang}/`, `/${other}/`);
+const otherAbs = new URL(otherPath, Astro.site).href;
+const fullTitle = title === t(lang, 'siteTitle') ? title : `${title} · ${t(lang, 'siteTitle')}`;
+---
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href={url('favicon.svg')} />
+    <link rel="alternate" hreflang={other} href={otherAbs} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;600;700&family=Noto+Sans:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" />
+    <script is:inline>
+      // Apply saved preferences before first paint (no flash).
+      try {
+        const d = document.documentElement;
+        const theme = localStorage.getItem('rs-theme');
+        if (theme) d.dataset.theme = theme;
+        d.dataset.depth = localStorage.getItem('rs-depth') || 'basic';
+      } catch { document.documentElement.dataset.depth = 'basic'; }
+    </script>
+  </head>
+  <body>
+    <a class="sr-only" href="#main">{lang === 'vi' ? 'Bỏ qua tới nội dung' : 'Skip to content'}</a>
+    <header class="topbar">
+      <a class="brand" href={url(`${lang}/`)}>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M13 7 9 3 5 7l4 4"/><path d="m17 11 4 4-4 4-4-4"/><path d="m8 12 4 4 6-6-4-4Z"/><path d="m16 8 3-3"/><path d="M9 21a6 6 0 0 0-6-6"/></svg>
+        <span>{t(lang, 'siteTitle')}</span>
+      </a>
+      {showDepth && (
+        <div class="seg hide-sm" role="group" aria-label={t(lang, 'depth')} data-depth-group>
+          <button type="button" data-depth="basic">{t(lang, 'depthBasic')}</button>
+          <button type="button" data-depth="advanced">{t(lang, 'depthAdvanced')}</button>
+          <button type="button" data-depth="ref">{t(lang, 'depthRef')}</button>
+        </div>
+      )}
+      {showDepth && <button type="button" class="btn hide-sm" data-present-toggle aria-pressed="false">{t(lang, 'present')}</button>}
+      <a class="btn" href={url(`${lang}/search/`)} aria-label={t(lang, 'search')}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      </a>
+      <button type="button" class="btn" data-theme-toggle aria-label={t(lang, 'theme')}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+      </button>
+      <a class="btn" href={otherPath} hreflang={other} lang={other}>{other.toUpperCase()}<span class="sr-only"> — {t(lang, 'otherLang')}</span></a>
+    </header>
+    <slot />
+    <footer class="site-footer">
+      <p>{t(lang, 'footer')} · <a href={url(`${lang}/glossary/`)}>{t(lang, 'glossary')}</a></p>
+    </footer>
+    <div class="present-hint" aria-hidden="true">{t(lang, 'presentHint')}</div>
+    <script>
+      const root = document.documentElement;
+      const save = (k: string, v: string) => { try { localStorage.setItem(k, v); } catch { /* private mode: keep in-memory only */ } };
+
+      // theme: cycle explicit light/dark over the OS default
+      document.querySelector('[data-theme-toggle]')?.addEventListener('click', () => {
+        const dark = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+        root.dataset.theme = dark ? 'light' : 'dark';
+        save('rs-theme', root.dataset.theme);
+      });
+
+      // depth level
+      const depthBtns = document.querySelectorAll<HTMLButtonElement>('[data-depth-group] button');
+      const syncDepth = () => depthBtns.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.depth === root.dataset.depth)));
+      depthBtns.forEach((b) => b.addEventListener('click', () => { root.dataset.depth = b.dataset.depth!; save('rs-depth', b.dataset.depth!); syncDepth(); }));
+      syncDepth();
+
+      // presentation mode: bigger type, no side panels, arrow keys jump between h2 sections
+      const presentBtn = document.querySelector<HTMLButtonElement>('[data-present-toggle]');
+      const setPresent = (on: boolean) => {
+        if (on) root.dataset.present = ''; else delete root.dataset.present;
+        presentBtn?.setAttribute('aria-pressed', String(on));
+      };
+      presentBtn?.addEventListener('click', () => setPresent(!('present' in root.dataset)));
+      document.addEventListener('keydown', (e) => {
+        if (!('present' in root.dataset)) return;
+        if (e.key === 'Escape') { setPresent(false); return; }
+        if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+        const el = e.target as HTMLElement;
+        if (el.closest('input, select, textarea, canvas, [role="application"]')) return;
+        const next = ['ArrowRight', 'PageDown'].includes(e.key);
+        const prev = ['ArrowLeft', 'PageUp'].includes(e.key);
+        if (!next && !prev) return;
+        e.preventDefault();
+        const heads = [...document.querySelectorAll<HTMLElement>('.prose > h1, .prose > h2')];
+        const y = window.scrollY + 80;
+        const target = next ? heads.find((h) => h.offsetTop > y + 4) : [...heads].reverse().find((h) => h.offsetTop < y - 4);
+        target?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+      });
+    </script>
+  </body>
+</html>

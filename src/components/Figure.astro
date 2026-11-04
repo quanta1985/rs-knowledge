@@ -1,0 +1,17 @@
+---
+// Frame for every interactive figure: title, the widget, a "try this" prompt, caption and data source.
+import { langFromUrl } from '../i18n/ui';
+
+interface Props { title: string; try?: string; source?: string; id?: string }
+const { title, try: tryThis, source, id } = Astro.props;
+const lang = langFromUrl(Astro.url);
+---
+<figure class="fig" id={id}>
+  <p class="fig-title">{title}</p>
+  <slot />
+  {tryThis && <p class="try"><strong>{lang === 'vi' ? 'Thử: ' : 'Try: '}</strong>{tryThis}</p>}
+  <figcaption>
+    <slot name="caption" />
+    {source && <div class="source muted">{lang === 'vi' ? 'Nguồn dữ liệu: ' : 'Data: '}{source}</div>}
+  </figcaption>
+</figure>

@@ -1,0 +1,25 @@
+---
+import Base from '../../layouts/Base.astro';
+import { LANGS, t, url, type Lang } from '../../i18n/ui';
+
+export const getStaticPaths = () => LANGS.map((lang) => ({ params: { lang } }));
+const lang = Astro.params.lang as Lang;
+---
+<Base lang={lang} title={t(lang, 'search')}>
+  <main id="main" class="layout" style="display:block;max-width:820px">
+    <h1>{t(lang, 'search')}</h1>
+    <link href={url('pagefind/pagefind-ui.css')} rel="stylesheet" />
+    <div id="search"></div>
+    <noscript>{lang === 'vi' ? 'Tìm kiếm cần JavaScript.' : 'Search needs JavaScript.'}</noscript>
+    <p class="muted" id="search-dev" hidden>{lang === 'vi'
+      ? 'Chỉ mục tìm kiếm được tạo khi build (npm run build). Ở chế độ dev chưa có.'
+      : 'The search index is generated at build time (npm run build). Not available in dev mode.'}</p>
+    <script is:inline define:vars={{ base: url('pagefind/') }}>
+      const s = document.createElement('script');
+      s.src = base + 'pagefind-ui.js';
+      s.onload = () => new PagefindUI({ element: '#search', showSubResults: true, baseUrl: base.replace(/pagefind\/$/, '') });
+      s.onerror = () => { document.getElementById('search-dev').hidden = false; };
+      document.head.appendChild(s);
+    </script>
+  </main>
+</Base>

@@ -1,0 +1,14 @@
+---
+// Content layer: basic (always shown), advanced (hidden in Basic mode), ref (the only blocks kept in Reference mode).
+import { langFromUrl, t } from '../i18n/ui';
+
+interface Props { level: 'advanced' | 'ref'; title?: string }
+const { level, title } = Astro.props;
+const lang = langFromUrl(Astro.url);
+const tag = level === 'advanced' ? t(lang, 'depthAdvanced') : t(lang, 'depthRef');
+---
+<section class={`depth depth-${level}`}>
+  <span class="depth-tag">{tag}</span>
+  {title && <h3>{title}</h3>}
+  <slot />
+</section>

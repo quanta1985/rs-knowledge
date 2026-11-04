@@ -1,0 +1,27 @@
+---
+import Base from '../../layouts/Base.astro';
+import SideNav from '../../components/SideNav.astro';
+import glossary from '../../data/glossary.json';
+import { LANGS, t, type Lang } from '../../i18n/ui';
+
+export const getStaticPaths = () => LANGS.map((lang) => ({ params: { lang } }));
+const lang = Astro.params.lang as Lang;
+const other: Lang = lang === 'vi' ? 'en' : 'vi';
+const terms = [...glossary].sort((a, b) => a[lang].localeCompare(b[lang], lang));
+---
+<Base lang={lang} title={t(lang, 'glossary')}>
+  <div class="layout">
+    <SideNav lang={lang} />
+    <main id="main" class="prose" data-pagefind-body>
+      <h1>{lang === 'vi' ? 'Thuật ngữ Việt – Anh' : 'English – Vietnamese glossary'}</h1>
+      <dl>
+        {terms.map((g) => (
+          <div id={g.id} style="padding:var(--s3) 0;border-bottom:1px solid var(--border)">
+            <dt><strong>{g[lang]}</strong> <span class="muted" lang={other}>· {g[other]}</span></dt>
+            <dd style="margin:var(--s1) 0 0">{g.def[lang]}</dd>
+          </div>
+        ))}
+      </dl>
+    </main>
+  </div>
+</Base>

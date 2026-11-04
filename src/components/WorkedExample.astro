@@ -1,0 +1,44 @@
+---
+// Hand calculation of a normalized-difference index on real reference pixels (computed at build time).
+import ref from '../../public/data/hanoi-s2/reference.json';
+import { langFromUrl } from '../i18n/ui';
+
+interface Props { index: string; a: string; b: string; points: string[] }
+const { index, a, b, points } = Astro.props;
+const lang = langFromUrl(Astro.url);
+const ia = ref.bands.indexOf(a);
+const ib = ref.bands.indexOf(b);
+if (ia < 0 || ib < 0) throw new Error(`Unknown band ${a}/${b}`);
+const fmt = (v: number, d = 3) => v.toLocaleString(lang === 'vi' ? 'vi-VN' : 'en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+const rows = points.map((id) => {
+  const p = ref.points.find((q) => q.id === id);
+  if (!p) throw new Error(`Unknown reference point ${id}`);
+  const ra = p.mean[ia];
+  const rb = p.mean[ib];
+  return { p, ra, rb, dnA: Math.round(ra * 1e4), dnB: Math.round(rb * 1e4), v: (ra - rb) / (ra + rb) };
+});
+const vi = lang === 'vi';
+---
+<aside class="worked" aria-label={vi ? 'Ví dụ tính tay' : 'Worked example'}>
+  <h4>{vi ? `Ví dụ tính tay: ${index} trên pixel thật` : `Worked example: ${index} on real pixels`}</h4>
+  <p class="muted" style="margin-top:0">
+    {vi
+      ? `Sentinel-2B, 12/02/2024, Hà Nội. Mỗi giá trị là trung bình cửa sổ 3×3 pixel (30 × 30 m).`
+      : `Sentinel-2B, 12 Feb 2024, Hanoi. Each value is the mean of a 3×3 pixel window (30 × 30 m).`}
+  </p>
+  {rows.map(({ p, ra, rb, dnA, dnB, v }) => (
+    <div>
+      <strong>{p.label[lang]}</strong> <span class="muted num">({fmt(p.lat, 4)}°N, {fmt(p.lon, 4)}°E)</span>
+      <ol class="num">
+        <li>{vi ? 'Giá trị lưu trong file Level-2A (DN):' : 'Stored Level-2A value (DN):'} {a} = {dnA}, {b} = {dnB}</li>
+        <li>{vi ? 'Đổi sang phản xạ, ρ = DN / 10 000:' : 'Convert to reflectance, ρ = DN / 10 000:'} ρ<sub>{a}</sub> = {fmt(ra, 4)}, ρ<sub>{b}</sub> = {fmt(rb, 4)}</li>
+        <li>{index} = ({fmt(ra, 4)} − {fmt(rb, 4)}) / ({fmt(ra, 4)} + {fmt(rb, 4)}) = {fmt(ra - rb, 4)} / {fmt(ra + rb, 4)} = <strong>{fmt(v)}</strong></li>
+      </ol>
+    </div>
+  ))}
+  <p class="muted" style="margin-bottom:0;font-size:0.85rem">
+    {vi
+      ? 'Ghi chú: trong Google Earth Engine, bộ S2_SR_HARMONIZED đã bù offset −1000 của baseline ≥ 04.00, nên chỉ cần chia 10 000.'
+      : 'Note: in Google Earth Engine, S2_SR_HARMONIZED already removes the −1000 offset of processing baseline ≥ 04.00, so dividing by 10 000 is enough.'}
+  </p>
+</aside>
