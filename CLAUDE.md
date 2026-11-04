@@ -64,10 +64,10 @@ GEE project: `claudev1-503808`. Push to `main` deploys via `.github/workflows/de
 - New chapter checklist: vi + en MDX, glossary terms, `src/data/quiz/<chNN>.json`, data script under `scripts/data/`, lab notebook generator `scripts/build_lab_chNN.py` (+ `labs/chNN_*.js` GEE script), run `--run` to execute the notebook, Playwright smoke test of every figure, then a `code-reviewer` pass.
 - Commits/pushes only when the user asks. Commit messages end with `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`. `.gitattributes` forces LF and marks `*.u16z` binary.
 
-## Status (2026-11-04, evening)
+## Status (2026-11-04, deployed)
 
 - All 16 chapters complete in vi + en (39 pages, Pagefind indexes 34), 66/66 unit tests, `tsc` clean except missing `node:*` types in test files, mobile (390 px) smoke of all 32 chapter pages: no console errors, no horizontal overflow. Two code-review passes done and fixes applied.
 - Every MapStage shows Viet Nam's sovereignty labels (Hoàng Sa, Trường Sa, Biển Đông; `SOVEREIGN` in `MapStage.tsx`, zoom < 9); national views use bounds that include both archipelagos.
 - Ch.15 (`LabIndex.astro`) and Ch.16 (`FormulaTable`, `RefList.astro`) read `labs/` and every chapter's references at build time — they stay complete when chapters change.
-- Nothing is committed yet (only `17ba485`). The user asked to finish the app first and push later. Push is blocked on the `workflow` token scope: `gh auth refresh -h github.com -s workflow`, then commit, `git push -u origin main`, `gh api -X POST repos/quanta1985/rs-knowledge/pages -f build_type=workflow`, and watch the Actions run.
+- Live at https://quanta1985.github.io/rs-knowledge/ (commit `91b7ad8`, Pages via GitHub Actions; the gh token now has the `workflow` scope). Every push to `main` redeploys.
 - Not yet verified: the GEE JS scripts `labs/*.js` in the Code Editor.
