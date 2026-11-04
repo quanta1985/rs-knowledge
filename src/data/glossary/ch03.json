@@ -1,0 +1,56 @@
+[
+ {
+  "id": "em-spectrum",
+  "vi": "Phổ điện từ",
+  "en": "Electromagnetic spectrum",
+  "def": {
+   "vi": "Toàn bộ dải bước sóng của bức xạ điện từ, từ tia gamma đến sóng vô tuyến. Viễn thám chủ yếu dùng khả kiến, hồng ngoại và vi ba.",
+   "en": "The full range of electromagnetic wavelengths, from gamma rays to radio. Remote sensing mostly uses visible, infrared and microwave."
+  }
+ },
+ {
+  "id": "black-body",
+  "vi": "Vật đen",
+  "en": "Black body",
+  "def": {
+   "vi": "Vật lý tưởng hấp thụ mọi bức xạ tới và phát xạ theo định luật Planck, chỉ phụ thuộc nhiệt độ.",
+   "en": "An ideal object that absorbs all incident radiation and emits according to Planck's law, depending only on temperature."
+  }
+ },
+ {
+  "id": "wien-law",
+  "vi": "Định luật Wien",
+  "en": "Wien's law",
+  "def": {
+   "vi": "Bước sóng phát xạ cực đại của vật đen: λmax = 2898 µm·K / T. Mặt Trời ~0,50 µm, bề mặt Trái Đất ~10 µm.",
+   "en": "Peak emission wavelength of a black body: λmax = 2898 µm·K / T. Sun ~0.50 µm, Earth's surface ~10 µm."
+  }
+ },
+ {
+  "id": "atmospheric-window",
+  "vi": "Cửa sổ khí quyển",
+  "en": "Atmospheric window",
+  "def": {
+   "vi": "Dải bước sóng mà khí quyển cho đi qua nhiều, ví dụ 0,4–1,3; 1,55–1,75; 2,05–2,4; 8–14 µm và vi ba. Cảm biến đặt kênh trong các cửa sổ này.",
+   "en": "Wavelength ranges the atmosphere lets through, e.g. 0.4–1.3, 1.55–1.75, 2.05–2.4, 8–14 µm and microwaves. Sensors place bands inside them."
+  }
+ },
+ {
+  "id": "emissivity",
+  "vi": "Độ phát xạ (ε)",
+  "en": "Emissivity (ε)",
+  "def": {
+   "vi": "Tỷ số giữa bức xạ một vật thật phát ra và bức xạ của vật đen cùng nhiệt độ, từ 0 đến 1. Nước ~0,99.",
+   "en": "Ratio of the radiation a real object emits to that of a black body at the same temperature, 0 to 1. Water ~0.99."
+  }
+ },
+ {
+  "id": "lst",
+  "vi": "Nhiệt độ bề mặt đất (LST)",
+  "en": "Land surface temperature (LST)",
+  "def": {
+   "vi": "Nhiệt độ của lớp bề mặt (mái nhà, tán lá, mặt nước) suy ra từ kênh hồng ngoại nhiệt sau khi hiệu chỉnh độ phát xạ và khí quyển; khác nhiệt độ không khí.",
+   "en": "Temperature of the surface skin (roofs, canopies, water) derived from thermal bands after emissivity and atmospheric correction; not air temperature."
+  }
+ }
+]

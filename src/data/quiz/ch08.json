@@ -1,0 +1,234 @@
+[
+ {
+  "q": {
+   "vi": "Trong tổ hợp 8-4-3, vì sao thực vật có màu đỏ?",
+   "en": "In an 8-4-3 composite, why is vegetation red?"
+  },
+  "options": [
+   {
+    "vi": "Kênh cận hồng ngoại B8 (phản xạ mạnh ở lá) được gán vào màu đỏ",
+    "en": "Near-infrared B8, which leaves reflect strongly, is shown in red"
+   },
+   {
+    "vi": "Lá cây có màu đỏ",
+    "en": "Leaves are red"
+   },
+   {
+    "vi": "Do kéo giãn sai",
+    "en": "A wrong stretch"
+   },
+   {
+    "vi": "Do khí quyển",
+    "en": "The atmosphere"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Cấu trúc tế bào lá phản xạ mạnh cận hồng ngoại (Chương 6).",
+   "en": "Leaf cell structure reflects near-infrared strongly (Chapter 6)."
+  }
+ },
+ {
+  "q": {
+   "vi": "Khối xanh tím chia ô đều ở An Giang trông như nước. Bằng chứng nào cho thấy không phải nước?",
+   "en": "The gridded blue-purple block in An Giang looks like water. What says it is not?"
+  },
+  "options": [
+   {
+    "vi": "MNDWI âm và có lưới đường nội bộ đều",
+    "en": "Negative MNDWI and a regular internal grid"
+   },
+   {
+    "vi": "Màu xanh tím",
+    "en": "Its blue-purple colour"
+   },
+   {
+    "vi": "Nằm gần núi",
+    "en": "It is near a mountain"
+   },
+   {
+    "vi": "Diện tích lớn",
+    "en": "It is large"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Nước có MNDWI dương; mẫu hình lưới và đường nội bộ gợi ý một cánh đồng pin mặt trời (diễn giải).",
+   "en": "Water has positive MNDWI; the grid and tracks suggest a solar farm (interpretation)."
+  }
+ },
+ {
+  "q": {
+   "vi": "Yếu tố giải đoán nào nhận ra đường băng sân bay Đà Nẵng nhanh nhất?",
+   "en": "Which key identifies the Da Nang runways fastest?"
+  },
+  "options": [
+   {
+    "vi": "Hình dạng: dải thẳng, hẹp, rất dài",
+    "en": "Shape: straight, narrow, very long strips"
+   },
+   {
+    "vi": "Màu sắc",
+    "en": "Colour"
+   },
+   {
+    "vi": "Bóng",
+    "en": "Shadow"
+   },
+   {
+    "vi": "Cấu trúc",
+    "en": "Texture"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Hình dạng hình học đặc trưng thường do con người tạo ra.",
+   "en": "Regular geometric shapes are usually man-made."
+  }
+ },
+ {
+  "q": {
+   "vi": "Vì sao bóng mây ở Hà Nội ngày 05/10/2023 nằm về phía tây bắc đám mây?",
+   "en": "Why does the 5 Oct 2023 cloud shadow over Hanoi lie north-west of the cloud?"
+  },
+  "options": [
+   {
+    "vi": "Mặt Trời chiếu từ phương vị 147° (đông nam)",
+    "en": "The Sun shines from azimuth 147° (south-east)"
+   },
+   {
+    "vi": "Gió thổi bóng đi",
+    "en": "Wind blows the shadow"
+   },
+   {
+    "vi": "Do vệ tinh nhìn nghiêng",
+    "en": "The satellite looks sideways"
+   },
+   {
+    "vi": "Ngẫu nhiên",
+    "en": "Random"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Bóng luôn đổ ngược hướng Mặt Trời.",
+   "en": "Shadows always fall away from the Sun."
+  }
+ },
+ {
+  "q": {
+   "vi": "Tổ hợp nào giúp tách bê tông, mái tôn khỏi đất trống tốt nhất?",
+   "en": "Which composite best separates concrete and metal roofs from bare soil?"
+  },
+  "options": [
+   {
+    "vi": "SWIR 12-11-4",
+    "en": "SWIR 12-11-4"
+   },
+   {
+    "vi": "Màu thật 4-3-2",
+    "en": "True colour 4-3-2"
+   },
+   {
+    "vi": "Chỉ dùng B2",
+    "en": "B2 alone"
+   },
+   {
+    "vi": "Không tổ hợp nào",
+    "en": "None"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Vật liệu xây dựng và đất khác nhau rõ ở SWIR.",
+   "en": "Building materials and soils differ clearly in SWIR."
+  }
+ },
+ {
+  "q": {
+   "vi": "Hồ ở trung tâm Đà Lạt chiếm khoảng 3 300 pixel Sentinel-2 10 m. Diện tích khoảng bao nhiêu?",
+   "en": "The lake in central Da Lat covers about 3,300 Sentinel-2 10 m pixels. Roughly what area?"
+  },
+  "options": [
+   {
+    "vi": "0,33 km²",
+    "en": "0.33 km²"
+   },
+   {
+    "vi": "3,3 km²",
+    "en": "3.3 km²"
+   },
+   {
+    "vi": "33 km²",
+    "en": "33 km²"
+   },
+   {
+    "vi": "0,033 km²",
+    "en": "0.033 km²"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Mỗi pixel 10 × 10 m = 100 m²; 3 300 × 100 m² = 330 000 m².",
+   "en": "Each pixel is 100 m²; 3,300 × 100 m² = 330,000 m²."
+  }
+ },
+ {
+  "q": {
+   "vi": "Màu của một đối tượng trên ảnh tổ hợp phụ thuộc vào gì?",
+   "en": "What does a feature's colour in a composite depend on?"
+  },
+  "options": [
+   {
+    "vi": "Kênh gán cho R, G, B và cách kéo giãn",
+    "en": "The bands assigned to R, G, B and the stretch"
+   },
+   {
+    "vi": "Chỉ vào đối tượng",
+    "en": "Only the feature"
+   },
+   {
+    "vi": "Chỉ vào ngày chụp",
+    "en": "Only the date"
+   },
+   {
+    "vi": "Màn hình",
+    "en": "The screen"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Cùng một ruộng có thể xanh, đỏ hay vàng tùy tổ hợp; luôn ghi tổ hợp và kéo giãn.",
+   "en": "The same field can look green, red or yellow; always state the composite and stretch."
+  }
+ },
+ {
+  "q": {
+   "vi": "Dải cây xen giữa các ô đầm ở Cà Mau được nhận ra bằng yếu tố nào?",
+   "en": "Which keys reveal the tree strips between Ca Mau ponds?"
+  },
+  "options": [
+   {
+    "vi": "Mẫu hình và vị trí (ven kênh, xen đầm)",
+    "en": "Pattern and site (along creeks, between ponds)"
+   },
+   {
+    "vi": "Chỉ có kích thước",
+    "en": "Size only"
+   },
+   {
+    "vi": "Bóng",
+    "en": "Shadow"
+   },
+   {
+    "vi": "Tông sáng",
+    "en": "Bright tone"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Mô hình tôm – rừng tạo mẫu hình dải song song đặc trưng; cần thực địa để khẳng định.",
+   "en": "Shrimp–mangrove farming makes a typical parallel-strip pattern; field checks confirm it."
+  }
+ }
+]

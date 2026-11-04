@@ -1,0 +1,263 @@
+[
+ {
+  "q": {
+   "vi": "Một ee.Image trong Earth Engine chứa gì ngay sau khi gõ lệnh?",
+   "en": "What does an ee.Image hold right after you type the command?"
+  },
+  "options": [
+   {
+    "vi": "Chỉ mô tả phép tính, chưa có pixel",
+    "en": "Only a description of the computation, no pixels"
+   },
+   {
+    "vi": "Toàn bộ pixel của ảnh",
+    "en": "All the image pixels"
+   },
+   {
+    "vi": "Một file GeoTIFF trên máy",
+    "en": "A GeoTIFF on your machine"
+   },
+   {
+    "vi": "Một ảnh JPEG xem trước",
+    "en": "A JPEG preview"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Đánh giá lười: máy chủ chỉ tính khi có yêu cầu kết quả.",
+   "en": "Lazy evaluation: servers compute only when a result is requested."
+  }
+ },
+ {
+  "q": {
+   "vi": "Khi Map.addLayer(med) chạy, máy chủ tính những pixel nào?",
+   "en": "When Map.addLayer(med) runs, which pixels are computed?"
+  },
+  "options": [
+   {
+    "vi": "Chỉ các ô bản đồ đang hiện ở mức zoom hiện tại",
+    "en": "Only the map tiles visible at the current zoom"
+   },
+   {
+    "vi": "Toàn bộ thế giới ở 10 m",
+    "en": "The whole world at 10 m"
+   },
+   {
+    "vi": "Không pixel nào",
+    "en": "None"
+   },
+   {
+    "vi": "Chỉ pixel trung tâm",
+    "en": "Only the centre pixel"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Độ phân giải và phạm vi tính do yêu cầu quyết định.",
+   "en": "Scale and extent are set by the request."
+  }
+ },
+ {
+  "q": {
+   "vi": "Lọc CLOUDY_PIXEL_PERCENTAGE ≤ 20 % giữ 8 ngày, còn lọc độ trong của khung ≥ 90 % giữ 16 ngày. Vì sao?",
+   "en": "CLOUDY_PIXEL_PERCENTAGE ≤ 20 % keeps 8 dates, frame clear ≥ 90 % keeps 16. Why?"
+  },
+  "options": [
+   {
+    "vi": "Thuộc tính mây tính cho cả tile 100 km, không cho khung nhỏ của bạn",
+    "en": "The cloud property covers the whole 100 km tile, not your small frame"
+   },
+   {
+    "vi": "Cloud Score+ luôn sai",
+    "en": "Cloud Score+ is always wrong"
+   },
+   {
+    "vi": "Sentinel-2B không có thuộc tính mây",
+    "en": "Sentinel-2B has no cloud property"
+   },
+   {
+    "vi": "Vì làm tròn số",
+    "en": "Because of rounding"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Ngày 26/7/2024 tile có 79,9 % mây nhưng khung Hồ Tây trong hoàn toàn.",
+   "en": "On 26 Jul 2024 the tile was 79.9 % cloudy while the West Lake frame was clear."
+  }
+ },
+ {
+  "q": {
+   "vi": "Nên dùng gì thay cho vòng lặp for trên từng ảnh của một collection?",
+   "en": "What should replace a for loop over the images of a collection?"
+  },
+  "options": [
+   {
+    "vi": "col.map(f)",
+    "en": "col.map(f)"
+   },
+   {
+    "vi": "getInfo() trên từng ảnh",
+    "en": "getInfo() on each image"
+   },
+   {
+    "vi": "Tải ảnh về máy",
+    "en": "Download the images"
+   },
+   {
+    "vi": "Export từng ảnh",
+    "en": "Export each image"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "map() để máy chủ xử lý song song; vòng for phía máy khách gửi rất nhiều yêu cầu.",
+   "en": "map() lets the servers work in parallel; a client-side loop sends many requests."
+  }
+ },
+ {
+  "q": {
+   "vi": "Reducer nào ít bị ảnh hưởng nhất bởi một đám mây sót hay một ngày ngập?",
+   "en": "Which reducer is least affected by one missed cloud or one flood day?"
+  },
+  "options": [
+   {
+    "vi": "median",
+    "en": "median"
+   },
+   {
+    "vi": "min",
+    "en": "min"
+   },
+   {
+    "vi": "max",
+    "en": "max"
+   },
+   {
+    "vi": "first",
+    "en": "first"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Trung vị chỉ phụ thuộc vào giá trị ở giữa, không bị kéo bởi giá trị cực đoan.",
+   "en": "The median depends on the middle values, not on extremes."
+  }
+ },
+ {
+  "q": {
+   "vi": "Mỗi pixel khu Hồ Tây có trung bình bao nhiêu quan sát hợp lệ năm 2024, dù có 73 ngày chụp?",
+   "en": "How many valid observations does a West Lake pixel have on average in 2024, despite 73 acquisition dates?"
+  },
+  "options": [
+   {
+    "vi": "Khoảng 21",
+    "en": "About 21"
+   },
+   {
+    "vi": "73",
+    "en": "73"
+   },
+   {
+    "vi": "Khoảng 5",
+    "en": "About 5"
+   },
+   {
+    "vi": "365",
+    "en": "365"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Sau khi che mây bằng Cloud Score+: trung bình 21,3, từ 16 đến 27.",
+   "en": "After Cloud Score+ masking: 21.3 on average, from 16 to 27."
+  }
+ },
+ {
+  "q": {
+   "vi": "Trong Python, muốn in số ảnh của collection cần viết gì?",
+   "en": "In Python, how do you print the size of a collection?"
+  },
+  "options": [
+   {
+    "vi": "print(col.size().getInfo())",
+    "en": "print(col.size().getInfo())"
+   },
+   {
+    "vi": "print(col.size())",
+    "en": "print(col.size())"
+   },
+   {
+    "vi": "col.print()",
+    "en": "col.print()"
+   },
+   {
+    "vi": "len(col)",
+    "en": "len(col)"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Python cần getInfo() để kéo kết quả về; print(col.size()) chỉ in mô tả đối tượng.",
+   "en": "Python needs getInfo() to fetch the result; print(col.size()) prints the object description."
+  }
+ },
+ {
+  "q": {
+   "vi": "Kết quả lớn (ảnh cả tỉnh ở 10 m) nên lấy về bằng cách nào?",
+   "en": "How should a large result (a whole province at 10 m) be retrieved?"
+  },
+  "options": [
+   {
+    "vi": "Export (ra Drive, Cloud Storage hoặc asset)",
+    "en": "Export (to Drive, Cloud Storage or an asset)"
+   },
+   {
+    "vi": "getInfo()",
+    "en": "getInfo()"
+   },
+   {
+    "vi": "print()",
+    "en": "print()"
+   },
+   {
+    "vi": "Chụp màn hình",
+    "en": "Screenshot"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "getInfo() có giới hạn kích thước và thời gian; Export chạy như một tác vụ nền.",
+   "en": "getInfo() has size and time limits; Export runs as a background task."
+  }
+ },
+ {
+  "q": {
+   "vi": "Kho nào là nguồn chính thức của dữ liệu Sentinel từ chương trình Copernicus?",
+   "en": "Which archive is the official source of Copernicus Sentinel data?"
+  },
+  "options": [
+   {
+    "vi": "Copernicus Data Space Ecosystem",
+    "en": "Copernicus Data Space Ecosystem"
+   },
+   {
+    "vi": "USGS EarthExplorer",
+    "en": "USGS EarthExplorer"
+   },
+   {
+    "vi": "NASA Earthdata",
+    "en": "NASA Earthdata"
+   },
+   {
+    "vi": "VNSC",
+    "en": "VNSC"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Earth Engine và Planetary Computer cũng có bản sao, nhưng kho chính thức là Copernicus Data Space.",
+   "en": "Earth Engine and Planetary Computer hold copies, but the official archive is Copernicus Data Space."
+  }
+ }
+]

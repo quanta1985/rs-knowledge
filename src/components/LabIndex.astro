@@ -1,0 +1,49 @@
+---
+// Lists every lab in labs/ at build time (one row per chNN_* stem: Colab notebook + GEE script).
+import fs from 'node:fs';
+import path from 'node:path';
+import { CHAPTERS } from '../data/chapters';
+import { langFromUrl, url } from '../i18n/ui';
+
+const lang = langFromUrl(Astro.url);
+const REPO = 'quanta1985/rs-knowledge';
+const dir = path.join(process.cwd(), 'labs'); // astro dev/build run from the project root
+const files = fs.readdirSync(dir);
+const stems = [...new Set(files.filter((f) => /^ch\d\d_.*\.(ipynb|js)$/.test(f)).map((f) => f.replace(/\.(ipynb|js)$/, '')))].sort();
+
+/** Title from the GEE header (" * Lab N — vi / en · …") or the notebook's first markdown line ("# Lab N — vi / en"). */
+const titleOf = (stem: string) => {
+  const js = files.includes(`${stem}.js`) ? fs.readFileSync(path.join(dir, `${stem}.js`), 'utf8') : '';
+  let line = js.match(/Lab \d+ — ([^\n·]+)/)?.[1];
+  if (!line && files.includes(`${stem}.ipynb`)) {
+    const nb = JSON.parse(fs.readFileSync(path.join(dir, `${stem}.ipynb`), 'utf8'));
+    line = String(nb.cells?.[0]?.source?.join?.('') ?? '').match(/Lab \d+ — ([^\n]+)/)?.[1];
+  }
+  const [vi, en] = (line ?? stem).split(' / ').map((s) => s.trim());
+  return lang === 'vi' ? vi : en ?? vi;
+};
+const rows = stems.map((stem) => {
+  const n = Number(stem.slice(2, 4));
+  const ch = CHAPTERS.find((c) => c.n === n);
+  return { stem, n, ch, title: titleOf(stem), nb: files.includes(`${stem}.ipynb`), js: files.includes(`${stem}.js`) };
+});
+const L = lang === 'vi'
+  ? { ch: 'Chương', lab: 'Bài thực hành', py: 'Python (Colab)', gee: 'GEE (JavaScript)', open: 'Mở', script: 'Xem script', count: `${rows.length} bài thực hành` }
+  : { ch: 'Chapter', lab: 'Lab', py: 'Python (Colab)', gee: 'GEE (JavaScript)', open: 'Open', script: 'View script', count: `${rows.length} labs` };
+---
+<p class="muted">{L.count}</p>
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>{L.ch}</th><th>{L.lab}</th><th>{L.py}</th><th>{L.gee}</th></tr></thead>
+    <tbody>
+      {rows.map((r) => (
+        <tr>
+          <td>{r.ch ? <a href={url(`${lang}/${r.ch.slug}/`)}>{r.n}. {r.ch.title[lang]}</a> : r.n}</td>
+          <td>{r.title}</td>
+          <td>{r.nb && <a href={`https://colab.research.google.com/github/${REPO}/blob/main/labs/${r.stem}.ipynb`} target="_blank" rel="noopener">{L.open} ↗</a>}</td>
+          <td>{r.js && <a href={`https://github.com/${REPO}/blob/main/labs/${r.stem}.js`} target="_blank" rel="noopener">{L.script} ↗</a>}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,29 @@
+{
+ "width": 171,
+ "height": 171,
+ "resolution_m": 30,
+ "crs": "EPSG:32648",
+ "origin_xy": [
+  583980,
+  2331020
+ ],
+ "bands": [
+  "st"
+ ],
+ "dtype": "uint16",
+ "layout": "BSQ",
+ "scale": 0.00341802,
+ "offset": 149.0,
+ "unit": "K (surface temperature)",
+ "date": "2023-12-22",
+ "time_utc": "03:23:45.7081250Z",
+ "cloud_cover": 9.33,
+ "provenance": {
+  "collection": "LANDSAT/LC09/C02/T1_L2 ST_B10 (USGS single-channel algorithm, ASTER GED emissivity)",
+  "scene": "LC09_127045_20231222",
+  "resampling": "nearest neighbour to 30 m UTM 48N, same upper-left corner as the S2 cube",
+  "script": "scripts/data/export_ch03_physics.py",
+  "exported": "2026-11-04T05:38:19+00:00",
+  "attribution": "Landsat courtesy of USGS"
+ }
+}

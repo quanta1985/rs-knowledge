@@ -1,0 +1,25 @@
+{
+ "width": 160,
+ "height": 304,
+ "bands": [
+  "no2"
+ ],
+ "dtype": "int16",
+ "layout": "BSQ",
+ "bbox": [
+  102.0,
+  8.4,
+  110.0,
+  23.6
+ ],
+ "step_deg": 0.05,
+ "scale": 0.1,
+ "unit": "µmol/m² (tropospheric NO2 column)",
+ "nodata": -10,
+ "provenance": {
+  "collection": "COPERNICUS/S5P/OFFL/L3_NO2 (TROPOMI, harpconvert L3, qa_value > 0.75)",
+  "statistic": "mean of all 2024 daily L3 images; nearest-neighbour sample at 0.05 deg",
+  "script": "scripts/data/export_ch13_cases.py",
+  "exported": "2026-11-04T06:27:14+00:00"
+ }
+}

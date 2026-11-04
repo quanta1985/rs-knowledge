@@ -1,0 +1,263 @@
+[
+ {
+  "q": {
+   "vi": "Theo Copernicus GLO-30, pixel cao nhất quanh Fansipan cao bao nhiêu?",
+   "en": "In Copernicus GLO-30, how high is the highest pixel around Fansipan?"
+  },
+  "options": [
+   {
+    "vi": "3111 m",
+    "en": "3111 m"
+   },
+   {
+    "vi": "3143 m",
+    "en": "3143 m"
+   },
+   {
+    "vi": "2500 m",
+    "en": "2500 m"
+   },
+   {
+    "vi": "3500 m",
+    "en": "3500 m"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Pixel 30 m lấy độ cao trung bình của cả ô, nên đỉnh nhọn bị thấp hơn con số 3143 m thường công bố.",
+   "en": "A 30 m pixel represents the average height of its cell, so a sharp summit comes out lower than the published 3143 m."
+  }
+ },
+ {
+  "q": {
+   "vi": "Đo độ cao bằng ảnh lập thể dựa trên gì?",
+   "en": "Stereo heights are measured from what?"
+  },
+  "options": [
+   {
+    "vi": "Thị sai: vật cao dịch chuyển nhiều hơn giữa hai ảnh",
+    "en": "Parallax: tall objects shift more between the two images"
+   },
+   {
+    "vi": "Màu sắc của mái nhà",
+    "en": "Roof colour"
+   },
+   {
+    "vi": "Nhiệt độ bề mặt",
+    "en": "Surface temperature"
+   },
+   {
+    "vi": "Bóng mây",
+    "en": "Cloud shadows"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Δp = B·h / (H − h): độ dịch tăng theo độ cao h và theo đường đáy B.",
+   "en": "Δp = B·h / (H − h): the shift grows with height h and base B."
+  }
+ },
+ {
+  "q": {
+   "vi": "Với B/H = 0,5, pixel 0,5 m và sai số khớp ảnh 0,3 pixel, sai số độ cao là bao nhiêu?",
+   "en": "With B/H = 0.5, 0.5 m pixels and 0.3-pixel matching error, what is the height error?"
+  },
+  "options": [
+   {
+    "vi": "0,3 m",
+    "en": "0.3 m"
+   },
+   {
+    "vi": "3 m",
+    "en": "3 m"
+   },
+   {
+    "vi": "0,03 m",
+    "en": "0.03 m"
+   },
+   {
+    "vi": "18 m",
+    "en": "18 m"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "σh = σp·GSD/(B/H) = 0,3 × 0,5 / 0,5 = 0,3 m. Với pixel 30 m thì thành 18 m.",
+   "en": "σh = σp·GSD/(B/H) = 0.3 × 0.5 / 0.5 = 0.3 m. With 30 m pixels it becomes 18 m."
+  }
+ },
+ {
+  "q": {
+   "vi": "Chênh lệch Copernicus − SRTM trong khung Fansipan có trung bình và độ lệch chuẩn bao nhiêu?",
+   "en": "What are the mean and standard deviation of Copernicus − SRTM in the Fansipan frame?"
+  },
+  "options": [
+   {
+    "vi": "+3,5 m ± 11,8 m",
+    "en": "+3.5 m ± 11.8 m"
+   },
+   {
+    "vi": "0 m ± 0 m",
+    "en": "0 m ± 0 m"
+   },
+   {
+    "vi": "−100 m ± 50 m",
+    "en": "−100 m ± 50 m"
+   },
+   {
+    "vi": "+30 m ± 1 m",
+    "en": "+30 m ± 1 m"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Hai DEM khác thời điểm, khác cảm biến và khác geoid; 21,8 % số pixel lệch quá 10 m.",
+   "en": "The DEMs differ in date, sensor and geoid; 21.8 % of pixels differ by more than 10 m."
+  }
+ },
+ {
+  "q": {
+   "vi": "Hillshade với Mặt Trời ở phương vị 315° chiếu sáng sườn nào nhất?",
+   "en": "With the sun at azimuth 315°, which slopes does the hillshade light most?"
+  },
+  "options": [
+   {
+    "vi": "Sườn hướng Tây Bắc",
+    "en": "North-west-facing slopes"
+   },
+   {
+    "vi": "Sườn hướng Đông Nam",
+    "en": "South-east-facing slopes"
+   },
+   {
+    "vi": "Sườn hướng Nam",
+    "en": "South-facing slopes"
+   },
+   {
+    "vi": "Mọi sườn như nhau",
+    "en": "All slopes equally"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Độ sáng lớn nhất khi hướng dốc trùng phương vị Mặt Trời: cos(315° − 315°) = 1.",
+   "en": "Brightness peaks when aspect equals the sun azimuth: cos(315° − 315°) = 1."
+  }
+ },
+ {
+  "q": {
+   "vi": "Khoảng bao nhiêu phần trăm khung Fansipan dốc hơn 30°?",
+   "en": "Roughly what share of the Fansipan frame is steeper than 30°?"
+  },
+  "options": [
+   {
+    "vi": "43,5 %",
+    "en": "43.5 %"
+   },
+   {
+    "vi": "5 %",
+    "en": "5 %"
+   },
+   {
+    "vi": "90 %",
+    "en": "90 %"
+   },
+   {
+    "vi": "0 %",
+    "en": "0 %"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Tính từ Copernicus GLO-30 bằng phương pháp Horn 3 × 3.",
+   "en": "Computed from Copernicus GLO-30 with Horn's 3 × 3 method."
+  }
+ },
+ {
+  "q": {
+   "vi": "Với Sentinel-1 quỹ đạo lên, θ = 37°, bao nhiêu phần trăm khung bị chồng lấn?",
+   "en": "For an ascending Sentinel-1 pass at θ = 37°, what share of the frame is in layover?"
+  },
+  "options": [
+   {
+    "vi": "4,4 %",
+    "en": "4.4 %"
+   },
+   {
+    "vi": "44 %",
+    "en": "44 %"
+   },
+   {
+    "vi": "0 %",
+    "en": "0 %"
+   },
+   {
+    "vi": "25 %",
+    "en": "25 %"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Chồng lấn khi sườn hướng về radar dốc hơn θ theo phương cự ly. θ nhỏ hơn (30°) làm tỷ lệ tăng lên 9,5 %.",
+   "en": "Layover where the slope facing the radar exceeds θ along range. A smaller θ (30°) raises it to 9.5 %."
+  }
+ },
+ {
+  "q": {
+   "vi": "Độ cao trên Copernicus DEM tính từ mặt nào?",
+   "en": "Copernicus DEM heights are measured from which surface?"
+  },
+  "options": [
+   {
+    "vi": "Geoid EGM2008",
+    "en": "The EGM2008 geoid"
+   },
+   {
+    "vi": "Ellipsoid WGS84",
+    "en": "The WGS84 ellipsoid"
+   },
+   {
+    "vi": "Đáy biển",
+    "en": "The sea floor"
+   },
+   {
+    "vi": "Mặt đất trung bình của khung",
+    "en": "The frame's mean ground"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "SRTM dùng EGM96. Muốn so với độ cao GNSS (theo ellipsoid) phải cộng độ cao geoid.",
+   "en": "SRTM uses EGM96. To compare with GNSS (ellipsoidal) heights, add the geoid height."
+  }
+ },
+ {
+  "q": {
+   "vi": "Tuyến từ đỉnh Fansipan về Sa Pa dài 7,98 km nhưng tổng leo dốc 654 m. Điều đó cho biết gì?",
+   "en": "The line from Fansipan to Sa Pa is 7.98 km long with 654 m of total ascent. What does that tell you?"
+  },
+  "options": [
+   {
+    "vi": "Tuyến xuống một thung lũng thấp hơn Sa Pa rồi leo lên lại",
+    "en": "It drops into a valley lower than Sa Pa and climbs back up"
+   },
+   {
+    "vi": "Tuyến luôn đi xuống",
+    "en": "It descends all the way"
+   },
+   {
+    "vi": "DEM bị lỗi",
+    "en": "The DEM is broken"
+   },
+   {
+    "vi": "Sa Pa cao hơn Fansipan",
+    "en": "Sa Pa is higher than Fansipan"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Điểm thấp nhất trên tuyến là 1237 m, thấp hơn Sa Pa (1504 m), nên phải leo lên lại.",
+   "en": "The lowest point on the line is 1237 m, below Sa Pa (1504 m), so the line climbs back up."
+  }
+ }
+]

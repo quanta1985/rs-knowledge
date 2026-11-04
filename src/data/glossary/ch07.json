@@ -1,0 +1,74 @@
+[
+ {
+  "id": "toa-reflectance",
+  "vi": "Phản xạ đỉnh khí quyển (TOA)",
+  "en": "Top-of-atmosphere reflectance (TOA)",
+  "def": {
+   "vi": "Tỷ lệ năng lượng Mặt Trời phản xạ đo ở đỉnh khí quyển, gồm cả phần do khí quyển tán xạ. Sentinel-2 Level-1C.",
+   "en": "Fraction of solar energy reflected as measured at the top of the atmosphere, including the light scattered by the atmosphere. Sentinel-2 Level-1C."
+  }
+ },
+ {
+  "id": "radiance",
+  "vi": "Bức xạ (radiance)",
+  "en": "Radiance",
+  "def": {
+   "vi": "Năng lượng đi tới cảm biến theo một hướng, trên một đơn vị diện tích, góc khối và bước sóng; đơn vị W·m⁻²·sr⁻¹·µm⁻¹.",
+   "en": "Energy reaching the sensor from one direction per unit area, solid angle and wavelength; W·m⁻²·sr⁻¹·µm⁻¹."
+  }
+ },
+ {
+  "id": "atmospheric-correction",
+  "vi": "Hiệu chỉnh khí quyển",
+  "en": "Atmospheric correction",
+  "def": {
+   "vi": "Loại bỏ ảnh hưởng tán xạ và hấp thụ của khí quyển để đổi phản xạ đỉnh khí quyển thành phản xạ mặt đất (ví dụ Sen2Cor tạo Sentinel-2 L2A).",
+   "en": "Removing atmospheric scattering and absorption to turn top-of-atmosphere into surface reflectance (e.g. Sen2Cor producing Sentinel-2 L2A)."
+  }
+ },
+ {
+  "id": "rayleigh-scattering",
+  "vi": "Tán xạ Rayleigh",
+  "en": "Rayleigh scattering",
+  "def": {
+   "vi": "Tán xạ ánh sáng bởi phân tử khí, nhỏ hơn nhiều so với bước sóng; cường độ tỷ lệ với λ⁻⁴ nên ánh sáng lam bị tán xạ mạnh nhất (bầu trời xanh, ảnh TOA ám lam).",
+   "en": "Scattering of light by gas molecules much smaller than the wavelength; its strength scales with λ⁻⁴, so blue light scatters most (blue sky, bluish TOA images)."
+  }
+ },
+ {
+  "id": "aerosol",
+  "vi": "Sol khí (aerosol)",
+  "en": "Aerosol",
+  "def": {
+   "vi": "Hạt bụi, khói, muối biển lơ lửng trong không khí; gây mù và làm tăng phản xạ đỉnh khí quyển ở các kênh nhìn thấy.",
+   "en": "Dust, smoke and sea-salt particles suspended in the air; they cause haze and raise top-of-atmosphere reflectance in visible bands."
+  }
+ },
+ {
+  "id": "cloud-score-plus",
+  "vi": "Cloud Score+",
+  "en": "Cloud Score+",
+  "def": {
+   "vi": "Sản phẩm của Google cho mỗi pixel Sentinel-2 một điểm từ 0 (mây, bóng mây) đến 1 (trong); băng cs_cdf dùng để lọc mây bằng một ngưỡng.",
+   "en": "Google product scoring each Sentinel-2 pixel from 0 (cloud or shadow) to 1 (clear); the cs_cdf band is thresholded to mask clouds."
+  }
+ },
+ {
+  "id": "scl",
+  "vi": "Lớp phân loại cảnh (SCL)",
+  "en": "Scene classification layer (SCL)",
+  "def": {
+   "vi": "Băng phân loại của Sen2Cor đi kèm Sentinel-2 L2A: mây, bóng mây, nước, thực vật, đất… dùng để lọc mây.",
+   "en": "Sen2Cor classification band shipped with Sentinel-2 L2A: cloud, shadow, water, vegetation, soil… used for cloud masking."
+  }
+ },
+ {
+  "id": "median-composite",
+  "vi": "Ảnh tổng hợp trung vị",
+  "en": "Median composite",
+  "def": {
+   "vi": "Ảnh ghép lấy giá trị trung vị của nhiều lần chụp tại mỗi pixel, thường sau khi lọc mây, để có một ảnh không mây cho một khoảng thời gian.",
+   "en": "Image built from the per-pixel median of many acquisitions, usually after cloud masking, to get one cloud-free image for a period."
+  }
+ }
+]

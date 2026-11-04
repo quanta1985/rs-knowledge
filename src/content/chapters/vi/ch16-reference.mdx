@@ -1,0 +1,37 @@
+---
+title: Bảng công thức & tài liệu tham khảo
+n: 16
+summary: Mọi công thức dùng trong sổ tay trong một bảng tra cứu được, và danh mục tài liệu tham khảo gộp từ tất cả các chương.
+objectives:
+  - Tra nhanh một công thức và tìm chương giải thích nó.
+  - Tìm nguồn gốc của một phương pháp hay một bộ dữ liệu.
+updated: "2026-11-04"
+---
+import Depth from '../../../components/Depth.astro';
+import FormulaTable from '../../../islands/FormulaTable.tsx';
+import RefList from '../../../components/RefList.astro';
+
+## 16.1 Bảng công thức
+
+Gõ tên chỉ số, ký hiệu hay đơn vị để lọc, hoặc chọn một chủ đề. Số ở cột cuối dẫn tới chương giải thích công thức đó.
+
+<FormulaTable client:visible lang="vi" />
+
+<Depth level="ref" title="Hằng số hay dùng">
+
+| Hằng số | Giá trị |
+|---|---|
+| Tham số hấp dẫn của Trái Đất μ = GM | 398 600,4418 km³/s² |
+| Bán kính xích đạo WGS84 | 6 378 137 m |
+| Tốc độ ánh sáng c | 299 792 458 m/s |
+| Hằng số Wien | 2898 µm·K |
+| Hằng số Stefan–Boltzmann σ | 5,67 × 10⁻⁸ W·m⁻²·K⁻⁴ |
+| Bước sóng Sentinel-1 (5,405 GHz) | ≈ 5,55 cm |
+
+</Depth>
+
+## 16.2 Tài liệu tham khảo của toàn bộ sổ tay
+
+Danh mục được gộp tự động từ mục "Tài liệu tham khảo" của mọi chương. Mỗi tài liệu ghi kèm các chương có trích dẫn nó.
+
+<RefList />

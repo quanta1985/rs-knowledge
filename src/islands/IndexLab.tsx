@@ -1,9 +1,12 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import type { Lang } from '../i18n/ui';
+import { lonLatToPixel } from '../lib/geo';
 import { band, BRBG, colormap, histogram, normalizedDifference, otsu, VIRIDIS } from '../lib/raster';
 import { bandLabel } from './bands';
-import { useScene } from './cube';
-import { composite, eventToPixel, indexImage } from './draw';
+import { frameQuad, useScene } from './cube';
+import { indexImage } from './draw';
+import MapStage from './MapStage';
+import { Pills, Slider, StatPanel } from './VizUi';
 
 type Preset = { id: string; a: string; b: string; ref: string; t: number };
 const PRESETS: Preset[] = [
@@ -17,136 +20,105 @@ const BINS = 80;
 
 const TXT = {
   vi: { loading: 'Đang tải ảnh…', idx: 'Chỉ số', custom: 'Tự chọn', a: 'Kênh A', b: 'Kênh B', mode: 'Hiển thị',
-        map: 'Bản đồ chỉ số', mask: 'Vùng ≥ ngưỡng', thr: 'Ngưỡng', otsu: 'Ngưỡng Otsu', cmap: 'Thang màu',
-        brbg: 'Phân kỳ BrBG', vir: 'Viridis', above: 'pixel ≥ ngưỡng', hist: 'Histogram giá trị chỉ số (512 × 512 pixel)',
-        count: 'Số pixel', value: 'Giá trị', canvas: 'Bản đồ chỉ số phổ, Hà Nội', hover: 'Giá trị tại con trỏ' },
+        map: 'Bản đồ chỉ số', mask: 'Vùng ≥ ngưỡng', thr: 'Ngưỡng', otsu: 'Otsu', cmap: 'Thang màu', op: 'Độ mờ',
+        above: 'Pixel ≥ ngưỡng', area: 'Diện tích ≥ ngưỡng', hist: 'Histogram giá trị chỉ số (512 × 512 pixel)', formula: 'Công thức',
+        label: 'Bản đồ chỉ số phổ Sentinel-2, Hồ Tây – sông Hồng', at: 'Tại con trỏ', src: 'Nguồn' },
   en: { loading: 'Loading image…', idx: 'Index', custom: 'Custom', a: 'Band A', b: 'Band B', mode: 'View',
-        map: 'Index map', mask: 'Area ≥ threshold', thr: 'Threshold', otsu: 'Otsu threshold', cmap: 'Colour scale',
-        brbg: 'Diverging BrBG', vir: 'Viridis', above: 'pixels ≥ threshold', hist: 'Histogram of index values (512 × 512 pixels)',
-        count: 'Pixels', value: 'Value', canvas: 'Spectral index map, Hanoi', hover: 'Value under pointer' },
+        map: 'Index map', mask: 'Area ≥ threshold', thr: 'Threshold', otsu: 'Otsu', cmap: 'Colour scale', op: 'Opacity',
+        above: 'Pixels ≥ threshold', area: 'Area ≥ threshold', hist: 'Histogram of index values (512 × 512 pixels)', formula: 'Formula',
+        label: 'Sentinel-2 spectral index map, West Lake – Red River', at: 'Under pointer', src: 'Source' },
 };
 
 export default function IndexLab({ lang, initial = 'NDVI' }: { lang: Lang; initial?: string }) {
   const T = TXT[lang];
   const { scene, error } = useScene();
-  const canvas = useRef<HTMLCanvasElement>(null);
   const start = PRESETS.find((p) => p.id === initial) ?? PRESETS[0];
   const [ab, setAb] = useState<[string, string]>([start.a, start.b]);
   const [thr, setThr] = useState(start.t);
   const [mode, setMode] = useState<'map' | 'mask'>('map');
   const [cmap, setCmap] = useState<'brbg' | 'viridis'>('brbg');
+  const [op, setOp] = useState(1);
   const [hover, setHover] = useState<number | null>(null);
 
   const values = useMemo(() => {
     if (!scene) return null;
     const s = scene.cube.scale;
-    const A = Float32Array.from(band(scene.cube, ab[0]), (v) => v * s);
-    const B = Float32Array.from(band(scene.cube, ab[1]), (v) => v * s);
-    return normalizedDifference(A, B);
+    return normalizedDifference(Float32Array.from(band(scene.cube, ab[0]), (v) => v * s), Float32Array.from(band(scene.cube, ab[1]), (v) => v * s));
   }, [scene, ab]);
-  const base = useMemo(() => scene && composite(scene.cube, ['B4', 'B3', 'B2'], 'p2-98').img, [scene]);
   const hist = useMemo(() => values && histogram(values, -1, 1, BINS), [values]);
   const above = useMemo(() => {
     let k = 0;
     if (values) for (let i = 0; i < values.length; i++) if (values[i] >= thr) k++;
     return k;
   }, [values, thr]);
-  const maskThr = mode === 'mask' ? thr : null; // threshold only matters for the mask view
-
-  useEffect(() => {
-    if (!values || !scene || !base) return;
+  const maskThr = mode === 'mask' ? thr : null; // the threshold only changes the picture in mask view
+  const image = useMemo(() => {
+    if (!values || !scene) return null;
     const { width: w, height: h } = scene.cube;
-    const img = indexImage(values, w, h, cmap === 'brbg' ? BRBG : VIRIDIS, -1, 1,
-      maskThr != null ? { threshold: maskThr, color: MASK, base } : undefined);
-    canvas.current?.getContext('2d')?.putImageData(img, 0, 0);
-  }, [values, scene, base, maskThr, cmap]);
+    if (maskThr == null) return indexImage(values, w, h, cmap === 'brbg' ? BRBG : VIRIDIS, -1, 1);
+    const img = new ImageData(w, h); // mask only; the basemap shows through elsewhere
+    for (let i = 0; i < values.length; i++) if (values[i] >= maskThr) img.data.set([...MASK, 255], i * 4);
+    return img;
+  }, [values, scene, maskThr, cmap]);
+  const overlays = useMemo(() => [{ id: 'idx', image, opacity: op }], [image, op]);
+  const quad = useMemo(() => scene && frameQuad(scene.meta), [scene]);
 
   if (error) return <p className="viz status" role="alert">Error: {error}</p>;
-  if (!scene || !values || !hist) return <p className="viz status" aria-live="polite">{T.loading}</p>;
+  if (!scene || !values || !hist || !quad) return <p className="viz status" aria-live="polite">{T.loading}</p>;
 
   const preset = PRESETS.find((p) => p.a === ab[0] && p.b === ab[1]);
-  const n = values.length;
-  const km2 = (above * scene.meta.resolution_m ** 2) / 1e6;
-  const nf = (v: number, d = 2) => v.toLocaleString(lang === 'vi' ? 'vi-VN' : 'en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
-  const pick = (p: Preset) => { setAb([p.a, p.b]); setThr(p.t); };
+  const name = preset ? preset.id : T.custom;
+  const n = values.length, res = scene.meta.resolution_m;
+  const loc = lang === 'vi' ? 'vi-VN' : 'en-US';
+  const nf = (v: number, d = 2) => v.toLocaleString(loc, { minimumFractionDigits: d, maximumFractionDigits: d });
   const stops = cmap === 'brbg' ? BRBG : VIRIDIS;
   const gradient = `linear-gradient(90deg, ${Array.from({ length: 11 }, (_, i) => `rgb(${colormap(stops, i / 10).join(',')})`).join(',')})`;
-
-  // histogram geometry
-  const HW = 320, HH = 120, maxC = Math.max(...hist);
+  const HW = 260, HH = 64, maxC = Math.max(...hist);
   const hx = (v: number) => ((v + 1) / 2) * HW;
+  const sel = (i: 0 | 1) => (
+    <label className="ctl"><span className="ctl-label">{i ? T.b : T.a}</span>
+      <select className="stage-select" style={{ maxWidth: 128 }} value={ab[i]} onChange={(e) => setAb(i ? [ab[0], e.target.value] : [e.target.value, ab[1]])}>
+        {scene.cube.bands.map((b) => <option key={b} value={b}>{bandLabel(b, lang)}</option>)}
+      </select>
+    </label>
+  );
+
+  const hud = (
+    <StatPanel title={`${name} · Sentinel-2B 12/02/2024`} rows={[
+      { k: T.formula, v: `(${ab[0]} − ${ab[1]}) / (${ab[0]} + ${ab[1]})` },
+      ...(preset ? [{ k: T.src, v: preset.ref, tone: 'muted' as const }] : []),
+      { k: T.thr, v: nf(thr), tone: 'accent' },
+      { k: T.above, v: `${nf((100 * above) / n, 1)} %` },
+      { k: T.area, v: `${nf((above * res ** 2) / 1e6)} km²`, tone: 'warn' },
+      { k: T.at, v: hover == null || Number.isNaN(values[hover]) ? '—' : nf(values[hover], 3), tone: 'muted' },
+    ]}>
+      <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>{sel(0)}{sel(1)}</div>
+      <svg className="hist" viewBox={`-4 -4 ${HW + 8} ${HH + 22}`} role="img" aria-label={T.hist}>
+        {hist.map((c, i) => {
+          const x0 = -1 + (2 * i) / BINS, h = (c / maxC) * HH, hit = x0 + 1 / BINS >= thr;
+          return <rect key={i} x={hx(x0)} width={HW / BINS - 0.5} y={HH - h} height={h} fill={hit ? `rgb(${MASK})` : '#94a3b8'} opacity={hit ? 0.95 : 0.45} />;
+        })}
+        <line x1={hx(thr)} x2={hx(thr)} y1={-4} y2={HH} stroke="#e3b25a" strokeWidth={1.5} />
+        <text x={0} y={HH + 13}>−1</text><text x={HW / 2} y={HH + 13} textAnchor="middle">0</text><text x={HW} y={HH + 13} textAnchor="end">+1</text>
+      </svg>
+      {mode === 'map' && <div aria-hidden="true" style={{ marginTop: 6 }}>
+        <div style={{ height: 8, borderRadius: 3, background: gradient }} />
+        <div className="num" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: '#94a3b8' }}><span>−1</span><span>0</span><span>+1</span></div>
+      </div>}
+    </StatPanel>
+  );
+  const bar = <>
+    <Pills label={T.idx} value={preset?.id ?? ''} onChange={(id) => { const p = PRESETS.find((x) => x.id === id)!; setAb([p.a, p.b]); setThr(p.t); }}
+      options={PRESETS.map((p) => ({ v: p.id, label: p.id }))} />
+    <Pills label={T.mode} value={mode} onChange={setMode} options={[{ v: 'map', label: T.map }, { v: 'mask', label: T.mask }]} />
+    {mode === 'map' && <Pills label={T.cmap} value={cmap} onChange={setCmap} options={[{ v: 'brbg', label: 'BrBG' }, { v: 'viridis', label: 'Viridis' }]} />}
+    <Slider label={T.thr} value={thr} min={-1} max={1} step={0.01} fmt={(v) => nf(v)} onChange={setThr} />
+    <button type="button" className="pill-btn" onClick={() => setThr(Number(otsu(values, -1, 1, 200).toFixed(2)))}>{T.otsu}</button>
+    <Slider label={T.op} value={op} min={0} max={1} step={0.05} fmt={(v) => `${Math.round(v * 100)} %`} onChange={setOp} />
+  </>;
 
   return (
-    <div className="viz">
-      <div className="seg" role="group" aria-label={T.idx} style={{ flexWrap: 'wrap', width: 'fit-content' }}>
-        {PRESETS.map((p) => <button key={p.id} type="button" aria-pressed={preset?.id === p.id} onClick={() => pick(p)}>{p.id}</button>)}
-      </div>
-      <p className="formula">
-        {preset ? preset.id : T.custom} = ({ab[0]} − {ab[1]}) / ({ab[0]} + {ab[1]})
-        {preset && <span className="muted"> · {preset.ref}</span>}
-      </p>
-      <div className="viz two">
-        <div>
-          <canvas ref={canvas} width={scene.cube.width} height={scene.cube.height} role="img"
-            aria-label={`${T.canvas}: (${ab[0]} − ${ab[1]}) / (${ab[0]} + ${ab[1]})`}
-            onPointerMove={(e) => { const p = eventToPixel(e, e.currentTarget, scene.cube.width, scene.cube.height); setHover(p ? values[p.row * scene.cube.width + p.col] : null); }}
-            onPointerLeave={() => setHover(null)} />
-          {mode === 'map' ? (
-            <div aria-hidden="true" style={{ marginTop: 6 }}>
-              <div style={{ height: 10, borderRadius: 3, background: gradient }} />
-              <div className="num muted" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem' }}><span>−1</span><span>0</span><span>+1</span></div>
-            </div>
-          ) : (
-            <p className="muted" style={{ fontSize: '0.85rem', margin: '6px 0 0' }}>
-              <span aria-hidden="true" style={{ display: 'inline-block', width: 12, height: 12, background: `rgb(${MASK.join(',')})`, verticalAlign: 'middle', marginRight: 6 }} />
-              {preset ? preset.id : T.custom} ≥ {nf(thr)}
-            </p>
-          )}
-          <p className="readout num" aria-live="off">{T.hover}: {hover == null || Number.isNaN(hover) ? '—' : nf(hover, 3)}</p>
-        </div>
-        <div>
-          <div className="controls" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
-            <label style={{ justifyContent: 'space-between' }}>{T.a}
-              <select value={ab[0]} onChange={(e) => setAb([e.target.value, ab[1]])}>{scene.cube.bands.map((b) => <option key={b} value={b}>{bandLabel(b, lang)}</option>)}</select>
-            </label>
-            <label style={{ justifyContent: 'space-between' }}>{T.b}
-              <select value={ab[1]} onChange={(e) => setAb([ab[0], e.target.value])}>{scene.cube.bands.map((b) => <option key={b} value={b}>{bandLabel(b, lang)}</option>)}</select>
-            </label>
-            <div className="seg" role="group" aria-label={T.mode}>
-              <button type="button" aria-pressed={mode === 'map'} onClick={() => setMode('map')}>{T.map}</button>
-              <button type="button" aria-pressed={mode === 'mask'} onClick={() => setMode('mask')}>{T.mask}</button>
-            </div>
-            {mode === 'map' && (
-              <label style={{ justifyContent: 'space-between' }}>{T.cmap}
-                <select value={cmap} onChange={(e) => setCmap(e.target.value as 'brbg' | 'viridis')}>
-                  <option value="brbg">{T.brbg}</option><option value="viridis">{T.vir}</option>
-                </select>
-              </label>
-            )}
-            <label style={{ justifyContent: 'space-between' }}>{T.thr} <span className="num">{nf(thr)}</span></label>
-            <input type="range" min={-1} max={1} step={0.01} value={thr} aria-label={T.thr} onChange={(e) => setThr(Number(e.target.value))} />
-            <button type="button" className="btn" onClick={() => setThr(Number(otsu(values, -1, 1, 200).toFixed(2)))}>{T.otsu}</button>
-          </div>
-          <svg className="chart" viewBox={`-28 -6 ${HW + 36} ${HH + 38}`} width="100%" role="img" aria-label={T.hist} style={{ marginTop: 'var(--s3)' }}>
-            <title>{T.hist}</title>
-            {hist.map((c, i) => {
-              const x0 = -1 + (2 * i) / BINS;
-              const h = (c / maxC) * HH;
-              return <rect key={i} x={hx(x0) + 0.3} width={HW / BINS - 0.6} y={HH - h} height={h}
-                fill={x0 + 1 / BINS >= thr ? `rgb(${MASK.join(',')})` : 'currentColor'} opacity={x0 + 1 / BINS >= thr ? 0.9 : 0.35} />;
-            })}
-            <line x1={hx(thr)} x2={hx(thr)} y1={-4} y2={HH} stroke="currentColor" strokeWidth={1.5} />
-            <line x1={0} x2={HW} y1={HH} y2={HH} stroke="currentColor" opacity={0.4} />
-            {[-1, -0.5, 0, 0.5, 1].map((v) => <text key={v} x={hx(v)} y={HH + 14} textAnchor="middle">{nf(v, 1)}</text>)}
-            <text x={HW / 2} y={HH + 26} textAnchor="middle">{T.value}</text>
-            <text transform={`translate(-16 ${HH / 2}) rotate(-90)`} textAnchor="middle">{T.count}</text>
-          </svg>
-          <p className="num" style={{ margin: 'var(--s2) 0 0' }}>
-            <strong>{nf((100 * above) / n, 1)} %</strong> {T.above} ≈ <strong>{nf(km2, 2)} km²</strong>
-            <span className="muted"> / {nf((n * scene.meta.resolution_m ** 2) / 1e6, 2)} km²</span>
-          </p>
-        </div>
-      </div>
-    </div>
+    <MapStage lang={lang} label={`${T.label}: ${name}`} quad={quad} overlays={overlays} hud={hud} bar={bar} height={640}
+      onHover={(p) => { const px = p && lonLatToPixel(quad, p.lon, p.lat, scene.cube.width, scene.cube.height); setHover(px ? px.row * scene.cube.width + px.col : null); }} />
   );
 }

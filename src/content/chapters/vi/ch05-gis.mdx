@@ -1,0 +1,190 @@
+---
+title: "Nền tảng GIS: hệ tọa độ, VN-2000, raster/vector"
+n: 5
+summary: Ảnh vệ tinh chỉ dùng được khi biết mỗi pixel nằm ở đâu. Chương này đi từ ellipsoid, datum đến phép chiếu UTM và VN-2000, đo sai số tỷ lệ trên lãnh thổ Việt Nam, rồi so sánh Hồ Tây ở dạng raster và vector.
+objectives:
+  - Phân biệt ellipsoid, datum, phép chiếu và hệ quy chiếu tọa độ (CRS); đọc được mã EPSG.
+  - Chuyển một điểm giữa WGS84, UTM và VN-2000; giải thích vì sao lẫn hai datum gây lệch khoảng 200 m.
+  - Tính và giải thích hệ số tỷ lệ của phép chiếu UTM và TM-3 ở các vùng của Việt Nam.
+  - So sánh raster và vector về diện tích, độ chi tiết và dung lượng.
+updated: "2026-11-04"
+---
+import Term from '../../../components/Term.astro';
+import Depth from '../../../components/Depth.astro';
+import Figure from '../../../components/Figure.astro';
+import LabLinks from '../../../components/LabLinks.astro';
+import CrsExplorer from '../../../islands/CrsExplorer.tsx';
+import ScaleFactorChart from '../../../islands/ScaleFactorChart.tsx';
+import RasterVector from '../../../islands/RasterVector.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/ch05.json';
+
+## 5.1 Một con số tọa độ cần những gì
+
+Trái Đất không tròn đều. Để ghi vị trí bằng con số, ta thay nó bằng một **ellipsoid**, tức hình cầu dẹt ở hai cực. Sau đó phải chọn cách đặt ellipsoid này so với Trái Đất thật; cách đặt đó gọi là <Term id="datum">datum</Term>. Cuối cùng, muốn đo khoảng cách bằng mét trên giấy hoặc màn hình, ta trải mặt cong ra mặt phẳng bằng một **phép chiếu**.
+
+Ba thành phần đó gộp lại là một <Term id="crs">hệ quy chiếu tọa độ (CRS)</Term>. Mọi phần mềm GIS và Google Earth Engine gọi CRS bằng mã EPSG.
+
+<Depth level="ref" title="Bảng tra: các mã EPSG hay dùng ở Việt Nam">
+
+| Mã EPSG | Tên | Dùng cho |
+|---|---|---|
+| 4326 | WGS 84 (kinh, vĩ độ) | GPS, Google Earth, GeoJSON |
+| 32648 / 32649 | WGS 84 / UTM múi 48N / 49N | Ảnh Sentinel-2, Landsat (sổ tay này dùng 32648) |
+| 4756 | VN-2000 (kinh, vĩ độ) | Hệ quốc gia |
+| 3405 / 3406 | VN-2000 / UTM múi 48N / 49N | Bản đồ địa hình tỷ lệ nhỏ |
+| 5897 | VN-2000 / TM-3 múi 482 (kinh tuyến trục 105°) | Bản đồ địa chính, ví dụ Hà Nội |
+| 9210 | VN-2000 / TM-3 105-45 | Bản đồ địa chính, ví dụ TP.HCM |
+
+Nguồn: cơ sở dữ liệu EPSG (IOGP), truy vấn qua PROJ.
+
+</Depth>
+
+## 5.2 WGS84, VN-2000 và phép chuyển datum
+
+GPS và hầu hết ảnh vệ tinh dùng **WGS84**. Việt Nam dùng <Term id="vn2000">VN-2000</Term> từ năm 2000 (Quyết định 83/2000/QĐ-TTg), thay cho hệ HN-72 cũ. VN-2000 dùng **cùng ellipsoid** với WGS84 nhưng đặt lệch đi để khớp nhất với lãnh thổ Việt Nam. Vì vậy cùng một điểm có hai cặp kinh, vĩ độ khác nhau.
+
+Muốn đổi từ hệ này sang hệ kia, phải dùng <Term id="helmert">phép chuyển Helmert 7 tham số</Term>, với bộ tham số do Thông tư 973/2001/TT-TCĐC công bố.
+
+<Figure
+  title="Hình 5.1 — Múi UTM, kinh tuyến trục VN-2000 và cùng một điểm trong ba hệ tọa độ"
+  try="Chọn Hồ Hoàn Kiếm, phóng to: chấm đỏ là chỗ điểm rơi vào nếu ai đó nhập số VN-2000 vào bản đồ WGS84. Hai chấm cách nhau bao xa? Bấm thử vài điểm ở Cà Mau và Móng Cái rồi so hệ số k."
+  source="Chuyển datum: Helmert 7 tham số (Thông tư 973/2001/TT-TCĐC; EPSG:6960, quy ước coordinate frame), kiểm tra với PROJ tới 1e-8 độ. Phép chiếu ngang Mercator: chuỗi của Snyder (1987), khớp PROJ tới 1 cm. Ảnh nền © Esri, Maxar, Earthstar Geographics."
+>
+  <CrsExplorer client:visible lang="vi" />
+</Figure>
+
+<div class="worked">
+
+#### Ví dụ: một điểm ở Hồ Hoàn Kiếm qua bốn hệ tọa độ
+
+Điểm WGS84: 105,8342°E, 21,0278°N.
+
+1. **UTM múi 48N (WGS84):** E = 586 683,64 m, N = 2 325 450,79 m. Hệ số tỷ lệ tại điểm k = 0,9996929.
+2. **Chuyển sang datum VN-2000** (Helmert 7 tham số): 105,8323173°E, 21,0287858°N. Kinh độ nhỏ đi, vĩ độ lớn lên.
+3. **VN-2000 / UTM 48N:** E = 586 487,43 m, N = 2 325 558,87 m. So với bước 1, điểm lệch **ΔE = −196,2 m, ΔN = +108,1 m, tổng 224,0 m**.
+4. **VN-2000 / TM-3, kinh tuyến trục 105°, k₀ = 0,9999:** E = 586 513,38 m, N = 2 326 256,82 m. Tọa độ Bắc lớn hơn bước 3 khoảng 700 m chỉ vì k₀ khác (0,9999 so với 0,9996).
+
+Bài học: một cặp số E, N vô nghĩa nếu không kèm tên hệ. Lệch 224 m là cỡ một dãy phố; lệch 700 m có thể sang phường khác.
+
+</div>
+
+<Depth level="advanced" title="Công thức Helmert và cái bẫy dấu của góc xoay">
+
+Chuyển từ VN-2000 sang WGS84 trong hệ tọa độ không gian địa tâm (X, Y, Z):
+
+<p class="formula">X_WGS84 = T + (1 + s) · R · X_VN2000</p>
+
+Bộ tham số (EPSG:6960): T = (−191,90441429; −39,30318279; −111,45032835) m; góc xoay rx = −0,00928836″, ry = 0,01975479″, rz = −0,00427372″; s = 0,252906278 ppm.
+
+Có hai quy ước viết ma trận xoay R: **coordinate frame** và **position vector**. Hai quy ước chỉ khác nhau ở dấu của góc xoay. EPSG ghi bộ tham số này theo quy ước coordinate frame. Nếu nhập vào phần mềm dùng quy ước kia mà không đổi dấu, kết quả sẽ sai vài decimet. Sổ tay kiểm tra hàm của mình với PROJ: sai khác dưới 1e-8 độ (khoảng 1 mm).
+
+Cơ sở dữ liệu EPSG còn một bộ tham số thứ hai, EPSG:5194 "VN-2000 to WGS 84 (1)". PROJ có thể tự chọn bộ này tùy vị trí: ở chợ Bến Thành, hai bộ cho kết quả lệch nhau khoảng 0,8 m. Khi cần độ chính xác dưới mét, hãy ghi rõ mã phép chuyển đã dùng.
+
+</Depth>
+
+## 5.3 Phép chiếu và sai số tỷ lệ
+
+Không thể trải mặt cong ra phẳng mà không méo. <Term id="utm">Phép chiếu UTM</Term> chia Trái Đất thành các múi rộng 6°. Trong mỗi múi, độ dài đúng nhất dọc hai đường cách kinh tuyến trục khoảng 180 km. Phần lớn Việt Nam nằm trong **múi 48** (102°–108°E, kinh tuyến trục 105°); phần phía đông từ 108°E nằm trong **múi 49**.
+
+<Term id="scale-factor">Hệ số tỷ lệ k</Term> cho biết lưới phóng to hay thu nhỏ bao nhiêu. Trên kinh tuyến trục UTM, k = 0,9996 (thu nhỏ 400 ppm, tức 40 cm mỗi km). Ra đến rìa múi, k vượt quá 1.
+
+<Figure
+  title="Hình 5.2 — Sai lệch tỷ lệ theo kinh độ: UTM so với VN-2000 TM-3"
+  try="Rê chuột dọc trục kinh độ. Ở Móng Cái, 1 km trên lưới UTM sai bao nhiêu milimét? Dời kinh tuyến trục TM-3 sang 107°45′ (Đà Nẵng): sai số ở Đà Nẵng còn bao nhiêu?"
+  source="Hệ số tỷ lệ của phép chiếu ngang Mercator trên ellipsoid WGS84, chuỗi của Snyder (1987, công thức 8-11). Đường TM-3 đậm trong khoảng ±1,5° quanh kinh tuyến trục (độ rộng một múi 3°)."
+>
+  <ScaleFactorChart client:visible lang="vi" />
+</Figure>
+
+<details>
+<summary>Bảng số liệu: hệ số k của UTM tại một số địa điểm</summary>
+
+| Địa điểm | Kinh độ | Múi UTM | k | Sai trên 1 km |
+|---|---|---|---|---|
+| Lào Cai | 103,97°E | 48 | 0,999739 | −26 cm |
+| Hà Nội (Hồ Hoàn Kiếm) | 105,83°E | 48 | 0,999693 | −31 cm |
+| Móng Cái | 107,97°E | 48 | 1,000770 | +77 cm |
+| Đà Nẵng | 108,22°E | 49 | 1,000694 | +69 cm |
+| Cà Mau | 104,75°E | 48 | 0,999609 | −39 cm |
+
+</details>
+
+Sai số 77 cm mỗi km là không đáng kể khi đo diện tích lúa trên ảnh 10 m. Nhưng với bản đồ địa chính thì quá lớn: một thửa đất dài 100 m sẽ sai 7,7 cm. Vì vậy bản đồ tỷ lệ lớn của VN-2000 dùng **múi 3° (TM-3) với k₀ = 0,9999**. Kinh tuyến trục được chọn riêng cho từng tỉnh, ví dụ Hà Nội 105°. Trong một múi 3°, sai lệch chỉ từ −100 đến khoảng +200 ppm. Tại Hồ Hoàn Kiếm, k của TM-3 bằng 0,9999925, gần như đúng tỷ lệ.
+
+## 5.4 Raster và vector
+
+Cùng một hồ có thể lưu theo hai cách:
+
+- <Term id="raster">Raster</Term>: lưới ô vuông đều nhau, mỗi ô ghi "nước" hoặc "không phải nước". Ảnh vệ tinh, DEM, bản đồ chỉ số đều là raster.
+- <Term id="vector">Vector</Term>: một vùng (polygon) ghi tọa độ từng đỉnh của đường bờ. Ranh giới hành chính, đường giao thông, thửa đất thường là vector.
+
+<Figure
+  title="Hình 5.3 — Hồ Tây ở dạng raster và dạng vector trên bản đồ"
+  try="Tăng kích thước pixel từ 10 m lên 320 m: diện tích raster thay đổi thế nào? Tăng dung sai đơn giản hóa lên 100 m rồi phóng to bờ hồ: số đỉnh, diện tích và chu vi đổi ra sao?"
+  source="Mặt nạ nước: MNDWI = (B3 − B11)/(B3 + B11) ≥ 0 trên ảnh Sentinel-2B L2A ngày 12/02/2024 (Chương 6), vùng liền khối chứa Hồ Tây. Vector: đường đồng mức 0,5 của mặt nạ 10 m (marching squares), đơn giản hóa Douglas–Peucker trong trình duyệt. Raster thô hơn: tỷ lệ nước trong khối ≥ 50 %. Dung lượng chưa nén: 1 byte mỗi ô; 16 byte mỗi đỉnh (hai số thực 8 byte). Contains modified Copernicus Sentinel data 2024."
+>
+  <RasterVector client:visible lang="vi" />
+</Figure>
+
+Hai bảng dưới đây lấy từ Hình 5.3.
+
+<details>
+<summary>Bảng số liệu: raster ở các kích thước pixel</summary>
+
+| Pixel | Số ô | Ô nước | Diện tích | Dung lượng |
+|---|---|---|---|---|
+| 10 m | 262 144 | 51 276 | 5,128 km² | 256 KB |
+| 40 m | 16 384 | 3 241 | 5,186 km² | 16 KB |
+| 80 m | 4 096 | 807 | 5,165 km² | 4 KB |
+| 320 m | 256 | 49 | 5,018 km² | 256 B |
+
+</details>
+
+<details>
+<summary>Bảng số liệu: vector với các dung sai đơn giản hóa</summary>
+
+| Dung sai | Số đỉnh | Diện tích | Chu vi | Dung lượng |
+|---|---|---|---|---|
+| 0 m | 2 403 | 5,100 km² | 20,48 km | 37,5 KB |
+| 10 m | 429 | 5,100 km² | 18,57 km | 6,7 KB |
+| 50 m | 61 | 5,089 km² | 15,21 km | 976 B |
+| 100 m | 38 | 5,055 km² | 14,34 km | 608 B |
+
+</details>
+
+Ba điều rút ra:
+
+1. **Diện tích khá bền**, chu vi thì không. Giảm từ 2 403 xuống 61 đỉnh chỉ làm diện tích giảm 0,2 %, nhưng chu vi mất gần 26 % vì các khúc khuỷu của bờ hồ bị là phẳng.
+2. Raster 10 m cho 5,128 km², vector cho 5,100 km². Đường viền vector đi qua giữa tâm các pixel ven bờ nên cắt bớt nửa góc ở mỗi bậc thang.
+3. Raster tốn chỗ cho cả vùng không phải nước (262 144 ô cho 51 276 ô nước). Vector chỉ lưu đường bờ nên gọn hơn nhiều, nhưng không lưu được giá trị biến đổi liên tục như độ cao hay NDVI.
+
+<Depth level="advanced" title="Vì sao diện tích raster dao động khi pixel to lên?">
+
+Ở 40 m, diện tích tăng lên 5,186 km², rồi giảm còn 5,018 km² ở 320 m. Quy tắc "≥ 50 % là nước" làm tròn từng ô ven bờ lên hoặc xuống. Khi ô còn nhỏ, sai số tròn số triệt tiêu nhau nên tổng diện tích ổn định. Khi ô to, mỗi lần làm tròn ăn hoặc thêm cả một mảng lớn, nên tổng diện tích phụ thuộc vào việc lưới rơi trúng chỗ nào. Đây là cùng hiện tượng pixel hỗn hợp của Chương 4, nhìn từ phía GIS.
+
+</Depth>
+
+## 5.5 Thực hành
+
+Notebook dùng `pyproj` để chuyển một điểm qua WGS84, UTM và VN-2000, rồi tự viết lại phép Helmert để kiểm tra. Phần sau so diện tích Hồ Tây tính theo pixel với diện tích của polygon do Earth Engine vector hóa. Script GEE vẽ múi UTM và vector hóa một hồ bất kỳ.
+
+<LabLinks notebook="labs/ch05_gis.ipynb" gee="labs/ch05_gis.js" />
+
+**Bài tập gợi ý**
+
+1. Lấy tọa độ GPS nhà bạn. Tính tọa độ VN-2000 TM-3 theo kinh tuyến trục của tỉnh bạn (tra trong Thông tư 973/2001/TT-TCĐC).
+2. Chọn một hồ khác (Hồ Ba Bể, hồ Trị An). Diện tích raster và vector chênh nhau bao nhiêu phần trăm?
+3. Ở vĩ độ nào trong Việt Nam, rìa múi UTM 48 có sai số tỷ lệ lớn nhất? Vì sao?
+
+## 5.6 Ôn tập
+
+<Quiz client:visible lang="vi" items={quiz} />
+
+## Tài liệu tham khảo
+
+- Douglas, D. H., & Peucker, T. K. (1973). Algorithms for the reduction of the number of points required to represent a digitized line or its caricature. *Cartographica*, 10(2), 112–122.
+- IOGP. *EPSG Geodetic Parameter Dataset* (truy vấn qua PROJ/pyproj 3.7): EPSG:4756, 3405, 5897, 6960.
+- Snyder, J. P. (1987). *Map Projections — A Working Manual*. U.S. Geological Survey Professional Paper 1395.
+- Thủ tướng Chính phủ (2000). Quyết định 83/2000/QĐ-TTg về sử dụng Hệ quy chiếu và Hệ tọa độ quốc gia Việt Nam.
+- Tổng cục Địa chính (2001). Thông tư 973/2001/TT-TCĐC hướng dẫn áp dụng hệ quy chiếu và hệ tọa độ quốc gia VN-2000.

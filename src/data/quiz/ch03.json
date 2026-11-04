@@ -1,0 +1,263 @@
+[
+ {
+  "q": {
+   "vi": "Sentinel-1 phát ở tần số 5,405 GHz. Bước sóng là bao nhiêu?",
+   "en": "Sentinel-1 transmits at 5.405 GHz. What is the wavelength?"
+  },
+  "options": [
+   {
+    "vi": "Khoảng 5,55 cm",
+    "en": "About 5.55 cm"
+   },
+   {
+    "vi": "Khoảng 0,55 µm",
+    "en": "About 0.55 µm"
+   },
+   {
+    "vi": "Khoảng 55 m",
+    "en": "About 55 m"
+   },
+   {
+    "vi": "Khoảng 5,55 mm",
+    "en": "About 5.55 mm"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "λ = c / f = 299 792 458 / 5,405×10⁹ ≈ 0,0555 m.",
+   "en": "λ = c / f = 299,792,458 / 5.405×10⁹ ≈ 0.0555 m."
+  }
+ },
+ {
+  "q": {
+   "vi": "Bề mặt Trái Đất ~300 K phát xạ cực đại ở bước sóng nào?",
+   "en": "At what wavelength does a ~300 K Earth surface emit most?"
+  },
+  "options": [
+   {
+    "vi": "Khoảng 9,7 µm",
+    "en": "About 9.7 µm"
+   },
+   {
+    "vi": "Khoảng 0,5 µm",
+    "en": "About 0.5 µm"
+   },
+   {
+    "vi": "Khoảng 2,9 µm",
+    "en": "About 2.9 µm"
+   },
+   {
+    "vi": "Khoảng 5,5 cm",
+    "en": "About 5.5 cm"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Wien: λmax = 2898 / 300 ≈ 9,66 µm, giữa cửa sổ 8–14 µm.",
+   "en": "Wien: λmax = 2898 / 300 ≈ 9.66 µm, inside the 8–14 µm window."
+  }
+ },
+ {
+  "q": {
+   "vi": "Nếu nhiệt độ tuyệt đối tăng gấp đôi, tổng năng lượng vật đen phát ra tăng bao nhiêu lần?",
+   "en": "If absolute temperature doubles, by how much does a black body's total emission grow?"
+  },
+  "options": [
+   {
+    "vi": "16 lần",
+    "en": "16 times"
+   },
+   {
+    "vi": "2 lần",
+    "en": "2 times"
+   },
+   {
+    "vi": "4 lần",
+    "en": "4 times"
+   },
+   {
+    "vi": "8 lần",
+    "en": "8 times"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Stefan–Boltzmann: M = σT⁴, nên 2⁴ = 16.",
+   "en": "Stefan–Boltzmann: M = σT⁴, so 2⁴ = 16."
+  }
+ },
+ {
+  "q": {
+   "vi": "Vì sao kênh lam luôn mờ nhất trên ảnh quang học?",
+   "en": "Why is the blue band always the haziest in optical images?"
+  },
+  "options": [
+   {
+    "vi": "Tán xạ Rayleigh tỷ lệ với λ⁻⁴, mạnh nhất ở bước sóng ngắn",
+    "en": "Rayleigh scattering scales with λ⁻⁴, strongest at short wavelengths"
+   },
+   {
+    "vi": "Mặt Trời phát ít ánh sáng lam",
+    "en": "The Sun emits little blue light"
+   },
+   {
+    "vi": "Cảm biến lam có ít bit hơn",
+    "en": "The blue detector has fewer bits"
+   },
+   {
+    "vi": "Nước hấp thụ ánh sáng lam",
+    "en": "Water absorbs blue light"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Kênh B2 (492 nm) bị tán xạ mạnh gấp khoảng 3,3 lần kênh B4 (665 nm).",
+   "en": "B2 (492 nm) is scattered about 3.3 times more than B4 (665 nm)."
+  }
+ },
+ {
+  "q": {
+   "vi": "Theo ASTM G173, khoảng bao nhiêu phần trăm ánh sáng ở 1375 nm (kênh B10) đi xuyên được khí quyển?",
+   "en": "Per ASTM G173, roughly what share of 1375 nm light (band B10) gets through the atmosphere?"
+  },
+  "options": [
+   {
+    "vi": "Gần 0 % (0,02 %)",
+    "en": "Almost 0 % (0.02 %)"
+   },
+   {
+    "vi": "Khoảng 50 %",
+    "en": "About 50 %"
+   },
+   {
+    "vi": "Khoảng 80 %",
+    "en": "About 80 %"
+   },
+   {
+    "vi": "Gần 100 %",
+    "en": "Almost 100 %"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Hơi nước hấp thụ gần hết, nên B10 chỉ thấy mây ti ở trên cao, phía trên phần lớn hơi nước.",
+   "en": "Water vapour absorbs nearly all of it, so B10 sees only high cirrus above most of the vapour."
+  }
+ },
+ {
+  "q": {
+   "vi": "Kênh B9 (945 nm) của Sentinel-2 được đặt vào vùng hấp thụ hơi nước để làm gì?",
+   "en": "Why is Sentinel-2's B9 (945 nm) placed in a water-vapour band?"
+  },
+  "options": [
+   {
+    "vi": "Để ước lượng lượng hơi nước trong khí quyển",
+    "en": "To estimate atmospheric water vapour"
+   },
+   {
+    "vi": "Để thấy đáy sông",
+    "en": "To see river beds"
+   },
+   {
+    "vi": "Để đo nhiệt độ",
+    "en": "To measure temperature"
+   },
+   {
+    "vi": "Do lỗi thiết kế",
+    "en": "It is a design error"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Truyền qua trung bình trong kênh B9 chỉ 37,1 %; mức hấp thụ cho biết có bao nhiêu hơi nước, phục vụ hiệu chỉnh khí quyển.",
+   "en": "Band-averaged transmittance in B9 is only 37.1 %; the absorption depth reveals the water vapour, used in atmospheric correction."
+  }
+ },
+ {
+  "q": {
+   "vi": "Ở bước sóng nào cảm biến đo chủ yếu bức xạ do bề mặt phát ra thay vì ánh sáng Mặt Trời phản xạ?",
+   "en": "At which wavelengths do sensors record mainly emitted rather than reflected radiation?"
+  },
+  "options": [
+   {
+    "vi": "Trên khoảng 5 µm",
+    "en": "Above about 5 µm"
+   },
+   {
+    "vi": "Dưới 0,4 µm",
+    "en": "Below 0.4 µm"
+   },
+   {
+    "vi": "Từ 0,4 đến 0,7 µm",
+    "en": "From 0.4 to 0.7 µm"
+   },
+   {
+    "vi": "Từ 0,7 đến 1,3 µm",
+    "en": "From 0.7 to 1.3 µm"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Dưới khoảng 4 µm, ánh sáng Mặt Trời phản xạ chiếm ưu thế; trên khoảng 5 µm, bức xạ nhiệt của bề mặt chiếm ưu thế.",
+   "en": "Below ~4 µm reflected sunlight dominates; above ~5 µm the surface's own thermal emission dominates."
+  }
+ },
+ {
+  "q": {
+   "vi": "Sáng 22/12/2023, Landsat 9 đo Hồ Tây 15,8 °C và mái nhà 21,0 °C. Đó là nhiệt độ gì?",
+   "en": "On 22 Dec 2023 Landsat 9 measured West Lake at 15.8 °C and roofs at 21.0 °C. What temperature is that?"
+  },
+  "options": [
+   {
+    "vi": "Nhiệt độ bề mặt (lớp ngoài cùng)",
+    "en": "Surface (skin) temperature"
+   },
+   {
+    "vi": "Nhiệt độ không khí ở 2 m",
+    "en": "Air temperature at 2 m"
+   },
+   {
+    "vi": "Nhiệt độ đất ở độ sâu 1 m",
+    "en": "Soil temperature at 1 m depth"
+   },
+   {
+    "vi": "Nhiệt độ sáng chưa hiệu chỉnh",
+    "en": "Uncorrected brightness temperature"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Sản phẩm ST_B10 Collection 2 Level-2 đã hiệu chỉnh độ phát xạ và khí quyển, cho nhiệt độ bề mặt.",
+   "en": "The Collection 2 Level-2 ST_B10 product is emissivity- and atmosphere-corrected surface temperature."
+  }
+ },
+ {
+  "q": {
+   "vi": "Vì sao tính nhiệt độ bề mặt từ kênh nhiệt cần biết độ phát xạ ε?",
+   "en": "Why does retrieving surface temperature need the emissivity ε?"
+  },
+  "options": [
+   {
+    "vi": "Vật thật phát xạ ít hơn vật đen cùng nhiệt độ",
+    "en": "Real objects emit less than a black body at the same temperature"
+   },
+   {
+    "vi": "Để đổi độ C sang độ K",
+    "en": "To convert °C to K"
+   },
+   {
+    "vi": "Vì cảm biến nhiệt đo ánh sáng phản xạ",
+    "en": "Because thermal sensors measure reflected light"
+   },
+   {
+    "vi": "Không cần ε",
+    "en": "ε is not needed"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Bỏ qua ε sẽ ra nhiệt độ sáng, thấp hơn nhiệt độ thật.",
+   "en": "Ignoring ε gives the brightness temperature, lower than the true temperature."
+  }
+ }
+]

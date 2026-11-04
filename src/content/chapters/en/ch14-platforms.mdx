@@ -1,0 +1,174 @@
+---
+title: Open data platforms & Google Earth Engine
+n: 14
+summary: Where to get satellite images, and how to process hundreds of them without downloading anything. This chapter compares the open data archives, then explains how Google Earth Engine works through filter, map and reduce on every 2024 Sentinel-2 image of the West Lake area.
+objectives:
+  - Choose a suitable archive (Copernicus, USGS, NASA, Earth Engine, Planetary Computer, VNSC) for a task.
+  - Tell client-side from server-side objects; explain Earth Engine's lazy evaluation.
+  - Filter an ImageCollection by space, time and properties; know the limits of the tile-level cloud property.
+  - Use map() and reducers (median, mean, max, count) to build composites; read the number of valid observations.
+  - Write the same workflow in JavaScript (Code Editor) and Python.
+updated: "2026-11-04"
+---
+import Term from '../../../components/Term.astro';
+import Depth from '../../../components/Depth.astro';
+import Figure from '../../../components/Figure.astro';
+import LabLinks from '../../../components/LabLinks.astro';
+import CollectionFilter from '../../../islands/CollectionFilter.tsx';
+import LazyGraph from '../../../islands/LazyGraph.tsx';
+import ReducerLab from '../../../islands/ReducerLab.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/ch14.json';
+
+## 14.1 Where to get data
+
+Most images in this handbook are **open data**: anyone can download them free of charge after registering. There are two kinds of platform:
+
+- **Download archives:** search, download files, then process them in QGIS, SNAP or Python.
+- **Cloud computing platforms:** data and computers sit together; you send code and receive only the result.
+
+<div class="table-wrap">
+
+| Platform | Main data | Type | Notes |
+|---|---|---|---|
+| Copernicus Data Space Ecosystem | Sentinel-1, 2, 3, 5P | Download + API + processing | Official archive of the Copernicus programme (EU/ESA) |
+| USGS EarthExplorer | Landsat since 1972, ASTER, SRTM | Download | The original Landsat archive; USGS account |
+| NASA Earthdata Search | MODIS, VIIRS, GPM, SMAP… | Download + API | Earthdata Login account |
+| Google Earth Engine | Thousands of datasets (Landsat, Sentinel, MODIS, climate, DEMs…) | Cloud computing | Free for research, education and non-profit use; needs a Google Cloud project |
+| Microsoft Planetary Computer | Landsat, Sentinel and many more | STAC catalogue + data on Azure | Read directly from Python (pystac-client) |
+| Vietnam National Space Center (VNSC) | VNREDSat-1 | Order | High-resolution images of Viet Nam, acquired on request |
+
+</div>
+
+The handbook uses **Earth Engine** for its labs for one simple reason: the median of 74 Sentinel-2 images (section 14.4) takes seconds in Earth Engine, while downloading 74 images means tens of GB.
+
+<Depth level="ref" title="Reference: common formats and standards">
+
+<div class="table-wrap">
+
+| Name | What it is | Where you meet it |
+|---|---|---|
+| GeoTIFF / COG | Georeferenced raster; a COG (Cloud-Optimized GeoTIFF) can be read in parts over the network | Landsat Collection 2, Planetary Computer |
+| SAFE | Folder packaging one Sentinel scene (JP2 images + XML metadata) | Copernicus Data Space |
+| NetCDF / HDF | Many layers and dates in one file | MODIS, climate data, Sentinel-5P |
+| STAC | Standard JSON description of image catalogues, searchable through an API | Planetary Computer, Copernicus, AWS |
+
+</div>
+
+</Depth>
+
+## 14.2 How Earth Engine works: lazy evaluation
+
+In Earth Engine, an `ee.Image` or `ee.ImageCollection` holds no pixels. It is only a **description** of the work to do. Each `filter`, `map` or `median` adds a node to an expression graph. Only when you ask for a concrete result (`print`, `Map.addLayer`, `getInfo()`, `Export`) is the description sent to the servers, and they compute only what is needed, for example just the map tiles on screen. This is <Term id="lazy-evaluation">lazy evaluation</Term>.
+
+<Figure
+  title="Figure 14.1 — The expression graph is built step by step and computed only when needed"
+  try="Press 'Next step' four times: how many pixels have been computed? At step 5 (Map.addLayer), which pixels do the servers compute? Switch to Python to compare the syntax."
+  source="Schematic. Syntax follows the Earth Engine documentation (JavaScript Code Editor and Python API)."
+>
+  <LazyGraph client:visible lang="en" />
+</Figure>
+
+In practice:
+
+- Do not loop over images with JavaScript/Python `for` loops; use `map()` so the servers work in parallel.
+- `getInfo()` pulls a result to your machine; use it only for small results (a few numbers, a few hundred points). Use `Export` for large outputs.
+- The computation scale is set by the **request** (the map zoom level, or the `scale` argument of `reduceRegion`), not by the source image. Forgetting `scale` is a classic mistake.
+
+## 14.3 Filtering an ImageCollection
+
+An <Term id="image-collection">ImageCollection</Term> is a stack of images. `COPERNICUS/S2_SR_HARMONIZED` holds every Sentinel-2 Level-2A scene on Earth. The three basic filters are `filterBounds` (space), `filterDate` (time) and `filter` (properties, such as cloud percentage).
+
+<Figure
+  title="Figure 14.2 — Every Sentinel-2 acquisition over the West Lake frame in 2024"
+  try="Set 'Tile cloud ≤ 20 %': how many dates remain? Of those, how many have a truly clear West Lake frame? Put 'Tile cloud' back to 100 % and set 'Frame clear ≥ 90 %': do you get more or fewer dates? Watch the code update."
+  source="COPERNICUS/S2_SR_HARMONIZED, filterBounds(5.12 × 5.12 km West Lake frame), 2024: 74 images on 73 dates (same-day tiles merged). Tile cloud = CLOUDY_PIXEL_PERCENTAGE (a property of the whole 100 × 100 km tile, minimum over same-day tiles). Frame clear = share of frame pixels with Cloud Score+ cs_cdf ≥ 0.6. Contains modified Copernicus Sentinel data 2024."
+>
+  <CollectionFilter client:visible lang="en" />
+</Figure>
+
+2024 has **74 images** on 73 dates (Sentinel-2A 36, Sentinel-2B 37), one roughly every 5 days.
+
+- Filtering on the tile cloud property **≤ 20 %** keeps only **8 dates**, 7 of which have a truly clear frame.
+- Filtering on the clear share **of the frame itself** (≥ 90 %) keeps **16 dates**, twice as many.
+
+The reason: `CLOUDY_PIXEL_PERCENTAGE` describes **the whole 100 × 100 km tile**. On 26 July 2024 the tile was 79.9 % cloudy, yet the West Lake frame was completely clear. Conversely, on **44 dates** the frame was almost fully covered (clear < 5 %). From January to June only February and April had a date with ≥ 90 % frame clear (Chapter 4 found the same over three years).
+
+<Depth level="advanced" title="Filter on your area, not on the tile">
+
+To filter on the clear share of your study area, compute it for each image with `map()` + `reduceRegion()`, then filter on the new property:
+
+```js
+var cs = ee.ImageCollection('GOOGLE/CLOUD_SCORE_PLUS/V1/S2_HARMONIZED');
+var col = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED').filterBounds(frame)
+  .filterDate('2024-01-01', '2025-01-01').linkCollection(cs, ['cs_cdf'])
+  .map(function (img) {
+    var clear = img.select('cs_cdf').gte(0.6)
+      .reduceRegion({reducer: ee.Reducer.mean(), geometry: frame, scale: 20}).get('cs_cdf');
+    return img.set('clear', clear);
+  })
+  .filter(ee.Filter.gte('clear', 0.9));
+```
+
+This costs more computation (one reduction per image) but gives exactly what you need.
+
+</Depth>
+
+## 14.4 Map and reduce: from 74 images to one
+
+`map(f)` applies a function `f` to every image (for example, NDVI plus cloud masking). A <Term id="reducer">reducer</Term> collapses the stack into **one image**, pixel by pixel: median, mean, maximum, minimum, or the count of valid observations.
+
+<Figure
+  title="Figure 14.3 — Reducing the 2024 NDVI stack on the West Lake map"
+  try="Choose median, then max: how does the Red River floodplain change colour? Choose count: where are valid observations fewest? Hover over a cropland pixel to see its NDVI series and where the reduced value falls (yellow line)."
+  source="COPERNICUS/S2_SR_HARMONIZED 2024, map(): NDVI = (B8 − B4)/(B8 + B4), pixels with Cloud Score+ cs_cdf < 0.6 masked, clear pixels averaged to a 40 m grid; 73 dates, same-day tiles merged with mosaic(). Reducers run in the browser on the exported stack (same definitions as ee.Reducer). Fixed BrBG scale −1…+1. Contains modified Copernicus Sentinel data 2024. Basemap © Esri, Maxar, Earthstar Geographics."
+>
+  <ReducerLab client:visible lang="en" />
+</Figure>
+
+After cloud masking, each 40 m pixel has on average **21.3 valid observations** in 2024 (16 to 27), out of 73 acquisition dates.
+
+- **median** gives a "typical" image, robust to leftover clouds and flood days. The median of the per-pixel medians in the frame is 0.185.
+- **max** gives the "greenest" image of the year; the median of the per-pixel maxima is higher, 0.272. It is a common composite for vegetation mapping.
+- **min** is easily pulled down by one flood or one missed cloud. The floodplain-cropland pixel reaches its maximum of 0.881 on 4 September 2024, then NDVI is negative from 14 September to mid-October, lowest −0.521 on 24 September. Most likely the floodplain flooded after Typhoon Yagi and slowly drained (Chapter 11). This is an interpretation not checked in the field.
+
+<Depth level="advanced" title="The same workflow in JavaScript and Python">
+
+<div class="table-wrap">
+
+| Step | JavaScript (Code Editor) | Python (earthengine-api) |
+|---|---|---|
+| Initialise | (automatic) | `ee.Authenticate(); ee.Initialize(project='…')` |
+| Function for map | `function (img) { return img.normalizedDifference(['B8','B4']); }` | `lambda img: img.normalizedDifference(['B8', 'B4'])` |
+| Reduce | `col.median()` | `col.median()` |
+| Print a number | `print(col.size())` | `print(col.size().getInfo())` |
+| Map | `Map.addLayer(img, vis)` | `geemap.Map().addLayer(img, vis)` or `getMapId()` |
+| Export | `Export.image.toDrive({...})` | `ee.batch.Export.image.toDrive(...).start()` |
+
+</div>
+
+The main difference: in Python every result needs `getInfo()` to reach your machine; in the Code Editor, `print` does it for you.
+
+</Depth>
+
+## 14.5 Lab
+
+The notebook redoes the whole chapter: filtering the collection, comparing the two cloud filters, mapping NDVI, comparing reducers and exporting the median composite to Google Drive. The GEE script does the same in the Code Editor.
+
+<LabLinks notebook="labs/ch14_gee.ipynb" gee="labs/ch14_gee.js" />
+
+**Suggested exercises**
+
+1. Move the frame to your home town. How many 2024 dates have ≥ 90 % frame clear?
+2. Build a maximum-NDVI composite per quarter. Which quarter is greenest?
+3. Write a `map()` function that also computes MNDWI, then use `qualityMosaic('ndvi')` instead of `max()`. How do the two differ?
+
+## 14.6 Review
+
+<Quiz client:visible lang="en" items={quiz} />
+
+## References
+
+- Gorelick, N., et al. (2017). Google Earth Engine: Planetary-scale geospatial analysis for everyone. *Remote Sensing of Environment*, 202, 18–27.
+- Pasquarella, V. J., Brown, C. F., Czerwinski, W., & Rucklidge, W. J. (2023). Comprehensive quality assessment of optical satellite imagery using weakly supervised video learning. *CVPR Workshops*, 2125–2135.
+- Wulder, M. A., et al. (2012). Opening the archive: How free data has enabled the science and monitoring promise of Landsat. *Remote Sensing of Environment*, 122, 2–10.

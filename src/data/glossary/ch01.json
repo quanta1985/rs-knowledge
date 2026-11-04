@@ -1,0 +1,47 @@
+[
+ {
+  "id": "remote-sensing",
+  "vi": "Viễn thám",
+  "en": "Remote sensing",
+  "def": {
+   "vi": "Thu thập thông tin về một đối tượng mà không chạm vào nó, thường bằng cảm biến đo bức xạ điện từ đặt trên vệ tinh, máy bay hoặc UAV.",
+   "en": "Acquiring information about an object without touching it, usually with sensors measuring electromagnetic radiation from satellites, aircraft or drones."
+  }
+ },
+ {
+  "id": "passive-sensor",
+  "vi": "Cảm biến thụ động",
+  "en": "Passive sensor",
+  "def": {
+   "vi": "Cảm biến chỉ đo năng lượng có sẵn: ánh sáng Mặt Trời phản xạ hoặc bức xạ nhiệt do vật phát ra. Ví dụ Sentinel-2, Landsat, MODIS.",
+   "en": "A sensor that measures naturally available energy: reflected sunlight or emitted thermal radiation. E.g. Sentinel-2, Landsat, MODIS."
+  }
+ },
+ {
+  "id": "active-sensor",
+  "vi": "Cảm biến chủ động",
+  "en": "Active sensor",
+  "def": {
+   "vi": "Cảm biến tự phát năng lượng rồi đo phần dội về, hoạt động cả ngày lẫn đêm. Ví dụ radar SAR (Sentinel-1), LiDAR.",
+   "en": "A sensor that emits its own energy and records the echo, working day and night. E.g. SAR radar (Sentinel-1), LiDAR."
+  }
+ },
+ {
+  "id": "ground-segment",
+  "vi": "Phân đoạn mặt đất",
+  "en": "Ground segment",
+  "def": {
+   "vi": "Trạm điều khiển, anten thu dữ liệu và hệ thống xử lý, lưu trữ, phân phối dữ liệu vệ tinh.",
+   "en": "Control centres, receiving antennas and the systems that process, archive and distribute satellite data."
+  }
+ },
+ {
+  "id": "data-level",
+  "vi": "Cấp xử lý dữ liệu",
+  "en": "Processing level",
+  "def": {
+   "vi": "Mức xử lý của sản phẩm ảnh: L0 thô, L1 đã hiệu chuẩn và nắn hình học (ví dụ L1C: phản xạ đỉnh khí quyển), L2 đã hiệu chỉnh khí quyển (ví dụ L2A: phản xạ bề mặt).",
+   "en": "How far a product has been processed: L0 raw, L1 calibrated and geometrically corrected (e.g. L1C top-of-atmosphere reflectance), L2 atmospherically corrected (e.g. L2A surface reflectance)."
+  }
+ }
+]

@@ -1,0 +1,203 @@
+---
+title: Tổng quan viễn thám & hệ thống vệ tinh
+n: 1
+summary: Viễn thám là đo đạc từ xa. Chương này đi theo đường đi của năng lượng từ nguồn đến người dùng, giới thiệu bốn phân đoạn của một hệ thống vệ tinh và những vệ tinh quan sát Trái Đất đang bay trên đầu chúng ta, kèm vị trí tính từ phần tử quỹ đạo thật và khung ảnh thật quanh Hà Nội.
+objectives:
+  - Định nghĩa viễn thám; phân biệt cảm biến thụ động và chủ động.
+  - Mô tả 7 khâu của chuỗi viễn thám và 4 phân đoạn của một hệ thống vệ tinh.
+  - Kể tên các vệ tinh quan sát Trái Đất dữ liệu mở chính và đọc được độ cao, độ nghiêng, chu kỳ của chúng.
+  - So sánh diện tích một cảnh ảnh của các cảm biến với kích thước đối tượng cần nghiên cứu.
+  - Biết các mốc chính của viễn thám thế giới và Việt Nam.
+updated: "2026-11-04"
+---
+import Term from '../../../components/Term.astro';
+import Depth from '../../../components/Depth.astro';
+import Figure from '../../../components/Figure.astro';
+import LabLinks from '../../../components/LabLinks.astro';
+import RsChain from '../../../islands/RsChain.tsx';
+import EoMissions from '../../../islands/EoMissions.tsx';
+import FootprintMap from '../../../islands/FootprintMap.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/ch01.json';
+
+<p class="muted" style="font-size:0.9rem">Chương này phỏng theo chương 1 và chương 8 của <a href="https://satellite-rs-handbook.netlify.app/" rel="noopener"><em>Sổ tay Vệ tinh & Viễn thám</em></a> (Nguyễn Văn Tín, giấy phép CC BY 4.0). Phần bốn phân đoạn, các mốc lịch sử và sơ đồ chuỗi viễn thám dựa trên bản gốc. Các hình tương tác, số liệu quỹ đạo và khung ảnh thật là phần bổ sung của sổ tay này.</p>
+
+## 1.1 Viễn thám là gì
+
+<Term id="remote-sensing">Viễn thám</Term> là thu thập thông tin về một đối tượng mà **không chạm vào nó**. Trong sổ tay này, "đối tượng" là mặt đất, mặt nước, cây cối và thành phố. "Không chạm" nghĩa là đo năng lượng điện từ từ vệ tinh cách đó vài trăm km.
+
+Theo cách trình bày kinh điển của Trung tâm Viễn thám Canada (CCRS), mọi hệ viễn thám gồm 7 khâu, từ nguồn năng lượng đến ứng dụng. Có hai cách lấy năng lượng:
+
+- <Term id="passive-sensor">Cảm biến thụ động</Term> đo năng lượng có sẵn: ánh sáng Mặt Trời phản xạ (Sentinel-2, Landsat) hoặc bức xạ nhiệt do chính bề mặt phát ra (kênh nhiệt Landsat).
+- <Term id="active-sensor">Cảm biến chủ động</Term> tự phát năng lượng rồi đo phần dội về. Radar Sentinel-1 (Chương 11) là ví dụ: chụp được ban đêm và xuyên mây.
+
+<Figure
+  title="Hình 1.1 — Chuỗi viễn thám 7 khâu, với ví dụ thật trong sổ tay"
+  try="Bấm lần lượt Quang học → Nhiệt → Radar. Ở chế độ Nhiệt, vì sao khâu 1 và 2 bị làm mờ? Bấm khâu 3 để xem ví dụ số liệu Hà Nội của từng loại."
+  source="Sơ đồ theo 7 khâu của CCRS (Natural Resources Canada, Fundamentals of Remote Sensing), phỏng theo Sổ tay Vệ tinh & Viễn thám (CC BY 4.0). Số liệu ví dụ lấy từ Chương 3, 6 và 11 của sổ tay này."
+>
+  <RsChain client:visible lang="vi" />
+</Figure>
+
+Ánh sáng đi qua khí quyển **hai lần** (xuống và lên), nên ảnh quang học luôn lẫn ảnh hưởng của khí quyển (Chương 3, 7). Năng lượng nhiệt chỉ đi một lần, từ bề mặt lên. Radar cũng đi hai lần, nhưng khí quyển gần như trong suốt với sóng vi ba.
+
+## 1.2 Bốn phân đoạn của một hệ thống vệ tinh
+
+Một vệ tinh không tự làm ra bản đồ. Nó là một mắt xích trong hệ thống bốn phân đoạn:
+
+<div class="table-wrap">
+
+| Phân đoạn | Gồm những gì | Ví dụ với Sentinel-2 |
+|---|---|---|
+| Phóng | Tên lửa, bãi phóng | Sentinel-2A phóng bằng tên lửa Vega từ Kourou (Guyane thuộc Pháp) năm 2015 |
+| Không gian | **Bus** (khung, nguồn điện, điều khiển tư thế, nhiệt, liên lạc) và **payload** (thiết bị làm nhiệm vụ) | Payload là máy chụp đa phổ MSI, 13 kênh |
+| Mặt đất | Trung tâm điều khiển, trạm anten thu dữ liệu, hệ thống xử lý và lưu trữ | <Term id="ground-segment">Phân đoạn mặt đất</Term> của ESA tạo sản phẩm L1C và L2A |
+| Người dùng | Người và phần mềm dùng dữ liệu | Bạn, khi mở ảnh trong Earth Engine hoặc QGIS |
+
+</div>
+
+Người dùng thường chỉ thấy phân đoạn cuối. Nhưng chất lượng dữ liệu phụ thuộc cả bốn: quỹ đạo do tên lửa và động cơ duy trì, cảm biến được hiệu chuẩn trên quỹ đạo, và mặt đất quyết định <Term id="data-level">cấp xử lý</Term> mà bạn tải về.
+
+<Depth level="ref" title="Bảng tra: các cấp xử lý dữ liệu">
+
+<div class="table-wrap">
+
+| Cấp | Nội dung | Ví dụ |
+|---|---|---|
+| L0 | Dữ liệu thô từ vệ tinh, chưa hiệu chuẩn | Ít khi phát hành |
+| L1 | Đã hiệu chuẩn bức xạ và nắn hình học; giá trị là bức xạ hoặc phản xạ **đỉnh khí quyển** (TOA) | Sentinel-2 L1C, Landsat Collection 2 Level-1, Sentinel-1 GRD |
+| L2 | Đã hiệu chỉnh khí quyển; giá trị là phản xạ **bề mặt** hoặc nhiệt độ bề mặt | Sentinel-2 L2A, Landsat Collection 2 Level-2 |
+| L3, L4 | Sản phẩm tổng hợp theo thời gian hoặc đại lượng mô hình hóa | Ảnh ghép không mây, bản đồ lớp phủ |
+
+</div>
+
+Các chương 4, 6 và 11 dùng L2A, Collection 2 Level-2 và GRD. Chương 7 so sánh L1C với L2A.
+
+</Depth>
+
+## 1.3 Những vệ tinh đang bay trên đầu chúng ta
+
+Hình 1.2 đặt 11 vệ tinh quan sát Trái Đất lên quả địa cầu. Vị trí tính từ **phần tử quỹ đạo thật** do CelesTrak công bố ngày 3–4/11/2026, nên bạn thấy chúng đúng chỗ tại thời điểm đó.
+
+<Figure
+  title="Hình 1.2 — Các vệ tinh quan sát Trái Đất dữ liệu mở và VNREDSat-1"
+  try="Chọn nhóm 'Radar' rồi 'Quang học'. Các vệ tinh có độ nghiêng gần nhau hay khác xa nhau? Chọn VNREDSat-1 và so 'Độ nghiêng' với 'Độ nghiêng SSO (J2)'."
+  source="Phần tử quỹ đạo trung bình (GP/OMM) từ CelesTrak, lấy ngày 04/11/2026. Sổ tay truyền quỹ đạo như quỹ đạo tròn có trôi nút do J2, sai số cỡ chục km sau một ngày; chỉ để minh họa, không dùng dự báo lượt bay. Ảnh nền © Esri, Maxar, Earthstar Geographics."
+>
+  <EoMissions client:visible lang="vi" />
+</Figure>
+
+Tất cả các vệ tinh trong hình đều bay ở độ cao 680–790 km với độ nghiêng khoảng 98°. Đây là <Term id="sun-synchronous-orbit">quỹ đạo đồng bộ Mặt Trời</Term>: vệ tinh luôn qua một nơi vào cùng giờ địa phương, nên ánh sáng giữa các ảnh tương tự nhau. Chương 2 giải thích vì sao 98° lại "đặc biệt".
+
+<div class="worked">
+
+#### Ví dụ: từ phần tử quỹ đạo ra độ cao của Sentinel-2A
+
+CelesTrak cho chuyển động trung bình của Sentinel-2A: n = 14,3081738 vòng/ngày.
+
+1. Chu kỳ: T = 1440 phút / 14,3081738 = **100,64 phút**.
+2. Định luật Kepler III: a = ∛(μ T² / 4π²), với μ = 398 600,4 km³/s² và T = 6038,5 s, ra a = **7167,1 km**.
+3. Độ cao trên bán kính xích đạo 6378,1 km: h = 7167,1 − 6378,1 = **789,0 km**.
+4. Vận tốc: v = √(μ / a) = **7,46 km/s**, tức khoảng 26 900 km/h.
+
+ESA công bố độ cao trung bình của Sentinel-2 là 786 km. Chênh lệch 3 km là do cách định nghĩa: dùng bán kính xích đạo hay bán kính tại từng vĩ độ.
+
+</div>
+
+<details>
+<summary>Bảng số liệu: 11 vệ tinh trong Hình 1.2</summary>
+
+<div class="table-wrap">
+
+| Vệ tinh | Loại | Độ cao (km) | Độ nghiêng (°) | Chu kỳ (phút) |
+|---|---|---|---|---|
+| Sentinel-2A, 2B, 2C | Quang học | 789,0 | 98,56–98,57 | 100,64 |
+| Sentinel-1A | Radar | 693,7 | 98,16 | 98,64 |
+| Sentinel-1C, 1D | Radar | 695,8 | 98,18 | 98,68 |
+| Landsat 8, 9 | Quang học + nhiệt | 702,5 | 98,21–98,22 | 98,83 |
+| Terra (MODIS) | Quang học | 689,3 | 97,93 | 98,55 |
+| Aqua (MODIS) | Quang học | 685,9 | 98,45 | 98,48 |
+| VNREDSat-1 | Quang học | 677,8 | 97,89 | 98,31 |
+
+</div>
+
+Độ cao tính từ chuyển động trung bình như ví dụ trên. Nguồn: CelesTrak, phần tử ngày 03–04/11/2026.
+
+</details>
+
+## 1.4 Một cảnh ảnh rộng bao nhiêu?
+
+Mỗi lần chụp, cảm biến ghi một dải đất rộng bằng <Term id="swath">dải chụp</Term> của nó. Nhà cung cấp cắt dải này thành các **cảnh** hoặc **ô** (tile) để phân phối. Kích thước cảnh quyết định bạn cần bao nhiêu ảnh để phủ vùng nghiên cứu.
+
+<Figure
+  title="Hình 1.3 — Khung ảnh thật của ba cảm biến quanh Hà Nội"
+  try="Bấm 'Phóng tới' từng khung. Khung Hồ Tây mà Chương 4, 6, 11 dùng nằm ở đâu trong ô Sentinel-2? Một cảnh Landsat lớn gấp bao nhiêu lần khung đó?"
+  source="Đường bao (system:footprint) của các cảnh thật trong Earth Engine: Sentinel-2 L2A ô T48QWJ 12/02/2024; Landsat 9 hàng 127/45 22/12/2023; Sentinel-1A IW GRD quỹ đạo 128 12/02/2024. VNREDSat-1: hình vuông 17,5 km theo dải chụp danh nghĩa, không phải cảnh thật. Diện tích tính trên ellipsoid. Ảnh nền © Esri, Maxar, Earthstar Geographics."
+>
+  <FootprintMap client:visible lang="vi" />
+</Figure>
+
+<div class="table-wrap">
+
+| Khung | Diện tích | Gấp khung Hồ Tây |
+|---|---|---|
+| Sentinel-1 IW (một khung) | 42 901 km² | 1637 lần |
+| Landsat 9 (một cảnh) | 36 725 km² | 1401 lần |
+| Sentinel-2 (một ô 110 × 110 km) | 12 098 km² | 461 lần |
+| VNREDSat-1 (dải danh nghĩa 17,5 km) | 306 km² | 12 lần |
+| Khung Hồ Tây của sổ tay (5,12 × 5,12 km) | 26,2 km² | 1 |
+
+</div>
+
+Một cảnh Landsat kéo dài khoảng 190 km, từ vùng núi phía bắc xuống quá Hà Nội. Một ảnh VNREDSat-1 chỉ phủ một phần nội thành, nhưng chi tiết hơn 4 lần (2,5 m so với 10 m). Đánh đổi giữa dải chụp và độ phân giải được bàn kỹ ở Chương 4.
+
+## 1.5 Các mốc lịch sử và viễn thám ở Việt Nam
+
+<div class="table-wrap">
+
+| Năm | Mốc |
+|---|---|
+| 1957 | Sputnik 1 (Liên Xô), vệ tinh nhân tạo đầu tiên |
+| 1972 | Landsat 1 phóng, mở đầu chuỗi ảnh quan sát mặt đất liên tục dài nhất |
+| 1978 | Seasat, vệ tinh dân sự đầu tiên mang radar SAR |
+| 2008 | USGS mở miễn phí toàn bộ kho ảnh Landsat |
+| 2013 | **VNREDSat-1** phóng ngày 7/5, vệ tinh quan sát Trái Đất đầu tiên của Việt Nam |
+| 2014–2015 | Sentinel-1A (radar) và Sentinel-2A (đa phổ), dữ liệu miễn phí và mở |
+
+</div>
+
+Nguồn: Sổ tay Vệ tinh & Viễn thám (CC BY 4.0).
+
+VNREDSat-1 do Trung tâm Vũ trụ Việt Nam (VNSC) quản lý, chụp ảnh toàn sắc 2,5 m và đa phổ 10 m. Phần tử quỹ đạo tháng 11/2026 cho thấy một điều thú vị: độ nghiêng thật 97,89° **thấp hơn** độ nghiêng đồng bộ Mặt Trời ở độ cao đó (98,10°). Theo công thức J2 (Chương 2), mặt phẳng quỹ đạo quay 0,961°/ngày thay vì 0,986°/ngày. Mặt phẳng quỹ đạo chậm hơn Mặt Trời, nên giờ bay qua **sớm dần**, khoảng 36 phút mỗi năm nếu không hiệu chỉnh. Đây là ước tính từ một bộ phần tử, sổ tay không có số liệu vận hành của VNSC để kiểm chứng.
+
+<Depth level="advanced" title="Terra cũng đang trôi">
+
+Terra (mang MODIS) có độ nghiêng 97,93°, cũng thấp hơn độ nghiêng đồng bộ Mặt Trời (98,14°). NASA đã ngừng duy trì quỹ đạo của Terra khi vệ tinh bước vào giai đoạn cuối sứ mệnh, nên giờ bay qua của nó sớm dần. Khi so sánh chuỗi dài nhiều năm của MODIS Terra, cần nhớ góc chiếu sáng không còn cố định như thời đầu.
+
+</Depth>
+
+## 1.6 Thực hành
+
+Notebook đọc phần tử quỹ đạo từ CelesTrak, tính độ cao và chu kỳ, rồi đếm số ảnh Sentinel-2, Landsat 9 và Sentinel-1 chụp Hà Nội năm 2024 trong Earth Engine. Script GEE vẽ khung các cảnh ảnh phủ một điểm bạn chọn.
+
+<LabLinks notebook="labs/ch01_overview.ipynb" gee="labs/ch01_overview.js" />
+
+**Bài tập gợi ý**
+
+1. Đổi điểm sang tỉnh của bạn. Cần bao nhiêu ô Sentinel-2 để phủ toàn tỉnh?
+2. Tìm trên CelesTrak một vệ tinh quan sát Trái Đất khác (ví dụ PlanetScope hoặc ICEYE). Tính độ cao từ chuyển động trung bình.
+3. Vì sao ảnh nhiệt chỉ đi qua khí quyển một lần, còn ảnh quang học đi qua hai lần?
+
+## 1.7 Ôn tập
+
+<Quiz client:visible lang="vi" items={quiz} />
+
+## Tài liệu tham khảo
+
+- CCRS (Canada Centre for Remote Sensing). *Fundamentals of Remote Sensing* (tài liệu hướng dẫn trực tuyến). Natural Resources Canada.
+- Drusch, M. và cs. (2012). Sentinel-2: ESA's optical high-resolution mission for GMES operational services. *Remote Sensing of Environment*, 120, 25–36.
+- Kelso, T. S. *CelesTrak*: dữ liệu phần tử quỹ đạo GP. https://celestrak.org
+- Lillesand, T. M., Kiefer, R. W., & Chipman, J. W. (2015). *Remote Sensing and Image Interpretation* (7th ed.). Wiley.
+- Nguyễn Văn Tín. *Sổ tay Vệ tinh & Viễn thám*. CC BY 4.0. https://satellite-rs-handbook.netlify.app/
+- Torres, R. và cs. (2012). GMES Sentinel-1 mission. *Remote Sensing of Environment*, 120, 9–24.
+- Wulder, M. A. và cs. (2019). Current status of Landsat program, science, and applications. *Remote Sensing of Environment*, 225, 127–147.

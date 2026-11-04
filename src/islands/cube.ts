@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import type { Cube } from '../lib/raster';
+import { gridCorners, type Quad } from '../lib/geo';
 
 export type SceneMeta = {
-  width: number; height: number; bands: string[]; scale: number; date: string;
+  width: number; height: number; bands: string[]; scale: number; date: string; origin_xy?: [number, number]; crs?: string;
   bbox_lonlat: [number, number, number, number]; resolution_m: number;
   scene: Record<string, string | number>;
   provenance: Record<string, string>;
@@ -44,7 +45,7 @@ export const loadScene = (): Promise<Scene> =>
   })().catch((e) => { pending = null; throw e; }));
 
 /** Other products on the same footprint (public/data/<dir>/), with common band names. Cached per dir. */
-export type Product = { cube: Cube; meta: SceneMeta & { source_bands: Record<string, string> } };
+export type Product = { cube: Cube; meta: SceneMeta & { source_bands?: Record<string, string>; dtype?: 'uint16' | 'int16' } };
 const products = new Map<string, Promise<Product>>();
 export const loadProduct = (dir: string): Promise<Product> => {
   let p = products.get(dir);
@@ -54,7 +55,7 @@ export const loadProduct = (dir: string): Promise<Product> => {
         fetchOk(`${DATA}${dir}/meta.json`).then((r) => r.json() as Promise<Product['meta']>),
         fetchOk(`${DATA}${dir}/bands.u16z`).then((r) => r.arrayBuffer()).then(gunzip),
       ]);
-      const data = new Uint16Array(raw);
+      const data = meta.dtype === 'int16' ? new Int16Array(raw) : new Uint16Array(raw);
       if (data.length !== meta.width * meta.height * meta.bands.length) throw new Error(`Data size mismatch in ${dir}`);
       return { cube: { width: meta.width, height: meta.height, bands: meta.bands, data, scale: meta.scale }, meta };
     })();
@@ -76,4 +77,22 @@ export const useScene = (): { scene: Scene | null; error: string | null } => {
     return () => { alive = false; };
   }, []);
   return { scene, error };
+};
+
+export const useProduct = (dir: string): { product: Product | null; error: string | null } => {
+  const [product, setProduct] = useState<Product | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    let alive = true;
+    loadProduct(dir).then((p) => alive && setProduct(p), (e: unknown) => alive && setError(e instanceof Error ? e.message : String(e)));
+    return () => { alive = false; };
+  }, [dir]);
+  return { product, error };
+};
+
+/** Corner quad (lon/lat) of a product's UTM grid, for map overlays. */
+export const frameQuad = (m: { origin_xy?: [number, number]; width: number; height: number; resolution_m: number; crs?: string }): Quad => {
+  const zone = Number((m.crs ?? 'EPSG:32648').slice(-2));
+  const [x0, y1] = m.origin_xy ?? [583980, 2331020];
+  return gridCorners(x0, y1, m.width, m.height, m.resolution_m, zone);
 };

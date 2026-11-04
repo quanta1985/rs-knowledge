@@ -1,0 +1,176 @@
+---
+title: Case study Việt Nam
+n: 13
+summary: Các phương pháp ở những chương trước được áp dụng cho bài toán thật của Việt Nam. Bản đồ tổng hợp chín ví dụ, rồi đi sâu ba trường hợp có số liệu tính trực tiếp từ Earth Engine - mất tán cây ở Tây Nguyên, đảo nhiệt TP. Hồ Chí Minh và NO₂ trên cả nước.
+objectives:
+  - Liên hệ mỗi bài toán thực tế với dữ liệu, phương pháp và chương đã học.
+  - Tính và đọc đúng thống kê mất tán cây từ Hansen Global Forest Change, phân biệt "mất tán cây" với "phá rừng".
+  - So sánh nhiệt độ bề mặt giữa các lớp phủ đô thị và biết vì sao LST khác nhiệt độ không khí.
+  - Đọc bản đồ và chuỗi NO₂ của Sentinel-5P; phân biệt quan hệ trùng thời gian với quan hệ nhân quả.
+updated: "2026-11-04"
+---
+import Term from '../../../components/Term.astro';
+import Depth from '../../../components/Depth.astro';
+import Figure from '../../../components/Figure.astro';
+import LabLinks from '../../../components/LabLinks.astro';
+import CaseMap from '../../../islands/CaseMap.tsx';
+import ForestLossMap from '../../../islands/ForestLossMap.tsx';
+import UrbanHeatMap from '../../../islands/UrbanHeatMap.tsx';
+import No2Map from '../../../islands/No2Map.tsx';
+import No2Series from '../../../islands/No2Series.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/ch13.json';
+
+## 13.1 Bản đồ các ví dụ
+
+Mỗi ví dụ dưới đây trả lời bốn câu hỏi: **ở đâu, khi nào, dùng dữ liệu gì, bằng phương pháp nào**. Sáu ví dụ có số liệu tính ngay trong sổ tay (đánh dấu "tính trong sổ tay"). Ba ví dụ còn lại tóm tắt kết quả đã công bố.
+
+<Figure
+  title="Hình 13.1 — Chín ví dụ viễn thám ở Việt Nam"
+  try="Bấm lần lượt Yagi, Cà Mau và Tây Nguyên. Ví dụ nào dùng radar, ví dụ nào dùng ảnh quang học, vì sao? Mở chương được gợi ý để xem phương pháp."
+  source="Vùng tô màu là phạm vi minh họa, ranh giới gần đúng (trừ khung ảnh Hà Nội, TP.HCM và ranh giới 5 tỉnh Tây Nguyên theo FAO GAUL 2015). Số liệu: các chương được dẫn và tài liệu tham khảo cuối chương. Ảnh nền © Esri, Maxar, Earthstar Geographics."
+>
+  <CaseMap client:visible lang="vi" />
+</Figure>
+
+Hãy để ý cột "Dữ liệu" trong bảng thông số. Bài toán xảy ra trong mùa mưa và cần nhiều thời điểm (lũ, lúa) thì dùng radar. Bài toán cần nhìn lại hàng chục năm (rừng, bờ biển) thì dùng kho Landsat từ năm 1984. Bài toán về khí quyển (NO₂) cần một cảm biến chuyên dụng là TROPOMI.
+
+## 13.2 Mất tán cây ở Tây Nguyên, 2001–2025
+
+Bộ <Term id="tree-cover-loss">Global Forest Change</Term> của Hansen và cộng sự (2013) phân loại toàn bộ kho Landsat để tìm từng pixel 30 m bị mất tán cây và năm xảy ra. Bộ này được cập nhật hằng năm; ở đây dùng phiên bản 1.13 (đến năm 2025).
+
+Cách tính trong sổ tay:
+
+1. "Rừng năm 2000" = pixel có độ che phủ tán ≥ 30 % trong năm 2000.
+2. "Mất" = pixel rừng năm 2000 được đánh dấu mất trong 2001–2025.
+3. Cộng diện tích theo năm, theo tỉnh, trên ranh giới 5 tỉnh Tây Nguyên trước khi sắp xếp tỉnh năm 2025 (FAO GAUL 2015).
+
+<Figure
+  title="Hình 13.2 — Mất tán cây ở Tây Nguyên theo năm và theo tỉnh"
+  try="Kéo 'Hiện mất đến năm' từ 2001 lên 2025 để xem các vùng mất lan dần. Chọn từng tỉnh: tỉnh nào mất tỷ lệ lớn nhất so với năm 2000? Chuyển sang 'Rừng năm 2000' để so sánh."
+  source="UMD/hansen/global_forest_change_2025_v1_13 (Hansen và cs. 2013, cập nhật đến 2025). Rừng năm 2000: treecover2000 ≥ 30 %. Bản đồ: lưới 0,004° (~440 m), mỗi ô hiển thị nếu ≥ 5 % pixel 30 m trong ô bị mất; màu = năm mất trung bình. Thống kê tính ở 30 m trong Earth Engine. Ranh giới tỉnh: FAO GAUL 2015 (trước 2025). Ảnh nền © Esri, Maxar, Earthstar Geographics."
+>
+  <ForestLossMap client:visible lang="vi" />
+</Figure>
+
+Trên năm tỉnh, có **3,16 triệu ha** tán cây năm 2000. Trong 2001–2025 mất **709 nghìn ha**, tức **22,5 %**.
+
+| Tỉnh | Tán cây năm 2000 (ha) | Mất 2001–2025 (ha) | Tỷ lệ |
+|---|---|---|---|
+| Kon Tum | 748 317 | 187 328 | 25,0 % |
+| Gia Lai | 720 950 | 175 908 | 24,4 % |
+| Đắk Lắk | 545 958 | 119 858 | 22,0 % |
+| Đắk Nông | 424 699 | 126 120 | 29,7 % |
+| Lâm Đồng | 716 889 | 99 935 | 13,9 % |
+
+Năm mất nhiều nhất của cả vùng là 2010 (66 251 ha). Theo giai đoạn: 281 nghìn ha trong 2001–2010, 356 nghìn ha trong 2011–2020, 72 nghìn ha trong 2021–2025.
+
+**Đọc số liệu cho đúng:**
+
+- "Mất tán cây" **không đồng nghĩa với phá rừng**. Hansen ghi nhận mọi lần tán cây bị thay thế: chặt rừng tự nhiên, nhưng cũng cả khai thác rừng trồng theo chu kỳ, cháy, bão đổ. Rừng trồng keo bị khai thác rồi trồng lại sẽ vẫn bị tính là "mất".
+- Bộ dữ liệu không trừ phần cây mọc lại sau 2000, nên 22,5 % không phải là mức giảm ròng diện tích rừng.
+- Thuật toán được cải tiến trong các lần cập nhật. Tài liệu của bộ dữ liệu khuyên thận trọng khi so sánh các năm trước và sau khoảng 2011. Vì vậy, chênh lệch giữa hai giai đoạn trên chỉ nên đọc như xu hướng, chưa phải kết luận.
+
+<Depth level="advanced" title="Vì sao không dùng ngưỡng 10 % hay 50 % tán?">
+
+Ngưỡng tán quyết định thế nào là "rừng". Ngưỡng thấp tính thêm vườn cây, cây bụi; ngưỡng cao chỉ còn rừng kín. Định nghĩa rừng của FAO dùng ngưỡng 10 %, nhiều nghiên cứu dùng Hansen chọn 25–30 %. Đổi ngưỡng sẽ đổi cả diện tích năm 2000 lẫn diện tích mất. Bài tập 1 ở mục 13.6 yêu cầu bạn tính lại với ngưỡng khác.
+
+</Depth>
+
+## 13.3 Đảo nhiệt đô thị TP. Hồ Chí Minh
+
+Bề mặt bê tông và mái tôn hấp thụ nhiều bức xạ, lại ít bốc hơi nước, nên nóng hơn cây xanh và mặt nước. Hiện tượng này gọi là <Term id="urban-heat-island">đảo nhiệt đô thị</Term>. Kênh nhiệt của Landsat cho phép đo <Term id="lst">nhiệt độ bề mặt (LST)</Term> ở độ phân giải 100 m (lấy mẫu lại 30 m trong sản phẩm Level-2).
+
+<Figure
+  title="Hình 13.3 — Nhiệt độ bề mặt TP. Hồ Chí Minh, mùa khô 2024"
+  try="Di chuột từ quận trung tâm ra sông Sài Gòn và vùng cây xanh: nhiệt độ giảm bao nhiêu? Chuyển sang 'Điểm nóng', kéo ngưỡng lên 44 °C: các điểm nóng nằm ở đâu? So với lớp 'Lớp phủ'."
+  source="Landsat 8/9 Collection 2 Level-2, ST_B10 × 0,00341802 + 149,0 K, 42 cảnh tháng 1–4/2024 (CLOUD_COVER < 30 %), che mây bằng QA_PIXEL (bit 1–4), trung vị từng pixel, lưới 100 m UTM 48N (khung 40 × 40 km). Lớp phủ: ESA WorldCover v200 (2021). Thang màu cố định 28–46 °C. Landsat courtesy of USGS. Ảnh nền © Esri, Maxar, Earthstar Geographics."
+>
+  <UrbanHeatMap client:visible lang="vi" />
+</Figure>
+
+Trung bình theo lớp phủ trong khung 40 × 40 km:
+
+| Lớp phủ | LST trung bình | Tỷ lệ diện tích khung |
+|---|---|---|
+| Đất xây dựng | 40,9 °C | 37,4 % |
+| Đất trống | 39,7 °C | 1,4 % |
+| Cỏ | 38,9 °C | 12,5 % |
+| Cây gỗ | 36,8 °C | 21,8 % |
+| Đất trồng trọt | 36,6 °C | 13,0 % |
+| Mặt nước | 32,3 °C | 10,4 % |
+| Rừng ngập mặn | 32,3 °C | 3,5 % |
+
+Đất xây dựng nóng hơn cây gỗ **4,1 °C** và hơn mặt nước **8,6 °C**. Diện tích có LST ≥ 42 °C là **232,5 km²**, tức khoảng 15 % khung. Toàn khung có trung vị 38,4 °C; 90 % pixel nằm trong khoảng 30,7–44,2 °C.
+
+**Lưu ý:**
+
+- LST là nhiệt độ **của bề mặt** lúc vệ tinh bay qua (khoảng 10 giờ sáng), không phải nhiệt độ không khí đo ở trạm khí tượng. Mái tôn có thể nóng hơn không khí hàng chục độ.
+- Trung vị 42 cảnh của bốn tháng mùa khô cho bức tranh "điển hình", không phải một ngày nóng nhất.
+- Lớp phủ WorldCover là năm 2021, trong khi LST là năm 2024. Những nơi mới xây sau 2021 sẽ bị gán sai lớp.
+
+## 13.4 Chất lượng không khí: NO₂ từ Sentinel-5P
+
+Khí NO₂ sinh ra chủ yếu khi đốt nhiên liệu (giao thông, nhà máy nhiệt điện, công nghiệp) và đốt sinh khối. Cảm biến TROPOMI trên Sentinel-5P đo phổ ánh sáng tán xạ ngược từ khí quyển. Từ đó tính được <Term id="tropospheric-no2">cột NO₂ tầng đối lưu</Term>: tổng số phân tử NO₂ từ mặt đất lên đỉnh tầng đối lưu trên mỗi mét vuông. Ô pixel cỡ 5,5 × 3,5 km.
+
+<Figure
+  title="Hình 13.4 — NO₂ tầng đối lưu trung bình năm 2024 trên Việt Nam"
+  try="Tăng 'Ẩn dưới' lên 50 µmol/m²: vùng nào còn lại? Di chuột qua Hà Nội, TP.HCM, Hải Phòng – Quảng Ninh và Tây Bắc để so sánh."
+  source="COPERNICUS/S5P/OFFL/L3_NO2 (TROPOMI, sản phẩm L3 của Earth Engine, đã lọc qa_value > 0,75), trung bình mọi ảnh ngày năm 2024, lấy mẫu láng giềng gần nhất ở lưới 0,05°. Thang màu cố định 0–120 µmol/m². Giá trị trên biển và ngoài lãnh thổ được giữ để thấy NO₂ lan truyền. Contains modified Copernicus Sentinel data 2024. Ảnh nền © Esri, Maxar, Earthstar Geographics."
+>
+  <No2Map client:visible lang="vi" />
+</Figure>
+
+Trung bình năm 2024 trong bán kính 10 km: **Hà Nội 83,8**, **TP. Hồ Chí Minh 61,9** và **vùng núi Lai Châu 20,2 µmol/m²**. Nội thành Hà Nội cao gấp **4,1 lần** vùng nông thôn miền núi.
+
+<Figure
+  title="Hình 13.5 — NO₂ theo tháng ở ba địa điểm, 2019–2024"
+  try="So sánh tháng 7 và tháng 12 ở Hà Nội. Tìm tháng 4/2020 trên đường Hà Nội: điều gì khác thường? Lai Châu cao nhất vào tháng nào?"
+  source="Như Hình 13.4; trung bình các ảnh ngày trong từng tháng, rồi trung bình không gian trong vòng tròn bán kính 10 km quanh mỗi điểm."
+>
+  <No2Series client:visible lang="vi" />
+</Figure>
+
+Ba điều đọc được từ Hình 13.5 (trung bình theo tháng của sáu năm 2019–2024):
+
+1. **Mùa:** Hà Nội cao nhất vào tháng 12 (102,9) và thấp nhất vào tháng 7 (61,1). TP.HCM cao nhất vào tháng 1 (84,5) và thấp nhất vào tháng 8 (41,6). Mùa hè có nắng mạnh, NO₂ bị phân hủy nhanh hơn và mưa rửa trôi nhiều hơn. Mùa đông lớp khí quyển sát đất mỏng, chất ô nhiễm khó khuếch tán. Đây là cách giải thích theo tài liệu chung; sổ tay không tách riêng từng nguyên nhân.
+2. **Tháng 4/2020:** Hà Nội chỉ 58,0, so với 86,9 (4/2019) và 90,6 (4/2021). Thời điểm này **trùng** với đợt giãn cách xã hội toàn quốc tháng 4/2020. Sự trùng thời gian chưa chứng minh nhân quả, vì thời tiết từng tháng cũng làm NO₂ thay đổi.
+3. **Lai Châu** thấp quanh năm nhưng có đỉnh vào tháng 3 (33,2). Đó là cuối mùa khô, khi có nhiều đốt nương rẫy và cháy sinh khối ở vùng núi phía Bắc và các nước lân cận. Đây là diễn giải, chưa đối chiếu với dữ liệu điểm cháy.
+
+<Depth level="advanced" title="Cột NO₂ khác nồng độ tại mặt đất">
+
+µmol/m² là lượng NO₂ trong **cả cột không khí**, không phải nồng độ µg/m³ mà trạm quan trắc đo ở độ cao vài mét. Muốn quy đổi phải biết NO₂ phân bố theo độ cao, thường cần mô hình khí quyển. Vì vậy ảnh vệ tinh tốt để so sánh **không gian và xu hướng**, nhưng không thay thế được trạm khi đối chiếu với quy chuẩn chất lượng không khí.
+
+</Depth>
+
+## 13.5 Bài học chung
+
+- Bắt đầu từ **câu hỏi**, rồi mới chọn dữ liệu: cần nhìn qua mây (radar), cần lịch sử dài (Landsat) hay cần đo khí (TROPOMI).
+- Mỗi con số đi kèm **định nghĩa**: ngưỡng tán 30 %, LST trung vị mùa khô, cột NO₂ tầng đối lưu. Đổi định nghĩa là đổi con số.
+- Kết quả viễn thám cần **kiểm chứng** (thực địa, trạm, thống kê) trước khi dùng cho quyết định.
+
+## 13.6 Thực hành
+
+Notebook tính lại mất tán cây theo tỉnh với ngưỡng tán tùy chọn, LST theo lớp phủ cho một thành phố bất kỳ và chuỗi NO₂ cho một điểm bất kỳ. Script GEE vẽ ba lớp này trên bản đồ.
+
+<LabLinks notebook="labs/ch13_vietnam.ipynb" gee="labs/ch13_vietnam.js" />
+
+**Bài tập gợi ý**
+
+1. Tính lại mất tán cây Tây Nguyên với ngưỡng tán 10 % và 50 %. Tỷ lệ mất thay đổi thế nào?
+2. Làm lại bảng LST theo lớp phủ cho Hà Nội hoặc Đà Nẵng. Chênh lệch giữa đất xây dựng và cây gỗ có giống TP.HCM không?
+3. Vẽ chuỗi NO₂ cho một khu công nghiệp hoặc nhà máy nhiệt điện gần nơi bạn sống.
+
+## 13.7 Ôn tập
+
+<Quiz client:visible lang="vi" items={quiz} />
+
+## Tài liệu tham khảo
+
+- Erban, L. E., Gorelick, S. M., & Zebker, H. A. (2014). Groundwater extraction, land subsidence, and sea-level rise in the Mekong Delta, Vietnam. *Environmental Research Letters*, 9(8), 084010.
+- Hansen, M. C. và cs. (2013). High-resolution global maps of 21st-century forest cover change. *Science*, 342(6160), 850–853.
+- Kuenzer, C. và cs. (2013). Flood mapping and flood dynamics of the Mekong Delta: ENVISAT-ASAR-WSM based time series analyses. *Remote Sensing*, 5(2), 687–715.
+- Minderhoud, P. S. J. và cs. (2017). Impacts of 25 years of groundwater extraction on subsidence in the Mekong delta, Vietnam. *Environmental Research Letters*, 12(6), 064006.
+- Veefkind, J. P. và cs. (2012). TROPOMI on the ESA Sentinel-5 Precursor: A GMES mission for global observations of the atmospheric composition for climate, air quality and ozone layer applications. *Remote Sensing of Environment*, 120, 70–83.
+- Weng, Q. (2009). Thermal infrared remote sensing for urban climate and environmental studies: Methods, applications, and trends. *ISPRS Journal of Photogrammetry and Remote Sensing*, 64(4), 335–344.
+- Zanaga, D. và cs. (2022). *ESA WorldCover 10 m 2021 v200*. Zenodo.

@@ -1,0 +1,37 @@
+{
+ "width": 512,
+ "height": 512,
+ "resolution_m": 10,
+ "crs": "EPSG:32648",
+ "origin_xy": [
+  583980,
+  2331020
+ ],
+ "bands": [
+  "B2",
+  "B3",
+  "B4",
+  "B8",
+  "B11",
+  "cs",
+  "cs_cdf",
+  "SCL"
+ ],
+ "dtype": "uint16",
+ "layout": "BSQ",
+ "scale": 0.0001,
+ "date": "2023-10-05",
+ "scene": {
+  "CLOUDY_PIXEL_PERCENTAGE": 30.685836,
+  "SPACECRAFT_NAME": "Sentinel-2B",
+  "clear_frac": 0.536407470703125,
+  "system:index": "20231005T032609_20231005T033547_T48QWJ"
+ },
+ "notes": "cs and cs_cdf are Cloud Score+ x 10000 (1 = clear); SCL is the Sen2Cor scene classification (no scale)",
+ "provenance": {
+  "collection": "COPERNICUS/S2_SR_HARMONIZED + GOOGLE/CLOUD_SCORE_PLUS/V1/S2_HARMONIZED",
+  "attribution": "Contains modified Copernicus Sentinel data 2023",
+  "script": "scripts/data/export_ch07_preprocessing.py",
+  "exported": "2026-11-04T05:18:24+00:00"
+ }
+}

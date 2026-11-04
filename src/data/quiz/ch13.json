@@ -1,0 +1,263 @@
+[
+ {
+  "q": {
+   "vi": "Vì sao nghiên cứu lũ ở Đồng bằng sông Cửu Long thường dùng radar?",
+   "en": "Why do Mekong Delta flood studies usually use radar?"
+  },
+  "options": [
+   {
+    "vi": "Lũ xảy ra trong mùa mưa nhiều mây; radar chụp xuyên mây",
+    "en": "Floods occur in the cloudy rainy season; radar sees through clouds"
+   },
+   {
+    "vi": "Radar có độ phân giải cao hơn mọi ảnh quang học",
+    "en": "Radar always has higher resolution than optical"
+   },
+   {
+    "vi": "Radar đo được độ sâu nước",
+    "en": "Radar measures water depth"
+   },
+   {
+    "vi": "Radar rẻ hơn",
+    "en": "Radar is cheaper"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Mùa lũ trùng mùa mưa; ảnh quang học bị mây che (Chương 11).",
+   "en": "The flood season is the rainy season, when optical images are clouded (Chapter 11)."
+  }
+ },
+ {
+  "q": {
+   "vi": "Hansen ghi nhận 709 nghìn ha 'mất tán cây' ở Tây Nguyên 2001–2025. Cách hiểu nào đúng?",
+   "en": "Hansen records 709 thousand ha of 'tree-cover loss' in the Central Highlands 2001–2025. Which reading is correct?"
+  },
+  "options": [
+   {
+    "vi": "Gồm cả phá rừng tự nhiên lẫn khai thác rừng trồng, cháy; chưa trừ phần mọc lại",
+    "en": "It includes natural-forest clearing, plantation harvest and fire; regrowth is not subtracted"
+   },
+   {
+    "vi": "Toàn bộ là phá rừng tự nhiên",
+    "en": "It is all natural-forest clearing"
+   },
+   {
+    "vi": "Đó là mức giảm ròng diện tích rừng",
+    "en": "It is the net decline in forest area"
+   },
+   {
+    "vi": "Chỉ tính rừng ngập mặn",
+    "en": "It only counts mangroves"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Loss = mọi lần tán cây bị thay thế; rừng trồng khai thác rồi trồng lại vẫn bị tính.",
+   "en": "Loss = any stand-replacing disturbance; harvested and replanted plantations still count."
+  }
+ },
+ {
+  "q": {
+   "vi": "Tỉnh nào mất tỷ lệ tán cây năm 2000 lớn nhất?",
+   "en": "Which province lost the largest share of its 2000 tree cover?"
+  },
+  "options": [
+   {
+    "vi": "Đắk Nông (29,7 %)",
+    "en": "Dak Nong (29.7 %)"
+   },
+   {
+    "vi": "Lâm Đồng",
+    "en": "Lam Dong"
+   },
+   {
+    "vi": "Gia Lai",
+    "en": "Gia Lai"
+   },
+   {
+    "vi": "Kon Tum",
+    "en": "Kon Tum"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Đắk Nông 29,7 %, Kon Tum 25,0 %, Gia Lai 24,4 %, Đắk Lắk 22,0 %, Lâm Đồng 13,9 %.",
+   "en": "Dak Nong 29.7 %, Kon Tum 25.0 %, Gia Lai 24.4 %, Dak Lak 22.0 %, Lam Dong 13.9 %."
+  }
+ },
+ {
+  "q": {
+   "vi": "Đổi ngưỡng tán từ 30 % xuống 10 % sẽ làm gì?",
+   "en": "What happens if the canopy threshold drops from 30 % to 10 %?"
+  },
+  "options": [
+   {
+    "vi": "Đổi cả diện tích rừng năm 2000 lẫn diện tích mất",
+    "en": "Both the 2000 forest area and the loss change"
+   },
+   {
+    "vi": "Không thay đổi gì",
+    "en": "Nothing changes"
+   },
+   {
+    "vi": "Chỉ đổi năm mất",
+    "en": "Only the loss years change"
+   },
+   {
+    "vi": "Chỉ đổi màu bản đồ",
+    "en": "Only the map colours change"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Ngưỡng định nghĩa 'rừng'; ngưỡng thấp tính thêm vườn cây và cây bụi.",
+   "en": "The threshold defines 'forest'; a low one adds orchards and shrubs."
+  }
+ },
+ {
+  "q": {
+   "vi": "Ở TP.HCM mùa khô 2024, đất xây dựng nóng hơn cây gỗ bao nhiêu (LST trung bình)?",
+   "en": "In HCMC's 2024 dry season, how much warmer is built-up land than tree cover (mean LST)?"
+  },
+  "options": [
+   {
+    "vi": "Khoảng 4,1 °C",
+    "en": "About 4.1 °C"
+   },
+   {
+    "vi": "Khoảng 0,5 °C",
+    "en": "About 0.5 °C"
+   },
+   {
+    "vi": "Khoảng 15 °C",
+    "en": "About 15 °C"
+   },
+   {
+    "vi": "Không khác",
+    "en": "No difference"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "40,9 °C so với 36,8 °C.",
+   "en": "40.9 °C versus 36.8 °C."
+  }
+ },
+ {
+  "q": {
+   "vi": "Vì sao LST từ Landsat khác nhiệt độ không khí ở trạm khí tượng?",
+   "en": "Why does Landsat LST differ from station air temperature?"
+  },
+  "options": [
+   {
+    "vi": "LST là nhiệt độ bề mặt lúc vệ tinh bay qua, không phải nhiệt độ không khí ở độ cao 2 m",
+    "en": "LST is the surface temperature at overpass time, not the air temperature at 2 m"
+   },
+   {
+    "vi": "Landsat đo sai",
+    "en": "Landsat is wrong"
+   },
+   {
+    "vi": "Trạm đặt trong nhà",
+    "en": "Stations are indoors"
+   },
+   {
+    "vi": "LST tính bằng Kelvin",
+    "en": "LST is in Kelvin"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Mái tôn có thể nóng hơn không khí hàng chục độ vào buổi sáng nắng.",
+   "en": "A metal roof can be tens of degrees hotter than the air on a sunny morning."
+  }
+ },
+ {
+  "q": {
+   "vi": "Đơn vị µmol/m² của NO₂ Sentinel-5P cho biết gì?",
+   "en": "What does the µmol/m² unit of Sentinel-5P NO₂ describe?"
+  },
+  "options": [
+   {
+    "vi": "Lượng NO₂ trong cả cột không khí tầng đối lưu trên mỗi m²",
+    "en": "NO₂ in the whole tropospheric air column per m²"
+   },
+   {
+    "vi": "Nồng độ NO₂ tại mặt đất",
+    "en": "NO₂ concentration at the ground"
+   },
+   {
+    "vi": "Lượng NO₂ thải ra mỗi ngày",
+    "en": "NO₂ emitted per day"
+   },
+   {
+    "vi": "Nồng độ trong nước mưa",
+    "en": "Concentration in rainwater"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Muốn ra nồng độ mặt đất cần biết phân bố theo độ cao, thường từ mô hình.",
+   "en": "Ground concentration needs the vertical profile, usually from a model."
+  }
+ },
+ {
+  "q": {
+   "vi": "NO₂ ở Hà Nội tháng 4/2020 thấp bất thường (58,0 so với 86,9 năm 2019). Kết luận nào thận trọng nhất?",
+   "en": "Hanoi's April 2020 NO₂ was unusually low (58.0 vs 86.9 in 2019). What is the most careful conclusion?"
+  },
+  "options": [
+   {
+    "vi": "Trùng thời gian với giãn cách xã hội, nhưng thời tiết cũng có thể góp phần; chưa chứng minh nhân quả",
+    "en": "It coincides with social distancing, but weather may contribute; causation is not proven"
+   },
+   {
+    "vi": "Giãn cách là nguyên nhân duy nhất",
+    "en": "Social distancing was the only cause"
+   },
+   {
+    "vi": "Vệ tinh hỏng tháng đó",
+    "en": "The satellite failed that month"
+   },
+   {
+    "vi": "Hà Nội không còn ô nhiễm",
+    "en": "Hanoi stopped polluting"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "So sánh với cùng tháng các năm khác là bước đầu; muốn khẳng định cần tách ảnh hưởng của thời tiết.",
+   "en": "Comparing with the same month in other years is a first step; confirmation requires removing weather effects."
+  }
+ },
+ {
+  "q": {
+   "vi": "Vì sao NO₂ ở Hà Nội cao vào mùa đông và thấp vào mùa hè?",
+   "en": "Why is Hanoi's NO₂ high in winter and low in summer?"
+  },
+  "options": [
+   {
+    "vi": "Mùa hè nắng mạnh phân hủy NO₂ nhanh và mưa rửa trôi; mùa đông lớp khí sát đất mỏng, khó khuếch tán",
+    "en": "Strong summer sunlight destroys NO₂ and rain washes it out; in winter a shallow boundary layer traps it"
+   },
+   {
+    "vi": "Mùa đông có nhiều xe hơn gấp đôi",
+    "en": "Twice as many vehicles in winter"
+   },
+   {
+    "vi": "Vệ tinh chỉ chụp mùa đông",
+    "en": "The satellite images only in winter"
+   },
+   {
+    "vi": "Mùa hè vệ tinh bay cao hơn",
+    "en": "The satellite flies higher in summer"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Đây là giải thích theo tài liệu chung; sổ tay không tách riêng từng nguyên nhân.",
+   "en": "This is the general-literature explanation; the handbook does not separate the causes."
+  }
+ }
+]

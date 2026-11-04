@@ -1,0 +1,263 @@
+[
+ {
+  "q": {
+   "vi": "Cảm biến nào là cảm biến chủ động?",
+   "en": "Which sensor is active?"
+  },
+  "options": [
+   {
+    "vi": "Radar SAR của Sentinel-1",
+    "en": "Sentinel-1's SAR radar"
+   },
+   {
+    "vi": "Máy chụp MSI của Sentinel-2",
+    "en": "Sentinel-2's MSI camera"
+   },
+   {
+    "vi": "Kênh nhiệt TIRS của Landsat 9",
+    "en": "Landsat 9's TIRS thermal band"
+   },
+   {
+    "vi": "MODIS trên Terra",
+    "en": "MODIS on Terra"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Radar tự phát xung vi ba rồi đo phần dội về. Ba cảm biến còn lại đo ánh sáng phản xạ hoặc bức xạ nhiệt có sẵn.",
+   "en": "Radar transmits its own microwave pulses and records the echo; the others measure existing reflected light or thermal emission."
+  }
+ },
+ {
+  "q": {
+   "vi": "Trong chuỗi viễn thám, ảnh nhiệt đi qua khí quyển mấy lần?",
+   "en": "In the remote-sensing chain, how many times does thermal radiation cross the atmosphere?"
+  },
+  "options": [
+   {
+    "vi": "Một lần, từ bề mặt lên vệ tinh",
+    "en": "Once, from the surface up to the satellite"
+   },
+   {
+    "vi": "Hai lần, như ảnh quang học",
+    "en": "Twice, like optical images"
+   },
+   {
+    "vi": "Không lần nào",
+    "en": "Never"
+   },
+   {
+    "vi": "Ba lần",
+    "en": "Three times"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Nguồn của bức xạ nhiệt là chính bề mặt, nên không có chặng đi xuống.",
+   "en": "The source of thermal radiation is the surface itself, so there is no downward leg."
+  }
+ },
+ {
+  "q": {
+   "vi": "Payload của Sentinel-2 là gì?",
+   "en": "What is Sentinel-2's payload?"
+  },
+  "options": [
+   {
+    "vi": "Máy chụp đa phổ MSI, 13 kênh",
+    "en": "The 13-band MultiSpectral Instrument (MSI)"
+   },
+   {
+    "vi": "Tấm pin Mặt Trời",
+    "en": "The solar panels"
+   },
+   {
+    "vi": "Trạm thu ở mặt đất",
+    "en": "The ground receiving station"
+   },
+   {
+    "vi": "Tên lửa Vega",
+    "en": "The Vega rocket"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Payload là thiết bị làm nhiệm vụ. Pin Mặt Trời thuộc bus, trạm thu thuộc phân đoạn mặt đất, tên lửa thuộc phân đoạn phóng.",
+   "en": "The payload is the mission instrument; panels belong to the bus, stations to the ground segment, the rocket to the launch segment."
+  }
+ },
+ {
+  "q": {
+   "vi": "Sản phẩm Sentinel-2 L2A chứa đại lượng gì?",
+   "en": "What does a Sentinel-2 L2A product contain?"
+  },
+  "options": [
+   {
+    "vi": "Phản xạ bề mặt, đã hiệu chỉnh khí quyển",
+    "en": "Surface reflectance, atmospherically corrected"
+   },
+   {
+    "vi": "Số đếm thô từ cảm biến",
+    "en": "Raw sensor counts"
+   },
+   {
+    "vi": "Phản xạ đỉnh khí quyển",
+    "en": "Top-of-atmosphere reflectance"
+   },
+   {
+    "vi": "Nhiệt độ bề mặt",
+    "en": "Surface temperature"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "L1C là phản xạ đỉnh khí quyển; L2A đã hiệu chỉnh khí quyển thành phản xạ bề mặt.",
+   "en": "L1C is top-of-atmosphere reflectance; L2A is atmospherically corrected to surface reflectance."
+  }
+ },
+ {
+  "q": {
+   "vi": "Sentinel-2A có chuyển động trung bình 14,308 vòng/ngày. Chu kỳ quỹ đạo là bao nhiêu?",
+   "en": "Sentinel-2A's mean motion is 14.308 rev/day. What is its period?"
+  },
+  "options": [
+   {
+    "vi": "Khoảng 100,6 phút",
+    "en": "About 100.6 min"
+   },
+   {
+    "vi": "Khoảng 14,3 giờ",
+    "en": "About 14.3 h"
+   },
+   {
+    "vi": "Khoảng 90 phút",
+    "en": "About 90 min"
+   },
+   {
+    "vi": "Đúng 24 giờ",
+    "en": "Exactly 24 h"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "T = 1440 phút / 14,308 = 100,64 phút.",
+   "en": "T = 1440 min / 14.308 = 100.64 min."
+  }
+ },
+ {
+  "q": {
+   "vi": "Một cảnh Landsat 9 quanh Hà Nội (36 725 km²) lớn gấp khoảng bao nhiêu lần khung Hồ Tây 5,12 × 5,12 km của sổ tay?",
+   "en": "A Landsat 9 scene around Hanoi (36,725 km²) is roughly how many times the handbook's 5.12 × 5.12 km West Lake frame?"
+  },
+  "options": [
+   {
+    "vi": "Khoảng 1400 lần",
+    "en": "About 1400 times"
+   },
+   {
+    "vi": "Khoảng 14 lần",
+    "en": "About 14 times"
+   },
+   {
+    "vi": "Khoảng 140 lần",
+    "en": "About 140 times"
+   },
+   {
+    "vi": "Khoảng 14 000 lần",
+    "en": "About 14,000 times"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Khung Hồ Tây rộng 26,2 km²; 36 725 / 26,2 ≈ 1401.",
+   "en": "The frame is 26.2 km²; 36,725 / 26.2 ≈ 1401."
+  }
+ },
+ {
+  "q": {
+   "vi": "Vì sao hầu hết vệ tinh quan sát Trái Đất có độ nghiêng khoảng 98°?",
+   "en": "Why do most Earth-observation satellites have an inclination near 98°?"
+  },
+  "options": [
+   {
+    "vi": "Để quỹ đạo đồng bộ Mặt Trời: qua mỗi nơi vào cùng giờ địa phương",
+    "en": "To be sun-synchronous: same local time over each place"
+   },
+   {
+    "vi": "Để bay qua đúng hai cực",
+    "en": "To fly exactly over both poles"
+   },
+   {
+    "vi": "Để tiết kiệm nhiên liệu khi phóng",
+    "en": "To save fuel at launch"
+   },
+   {
+    "vi": "Để đứng yên so với mặt đất",
+    "en": "To stay fixed above the ground"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Ở độ cao 600–800 km, độ nghiêng ~98° làm mặt phẳng quỹ đạo quay theo Mặt Trời nhờ lực J2 (Chương 2).",
+   "en": "At 600–800 km, ~98° makes the orbit plane follow the Sun through J2 (Chapter 2)."
+  }
+ },
+ {
+  "q": {
+   "vi": "Vệ tinh quan sát Trái Đất đầu tiên của Việt Nam là vệ tinh nào và phóng năm nào?",
+   "en": "What was Viet Nam's first Earth-observation satellite, and when was it launched?"
+  },
+  "options": [
+   {
+    "vi": "VNREDSat-1, năm 2013",
+    "en": "VNREDSat-1, 2013"
+   },
+   {
+    "vi": "Vinasat-1, năm 2008",
+    "en": "Vinasat-1, 2008"
+   },
+   {
+    "vi": "Landsat 1, năm 1972",
+    "en": "Landsat 1, 1972"
+   },
+   {
+    "vi": "Sentinel-2A, năm 2015",
+    "en": "Sentinel-2A, 2015"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "VNREDSat-1 phóng ngày 7/5/2013. Vinasat-1 là vệ tinh viễn thông địa tĩnh.",
+   "en": "VNREDSat-1 was launched on 7 May 2013; Vinasat-1 is a geostationary telecom satellite."
+  }
+ },
+ {
+  "q": {
+   "vi": "Độ nghiêng của VNREDSat-1 (97,89°) thấp hơn giá trị đồng bộ Mặt Trời (98,10°). Hệ quả là gì?",
+   "en": "VNREDSat-1's inclination (97.89°) is below the sun-synchronous value (98.10°). What follows?"
+  },
+  "options": [
+   {
+    "vi": "Giờ bay qua trôi dần, sớm hơn mỗi năm",
+    "en": "Its overpass time drifts earlier each year"
+   },
+   {
+    "vi": "Vệ tinh rơi ngay",
+    "en": "It falls immediately"
+   },
+   {
+    "vi": "Ảnh mất màu",
+    "en": "Images lose colour"
+   },
+   {
+    "vi": "Không có hệ quả gì",
+    "en": "Nothing changes"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Mặt phẳng quỹ đạo quay 0,961°/ngày, chậm hơn Mặt Trời (0,986°/ngày), nên giờ bay qua sớm dần khoảng 36 phút mỗi năm (ước tính J2).",
+   "en": "The plane turns 0.961°/day, slower than the Sun (0.986°/day), so the overpass gets earlier by about 36 min per year (J2 estimate)."
+  }
+ }
+]

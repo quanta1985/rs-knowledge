@@ -1,0 +1,131 @@
+---
+title: Tổ hợp màu & giải đoán bằng mắt
+n: 8
+summary: Cùng một cảnh có thể hiện màu thật, đỏ rực hay vàng nâu tùy cách gán kênh vào màu. Chương này dùng bốn cảnh Sentinel-2 thật ở Cà Mau, An Giang, Đà Lạt và Đà Nẵng để luyện chọn tổ hợp màu, đọc chín yếu tố giải đoán và tự kiểm tra bằng câu hỏi trên bản đồ.
+objectives:
+  - Tạo và đọc các tổ hợp màu thật, giả màu hồng ngoại, nông nghiệp và đô thị SWIR.
+  - Biết rằng màu trên ảnh phụ thuộc kênh và cách kéo giãn, và luôn ghi rõ cả hai.
+  - Dùng chín yếu tố giải đoán (tông, màu, kích thước, hình dạng, cấu trúc, mẫu hình, bóng, vị trí, liên quan) để nhận biết đối tượng.
+  - Kiểm tra một diễn giải bằng số đo phổ (NDVI, MNDWI) thay vì chỉ tin vào mắt.
+updated: "2026-11-04"
+---
+import Term from '../../../components/Term.astro';
+import Depth from '../../../components/Depth.astro';
+import Figure from '../../../components/Figure.astro';
+import LabLinks from '../../../components/LabLinks.astro';
+import CompositeExplorer from '../../../islands/CompositeExplorer.tsx';
+import InterpretKeys from '../../../islands/InterpretKeys.tsx';
+import InterpretQuiz from '../../../islands/InterpretQuiz.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/ch08.json';
+
+## 8.1 Gán kênh vào màu
+
+Màn hình chỉ có ba màu: đỏ, lục, lam. Sentinel-2 có 13 kênh. Một <Term id="composite">tổ hợp màu</Term> chọn ba kênh và gán vào ba màu đó. Khi kênh không nhìn thấy (cận hồng ngoại, SWIR) được đưa lên màn hình, ta có <Term id="false-colour">ảnh giả màu</Term>.
+
+| Tổ hợp (R-G-B) | Tên thường gọi | Đọc nhanh |
+|---|---|---|
+| 4-3-2 | Màu thật | Giống mắt nhìn; nước tối, đô thị xám sáng |
+| 8-4-3 | Giả màu hồng ngoại | Thực vật đỏ; cây càng tươi, tán càng dày càng đỏ |
+| 11-8-2 | Nông nghiệp | Cây trồng xanh lá tươi, đất trống nâu, nước đen |
+| 12-11-4 | Đô thị SWIR | Bê tông, mái tôn nổi bật; khói mỏng gần như trong suốt |
+
+<Figure
+  title="Hình 8.1 — Bốn cảnh Sentinel-2, nhiều tổ hợp màu"
+  try="Ở Cà Mau, chuyển từ 4-3-2 sang 8-4-3: dải nào chuyển sang đỏ, ô nào xanh đen? Ở Đà Nẵng chọn 12-11-4: đường băng và mái nhà nổi bật thế nào? Tự chọn R = B12, G = B8, B = B4 xem có gì khác."
+  source="Sentinel-2 L2A (COPERNICUS/S2_SR_HARMONIZED): Cà Mau 30/01/2024, An Giang 15/01/2024, Đà Lạt 11/02/2023, Đà Nẵng 23/03/2023; mỗi cảnh 512 × 512 pixel 10 m, ngày được chọn bằng Cloud Score+. Kéo giãn 2–98 % riêng từng kênh, giới hạn ghi trong bảng thông số. Contains modified Copernicus Sentinel data 2023–2024. Ảnh nền © Esri, Maxar, Earthstar Geographics."
+>
+  <CompositeExplorer client:visible lang="vi" />
+</Figure>
+
+**Màu không phải là thuộc tính của đối tượng.** Cùng một ruộng lúa là xanh lá ở 4-3-2, đỏ ở 8-4-3 và xanh lá tươi ở 11-8-2. Ngay cả trong một tổ hợp, cách <Term id="stretch">kéo giãn</Term> cũng đổi màu: kéo giãn 2–98 % theo từng cảnh làm hai cảnh khác nhau trông "cân" như nhau dù độ sáng thật khác xa. Khi trình bày ảnh, luôn ghi tổ hợp kênh và kiểu kéo giãn.
+
+## 8.2 Chín yếu tố giải đoán
+
+Người giải đoán ảnh không chỉ nhìn màu. Từ thời ảnh máy bay, các nhà nghiên cứu đã hệ thống hóa những <Term id="interpretation-key">yếu tố giải đoán</Term> mà mắt dùng để nhận ra đối tượng (Olson, 1960). Mỗi yếu tố trong Hình 8.2 kèm một ví dụ thật và số đo phổ tại chỗ ghim.
+
+<Figure
+  title="Hình 8.2 — Chín yếu tố giải đoán trên ảnh Việt Nam"
+  try="Đi lần lượt từ 1 đến 9. Với 'Liên quan', so MNDWI của khối xanh tím với MNDWI của sông Hàn (yếu tố 'Tông'): vì sao khối đó không phải nước? Phóng to, chuyển sang bản đồ nền để đối chiếu."
+  source="Sentinel-2 L2A như Hình 8.1; ví dụ bóng mây dùng ảnh Hà Nội 05/10/2023 của Chương 7. NDVI, MNDWI và độ sáng là trung bình 3×3 pixel tại ghim. Các nhận định có ghi 'diễn giải' chưa được kiểm tra thực địa. Contains modified Copernicus Sentinel data 2023–2024. Ảnh nền © Esri, Maxar, Earthstar Geographics."
+>
+  <InterpretKeys client:visible lang="vi" />
+</Figure>
+
+<Depth level="ref" title="Bảng tra: chín yếu tố giải đoán">
+
+<div class="table-wrap">
+
+| Yếu tố | Câu hỏi đặt ra | Ví dụ trong sổ tay |
+|---|---|---|
+| Tông | Sáng hay tối? | Sông Hàn tối hơn phố, nhất là ở NIR |
+| Màu | Màu gì, trong tổ hợp nào? | Rừng đỏ ở 8-4-3 (Đà Lạt) |
+| Kích thước | To bao nhiêu so với thước tỷ lệ? | Hồ trung tâm Đà Lạt ≈ 0,33 km² |
+| Hình dạng | Hình học đều hay tự nhiên? | Đường băng Đà Nẵng |
+| Cấu trúc | Mịn hay gồ ghề? | Rừng trên Núi Cấm |
+| Mẫu hình | Các phần tử lặp lại thế nào? | Đầm tôm – dải cây ở Cà Mau |
+| Bóng | Bóng đổ hướng nào, dài bao nhiêu? | Bóng mây ở Hà Nội |
+| Vị trí | Nằm ở đâu trong địa hình? | Nhà cửa ở chân Núi Cấm |
+| Liên quan | Đi kèm với gì? | Khối pin mặt trời cạnh khu dân cư |
+
+</div>
+
+</Depth>
+
+<div class="worked">
+
+#### Ví dụ: thứ trông như nước nhưng không phải nước
+
+Ở chân Núi Cấm (An Giang) có một khối hình chữ nhật màu xanh tím, rất đều. Trên ảnh màu thật nó giống một hồ nước.
+
+1. Đo phổ trong vòng tròn bán kính 30 pixel giữa khối: MNDWI = **−0,58**, NDVI = 0,22. Nước có MNDWI dương (Chương 6), còn sông Hàn ở Đà Nẵng có MNDWI = +0,49.
+2. Mẫu hình: khối chia thành các ô lưới đều, có đường nội bộ thẳng. Liên quan: nằm cạnh khu dân cư, trên đất bằng.
+3. Kết luận (**diễn giải**): nhiều khả năng đây là một cánh đồng tấm pin mặt trời. Tấm pin hấp thụ mạnh ánh sáng nhìn thấy nên trông tối như nước, nhưng phản xạ SWIR khác nước.
+
+Bài học: mắt bị đánh lừa bởi tông và màu. Số đo phổ và các yếu tố hình dạng, mẫu hình giúp kiểm tra lại.
+
+</div>
+
+Ở cảnh Cà Mau, 27,3 % số pixel có MNDWI > 0 (ô đầm đang ngập nước) và 35,7 % có NDVI > 0,6 (cây rậm). Hai lớp này xen nhau thành dải song song, vuông góc với các rạch tự nhiên. Đó là mẫu hình của mô hình nuôi tôm xen rừng ngập mặn. Đây là **diễn giải** từ mẫu hình và phổ; muốn tách tôm – rừng với các kiểu đầm khác cần thực địa hoặc ảnh độ phân giải cao hơn.
+
+## 8.3 Tự kiểm tra trên bản đồ
+
+<Figure
+  title="Hình 8.3 — Trắc nghiệm giải đoán: bấm vào đối tượng được hỏi"
+  try="Trả lời đủ 8 câu. Chỉ lần bấm đầu tiên đúng mới được tính điểm. Nếu bí, dùng 'Gợi ý' trước khi 'Xem đáp án'."
+  source="Đáp án được chấm bằng vùng chữ nhật kết hợp điều kiện phổ trên chính pixel bạn bấm: nước = MNDWI > 0, cây rậm = NDVI > 0,6, sân bay = NDVI < 0,2, bóng = độ sáng < 0,08. Sentinel-2 L2A như Hình 8.1 và 7.3. Ảnh nền © Esri, Maxar, Earthstar Geographics."
+>
+  <InterpretQuiz client:visible lang="vi" />
+</Figure>
+
+<Depth level="advanced" title="Bẫy thường gặp khi giải đoán">
+
+- **Kéo giãn tự động đánh lừa.** Kéo giãn 2–98 % làm mọi cảnh trông tương phản như nhau. Muốn so độ sáng giữa hai cảnh, dùng cùng một kéo giãn cố định (như Chương 7).
+- **Bóng địa hình trên ảnh L2A.** Với cảnh An Giang, độ sáng NIR của rừng lại tương quan **âm** với độ chiếu sáng tính từ SRTM theo góc Mặt Trời của ảnh (r = −0,47): sườn khuất nắng không tối hơn như mong đợi. Nguyên nhân chưa được kiểm chứng; một khả năng là bước hiệu chỉnh địa hình của Sen2Cor. Vì vậy, ở vùng núi đừng dựa vào bóng địa hình trên ảnh L2A để đoán hướng sườn.
+- **Pixel hỗn hợp.** Ở 10 m, một con kênh rộng 15 m chỉ chiếm một đến hai pixel, và thường trộn với bờ (Chương 4). Các vệt sáng ngoằn ngoèo ở Cà Mau có MNDWI âm: đó nhiều khả năng là bờ kênh có đường và nhà, không phải mặt nước.
+- **Ngày chụp.** Ruộng lúa An Giang có thể là nước, cây xanh hay đất trống tùy tuần (Chương 6). Luôn ghi ngày chụp cạnh diễn giải.
+
+</Depth>
+
+## 8.4 Thực hành
+
+Notebook tải cả bốn cảnh, vẽ các tổ hợp màu với kéo giãn khác nhau và đo phổ ở các điểm giải đoán. Script GEE tạo nhanh bốn tổ hợp màu cho một vùng bất kỳ để luyện giải đoán.
+
+<LabLinks notebook="labs/ch08_interpretation.ipynb" gee="labs/ch08_interpretation.js" />
+
+**Bài tập gợi ý**
+
+1. Chọn một vùng quen thuộc. Với mỗi yếu tố giải đoán, tìm một ví dụ và ghi lại tổ hợp màu đã dùng.
+2. Tìm một vật thể trông giống nước nhưng không phải nước (mái nhà tối, bóng núi, tấm pin). Đo MNDWI để kiểm chứng.
+3. Cùng một cảnh, kéo giãn 2–98 % và kéo giãn cố định 0–0,3. Màu của rừng và đô thị đổi thế nào?
+
+## 8.5 Ôn tập
+
+<Quiz client:visible lang="vi" items={quiz} />
+
+## Tài liệu tham khảo
+
+- Campbell, J. B., & Wynne, R. H. (2011). *Introduction to Remote Sensing* (5th ed.). Guilford Press.
+- Drusch, M. và cs. (2012). Sentinel-2: ESA's optical high-resolution mission for GMES operational services. *Remote Sensing of Environment*, 120, 25–36.
+- Lillesand, T., Kiefer, R. W., & Chipman, J. (2015). *Remote Sensing and Image Interpretation* (7th ed.). Wiley.
+- Olson, C. E. (1960). Elements of photographic interpretation common to several sensors. *Photogrammetric Engineering*, 26(4), 651–656.

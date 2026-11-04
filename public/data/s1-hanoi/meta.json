@@ -1,0 +1,48 @@
+{
+ "width": 512,
+ "height": 512,
+ "resolution_m": 10,
+ "crs": "EPSG:32648",
+ "origin_xy": [
+  583980,
+  2331020
+ ],
+ "bands": [
+  "vv_ref",
+  "vh_ref",
+  "vv_pre",
+  "vh_pre",
+  "vv_post",
+  "vh_post"
+ ],
+ "dtype": "int16",
+ "layout": "BSQ",
+ "scale": 0.01,
+ "unit": "dB (sigma0)",
+ "scenes": {
+  "ref": {
+   "date": "2024-02-12",
+   "relative_orbit": 128,
+   "pass": "ASCENDING"
+  },
+  "pre": {
+   "date": "2024-08-31",
+   "relative_orbit": 91,
+   "pass": "DESCENDING"
+  },
+  "post": {
+   "date": "2024-09-12",
+   "relative_orbit": 91,
+   "pass": "DESCENDING"
+  }
+ },
+ "date": "2024-02-12",
+ "provenance": {
+  "collection": "COPERNICUS/S1_GRD (Sentinel-1A, IW, GRD, sigma0 dB, terrain-corrected by GEE)",
+  "speckle": "none",
+  "resampling": "nearest neighbour to the Sentinel-2 cube's 10 m UTM 48N grid",
+  "script": "scripts/data/export_s1.py",
+  "exported": "2026-11-04T04:06:58+00:00",
+  "attribution": "Contains modified Copernicus Sentinel data 2024"
+ }
+}

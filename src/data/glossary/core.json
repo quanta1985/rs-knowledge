@@ -1,0 +1,236 @@
+[
+ {
+  "id": "reflectance",
+  "vi": "Phản xạ phổ",
+  "en": "Spectral reflectance",
+  "def": {
+   "vi": "Tỷ lệ năng lượng bức xạ bị bề mặt phản xạ so với năng lượng chiếu tới, tại một bước sóng. Không thứ nguyên, thường từ 0 đến 1.",
+   "en": "Ratio of reflected to incident radiant energy at a given wavelength. Dimensionless, usually 0 to 1."
+  }
+ },
+ {
+  "id": "surface-reflectance",
+  "vi": "Phản xạ bề mặt (BOA)",
+  "en": "Surface reflectance (BOA)",
+  "def": {
+   "vi": "Phản xạ đã hiệu chỉnh ảnh hưởng khí quyển, ước tính tại mặt đất (Bottom-Of-Atmosphere). Sentinel-2 Level-2A cung cấp đại lượng này.",
+   "en": "Reflectance corrected for atmospheric effects, estimated at the ground (Bottom-Of-Atmosphere). Provided by Sentinel-2 Level-2A."
+  }
+ },
+ {
+  "id": "spectral-signature",
+  "vi": "Đặc trưng phổ (chữ ký phổ)",
+  "en": "Spectral signature",
+  "def": {
+   "vi": "Đường biểu diễn phản xạ của một loại bề mặt theo bước sóng. Dùng để phân biệt nước, thực vật, đất, bê tông…",
+   "en": "Curve of a surface's reflectance versus wavelength, used to tell water, vegetation, soil, concrete… apart."
+  }
+ },
+ {
+  "id": "band",
+  "vi": "Kênh phổ (băng)",
+  "en": "Spectral band",
+  "def": {
+   "vi": "Một khoảng bước sóng mà cảm biến ghi nhận thành một lớp ảnh riêng. Ví dụ Sentinel-2 B4 (đỏ, ~665 nm).",
+   "en": "A wavelength interval recorded by a sensor as one image layer, e.g. Sentinel-2 B4 (red, ~665 nm)."
+  }
+ },
+ {
+  "id": "nir",
+  "vi": "Cận hồng ngoại (NIR)",
+  "en": "Near infrared (NIR)",
+  "def": {
+   "vi": "Vùng bước sóng khoảng 0,7–1,3 µm. Lá cây khỏe phản xạ rất mạnh; nước hấp thụ gần như hoàn toàn.",
+   "en": "Wavelengths of about 0.7–1.3 µm. Healthy leaves reflect strongly; water absorbs almost completely."
+  }
+ },
+ {
+  "id": "swir",
+  "vi": "Hồng ngoại sóng ngắn (SWIR)",
+  "en": "Shortwave infrared (SWIR)",
+  "def": {
+   "vi": "Vùng khoảng 1,3–3 µm. Nhạy với độ ẩm của lá và đất, giúp tách nước và vùng xây dựng.",
+   "en": "About 1.3–3 µm. Sensitive to leaf and soil moisture; helps separate water and built-up land."
+  }
+ },
+ {
+  "id": "red-edge",
+  "vi": "Rìa đỏ",
+  "en": "Red edge",
+  "def": {
+   "vi": "Đoạn phản xạ của thực vật tăng vọt giữa đỏ (~680 nm) và NIR (~750 nm). Sentinel-2 có 3 kênh B5–B7 nằm ở đây.",
+   "en": "The steep rise in vegetation reflectance between red (~680 nm) and NIR (~750 nm). Sentinel-2 has three bands (B5–B7) there."
+  }
+ },
+ {
+  "id": "ndvi",
+  "vi": "NDVI",
+  "en": "NDVI",
+  "def": {
+   "vi": "Chỉ số thực vật chênh lệch chuẩn hóa: (NIR − Đỏ) / (NIR + Đỏ). Từ −1 đến 1; thực vật dày thường > 0,6.",
+   "en": "Normalized Difference Vegetation Index: (NIR − Red) / (NIR + Red). Ranges −1 to 1; dense vegetation is usually > 0.6."
+  }
+ },
+ {
+  "id": "ndwi",
+  "vi": "NDWI (McFeeters)",
+  "en": "NDWI (McFeeters)",
+  "def": {
+   "vi": "(Lục − NIR) / (Lục + NIR), làm nổi mặt nước. Không nhầm với NDWI của Gao (1996) dùng NIR và SWIR để đo độ ẩm lá.",
+   "en": "(Green − NIR) / (Green + NIR), highlights open water. Not to be confused with Gao's (1996) NDWI, which uses NIR and SWIR for leaf moisture."
+  }
+ },
+ {
+  "id": "mndwi",
+  "vi": "MNDWI",
+  "en": "MNDWI",
+  "def": {
+   "vi": "NDWI cải tiến (Xu, 2006): (Lục − SWIR1) / (Lục + SWIR1). Tách nước khỏi đô thị tốt hơn NDWI.",
+   "en": "Modified NDWI (Xu, 2006): (Green − SWIR1) / (Green + SWIR1). Separates water from built-up land better than NDWI."
+  }
+ },
+ {
+  "id": "ndbi",
+  "vi": "NDBI",
+  "en": "NDBI",
+  "def": {
+   "vi": "Chỉ số xây dựng (Zha và cs., 2003): (SWIR1 − NIR) / (SWIR1 + NIR). Dương ở vùng đô thị và đất trống.",
+   "en": "Normalized Difference Built-up Index (Zha et al., 2003): (SWIR1 − NIR) / (SWIR1 + NIR). Positive over built-up and bare land."
+  }
+ },
+ {
+  "id": "composite",
+  "vi": "Tổ hợp màu",
+  "en": "Colour composite",
+  "def": {
+   "vi": "Gán 3 kênh phổ vào 3 màu Đỏ–Lục–Lam của màn hình. Màu thật dùng B4-B3-B2; hồng ngoại giả dùng B8-B4-B3.",
+   "en": "Assigning three bands to the screen's Red–Green–Blue. True colour uses B4-B3-B2; false-colour infrared uses B8-B4-B3."
+  }
+ },
+ {
+  "id": "stretch",
+  "vi": "Kéo giãn tương phản",
+  "en": "Contrast stretch",
+  "def": {
+   "vi": "Ánh xạ giá trị ảnh sang độ sáng hiển thị 0–255. Kéo giãn 2–98 % cắt 2 % pixel tối nhất và sáng nhất. Chỉ đổi cách hiển thị, không đổi dữ liệu.",
+   "en": "Mapping image values to 0–255 display brightness. A 2–98 % stretch clips the darkest and brightest 2 %. Changes display only, not the data."
+  }
+ },
+ {
+  "id": "mixed-pixel",
+  "vi": "Pixel hỗn hợp",
+  "en": "Mixed pixel",
+  "def": {
+   "vi": "Pixel chứa nhiều loại bề mặt (ví dụ bờ sông: nửa nước, nửa cây). Phổ của nó là hỗn hợp nên khó phân loại.",
+   "en": "A pixel containing several surface types (e.g. a riverbank: half water, half trees). Its spectrum is a blend and hard to classify."
+  }
+ },
+ {
+  "id": "cloud-mask",
+  "vi": "Mặt nạ mây",
+  "en": "Cloud mask",
+  "def": {
+   "vi": "Lớp đánh dấu pixel bị mây hoặc bóng mây để loại khỏi phân tích. Ví dụ Cloud Score+ của Google.",
+   "en": "A layer flagging cloud or cloud-shadow pixels so they can be excluded. Example: Google's Cloud Score+."
+  }
+ },
+ {
+  "id": "phenology",
+  "vi": "Vật hậu học",
+  "en": "Phenology",
+  "def": {
+   "vi": "Chu kỳ sinh trưởng theo mùa của cây trồng (gieo, đẻ nhánh, trổ, chín, thu hoạch), thấy rõ qua chuỗi NDVI.",
+   "en": "Seasonal growth cycle of a crop (sowing, tillering, heading, ripening, harvest), clearly visible in an NDVI time series."
+  }
+ },
+ {
+  "id": "saturation",
+  "vi": "Bão hòa NDVI",
+  "en": "NDVI saturation",
+  "def": {
+   "vi": "Khi tán lá đã rất dày, NDVI gần như không tăng thêm dù sinh khối tiếp tục tăng. EVI ít bị hiện tượng này hơn.",
+   "en": "Over very dense canopies NDVI stops increasing even though biomass keeps growing. EVI is less affected."
+  }
+ },
+ {
+  "id": "spatial-resolution",
+  "vi": "Độ phân giải không gian",
+  "en": "Spatial resolution",
+  "def": {
+   "vi": "Kích thước mặt đất mà một pixel đại diện (ví dụ 10 m với Sentinel-2). Pixel càng nhỏ, vật thể càng nhỏ càng tách được.",
+   "en": "The ground size one pixel represents (e.g. 10 m for Sentinel-2). Smaller pixels resolve smaller objects."
+  }
+ },
+ {
+  "id": "spectral-resolution",
+  "vi": "Độ phân giải phổ",
+  "en": "Spectral resolution",
+  "def": {
+   "vi": "Số lượng, vị trí và độ rộng các kênh phổ. Càng nhiều kênh hẹp, càng phân biệt được nhiều loại bề mặt.",
+   "en": "The number, position and width of spectral bands. More, narrower bands separate more surface types."
+  }
+ },
+ {
+  "id": "radiometric-resolution",
+  "vi": "Độ phân giải bức xạ",
+  "en": "Radiometric resolution",
+  "def": {
+   "vi": "Số mức giá trị cảm biến ghi được, tính bằng bit: n bit cho 2ⁿ mức. 12 bit = 4096 mức.",
+   "en": "How many distinct values a sensor records, in bits: n bits give 2ⁿ levels. 12 bits = 4096 levels."
+  }
+ },
+ {
+  "id": "temporal-resolution",
+  "vi": "Độ phân giải thời gian",
+  "en": "Temporal resolution",
+  "def": {
+   "vi": "Khoảng thời gian giữa hai lần chụp cùng một nơi (chu kỳ lặp). Ở vùng nhiều mây, số ảnh dùng được ít hơn nhiều.",
+   "en": "The time between two acquisitions of the same place (revisit). In cloudy regions far fewer images are usable."
+  }
+ },
+ {
+  "id": "revisit",
+  "vi": "Chu kỳ lặp",
+  "en": "Revisit time",
+  "def": {
+   "vi": "Số ngày giữa hai lần vệ tinh (hoặc chòm vệ tinh) chụp lại cùng một điểm. Sentinel-2 hai vệ tinh: 5 ngày ở xích đạo.",
+   "en": "Days between two acquisitions of the same point by a satellite or constellation. Sentinel-2 with two satellites: 5 days at the equator."
+  }
+ },
+ {
+  "id": "swath",
+  "vi": "Độ rộng dải chụp",
+  "en": "Swath width",
+  "def": {
+   "vi": "Bề ngang vùng mặt đất chụp được trong một lần bay qua. Sentinel-2: 290 km; Landsat: 185 km; MODIS: 2330 km.",
+   "en": "Across-track width imaged in one pass. Sentinel-2: 290 km; Landsat: 185 km; MODIS: 2330 km."
+  }
+ },
+ {
+  "id": "quantization",
+  "vi": "Lượng tử hóa",
+  "en": "Quantisation",
+  "def": {
+   "vi": "Chuyển tín hiệu liên tục thành số nguyên có hạn mức. Ít bit thì bước nhảy lớn, các chi tiết tối như mặt nước bị mất.",
+   "en": "Turning a continuous signal into a limited set of integers. Fewer bits mean bigger steps, so dark detail such as water is lost."
+  }
+ },
+ {
+  "id": "hyperspectral",
+  "vi": "Siêu phổ",
+  "en": "Hyperspectral",
+  "def": {
+   "vi": "Cảm biến có hàng trăm kênh hẹp liên tục (ví dụ EnMAP, PRISMA), cho gần như cả đường cong phổ.",
+   "en": "Sensors with hundreds of narrow contiguous bands (e.g. EnMAP, PRISMA), giving nearly the whole spectral curve."
+  }
+ },
+ {
+  "id": "linear-mixing",
+  "vi": "Mô hình trộn tuyến tính",
+  "en": "Linear mixing model",
+  "def": {
+   "vi": "Giả định phổ của pixel hỗn hợp bằng tổng các phổ thuần nhân với tỷ lệ diện tích của chúng.",
+   "en": "Assumes a mixed pixel's spectrum is the sum of pure spectra weighted by their area fractions."
+  }
+ }
+]

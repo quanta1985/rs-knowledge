@@ -1,0 +1,263 @@
+[
+ {
+  "q": {
+   "vi": "Vì sao phi hành gia trên trạm vũ trụ ở độ cao 400 km lơ lửng?",
+   "en": "Why do astronauts float on a station at 400 km?"
+  },
+  "options": [
+   {
+    "vi": "Cả trạm và người cùng rơi tự do",
+    "en": "The station and the crew fall freely together"
+   },
+   {
+    "vi": "Ở đó không còn trọng lực",
+    "en": "There is no gravity there"
+   },
+   {
+    "vi": "Lực ly tâm triệt tiêu trọng lực của Mặt Trăng",
+    "en": "Centrifugal force cancels the Moon's gravity"
+   },
+   {
+    "vi": "Không khí đẩy họ lên",
+    "en": "Air pushes them up"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Trọng lực ở 400 km vẫn còn khoảng 88,5 % so với mặt đất.",
+   "en": "Gravity at 400 km is still about 88.5 % of its surface value."
+  }
+ },
+ {
+  "q": {
+   "vi": "Theo định luật Kepler III, chu kỳ quỹ đạo tròn phụ thuộc vào gì?",
+   "en": "By Kepler's third law, what does a circular orbit's period depend on?"
+  },
+  "options": [
+   {
+    "vi": "Chỉ bán kính quỹ đạo",
+    "en": "Only the orbit radius"
+   },
+   {
+    "vi": "Khối lượng vệ tinh",
+    "en": "The satellite's mass"
+   },
+   {
+    "vi": "Độ nghiêng",
+    "en": "The inclination"
+   },
+   {
+    "vi": "Kích thước pin Mặt Trời",
+    "en": "The size of the solar panels"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "T = 2π √(r³/μ): không có khối lượng vệ tinh trong công thức.",
+   "en": "T = 2π √(r³/μ): the satellite's mass does not appear."
+  }
+ },
+ {
+  "q": {
+   "vi": "Vệ tinh địa tĩnh bay ở độ cao bao nhiêu?",
+   "en": "At what altitude do geostationary satellites fly?"
+  },
+  "options": [
+   {
+    "vi": "35 786 km",
+    "en": "35,786 km"
+   },
+   {
+    "vi": "786 km",
+    "en": "786 km"
+   },
+   {
+    "vi": "20 200 km",
+    "en": "20,200 km"
+   },
+   {
+    "vi": "400 km",
+    "en": "400 km"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Chu kỳ phải bằng một ngày sao (1436 phút); Kepler III cho độ cao 35 786 km.",
+   "en": "The period must equal one sidereal day (1436 min); Kepler III gives 35,786 km."
+  }
+ },
+ {
+  "q": {
+   "vi": "Lực J2 sinh ra từ đâu?",
+   "en": "What causes the J2 effect?"
+  },
+  "options": [
+   {
+    "vi": "Trái Đất phình ở xích đạo",
+    "en": "The Earth's equatorial bulge"
+   },
+   {
+    "vi": "Lực hút của Mặt Trăng",
+    "en": "The Moon's pull"
+   },
+   {
+    "vi": "Áp suất bức xạ Mặt Trời",
+    "en": "Solar radiation pressure"
+   },
+   {
+    "vi": "Lực cản khí quyển",
+    "en": "Atmospheric drag"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Bán kính xích đạo lớn hơn bán kính cực khoảng 21 km; phần phình này làm mặt phẳng quỹ đạo quay dần.",
+   "en": "The equatorial radius is about 21 km larger than the polar one; the bulge makes orbit planes precess."
+  }
+ },
+ {
+  "q": {
+   "vi": "Để mặt phẳng quỹ đạo quay theo Mặt Trời (+0,9856°/ngày), độ nghiêng phải thế nào?",
+   "en": "For the orbit plane to follow the Sun (+0.9856°/day), the inclination must be…"
+  },
+  "options": [
+   {
+    "vi": "Lớn hơn 90° (hơi ngược chiều quay của Trái Đất)",
+    "en": "Above 90° (slightly retrograde)"
+   },
+   {
+    "vi": "Đúng 90°",
+    "en": "Exactly 90°"
+   },
+   {
+    "vi": "Bằng 0°",
+    "en": "Zero"
+   },
+   {
+    "vi": "Nhỏ hơn 45°",
+    "en": "Below 45°"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "dΩ/dt tỷ lệ với −cos i; muốn dương thì cos i âm, tức i > 90°. Ở 786 km cần khoảng 98,6°.",
+   "en": "dΩ/dt scales with −cos i; for it to be positive cos i must be negative, i > 90°. At 786 km about 98.6° is needed."
+  }
+ },
+ {
+  "q": {
+   "vi": "Sau mỗi vòng 100,6 phút, vết bay của Sentinel-2 lệch về phía tây bao nhiêu?",
+   "en": "After each 100.6-minute orbit, how far west does Sentinel-2's track shift?"
+  },
+  "options": [
+   {
+    "vi": "Khoảng 25° kinh độ (~2800 km ở xích đạo)",
+    "en": "About 25° of longitude (~2800 km at the equator)"
+   },
+   {
+    "vi": "Đúng 290 km",
+    "en": "Exactly 290 km"
+   },
+   {
+    "vi": "Không lệch",
+    "en": "It does not shift"
+   },
+   {
+    "vi": "Khoảng 1°",
+    "en": "About 1°"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Trái Đất quay 360° trong 1436 phút, nên trong 100,6 phút quay 25,2°.",
+   "en": "The Earth turns 360° in 1436 min, so 25.2° in 100.6 min."
+  }
+ },
+ {
+  "q": {
+   "vi": "Theo mô phỏng Hình 2.3, một vệ tinh Sentinel-2 cần bao nhiêu ngày để chụp hết đất liền Việt Nam?",
+   "en": "In the Figure 2.3 simulation, how many days does one Sentinel-2 satellite need to image all of Viet Nam's land?"
+  },
+  "options": [
+   {
+    "vi": "10 ngày",
+    "en": "10 days"
+   },
+   {
+    "vi": "1 ngày",
+    "en": "1 day"
+   },
+   {
+    "vi": "5 ngày",
+    "en": "5 days"
+   },
+   {
+    "vi": "16 ngày",
+    "en": "16 days"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Chu kỳ lặp 10 ngày; sau 7 ngày mới được 93,5 %. Hai vệ tinh lệch 180° thì cần 5 ngày.",
+   "en": "The repeat cycle is 10 days; after 7 days only 93.5 % is covered. Two satellites 180° apart need 5 days."
+  }
+ },
+ {
+  "q": {
+   "vi": "Sentinel-2 chụp trên nhánh nào của quỹ đạo?",
+   "en": "On which part of its orbit does Sentinel-2 acquire images?"
+  },
+  "options": [
+   {
+    "vi": "Nhánh đi xuống, phía ban ngày",
+    "en": "The descending, daytime pass"
+   },
+   {
+    "vi": "Nhánh đi lên, ban đêm",
+    "en": "The ascending, night-time pass"
+   },
+   {
+    "vi": "Cả hai nhánh như nhau",
+    "en": "Both passes equally"
+   },
+   {
+    "vi": "Chỉ ở hai cực",
+    "en": "Only over the poles"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Cảm biến quang học cần ánh sáng Mặt Trời; Sentinel-2 qua xích đạo đi xuống lúc 10:30 sáng.",
+   "en": "An optical sensor needs sunlight; Sentinel-2 crosses the equator southbound at 10:30."
+  }
+ },
+ {
+  "q": {
+   "vi": "Vì sao được chụp 5 ngày một lần không có nghĩa là có ảnh dùng được 5 ngày một lần?",
+   "en": "Why does 'imaged every 5 days' not mean 'a usable image every 5 days'?"
+  },
+  "options": [
+   {
+    "vi": "Mây che: ở Hà Nội chỉ 92 trên 433 ngày có ảnh đủ trong",
+    "en": "Clouds: in Hanoi only 92 of 433 dates were clear enough"
+   },
+   {
+    "vi": "Vệ tinh tắt máy vào cuối tuần",
+    "en": "Satellites switch off at weekends"
+   },
+   {
+    "vi": "Ảnh chỉ được phát hành 1 lần mỗi tháng",
+    "en": "Images are released monthly"
+   },
+   {
+    "vi": "Dải chụp thay đổi mỗi ngày",
+    "en": "The swath changes daily"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Đây là số liệu Sentinel-2 năm 2022–2024 ở Chương 4. Radar (Chương 11) không bị giới hạn này.",
+   "en": "This is the Sentinel-2 2022–2024 figure from Chapter 4; radar (Chapter 11) is free of this limit."
+  }
+ }
+]

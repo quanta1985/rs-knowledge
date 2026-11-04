@@ -1,0 +1,292 @@
+[
+ {
+  "q": {
+   "vi": "Vì sao Sentinel-1 chụp được khi trời nhiều mây?",
+   "en": "Why can Sentinel-1 image through clouds?"
+  },
+  "options": [
+   {
+    "vi": "Sóng vi ba dài khoảng 5,5 cm, lớn hơn rất nhiều so với giọt nước mây",
+    "en": "Its ~5.5 cm microwaves are much longer than cloud droplets"
+   },
+   {
+    "vi": "Vệ tinh bay thấp hơn mây",
+    "en": "It flies below the clouds"
+   },
+   {
+    "vi": "Vệ tinh chỉ chụp ban đêm",
+    "en": "It only images at night"
+   },
+   {
+    "vi": "Vệ tinh dùng ánh sáng hồng ngoại nhiệt",
+    "en": "It uses thermal infrared light"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Giọt mây chỉ cỡ micromét, nhỏ hơn bước sóng băng C hàng nghìn lần, nên gần như không cản sóng.",
+   "en": "Cloud droplets are micrometres in size, thousands of times smaller than the C-band wavelength, so they barely affect it."
+  }
+ },
+ {
+  "q": {
+   "vi": "Vì sao radar phải nhìn nghiêng mà không nhìn thẳng xuống?",
+   "en": "Why must an imaging radar look sideways rather than straight down?"
+  },
+  "options": [
+   {
+    "vi": "Hai điểm đối xứng qua vết bay sẽ dội về cùng lúc, không tách được",
+    "en": "Two points symmetric about the track would return at the same time and could not be separated"
+   },
+   {
+    "vi": "Để tránh ánh nắng",
+    "en": "To avoid sunlight"
+   },
+   {
+    "vi": "Vì ăng-ten quá nặng",
+    "en": "Because the antenna is too heavy"
+   },
+   {
+    "vi": "Để chụp được nhiều màu",
+    "en": "To capture more colours"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Radar định vị theo thời gian sóng đi về. Nếu nhìn thẳng xuống, hai điểm bên trái và bên phải cho cùng một thời gian.",
+   "en": "Radar locates echoes by travel time; looking straight down, left and right give identical times."
+  }
+ },
+ {
+  "q": {
+   "vi": "Với θ = 37°, độ phân giải cự ly nghiêng 2,65 m tương ứng bao nhiêu trên mặt đất?",
+   "en": "With θ = 37°, what ground-range resolution does a 2.65 m slant-range resolution give?"
+  },
+  "options": [
+   {
+    "vi": "Khoảng 4,4 m",
+    "en": "≈ 4.4 m"
+   },
+   {
+    "vi": "Khoảng 2,1 m",
+    "en": "≈ 2.1 m"
+   },
+   {
+    "vi": "2,65 m",
+    "en": "2.65 m"
+   },
+   {
+    "vi": "10 m",
+    "en": "10 m"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Độ phân giải mặt đất = độ phân giải nghiêng / sin θ = 2,65 / 0,602 ≈ 4,4 m.",
+   "en": "Ground resolution = slant resolution / sin θ = 2.65 / 0.602 ≈ 4.4 m."
+  }
+ },
+ {
+  "q": {
+   "vi": "Sườn núi hướng về radar dốc 45°, góc tới 37°. Ảnh bị hiện tượng gì?",
+   "en": "A slope facing the radar is 45° steep and the incidence angle is 37°. What happens?"
+  },
+  "options": [
+   {
+    "vi": "Chồng lấn: đỉnh núi hiện ra trước chân núi",
+    "en": "Layover: the summit appears before the foot"
+   },
+   {
+    "vi": "Bóng radar",
+    "en": "Radar shadow"
+   },
+   {
+    "vi": "Không bị méo",
+    "en": "No distortion"
+   },
+   {
+    "vi": "Co ngắn nhẹ",
+    "en": "Mild foreshortening"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Sườn trước dốc hơn góc tới thì đỉnh gần radar hơn chân, nên thứ tự trong ảnh đảo ngược.",
+   "en": "When the fore-slope is steeper than the incidence angle the summit is nearer the radar than the foot, so the order reverses."
+  }
+ },
+ {
+  "q": {
+   "vi": "Trên ảnh Hà Nội ngày 12/02/2024, đối tượng nào có VV cao nhất?",
+   "en": "In the 12 Feb 2024 Hanoi image, which target has the highest VV?"
+  },
+  "options": [
+   {
+    "vi": "Mái nhà, đường phố (−3,0 dB)",
+    "en": "Roofs and streets (−3.0 dB)"
+   },
+   {
+    "vi": "Thực vật bãi bồi",
+    "en": "Floodplain vegetation"
+   },
+   {
+    "vi": "Nước sông Hồng",
+    "en": "Red River water"
+   },
+   {
+    "vi": "Đất trống / cát",
+    "en": "Bare soil / sand"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Tường và mặt đất tạo dội hai lần như gương góc, nên đô thị sáng nhất.",
+   "en": "Walls and ground form corner reflectors (double bounce), so urban areas are brightest."
+  }
+ },
+ {
+  "q": {
+   "vi": "Kênh VH nhạy nhất với cơ chế nào?",
+   "en": "Which mechanism is VH most sensitive to?"
+  },
+  "options": [
+   {
+    "vi": "Tán xạ khối trong tán lá, cây trồng",
+    "en": "Volume scattering in canopies and crops"
+   },
+   {
+    "vi": "Phản xạ gương trên mặt nước",
+    "en": "Specular reflection on water"
+   },
+   {
+    "vi": "Ánh nắng phản xạ",
+    "en": "Reflected sunlight"
+   },
+   {
+    "vi": "Nhiệt độ bề mặt",
+    "en": "Surface temperature"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Chỉ khi sóng đổi hướng dao động thì kênh VH mới có tín hiệu, và điều này xảy ra khi sóng dội nhiều lần trong tán lá.",
+   "en": "A VH signal needs depolarisation, which happens with multiple scattering inside vegetation."
+  }
+ },
+ {
+  "q": {
+   "vi": "Vì sao phải lấy trung bình σ⁰ theo công suất tuyến tính mà không theo dB?",
+   "en": "Why average σ⁰ in linear power rather than in dB?"
+  },
+  "options": [
+   {
+    "vi": "Trung bình các giá trị dB bị lệch thấp vì dB là thang logarit",
+    "en": "Averaging dB values is biased low because dB is logarithmic"
+   },
+   {
+    "vi": "Vì dB không có đơn vị",
+    "en": "Because dB has no unit"
+   },
+   {
+    "vi": "Để ảnh sáng hơn",
+    "en": "To brighten the image"
+   },
+   {
+    "vi": "Hai cách cho kết quả như nhau",
+    "en": "It makes no difference"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Hàm log lõm nên trung bình của log nhỏ hơn log của trung bình (bất đẳng thức Jensen).",
+   "en": "log is concave, so the mean of logs is below the log of the mean (Jensen's inequality)."
+  }
+ },
+ {
+  "q": {
+   "vi": "Lọc boxcar 9×9 giảm độ lệch chuẩn VV giữa Hồ Tây từ 2,04 xuống 0,56 dB. Cái giá phải trả là gì?",
+   "en": "A 9×9 boxcar cuts the VV standard deviation in West Lake from 2.04 to 0.56 dB. What is the cost?"
+  },
+  "options": [
+   {
+    "vi": "Biên đối tượng (bờ hồ, đường phố) bị nhòe",
+    "en": "Edges (shorelines, streets) are blurred"
+   },
+   {
+    "vi": "Ảnh tối đi 10 dB",
+    "en": "The image becomes 10 dB darker"
+   },
+   {
+    "vi": "Mất kênh VH",
+    "en": "The VH band is lost"
+   },
+   {
+    "vi": "Không mất gì",
+    "en": "There is no cost"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Cửa sổ to trộn lẫn pixel ở hai bên biên. Bộ lọc Lee giữ biên tốt hơn.",
+   "en": "Large windows mix pixels across edges; the Lee filter keeps edges better."
+  }
+ },
+ {
+  "q": {
+   "vi": "Với ảnh bão Yagi, vì sao phát hiện thay đổi (VV giảm hơn 3 dB) tìm được nhiều nước mới hơn ngưỡng −15 dB?",
+   "en": "For the Yagi images, why does change detection (VV drop > 3 dB) find more new water than the −15 dB threshold?"
+  },
+  "options": [
+   {
+    "vi": "Cây ngập một phần làm σ⁰ giảm mạnh nhưng chưa xuống dưới −15 dB",
+    "en": "Partly submerged vegetation drops strongly but stays above −15 dB"
+   },
+   {
+    "vi": "Vì ảnh sau bị mây che",
+    "en": "The post image is cloudy"
+   },
+   {
+    "vi": "Vì phát hiện thay đổi luôn đúng hơn",
+    "en": "Change detection is always more accurate"
+   },
+   {
+    "vi": "Vì hai ảnh khác quỹ đạo",
+    "en": "The two images are from different orbits"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Ví dụ ở điểm thực vật bãi bồi, VV giảm từ −7,9 xuống −16,3 dB. Hai ảnh cùng quỹ đạo 91 nên so sánh trực tiếp được.",
+   "en": "For example the floodplain-vegetation point fell from −7.9 to −16.3 dB. Both images share orbit 91, so they compare directly."
+  }
+ },
+ {
+  "q": {
+   "vi": "Trong chuỗi An Giang, VH xuống −23,4 dB ngày 27/8/2024 rồi tăng dần. Cách giải thích hợp lý nhất là gì?",
+   "en": "In the An Giang series VH drops to −23.4 dB on 27 Aug 2024 then rises. The most plausible reading?"
+  },
+  "options": [
+   {
+    "vi": "Ruộng vừa gặt và được cho nước vào làm đất; sau đó lúa vụ mới lớn lên",
+    "en": "Fields harvested and flooded for land preparation; then the new crop grows"
+   },
+   {
+    "vi": "Vệ tinh hỏng",
+    "en": "The satellite failed"
+   },
+   {
+    "vi": "Mây che ảnh radar",
+    "en": "Clouds blocked the radar"
+   },
+   {
+    "vi": "Vệ tinh đổi quỹ đạo",
+    "en": "The orbit changed"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Mặt nước làm VH thấp; khi lúa lớn, tán xạ khối tăng nên VH tăng. Đây là diễn giải, cần lịch thời vụ thực địa để khẳng định.",
+   "en": "Open water gives low VH; as rice grows volume scattering raises VH. This is an interpretation that field crop calendars should confirm."
+  }
+ }
+]

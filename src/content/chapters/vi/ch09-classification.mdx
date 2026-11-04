@@ -1,0 +1,196 @@
+---
+title: Phân loại & đánh giá độ chính xác
+n: 9
+summary: Biến ảnh vệ tinh thành bản đồ lớp phủ, rồi hỏi bản đồ đúng đến đâu. Chương này cho bạn tự bấm mẫu huấn luyện trên ảnh Sentinel-2 Hồ Tây, so hai bộ phân loại, thử k-means, và đánh giá độ chính xác theo cách được khuyến nghị (Olofsson và cs. 2014), kèm diện tích có khoảng tin cậy.
+objectives:
+  - Phân biệt phân loại có giám sát và không giám sát; biết vai trò của mẫu huấn luyện.
+  - Giải thích bộ phân loại khoảng cách nhỏ nhất và hợp lý cực đại trong không gian phổ.
+  - Lập ma trận nhầm lẫn; tính độ chính xác tổng thể, của người dùng, của người sản xuất và F1.
+  - Thiết kế mẫu kiểm định phân tầng và ước lượng diện tích có hiệu chỉnh kèm khoảng tin cậy 95 %.
+  - Biết vì sao "đếm pixel" và hệ số kappa không đủ để báo cáo kết quả.
+updated: "2026-11-04"
+---
+import Term from '../../../components/Term.astro';
+import Depth from '../../../components/Depth.astro';
+import Figure from '../../../components/Figure.astro';
+import LabLinks from '../../../components/LabLinks.astro';
+import ClassifyLab from '../../../islands/ClassifyLab.tsx';
+import FeatureSpace from '../../../islands/FeatureSpace.tsx';
+import KMeansLab from '../../../islands/KMeansLab.tsx';
+import AccuracyLab from '../../../islands/AccuracyLab.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/ch09.json';
+
+## 9.1 Từ ảnh đến bản đồ
+
+Ảnh vệ tinh cho mỗi pixel một dãy số phản xạ. Người quản lý đất đai lại cần câu trả lời dạng "đây là nước, kia là nhà". <Term id="classification">Phân loại</Term> là bước gán mỗi pixel vào một lớp. Có hai cách chính:
+
+- **Có giám sát:** bạn chỉ cho máy vài pixel mẫu của từng lớp (<Term id="training-sample">mẫu huấn luyện</Term>). Máy học đặc trưng phổ của mỗi lớp rồi gán các pixel còn lại.
+- **Không giám sát:** máy tự gom pixel giống nhau thành cụm. Sau đó bạn mới đặt tên cho từng cụm.
+
+Chương này dùng lại ảnh Sentinel-2 ngày 12/02/2024 khu Hồ Tây – sông Hồng (Chương 6) với 5 lớp: nước, cây gỗ, thực vật thấp (ruộng, cỏ, cây bụi), đô thị và đất trống. Để có thứ so sánh, sổ tay dùng bản đồ <Term id="worldcover">ESA WorldCover</Term> 2021 cho cùng khung làm "tham chiếu".
+
+<Depth level="ref" title="Bảng tra: ghép lớp WorldCover vào 5 lớp của chương">
+
+<div class="table-wrap">
+
+| Lớp của chương | Mã WorldCover | Diện tích trong khung (WorldCover) |
+|---|---|---|
+| Nước | 80 (mặt nước), 90 (đất ngập nước có cỏ) | 7,33 km² |
+| Cây gỗ | 10 (tree cover) | 6,19 km² |
+| Thực vật thấp | 20 (cây bụi), 30 (cỏ), 40 (đất canh tác) | 1,67 km² |
+| Đô thị | 50 (built-up) | 10,84 km² |
+| Đất trống | 60 (bare / sparse vegetation) | 0,18 km² |
+
+</div>
+
+Khung 512 × 512 pixel 10 m = 26,2 km². WorldCover v200 được lấy mẫu láng giềng gần nhất về lưới UTM 48N của ảnh Sentinel-2.
+
+</Depth>
+
+**Lưu ý quan trọng:** WorldCover cũng là một bản đồ phân loại tự động, không phải sự thật mặt đất. Vì vậy mọi con số "đúng" trong chương này chính xác ra là **mức trùng khớp với WorldCover**. Đánh giá thật cần dữ liệu tham chiếu tốt hơn bản đồ cần kiểm tra, ví dụ giải đoán ảnh độ phân giải rất cao hoặc điều tra thực địa (mục 9.5).
+
+## 9.2 Phân loại có giám sát
+
+<Figure
+  title="Hình 9.1 — Tự bấm mẫu và phân loại ảnh Sentinel-2 trên bản đồ"
+  try="Bấm 'Xoá mẫu', chọn lớp Nước và bấm 3 điểm trên Hồ Tây, rồi 3 điểm Đô thị trên khu phố. Chỉ với 2 lớp, bản đồ ra sao? Thêm dần Cây gỗ, Thực vật thấp, Đất trống. Đổi giữa hai bộ phân loại và đọc dòng 'Trùng WorldCover'."
+  source="Sentinel-2B L2A 12/02/2024, 6 kênh B2, B3, B4, B8, B11, B12 (10 và 20 m lấy mẫu về 10 m). Mỗi điểm mẫu lấy cửa sổ 3 × 3 pixel. Tham chiếu: ESA WorldCover v200 (2021), © ESA WorldCover project. Mẫu gợi ý: 8 điểm mỗi lớp (đất trống 5 điểm) ở nơi WorldCover đồng nhất 5 × 5 pixel và phổ đồng đều, chọn bằng scripts/data/export_ch09_training.py. Contains modified Copernicus Sentinel data 2024. Ảnh nền © Esri, Maxar, Earthstar Geographics."
+>
+  <ClassifyLab client:visible lang="vi" />
+</Figure>
+
+Với bộ mẫu gợi ý (37 điểm, mỗi điểm 9 pixel):
+
+<div class="table-wrap">
+
+| Bộ phân loại | Nước | Cây gỗ | Thực vật thấp | Đô thị | Đất trống | Trùng WorldCover |
+|---|---|---|---|---|---|---|
+| Khoảng cách nhỏ nhất | 7,82 | 3,25 | 5,21 | 8,45 | 1,49 | 69,7 % |
+| Hợp lý cực đại | 6,19 | 2,54 | 5,86 | 10,01 | 1,62 | 70,5 % |
+| WorldCover (tham chiếu) | 7,33 | 6,19 | 1,67 | 10,84 | 0,18 | — |
+
+</div>
+
+Đơn vị: km². Cả hai bộ phân loại đều cho **quá ít cây gỗ và quá nhiều thực vật thấp**. Lý do: cây xanh xen trong phố Hà Nội có tán nhỏ, nên pixel 10 m thường trộn cây với mái nhà và đường (pixel hỗn hợp, Chương 4). Phổ của chúng giống thực vật thấp hơn là rừng cây thuần. Đất trống cũng bị thừa gần 9 lần: mái tôn, bãi công trường và cát ướt ven sông có phổ gần với bãi cát.
+
+### Hai bộ phân loại khác nhau ở đâu?
+
+<Figure
+  title="Hình 9.2 — Không gian phổ Đỏ – NIR: ranh giới của hai bộ phân loại"
+  try="Chuyển giữa 'Khoảng cách nhỏ nhất' và 'Hợp lý cực đại'. Ranh giới giữa cây gỗ (xanh lục) và thực vật thấp (vàng) dịch đi thế nào? Vì sao elip của lớp Đô thị dài và nghiêng?"
+  source="2500 pixel ngẫu nhiên của ảnh Sentinel-2 12/02/2024, tô màu theo WorldCover. Trung bình và elip 2σ tính từ bộ mẫu gợi ý (3 × 3 pixel mỗi điểm). Vùng nền: bộ phân loại huấn luyện trên đúng 2 kênh B4, B8 (bản đồ Hình 9.1 dùng 6 kênh)."
+>
+  <FeatureSpace client:visible lang="vi" />
+</Figure>
+
+- <Term id="minimum-distance">Khoảng cách nhỏ nhất</Term> chỉ nhớ **tâm** của mỗi lớp. Pixel thuộc về tâm gần nhất, nên ranh giới là các đường trung trực thẳng.
+- <Term id="maximum-likelihood">Hợp lý cực đại</Term> nhớ cả tâm lẫn **độ phân tán** (ma trận hiệp phương sai) của mỗi lớp. Lớp phân tán rộng như Đô thị (mái tôn sáng, mái ngói, đường nhựa tối) "chiếm" vùng rộng hơn; lớp gọn như Nước chỉ nhận pixel rất giống nó. Ranh giới vì thế cong.
+
+<Depth level="advanced" title="Công thức">
+
+Với vectơ phổ **x**, trung bình lớp **μₖ** và ma trận hiệp phương sai **Σₖ** (tính từ mẫu huấn luyện):
+
+<p class="formula">Khoảng cách nhỏ nhất: k* = argminₖ ‖x − μₖ‖²</p>
+<p class="formula">Hợp lý cực đại: k* = argmaxₖ [ −½ ln|Σₖ| − ½ (x − μₖ)ᵀ Σₖ⁻¹ (x − μₖ) ]</p>
+
+Hợp lý cực đại cần ít nhất d + 1 pixel mẫu mỗi lớp (d = số kênh, ở đây 6) để Σₖ khả nghịch. Lớp Đất trống chỉ có 5 điểm × 9 pixel, nên sổ tay cộng thêm một lượng nhỏ (0,1 % phương sai trung bình) vào đường chéo Σₖ để tránh lỗi số. Random Forest (Breiman 2001) không cần giả định phân phối chuẩn và thường tốt hơn cả hai, nhưng khó vẽ trong không gian phổ. Bạn sẽ thử nó trong bài thực hành bằng Earth Engine.
+
+</Depth>
+
+## 9.3 Phân loại không giám sát: k-means
+
+<Figure
+  title="Hình 9.3 — k-means gom pixel thành cụm, rồi bạn đặt tên"
+  try="Với k = 5, cụm nào chắc chắn là nước? Có cụm nào trùng hẳn với một lớp WorldCover không? Tăng k lên 8: các cụm đô thị tách ra thế nào? Bấm 'Khởi tạo lại' vài lần: kết quả có thay đổi không?"
+  source="Sentinel-2B L2A 12/02/2024, 6 kênh như Hình 9.1. Tâm cụm khớp trên 20 000 pixel ngẫu nhiên (k-means++ có hạt giống cố định), rồi gán mọi pixel vào tâm gần nhất. Cột cuối của bảng thông số là lớp WorldCover chiếm nhiều nhất trong cụm."
+>
+  <KMeansLab client:visible lang="vi" />
+</Figure>
+
+Với k = 5 (lần chạy 1), một cụm chiếm 29 % khung, có NDVI tâm cụm −0,13 và 94 % pixel là nước theo WorldCover: dễ đặt tên. Nhưng **ba trong năm cụm** đều chủ yếu là đô thị (88 %, 74 % và 59 %), khác nhau ở độ sáng mái nhà. Cây gỗ chỉ có một cụm (NDVI 0,63, 74 % cây gỗ). Thực vật thấp và đất trống không có cụm riêng. Bài học: k-means gom theo **phổ**, còn lớp của con người gom theo **chức năng**. Hai cách gom không trùng nhau.
+
+## 9.4 Ma trận nhầm lẫn và các loại độ chính xác
+
+Để biết bản đồ đúng đến đâu, ta lấy một **mẫu kiểm định** gồm các pixel ngẫu nhiên, **khác với mẫu huấn luyện**, rồi so nhãn bản đồ với nhãn tham chiếu tại từng pixel. Kết quả đếm được xếp thành <Term id="confusion-matrix">ma trận nhầm lẫn</Term>: hàng là lớp trên bản đồ, cột là lớp tham chiếu.
+
+- <Term id="overall-accuracy">Độ chính xác tổng thể (OA)</Term>: tỷ lệ pixel đúng.
+- <Term id="users-accuracy">Độ chính xác người dùng (UA)</Term> của một lớp: trong các pixel bản đồ gọi là "cây gỗ", bao nhiêu phần trăm đúng là cây gỗ? Đây là câu hỏi của người **dùng** bản đồ.
+- <Term id="producers-accuracy">Độ chính xác người sản xuất (PA)</Term>: trong cây gỗ thật, bao nhiêu phần trăm bản đồ tìm ra? Đây là câu hỏi của người **làm** bản đồ.
+- **F1** là trung bình điều hoà của UA và PA.
+
+<Figure
+  title="Hình 9.4 — Lấy mẫu kiểm định, ma trận nhầm lẫn và diện tích có khoảng tin cậy"
+  try="Giữ thiết kế phân tầng, kéo cỡ mẫu từ 5 lên 200 mỗi lớp: khoảng tin cậy của diện tích cây gỗ hẹp lại thế nào? Chuyển sang 'Ngẫu nhiên đơn giản' với tổng 250 điểm: lớp Đất trống còn mấy điểm mẫu? Bấm 'Lấy mẫu lại' nhiều lần và đếm số lần dấu ✓ biến mất."
+  source="Bản đồ: hợp lý cực đại với bộ mẫu gợi ý (Hình 9.1). Tham chiếu: ESA WorldCover v200, có sẵn cho mọi pixel nên tam giác xanh là diện tích 'đúng' của bài tập này. Mẫu kiểm định ngẫu nhiên có hạt giống; ô trắng = trùng, ô đen = khác. Ước lượng theo Olofsson và cs. (2014), khoảng tin cậy 95 % = ±1,96 sai số chuẩn."
+>
+  <AccuracyLab client:visible lang="vi" />
+</Figure>
+
+Với thiết kế phân tầng 50 điểm mỗi lớp (lần lấy mẫu 1):
+
+- OA thô (đếm thẳng 250 điểm) là 60,8 %. OA **có trọng số** theo diện tích từng lớp trên bản đồ là **72,5 ± 3,7 %**. Con số sau mới đúng cho cả bản đồ: đếm thẳng sai vì mỗi lớp được lấy 50 điểm bất kể lớp đó lớn hay nhỏ. Tỷ lệ trùng thật trên toàn bộ pixel là 70,5 %, nằm trong khoảng tin cậy.
+- UA Nước = 100 %, nhưng UA Đất trống chỉ 4 %: hầu hết pixel bản đồ gọi là đất trống thực ra là đô thị (30/50) hoặc nước (13/50).
+- Kappa = 0,51. Pontius & Millones (2011) chỉ ra kappa so sánh với một "mức ngẫu nhiên" không có ý nghĩa thực tế, nên báo cáo nên dùng OA, UA, PA kèm diện tích ước lượng thay cho kappa.
+
+<div class="worked">
+
+#### Ví dụ: ước lượng diện tích cây gỗ từ mẫu
+
+Bản đồ đếm được 2,54 km² cây gỗ. Nhưng cây gỗ thật còn nằm lẫn trong các lớp khác. Cột "Cây gỗ" (tham chiếu) của ma trận cho biết trong 50 điểm mẫu của mỗi lớp bản đồ có bao nhiêu điểm thật ra là cây gỗ:
+
+1. Tỷ lệ diện tích bản đồ của từng lớp: Nước W = 0,236; Cây gỗ 0,097; Thực vật thấp 0,224; Đô thị 0,382; Đất trống 0,062.
+2. Tỷ lệ điểm là cây gỗ trong mỗi lớp bản đồ: 0/50, 43/50, 27/50, 2/50, 5/50.
+3. Tỷ lệ diện tích cây gỗ = 0,236 × 0 + 0,097 × 0,86 + 0,224 × 0,54 + 0,382 × 0,04 + 0,062 × 0,10 ≈ 0,226.
+4. Diện tích = 0,226 × 26,2 km² ≈ **5,91 km²**, khoảng tin cậy 95 % là ± 1,02 km².
+
+Diện tích WorldCover là 6,19 km², nằm trong khoảng 4,89–6,93 km². Như vậy cách đếm pixel (2,54 km²) sai hơn 2 lần, còn ước lượng từ 250 điểm mẫu lại gần đúng. Đây là lý do Olofsson và cs. (2014) khuyên **không báo cáo diện tích bằng cách đếm pixel**.
+
+</div>
+
+<Depth level="advanced" title="Công thức Olofsson và cs. (2014)">
+
+Gọi nᵢⱼ là số điểm mẫu có lớp bản đồ i và lớp tham chiếu j, nᵢ. là số điểm của lớp bản đồ i, Wᵢ là tỷ lệ diện tích lớp i trên bản đồ, A là tổng diện tích:
+
+<p class="formula">p̂ᵢⱼ = Wᵢ nᵢⱼ / nᵢ.     Â_j = A Σᵢ p̂ᵢⱼ     SE(p̂.ⱼ) = √ Σᵢ Wᵢ² (nᵢⱼ/nᵢ.)(1 − nᵢⱼ/nᵢ.) / (nᵢ. − 1)</p>
+<p class="formula">OA = Σⱼ p̂ⱼⱼ     UAᵢ = p̂ᵢᵢ / p̂ᵢ.     PAⱼ = p̂ⱼⱼ / p̂.ⱼ     CI 95 % = ± 1,96 A · SE</p>
+
+Thiết kế phân tầng với số điểm tối thiểu cho mỗi lớp (thường 50–100) giúp các lớp hiếm như Đất trống có đủ mẫu. Với mẫu ngẫu nhiên đơn giản 250 điểm, lớp Đất trống chỉ nhận khoảng 15 điểm, nên PA và UA của nó dao động rất mạnh giữa các lần lấy mẫu.
+
+</Depth>
+
+## 9.5 Dữ liệu tham chiếu: điểm yếu lớn nhất
+
+Mọi phép đánh giá chỉ tốt bằng dữ liệu tham chiếu. Theo báo cáo kiểm định của ESA, độ chính xác tổng thể toàn cầu của WorldCover v200 vào khoảng 77 %. Tức là cứ khoảng 4 pixel lại có 1 pixel WorldCover có thể sai. Khi bản đồ của bạn "khác WorldCover", có thể bản đồ của bạn sai, có thể WorldCover sai, cũng có thể cả hai. Hơn nữa WorldCover là năm 2021, còn ảnh là năm 2024: những ô đất xây mới trong ba năm đó bị tính là "sai".
+
+Trong công việc thật, nên:
+
+1. Lấy mẫu kiểm định phân tầng theo bản đồ của bạn.
+2. Giải đoán từng điểm trên ảnh độ phân giải rất cao cùng thời điểm (Google Earth, ảnh máy bay không người lái) hoặc đi thực địa. Ghi lại mức độ chắc chắn.
+3. Báo cáo ma trận nhầm lẫn theo tỷ lệ diện tích, OA, UA, PA và diện tích có khoảng tin cậy.
+
+## 9.6 Thực hành
+
+Notebook Python tải ảnh Sentinel-2 cùng khung, huấn luyện Random Forest trong Earth Engine bằng các điểm mẫu, lấy mẫu kiểm định phân tầng và tính diện tích có khoảng tin cậy. Script GEE làm cùng việc cho một khu vực bạn tự chọn.
+
+<LabLinks notebook="labs/ch09_classification.ipynb" gee="labs/ch09_classification.js" />
+
+**Bài tập gợi ý**
+
+1. Thêm 10 điểm mẫu Cây gỗ trong các công viên lớn (Thủ Lệ, Bách Thảo) ở Hình 9.1. Diện tích cây gỗ và mức trùng WorldCover thay đổi bao nhiêu?
+2. Ở Hình 9.4, với tổng 250 điểm, thiết kế nào cho khoảng tin cậy diện tích Đất trống hẹp hơn? Vì sao?
+3. Chọn 30 điểm ngẫu nhiên, tự giải đoán bằng ảnh nền vệ tinh rồi so với WorldCover. Bạn và WorldCover khác nhau ở bao nhiêu điểm?
+
+## 9.7 Ôn tập
+
+<Quiz client:visible lang="vi" items={quiz} />
+
+## Tài liệu tham khảo
+
+- Breiman, L. (2001). Random forests. *Machine Learning*, 45(1), 5–32.
+- Congalton, R. G. (1991). A review of assessing the accuracy of classifications of remotely sensed data. *Remote Sensing of Environment*, 37(1), 35–46.
+- Foody, G. M. (2002). Status of land cover classification accuracy assessment. *Remote Sensing of Environment*, 80(1), 185–201.
+- Olofsson, P., Foody, G. M., Herold, M., Stehman, S. V., Woodcock, C. E., & Wulder, M. A. (2014). Good practices for estimating area and assessing accuracy of land change. *Remote Sensing of Environment*, 148, 42–57.
+- Pontius, R. G., & Millones, M. (2011). Death to Kappa: birth of quantity disagreement and allocation disagreement for accuracy assessment. *International Journal of Remote Sensing*, 32(15), 4407–4429.
+- Richards, J. A., & Jia, X. (2006). *Remote Sensing Digital Image Analysis* (4th ed.). Springer.
+- Zanaga, D. và cs. (2022). *ESA WorldCover 10 m 2021 v200*. Zenodo.

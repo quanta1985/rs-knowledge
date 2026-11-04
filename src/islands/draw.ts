@@ -2,7 +2,7 @@ import { autoStretch, band, colormap, stretchByte, type Cube, type Stretch } fro
 
 export type StretchMode = 'p2-98' | 'fixed-0.3' | 'none';
 
-const limits = (v: Uint16Array, scale: number, mode: StretchMode): Stretch => {
+const limits = (v: ArrayLike<number>, scale: number, mode: StretchMode): Stretch => {
   if (mode === 'fixed-0.3') return { lo: 0, hi: 0.3 / scale };
   if (mode === 'none') return { lo: 0, hi: 1 / scale };
   return autoStretch(v);

@@ -4,6 +4,10 @@ import type { Lang } from '../i18n/ui';
 type Bi = { vi: string; en: string };
 export type QuizItem = { q: Bi; options: Bi[]; answer: number; why: Bi };
 
+/** Deterministic option order per question (same on server and client), so answers are not always first. */
+const order = (n: number, seed: number): number[] =>
+  Array.from({ length: n }, (_, j) => j).sort((a, b) => ((a * 7 + seed * 3) % 11) - ((b * 7 + seed * 3) % 11) || a - b);
+
 export default function Quiz({ lang, items }: { lang: Lang; items: QuizItem[] }) {
   const uid = useId();
   const [picked, setPicked] = useState<Record<number, number>>({});
@@ -18,11 +22,11 @@ export default function Quiz({ lang, items }: { lang: Lang; items: QuizItem[] })
           <li key={i}>
             <fieldset>
               <legend>{it.q[lang]}</legend>
-              {it.options.map((o, j) => (
+              {order(it.options.length, i).map((j) => (
                 <label key={j}>
-                  <input type="radio" name={`${uid}-q${i}`} checked={picked[i] === j} disabled={picked[i] != null}
-                    onChange={() => setPicked((p) => ({ ...p, [i]: j }))} />
-                  <span>{o[lang]}</span>
+                  <input type="radio" name={`${uid}-q${i}`} checked={picked[i] === j} aria-disabled={picked[i] != null}
+                    onChange={() => setPicked((p) => (p[i] != null ? p : { ...p, [i]: j }))} />
+                  <span>{it.options[j][lang]}</span>
                 </label>
               ))}
               {picked[i] != null && (

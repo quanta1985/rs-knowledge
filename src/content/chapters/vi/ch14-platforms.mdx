@@ -1,0 +1,174 @@
+---
+title: Nền tảng dữ liệu mở & Google Earth Engine
+n: 14
+summary: Lấy ảnh vệ tinh ở đâu, và xử lý hàng trăm ảnh mà không cần tải về máy như thế nào. Chương này so sánh các kho dữ liệu mở, rồi giải thích cách Google Earth Engine làm việc qua ba thao tác lọc, ánh xạ và rút gọn trên toàn bộ ảnh Sentinel-2 năm 2024 của khu Hồ Tây.
+objectives:
+  - Chọn được kho dữ liệu phù hợp (Copernicus, USGS, NASA, Earth Engine, Planetary Computer, VNSC) cho một bài toán.
+  - Phân biệt đối tượng phía máy khách và phía máy chủ; giải thích đánh giá lười của Earth Engine.
+  - Lọc một ImageCollection theo không gian, thời gian và thuộc tính; biết giới hạn của thuộc tính mây cấp tile.
+  - Dùng map() và reducer (median, mean, max, count) để tạo ảnh tổng hợp; đọc số quan sát hợp lệ.
+  - Viết cùng một quy trình bằng JavaScript (Code Editor) và Python.
+updated: "2026-11-04"
+---
+import Term from '../../../components/Term.astro';
+import Depth from '../../../components/Depth.astro';
+import Figure from '../../../components/Figure.astro';
+import LabLinks from '../../../components/LabLinks.astro';
+import CollectionFilter from '../../../islands/CollectionFilter.tsx';
+import LazyGraph from '../../../islands/LazyGraph.tsx';
+import ReducerLab from '../../../islands/ReducerLab.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/ch14.json';
+
+## 14.1 Lấy dữ liệu ở đâu
+
+Phần lớn ảnh dùng trong sổ tay là **dữ liệu mở**: ai cũng tải được miễn phí sau khi đăng ký tài khoản. Có hai kiểu nền tảng:
+
+- **Kho để tải về:** tìm ảnh, tải file về máy rồi xử lý bằng QGIS, SNAP hay Python.
+- **Nền tảng tính toán trên đám mây:** dữ liệu và máy tính nằm cùng một chỗ, bạn gửi đoạn mã lên và chỉ nhận về kết quả.
+
+<div class="table-wrap">
+
+| Nền tảng | Dữ liệu chính | Kiểu | Ghi chú |
+|---|---|---|---|
+| Copernicus Data Space Ecosystem | Sentinel-1, 2, 3, 5P | Tải về + API + xử lý | Kho chính thức của chương trình Copernicus (EU/ESA) |
+| USGS EarthExplorer | Landsat từ 1972, ASTER, SRTM | Tải về | Kho gốc của Landsat; cần tài khoản USGS |
+| NASA Earthdata Search | MODIS, VIIRS, GPM, SMAP… | Tải về + API | Tài khoản Earthdata Login |
+| Google Earth Engine | Hàng nghìn bộ dữ liệu (Landsat, Sentinel, MODIS, khí hậu, DEM…) | Tính toán trên đám mây | Miễn phí cho nghiên cứu, giáo dục, phi lợi nhuận; cần dự án Google Cloud |
+| Microsoft Planetary Computer | Landsat, Sentinel, nhiều bộ khác | Danh mục STAC + dữ liệu trên Azure | Đọc trực tiếp bằng Python (pystac-client) |
+| Trung tâm Vũ trụ Việt Nam (VNSC) | VNREDSat-1 | Đặt hàng | Ảnh độ phân giải cao của Việt Nam, chụp theo yêu cầu |
+
+</div>
+
+Sổ tay chọn **Earth Engine** cho các bài thực hành vì một lý do đơn giản: tính trung vị của 74 ảnh Sentinel-2 (mục 14.4) trên Earth Engine mất vài giây, trong khi tải 74 ảnh về máy là hàng chục GB.
+
+<Depth level="ref" title="Bảng tra: định dạng và chuẩn hay gặp">
+
+<div class="table-wrap">
+
+| Tên | Là gì | Gặp ở đâu |
+|---|---|---|
+| GeoTIFF / COG | Ảnh raster có tọa độ; COG (Cloud-Optimized GeoTIFF) đọc được từng phần qua mạng | Landsat Collection 2, Planetary Computer |
+| SAFE | Thư mục gói một cảnh Sentinel (ảnh JP2 + metadata XML) | Copernicus Data Space |
+| NetCDF / HDF | Nhiều lớp và nhiều thời điểm trong một file | MODIS, dữ liệu khí hậu, Sentinel-5P |
+| STAC | Chuẩn mô tả danh mục ảnh (JSON) để tìm kiếm qua API | Planetary Computer, Copernicus, AWS |
+
+</div>
+
+</Depth>
+
+## 14.2 Earth Engine làm việc thế nào: đánh giá lười
+
+Trong Earth Engine, `ee.Image` hay `ee.ImageCollection` không chứa pixel nào. Chúng chỉ là **mô tả** công việc cần làm. Mỗi lệnh `filter`, `map`, `median` nối thêm một nút vào đồ thị biểu thức. Chỉ khi bạn yêu cầu một kết quả cụ thể (`print`, `Map.addLayer`, `getInfo()`, `Export`), mô tả đó mới được gửi lên máy chủ. Máy chủ cũng chỉ tính đúng phần cần thiết, ví dụ chỉ các ô bản đồ đang hiện trên màn hình. Cách làm này gọi là <Term id="lazy-evaluation">đánh giá lười</Term>.
+
+<Figure
+  title="Hình 14.1 — Đồ thị biểu thức được dựng dần, chỉ tính khi cần"
+  try="Bấm 'Bước tiếp' bốn lần: số pixel đã tính là bao nhiêu? Đến bước 5 (Map.addLayer), máy chủ tính những pixel nào? Đổi sang Python để so sánh cú pháp."
+  source="Sơ đồ minh họa. Cú pháp theo tài liệu Earth Engine (JavaScript Code Editor và Python API)."
+>
+  <LazyGraph client:visible lang="vi" />
+</Figure>
+
+Hệ quả thực tế:
+
+- Đừng dùng vòng lặp `for` của JavaScript/Python trên ảnh. Hãy dùng `map()` để máy chủ xử lý song song.
+- `getInfo()` kéo kết quả về máy, nên chỉ dùng cho kết quả nhỏ (vài con số, vài trăm điểm). Kết quả lớn thì dùng `Export`.
+- Độ phân giải tính toán do **yêu cầu** quyết định (mức zoom bản đồ, hay tham số `scale` của `reduceRegion`), không do ảnh gốc. Quên đặt `scale` là lỗi rất hay gặp.
+
+## 14.3 Lọc một ImageCollection
+
+<Term id="image-collection">ImageCollection</Term> là một chồng ảnh. Bộ `COPERNICUS/S2_SR_HARMONIZED` chứa mọi cảnh Sentinel-2 mức 2A trên toàn cầu. Ba bộ lọc cơ bản là `filterBounds` (không gian), `filterDate` (thời gian) và `filter` (thuộc tính, ví dụ phần trăm mây).
+
+<Figure
+  title="Hình 14.2 — Mọi lần Sentinel-2 chụp khung Hồ Tây năm 2024"
+  try="Đặt 'Mây của tile ≤ 20 %': giữ lại bao nhiêu ngày? Trong số đó, bao nhiêu ngày khung Hồ Tây thực sự trong? Đưa 'Mây của tile' về 100 % rồi đặt 'Khung trong ≥ 90 %': số ngày tăng hay giảm? Xem đoạn mã thay đổi theo từng thao tác."
+  source="COPERNICUS/S2_SR_HARMONIZED, filterBounds(khung 5,12 × 5,12 km Hồ Tây), năm 2024: 74 ảnh, 73 ngày (gộp các tile cùng ngày). Mây của tile = CLOUDY_PIXEL_PERCENTAGE (thuộc tính của cả tile 100 × 100 km, lấy nhỏ nhất trong ngày). Khung trong = tỷ lệ pixel có Cloud Score+ cs_cdf ≥ 0,6 trong khung. Contains modified Copernicus Sentinel data 2024."
+>
+  <CollectionFilter client:visible lang="vi" />
+</Figure>
+
+Năm 2024 có **74 ảnh** của 73 ngày chụp (Sentinel-2A 36 ngày, Sentinel-2B 37 ngày), tức cứ khoảng 5 ngày một lần.
+
+- Lọc theo thuộc tính mây của tile **≤ 20 %** chỉ giữ **8 ngày**; 7 ngày trong số đó khung Hồ Tây thực sự trong.
+- Lọc theo độ trong **của chính khung** (≥ 90 %) giữ được **16 ngày**, gấp đôi.
+
+Lý do: `CLOUDY_PIXEL_PERCENTAGE` là tỷ lệ mây của **cả tile 100 × 100 km**. Ngày 26/7/2024, tile có 79,9 % mây nhưng khung Hồ Tây lại trong hoàn toàn. Ngược lại, có **44 ngày** khung gần như bị che kín (trong < 5 %). Từ tháng 1 đến tháng 6, chỉ tháng 2 và tháng 4 có ngày khung trong ≥ 90 % (Chương 4 đã thấy điều này qua ba năm).
+
+<Depth level="advanced" title="Lọc theo vùng của bạn, không theo tile">
+
+Muốn lọc theo độ trong của vùng nghiên cứu, phải tính nó cho từng ảnh bằng `map()` + `reduceRegion()`, rồi lọc theo thuộc tính mới:
+
+```js
+var cs = ee.ImageCollection('GOOGLE/CLOUD_SCORE_PLUS/V1/S2_HARMONIZED');
+var col = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED').filterBounds(frame)
+  .filterDate('2024-01-01', '2025-01-01').linkCollection(cs, ['cs_cdf'])
+  .map(function (img) {
+    var clear = img.select('cs_cdf').gte(0.6)
+      .reduceRegion({reducer: ee.Reducer.mean(), geometry: frame, scale: 20}).get('cs_cdf');
+    return img.set('clear', clear);
+  })
+  .filter(ee.Filter.gte('clear', 0.9));
+```
+
+Cách này tốn tính toán hơn (một phép rút gọn cho mỗi ảnh), nhưng cho đúng thứ bạn cần.
+
+</Depth>
+
+## 14.4 Ánh xạ và rút gọn: từ 74 ảnh thành một ảnh
+
+`map(f)` áp dụng hàm `f` cho từng ảnh (ví dụ tính NDVI và che mây). Một <Term id="reducer">reducer</Term> gộp chồng ảnh thành **một ảnh**, tính riêng cho từng pixel: trung vị, trung bình, lớn nhất, nhỏ nhất, hoặc đếm số quan sát hợp lệ.
+
+<Figure
+  title="Hình 14.3 — Rút gọn chồng NDVI năm 2024 trên bản đồ Hồ Tây"
+  try="Chọn median rồi max: bãi bồi sông Hồng đổi màu ra sao? Chọn count: vùng nào có ít quan sát hợp lệ nhất? Di chuột lên một pixel ruộng để xem chuỗi NDVI của nó và vị trí của giá trị rút gọn (đường vàng)."
+  source="COPERNICUS/S2_SR_HARMONIZED 2024, map(): NDVI = (B8 − B4)/(B8 + B4), che pixel có Cloud Score+ cs_cdf < 0,6, lấy trung bình pixel trong về lưới 40 m; 73 ngày, gộp tile cùng ngày bằng mosaic(). Reducer chạy trong trình duyệt trên chồng đã xuất (cùng định nghĩa ee.Reducer). Thang màu BrBG cố định −1…+1. Contains modified Copernicus Sentinel data 2024. Ảnh nền © Esri, Maxar, Earthstar Geographics."
+>
+  <ReducerLab client:visible lang="vi" />
+</Figure>
+
+Sau khi che mây, mỗi pixel 40 m có trung bình **21,3 quan sát hợp lệ** trong năm 2024 (ít nhất 16, nhiều nhất 27), dù có 73 ngày chụp.
+
+- **median** cho ảnh "điển hình", ít bị ảnh hưởng bởi mây sót hay ngày ngập. Trung vị của các pixel trung vị trong khung là 0,185.
+- **max** cho ảnh "xanh nhất" của năm. Trung vị của các pixel max cao hơn, 0,272. Đây là cách tổng hợp thường dùng để lập bản đồ thực vật.
+- **min** dễ bị kéo xuống bởi một lần ngập hay một đám mây sót. Pixel ruộng bãi bồi đạt max 0,881 ngày 4/9/2024. Sau đó NDVI âm từ 14/9 đến giữa tháng 10, thấp nhất −0,521 ngày 24/9. Rất có thể bãi bị ngập sau bão Yagi rồi nước rút dần (Chương 11). Đây là diễn giải, chưa đối chiếu thực địa.
+
+<Depth level="advanced" title="Cùng một quy trình bằng JavaScript và Python">
+
+<div class="table-wrap">
+
+| Bước | JavaScript (Code Editor) | Python (earthengine-api) |
+|---|---|---|
+| Khởi tạo | (tự động) | `ee.Authenticate(); ee.Initialize(project='…')` |
+| Hàm cho map | `function (img) { return img.normalizedDifference(['B8','B4']); }` | `lambda img: img.normalizedDifference(['B8', 'B4'])` |
+| Rút gọn | `col.median()` | `col.median()` |
+| Xem số | `print(col.size())` | `print(col.size().getInfo())` |
+| Bản đồ | `Map.addLayer(img, vis)` | `geemap.Map().addLayer(img, vis)` hoặc `getMapId()` |
+| Xuất | `Export.image.toDrive({...})` | `ee.batch.Export.image.toDrive(...).start()` |
+
+</div>
+
+Khác biệt chính: trong Python, mọi kết quả phải gọi `getInfo()` mới về máy; trong Code Editor, `print` tự gọi giúp bạn.
+
+</Depth>
+
+## 14.5 Thực hành
+
+Notebook làm lại toàn bộ chương: lọc collection, so sánh hai cách lọc mây, map NDVI, so sánh các reducer và xuất ảnh trung vị về Google Drive. Script GEE làm cùng việc trong Code Editor.
+
+<LabLinks notebook="labs/ch14_gee.ipynb" gee="labs/ch14_gee.js" />
+
+**Bài tập gợi ý**
+
+1. Đổi khung sang quê bạn. Năm 2024 có bao nhiêu ngày khung trong ≥ 90 %?
+2. Tạo ảnh NDVI max theo từng quý. Quý nào xanh nhất?
+3. Viết một hàm `map()` tính thêm MNDWI, rồi dùng `qualityMosaic('ndvi')` thay cho `max()`. Hai cách khác nhau thế nào?
+
+## 14.6 Ôn tập
+
+<Quiz client:visible lang="vi" items={quiz} />
+
+## Tài liệu tham khảo
+
+- Gorelick, N. và cs. (2017). Google Earth Engine: Planetary-scale geospatial analysis for everyone. *Remote Sensing of Environment*, 202, 18–27.
+- Pasquarella, V. J., Brown, C. F., Czerwinski, W., & Rucklidge, W. J. (2023). Comprehensive quality assessment of optical satellite imagery using weakly supervised video learning. *CVPR Workshops*, 2125–2135.
+- Wulder, M. A. và cs. (2012). Opening the archive: How free data has enabled the science and monitoring promise of Landsat. *Remote Sensing of Environment*, 122, 2–10.

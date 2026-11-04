@@ -1,0 +1,38 @@
+[
+ {
+  "id": "earth-engine",
+  "vi": "Google Earth Engine",
+  "en": "Google Earth Engine",
+  "def": {
+   "vi": "Nền tảng điện toán đám mây chứa hàng nghìn bộ dữ liệu vệ tinh và khí hậu, cho phép phân tích bằng JavaScript hoặc Python mà không cần tải ảnh về.",
+   "en": "Cloud platform holding thousands of satellite and climate datasets, analysed with JavaScript or Python without downloading images."
+  }
+ },
+ {
+  "id": "image-collection",
+  "vi": "ImageCollection",
+  "en": "ImageCollection",
+  "def": {
+   "vi": "Một chồng ảnh trong Earth Engine (ví dụ mọi cảnh Sentinel-2), lọc bằng filterBounds, filterDate, filter.",
+   "en": "A stack of images in Earth Engine (e.g. every Sentinel-2 scene), filtered with filterBounds, filterDate and filter."
+  }
+ },
+ {
+  "id": "reducer",
+  "vi": "Reducer (phép rút gọn)",
+  "en": "Reducer",
+  "def": {
+   "vi": "Phép gộp nhiều giá trị thành một (trung vị, trung bình, lớn nhất, đếm…), áp dụng theo thời gian cho từng pixel hoặc theo không gian cho một vùng.",
+   "en": "An operation combining many values into one (median, mean, max, count…), applied over time per pixel or over space within a region."
+  }
+ },
+ {
+  "id": "lazy-evaluation",
+  "vi": "Đánh giá lười",
+  "en": "Lazy evaluation",
+  "def": {
+   "vi": "Earth Engine chỉ dựng mô tả phép tính; máy chủ chỉ tính khi có yêu cầu kết quả (print, Map.addLayer, getInfo, Export) và chỉ tính phần cần thiết.",
+   "en": "Earth Engine only builds a description of the computation; servers compute when a result is requested (print, Map.addLayer, getInfo, Export), and only what is needed."
+  }
+ }
+]

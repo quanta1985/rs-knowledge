@@ -1,0 +1,131 @@
+---
+title: Colour composites & visual interpretation
+n: 8
+summary: The same scene can look true-colour, bright red or yellow-brown depending on which bands go to which colour. This chapter uses four real Sentinel-2 scenes of Ca Mau, An Giang, Da Lat and Da Nang to practise choosing composites, reading the nine interpretation keys and testing yourself with questions on the map.
+objectives:
+  - Build and read true-colour, near-infrared false-colour, agriculture and SWIR urban composites.
+  - Know that colours depend on the bands and the stretch, and always state both.
+  - Use the nine interpretation keys (tone, colour, size, shape, texture, pattern, shadow, site, association) to identify features.
+  - Check an interpretation with spectral measurements (NDVI, MNDWI) instead of trusting the eye alone.
+updated: "2026-11-04"
+---
+import Term from '../../../components/Term.astro';
+import Depth from '../../../components/Depth.astro';
+import Figure from '../../../components/Figure.astro';
+import LabLinks from '../../../components/LabLinks.astro';
+import CompositeExplorer from '../../../islands/CompositeExplorer.tsx';
+import InterpretKeys from '../../../islands/InterpretKeys.tsx';
+import InterpretQuiz from '../../../islands/InterpretQuiz.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/ch08.json';
+
+## 8.1 Assigning bands to colours
+
+A screen has three colours: red, green, blue. Sentinel-2 has 13 bands. A <Term id="composite">colour composite</Term> picks three bands and assigns them to those colours. When invisible bands (near-infrared, SWIR) are put on screen we get a <Term id="false-colour">false-colour composite</Term>.
+
+| Composite (R-G-B) | Common name | Quick reading |
+|---|---|---|
+| 4-3-2 | True colour | As the eye sees; water dark, towns light grey |
+| 8-4-3 | NIR false colour | Vegetation red; the healthier and denser, the redder |
+| 11-8-2 | Agriculture | Crops bright green, bare soil brown, water black |
+| 12-11-4 | SWIR urban | Concrete and metal roofs stand out; thin smoke almost transparent |
+
+<Figure
+  title="Figure 8.1 — Four Sentinel-2 scenes, many composites"
+  try="In Ca Mau, switch from 4-3-2 to 8-4-3: which strips turn red, which plots blue-black? In Da Nang choose 12-11-4: how do the runways and roofs stand out? Try a custom R = B12, G = B8, B = B4."
+  source="Sentinel-2 L2A (COPERNICUS/S2_SR_HARMONIZED): Ca Mau 30 Jan 2024, An Giang 15 Jan 2024, Da Lat 11 Feb 2023, Da Nang 23 Mar 2023; each 512 × 512 pixels at 10 m, dates chosen with Cloud Score+. Per-band 2–98 % stretch, limits listed in the panel. Contains modified Copernicus Sentinel data 2023–2024. Basemap © Esri, Maxar, Earthstar Geographics."
+>
+  <CompositeExplorer client:visible lang="en" />
+</Figure>
+
+**Colour is not a property of the feature.** The same rice field is green in 4-3-2, red in 8-4-3 and bright green in 11-8-2. Even within one composite the <Term id="stretch">stretch</Term> changes colours: a per-scene 2–98 % stretch makes two very different scenes look equally contrasted. When you show an image, always state the band combination and the stretch.
+
+## 8.2 The nine interpretation keys
+
+Image interpreters do not only look at colour. Since the days of aerial photographs, the cues the eye uses to recognise features have been systematised as <Term id="interpretation-key">interpretation keys</Term> (Olson, 1960). Each key in Figure 8.2 comes with a real example and the spectral measurements at the pin.
+
+<Figure
+  title="Figure 8.2 — The nine interpretation keys on Vietnamese images"
+  try="Go through keys 1 to 9. For 'Association', compare the MNDWI of the blue-purple block with that of the Han River (key 'Tone'): why is the block not water? Zoom in and switch to the map basemap to cross-check."
+  source="Sentinel-2 L2A as in Figure 8.1; the shadow example uses the Hanoi image of 5 Oct 2023 from Chapter 7. NDVI, MNDWI and brightness are 3×3 pixel means at the pin. Statements marked 'interpretation' are not field-checked. Contains modified Copernicus Sentinel data 2023–2024. Basemap © Esri, Maxar, Earthstar Geographics."
+>
+  <InterpretKeys client:visible lang="en" />
+</Figure>
+
+<Depth level="ref" title="Reference: the nine interpretation keys">
+
+<div class="table-wrap">
+
+| Key | Question | Example in this handbook |
+|---|---|---|
+| Tone | Light or dark? | Han River darker than the streets, especially in NIR |
+| Colour | What colour, in which composite? | Forest red in 8-4-3 (Da Lat) |
+| Size | How big against the scale bar? | Central Da Lat lake ≈ 0.33 km² |
+| Shape | Geometric or natural? | Da Nang runways |
+| Texture | Smooth or rough? | Forest on Cam Mountain |
+| Pattern | How do elements repeat? | Shrimp ponds and tree strips in Ca Mau |
+| Shadow | Which direction, how long? | Cloud shadow over Hanoi |
+| Site | Where in the landscape? | Houses at the foot of Cam Mountain |
+| Association | What comes with it? | Solar panels next to a settlement |
+
+</div>
+
+</Depth>
+
+<div class="worked">
+
+#### Example: something that looks like water but is not
+
+At the foot of Cam Mountain (An Giang) there is a very uniform blue-purple rectangle. In true colour it looks like a lake.
+
+1. Measure the spectrum in a circle of radius 30 pixels in the middle: MNDWI = **−0.58**, NDVI = 0.22. Water has positive MNDWI (Chapter 6); the Han River in Da Nang has MNDWI = +0.49.
+2. Pattern: the block is divided into a regular grid with straight internal tracks. Association: next to a settlement, on flat land.
+3. Conclusion (**interpretation**): it is most likely a solar farm. Panels absorb visible light strongly, so they look dark like water, but their SWIR reflectance differs from water.
+
+Lesson: the eye is fooled by tone and colour. Spectral measurements and the shape and pattern keys let you check.
+
+</div>
+
+In the Ca Mau scene, 27.3 % of pixels have MNDWI > 0 (flooded ponds) and 35.7 % have NDVI > 0.6 (dense vegetation). The two alternate in parallel strips at right angles to the natural creeks: the pattern of shrimp farming mixed with mangroves. This is an **interpretation** from pattern and spectra; separating shrimp–mangrove from other pond types needs field data or finer imagery.
+
+## 8.3 Test yourself on the map
+
+<Figure
+  title="Figure 8.3 — Interpretation quiz: click the requested feature"
+  try="Answer all 8 questions. Only a correct first click scores. If stuck, use 'Hint' before 'Show answer'."
+  source="Answers are scored with a rectangle plus a spectral condition on the pixel you click: water = MNDWI > 0, dense vegetation = NDVI > 0.6, airport = NDVI < 0.2, shadow = brightness < 0.08. Sentinel-2 L2A as in Figures 8.1 and 7.3. Basemap © Esri, Maxar, Earthstar Geographics."
+>
+  <InterpretQuiz client:visible lang="en" />
+</Figure>
+
+<Depth level="advanced" title="Common traps">
+
+- **Automatic stretches mislead.** A 2–98 % stretch makes every scene look equally contrasted. To compare brightness between scenes, use the same fixed stretch (as in Chapter 7).
+- **Terrain shading in L2A.** In the An Giang scene, forest NIR brightness correlates **negatively** with illumination computed from SRTM for the scene's sun angles (r = −0.47): shaded slopes are not darker as expected. The cause is not verified; one possibility is Sen2Cor's terrain correction. In mountains, do not rely on terrain shading in L2A images to infer slope direction.
+- **Mixed pixels.** At 10 m a 15 m wide canal covers one or two pixels and mixes with its banks (Chapter 4). The bright winding lines in Ca Mau have negative MNDWI: they are most likely canal banks with roads and houses, not open water.
+- **Date.** An Giang rice can be water, green crop or bare soil depending on the week (Chapter 6). Always put the acquisition date next to an interpretation.
+
+</Depth>
+
+## 8.4 Lab
+
+The notebook loads all four scenes, draws the composites with different stretches and measures spectra at the interpretation points. The GEE script quickly builds four composites for any area for interpretation practice.
+
+<LabLinks notebook="labs/ch08_interpretation.ipynb" gee="labs/ch08_interpretation.js" />
+
+**Suggested exercises**
+
+1. Pick a familiar area. For each key, find an example and record the composite you used.
+2. Find something that looks like water but is not (dark roofs, mountain shadow, solar panels). Measure its MNDWI to check.
+3. Show one scene with a 2–98 % stretch and with a fixed 0–0.3 stretch. How do the colours of forest and town change?
+
+## 8.5 Review
+
+<Quiz client:visible lang="en" items={quiz} />
+
+## References
+
+- Campbell, J. B., & Wynne, R. H. (2011). *Introduction to Remote Sensing* (5th ed.). Guilford Press.
+- Drusch, M., et al. (2012). Sentinel-2: ESA's optical high-resolution mission for GMES operational services. *Remote Sensing of Environment*, 120, 25–36.
+- Lillesand, T., Kiefer, R. W., & Chipman, J. (2015). *Remote Sensing and Image Interpretation* (7th ed.). Wiley.
+- Olson, C. E. (1960). Elements of photographic interpretation common to several sensors. *Photogrammetric Engineering*, 26(4), 651–656.

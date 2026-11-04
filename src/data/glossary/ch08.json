@@ -1,0 +1,20 @@
+[
+ {
+  "id": "false-colour",
+  "vi": "Ảnh giả màu",
+  "en": "False-colour composite",
+  "def": {
+   "vi": "Tổ hợp màu gán kênh không nhìn thấy (ví dụ cận hồng ngoại) vào màu đỏ, lục hoặc lam; thực vật hiện đỏ trong tổ hợp 8-4-3.",
+   "en": "Colour composite that assigns invisible bands (e.g. near-infrared) to red, green or blue; vegetation turns red in an 8-4-3 composite."
+  }
+ },
+ {
+  "id": "interpretation-key",
+  "vi": "Yếu tố giải đoán",
+  "en": "Interpretation key",
+  "def": {
+   "vi": "Dấu hiệu dùng để nhận biết đối tượng trên ảnh: tông, màu, kích thước, hình dạng, cấu trúc, mẫu hình, bóng, vị trí, liên quan.",
+   "en": "Cue used to identify features in an image: tone, colour, size, shape, texture, pattern, shadow, site, association."
+  }
+ }
+]

@@ -1,0 +1,203 @@
+---
+title: Remote sensing & satellite systems overview
+n: 1
+summary: Remote sensing is measuring from a distance. This chapter follows energy from its source to the user, introduces the four segments of a satellite system and the Earth-observation satellites flying overhead, positioned from real orbital elements, with real scene footprints around Hanoi.
+objectives:
+  - Define remote sensing; tell passive from active sensors.
+  - Describe the seven stages of the remote-sensing chain and the four segments of a satellite system.
+  - Name the main open-data Earth-observation satellites and read their altitude, inclination and period.
+  - Compare the area of one scene from different sensors with the size of the object you study.
+  - Know the key milestones of remote sensing worldwide and in Viet Nam.
+updated: "2026-11-04"
+---
+import Term from '../../../components/Term.astro';
+import Depth from '../../../components/Depth.astro';
+import Figure from '../../../components/Figure.astro';
+import LabLinks from '../../../components/LabLinks.astro';
+import RsChain from '../../../islands/RsChain.tsx';
+import EoMissions from '../../../islands/EoMissions.tsx';
+import FootprintMap from '../../../islands/FootprintMap.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/ch01.json';
+
+<p class="muted" style="font-size:0.9rem">This chapter is adapted from chapters 1 and 8 of <a href="https://satellite-rs-handbook.netlify.app/" rel="noopener"><em>Sổ tay Vệ tinh & Viễn thám</em></a> (Nguyễn Văn Tín, CC BY 4.0). The four segments, the milestones and the remote-sensing chain follow the original. The interactive figures, orbital numbers and real footprints are additions of this handbook.</p>
+
+## 1.1 What remote sensing is
+
+<Term id="remote-sensing">Remote sensing</Term> means gathering information about an object **without touching it**. In this handbook the "object" is land, water, vegetation and cities; "without touching" means measuring electromagnetic energy from a satellite hundreds of kilometres away.
+
+Following the classic presentation of the Canada Centre for Remote Sensing (CCRS), every remote-sensing system has seven stages, from energy source to application. There are two ways to get the energy:
+
+- A <Term id="passive-sensor">passive sensor</Term> measures energy that is already there: reflected sunlight (Sentinel-2, Landsat) or thermal radiation emitted by the surface itself (Landsat's thermal bands).
+- An <Term id="active-sensor">active sensor</Term> emits its own energy and records the echo. Sentinel-1 radar (Chapter 11) is an example: it images at night and through clouds.
+
+<Figure
+  title="Figure 1.1 — The seven-stage remote-sensing chain, with real examples from this handbook"
+  try="Click Optical → Thermal → Radar. In Thermal mode, why are stages 1 and 2 dimmed? Click stage 3 to see a Hanoi number for each kind."
+  source="Diagram after the seven CCRS stages (Natural Resources Canada, Fundamentals of Remote Sensing), adapted from Sổ tay Vệ tinh & Viễn thám (CC BY 4.0). Example numbers from Chapters 3, 6 and 11 of this handbook."
+>
+  <RsChain client:visible lang="en" />
+</Figure>
+
+Sunlight crosses the atmosphere **twice** (down and up), so optical images always carry atmospheric effects (Chapters 3 and 7). Thermal energy crosses it once, from the surface up. Radar also crosses it twice, but the atmosphere is almost transparent to microwaves.
+
+## 1.2 The four segments of a satellite system
+
+A satellite does not make maps on its own. It is one link in a four-segment system:
+
+<div class="table-wrap">
+
+| Segment | What it contains | Sentinel-2 example |
+|---|---|---|
+| Launch | Rockets, launch sites | Sentinel-2A launched on a Vega rocket from Kourou (French Guiana) in 2015 |
+| Space | **Bus** (structure, power, attitude control, thermal, communications) and **payload** (the instrument) | The payload is the MultiSpectral Instrument (MSI), 13 bands |
+| Ground | Control centre, receiving antennas, processing and archiving | ESA's <Term id="ground-segment">ground segment</Term> produces L1C and L2A |
+| User | People and software that use the data | You, opening an image in Earth Engine or QGIS |
+
+</div>
+
+Users usually see only the last segment, but data quality depends on all four: the orbit is kept by the launcher and thrusters, the sensor is calibrated in orbit, and the ground segment decides which <Term id="data-level">processing level</Term> you download.
+
+<Depth level="ref" title="Reference: processing levels">
+
+<div class="table-wrap">
+
+| Level | Content | Examples |
+|---|---|---|
+| L0 | Raw data from the satellite, uncalibrated | Rarely distributed |
+| L1 | Radiometrically calibrated and geometrically corrected; values are **top-of-atmosphere** (TOA) radiance or reflectance | Sentinel-2 L1C, Landsat Collection 2 Level-1, Sentinel-1 GRD |
+| L2 | Atmospherically corrected; **surface** reflectance or surface temperature | Sentinel-2 L2A, Landsat Collection 2 Level-2 |
+| L3, L4 | Temporal composites or modelled variables | Cloud-free mosaics, land-cover maps |
+
+</div>
+
+Chapters 4, 6 and 11 use L2A, Collection 2 Level-2 and GRD. Chapter 7 compares L1C with L2A.
+
+</Depth>
+
+## 1.3 The satellites flying overhead
+
+Figure 1.2 places 11 Earth-observation satellites on the globe. Positions come from **real orbital elements** published by CelesTrak on 3–4 November 2026, so you see them where they were at that time.
+
+<Figure
+  title="Figure 1.2 — Open-data Earth-observation satellites and VNREDSat-1"
+  try="Choose the 'Radar' group, then 'Optical'. Are their inclinations similar or very different? Pick VNREDSat-1 and compare 'Inclination' with 'SSO inclination (J2)'."
+  source="Mean orbital elements (GP/OMM) from CelesTrak, retrieved 4 Nov 2026. The handbook propagates them as circular orbits with J2 node drift, accurate to tens of km after a day; illustrative only, not for pass prediction. Basemap © Esri, Maxar, Earthstar Geographics."
+>
+  <EoMissions client:visible lang="en" />
+</Figure>
+
+All of them fly at 680–790 km with an inclination near 98°. This is a <Term id="sun-synchronous-orbit">sun-synchronous orbit</Term>: the satellite passes each place at the same local time, so illumination is similar from image to image. Chapter 2 explains what is special about 98°.
+
+<div class="worked">
+
+#### Example: Sentinel-2A's altitude from its orbital elements
+
+CelesTrak gives Sentinel-2A's mean motion: n = 14.3081738 revolutions per day.
+
+1. Period: T = 1440 min / 14.3081738 = **100.64 min**.
+2. Kepler's third law: a = ∛(μ T² / 4π²), with μ = 398,600.4 km³/s² and T = 6038.5 s, gives a = **7167.1 km**.
+3. Altitude above the 6378.1 km equatorial radius: h = 7167.1 − 6378.1 = **789.0 km**.
+4. Velocity: v = √(μ / a) = **7.46 km/s**, about 26,900 km/h.
+
+ESA quotes a mean altitude of 786 km for Sentinel-2. The 3 km difference comes from the reference radius (equatorial versus local).
+
+</div>
+
+<details>
+<summary>Data table: the 11 satellites in Figure 1.2</summary>
+
+<div class="table-wrap">
+
+| Satellite | Type | Altitude (km) | Inclination (°) | Period (min) |
+|---|---|---|---|---|
+| Sentinel-2A, 2B, 2C | Optical | 789.0 | 98.56–98.57 | 100.64 |
+| Sentinel-1A | Radar | 693.7 | 98.16 | 98.64 |
+| Sentinel-1C, 1D | Radar | 695.8 | 98.18 | 98.68 |
+| Landsat 8, 9 | Optical + thermal | 702.5 | 98.21–98.22 | 98.83 |
+| Terra (MODIS) | Optical | 689.3 | 97.93 | 98.55 |
+| Aqua (MODIS) | Optical | 685.9 | 98.45 | 98.48 |
+| VNREDSat-1 | Optical | 677.8 | 97.89 | 98.31 |
+
+</div>
+
+Altitudes derived from mean motion as in the example. Source: CelesTrak elements of 3–4 Nov 2026.
+
+</details>
+
+## 1.4 How large is one scene?
+
+Each acquisition records a strip as wide as the sensor's <Term id="swath">swath</Term>. Providers cut it into **scenes** or **tiles** for distribution. Scene size decides how many images you need to cover a study area.
+
+<Figure
+  title="Figure 1.3 — Real scene footprints of three sensors around Hanoi"
+  try="Use 'Zoom to' on each footprint. Where does the West Lake frame used in Chapters 4, 6 and 11 sit inside the Sentinel-2 tile? How many times larger is a Landsat scene?"
+  source="Footprints (system:footprint) of real scenes in Earth Engine: Sentinel-2 L2A tile T48QWJ, 12 Feb 2024; Landsat 9 path/row 127/45, 22 Dec 2023; Sentinel-1A IW GRD, relative orbit 128, 12 Feb 2024. VNREDSat-1: a 17.5 km square from the nominal swath, not a real scene. Areas on the ellipsoid. Basemap © Esri, Maxar, Earthstar Geographics."
+>
+  <FootprintMap client:visible lang="en" />
+</Figure>
+
+<div class="table-wrap">
+
+| Footprint | Area | Times the West Lake frame |
+|---|---|---|
+| Sentinel-1 IW (one frame) | 42,901 km² | 1637 |
+| Landsat 9 (one scene) | 36,725 km² | 1401 |
+| Sentinel-2 (one 110 × 110 km tile) | 12,098 km² | 461 |
+| VNREDSat-1 (nominal 17.5 km swath) | 306 km² | 12 |
+| Handbook West Lake frame (5.12 × 5.12 km) | 26.2 km² | 1 |
+
+</div>
+
+One Landsat scene stretches about 190 km, from the northern mountains to beyond Hanoi. A VNREDSat-1 image covers only part of the inner city, but with 4 times finer pixels (2.5 m versus 10 m). Chapter 4 discusses the swath–resolution trade-off.
+
+## 1.5 Milestones, and remote sensing in Viet Nam
+
+<div class="table-wrap">
+
+| Year | Milestone |
+|---|---|
+| 1957 | Sputnik 1 (USSR), the first artificial satellite |
+| 1972 | Landsat 1, start of the longest continuous land-imaging record |
+| 1978 | Seasat, the first civilian satellite carrying a SAR |
+| 2008 | USGS opens the whole Landsat archive free of charge |
+| 2013 | **VNREDSat-1** launched on 7 May, Viet Nam's first Earth-observation satellite |
+| 2014–2015 | Sentinel-1A (radar) and Sentinel-2A (multispectral), free and open data |
+
+</div>
+
+Source: Sổ tay Vệ tinh & Viễn thám (CC BY 4.0).
+
+VNREDSat-1 is operated by the Vietnam National Space Center (VNSC) and acquires 2.5 m panchromatic and 10 m multispectral images. The November 2026 elements show something interesting: its actual inclination of 97.89° is **below** the sun-synchronous value for its altitude (98.10°). By the J2 formula (Chapter 2) its orbit plane turns 0.961°/day instead of 0.986°/day. The plane lags the Sun, so the overpass time gets **earlier**, by about 36 minutes per year if uncorrected. This is an estimate from one element set; the handbook has no VNSC operations data to confirm it.
+
+<Depth level="advanced" title="Terra is drifting too">
+
+Terra (carrying MODIS) has an inclination of 97.93°, also below the sun-synchronous value (98.14°). NASA stopped maintaining Terra's orbit as the mission entered its final phase, so its overpass time is getting earlier. When you compare long MODIS Terra records, remember that the illumination is no longer as fixed as in the early years.
+
+</Depth>
+
+## 1.6 Lab
+
+The notebook reads orbital elements from CelesTrak, computes altitude and period, and counts the Sentinel-2, Landsat 9 and Sentinel-1 images of Hanoi in 2024 in Earth Engine. The GEE script draws the footprints of the scenes covering a point you choose.
+
+<LabLinks notebook="labs/ch01_overview.ipynb" gee="labs/ch01_overview.js" />
+
+**Suggested exercises**
+
+1. Move the point to your province. How many Sentinel-2 tiles cover it?
+2. Find another Earth-observation satellite on CelesTrak (e.g. PlanetScope or ICEYE). Compute its altitude from the mean motion.
+3. Why does a thermal image cross the atmosphere once while an optical image crosses it twice?
+
+## 1.7 Review
+
+<Quiz client:visible lang="en" items={quiz} />
+
+## References
+
+- CCRS (Canada Centre for Remote Sensing). *Fundamentals of Remote Sensing* (online tutorial). Natural Resources Canada.
+- Drusch, M., et al. (2012). Sentinel-2: ESA's optical high-resolution mission for GMES operational services. *Remote Sensing of Environment*, 120, 25–36.
+- Kelso, T. S. *CelesTrak*: GP orbital element data. https://celestrak.org
+- Lillesand, T. M., Kiefer, R. W., & Chipman, J. W. (2015). *Remote Sensing and Image Interpretation* (7th ed.). Wiley.
+- Nguyễn Văn Tín. *Sổ tay Vệ tinh & Viễn thám*. CC BY 4.0. https://satellite-rs-handbook.netlify.app/
+- Torres, R., et al. (2012). GMES Sentinel-1 mission. *Remote Sensing of Environment*, 120, 9–24.
+- Wulder, M. A., et al. (2019). Current status of Landsat program, science, and applications. *Remote Sensing of Environment*, 225, 127–147.

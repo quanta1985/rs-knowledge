@@ -1,0 +1,672 @@
+{
+ "frame": "Hanoi West Lake – Red River, 5.12 x 5.12 km, UTM 48N",
+ "year": 2024,
+ "clear_threshold": 0.6,
+ "images": 74,
+ "dates": [
+  {
+   "date": "2024-01-03",
+   "sat": "Sentinel-2B",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 99.9,
+   "clear": 0.0
+  },
+  {
+   "date": "2024-01-08",
+   "sat": "Sentinel-2A",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 90.2,
+   "clear": 0.007
+  },
+  {
+   "date": "2024-01-13",
+   "sat": "Sentinel-2B",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 100.0,
+   "clear": 0.0
+  },
+  {
+   "date": "2024-01-18",
+   "sat": "Sentinel-2A",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 73.4,
+   "clear": 0.023
+  },
+  {
+   "date": "2024-01-23",
+   "sat": "Sentinel-2B",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 100,
+   "clear": 0.0
+  },
+  {
+   "date": "2024-01-28",
+   "sat": "Sentinel-2A",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 100,
+   "clear": 0.0
+  },
+  {
+   "date": "2024-02-02",
+   "sat": "Sentinel-2B",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 94.3,
+   "clear": 0.0
+  },
+  {
+   "date": "2024-02-07",
+   "sat": "Sentinel-2A",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 98.9,
+   "clear": 0.0
+  },
+  {
+   "date": "2024-02-12",
+   "sat": "Sentinel-2B",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 0.0,
+   "clear": 1
+  },
+  {
+   "date": "2024-02-17",
+   "sat": "Sentinel-2A",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 95.8,
+   "clear": 0.0
+  },
+  {
+   "date": "2024-02-22",
+   "sat": "Sentinel-2B",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 90.2,
+   "clear": 0.0
+  },
+  {
+   "date": "2024-02-27",
+   "sat": "Sentinel-2A",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 100,
+   "clear": 0.0
+  },
+  {
+   "date": "2024-03-03",
+   "sat": "Sentinel-2B",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 99.5,
+   "clear": 0.0
+  },
+  {
+   "date": "2024-03-08",
+   "sat": "Sentinel-2A",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 100,
+   "clear": 0.0
+  },
+  {
+   "date": "2024-03-13",
+   "sat": "Sentinel-2B",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 97.1,
+   "clear": 0.0
+  },
+  {
+   "date": "2024-03-18",
+   "sat": "Sentinel-2A",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 100,
+   "clear": 0.0
+  },
+  {
+   "date": "2024-03-23",
+   "sat": "Sentinel-2B",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 74.5,
+   "clear": 0.119
+  },
+  {
+   "date": "2024-03-28",
+   "sat": "Sentinel-2A",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 98.6,
+   "clear": 0.0
+  },
+  {
+   "date": "2024-04-02",
+   "sat": "Sentinel-2B",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 46.7,
+   "clear": 1
+  },
+  {
+   "date": "2024-04-07",
+   "sat": "Sentinel-2A",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 100.0,
+   "clear": 0.0
+  },
+  {
+   "date": "2024-04-12",
+   "sat": "Sentinel-2B",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 98.1,
+   "clear": 0.0
+  },
+  {
+   "date": "2024-04-17",
+   "sat": "Sentinel-2A",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 97.6,
+   "clear": 0.0
+  },
+  {
+   "date": "2024-04-22",
+   "sat": "Sentinel-2B",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 99.8,
+   "clear": 0.0
+  },
+  {
+   "date": "2024-04-27",
+   "sat": "Sentinel-2A",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 0.1,
+   "clear": 1
+  },
+  {
+   "date": "2024-05-02",
+   "sat": "Sentinel-2B",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 100,
+   "clear": 0.0
+  },
+  {
+   "date": "2024-05-07",
+   "sat": "Sentinel-2A",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 99.7,
+   "clear": 0.0
+  },
+  {
+   "date": "2024-05-12",
+   "sat": "Sentinel-2B",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 61.2,
+   "clear": 0.112
+  },
+  {
+   "date": "2024-05-17",
+   "sat": "Sentinel-2A",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 74.9,
+   "clear": 0.478
+  },
+  {
+   "date": "2024-05-22",
+   "sat": "Sentinel-2B",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 91.5,
+   "clear": 0.0
+  },
+  {
+   "date": "2024-05-27",
+   "sat": "Sentinel-2A",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 91.9,
+   "clear": 0.0
+  },
+  {
+   "date": "2024-06-01",
+   "sat": "Sentinel-2B",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 44.8,
+   "clear": 0.13
+  },
+  {
+   "date": "2024-06-06",
+   "sat": "Sentinel-2A",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 100.0,
+   "clear": 0.0
+  },
+  {
+   "date": "2024-06-11",
+   "sat": "Sentinel-2B",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 84.4,
+   "clear": 0.022
+  },
+  {
+   "date": "2024-06-16",
+   "sat": "Sentinel-2A",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 99.3,
+   "clear": 0.0
+  },
+  {
+   "date": "2024-06-21",
+   "sat": "Sentinel-2B",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 99.3,
+   "clear": 0.0
+  },
+  {
+   "date": "2024-06-26",
+   "sat": "Sentinel-2A",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 99.8,
+   "clear": 0.0
+  },
+  {
+   "date": "2024-07-01",
+   "sat": "Sentinel-2B",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 97.6,
+   "clear": 0.0
+  },
+  {
+   "date": "2024-07-06",
+   "sat": "Sentinel-2A",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 76.6,
+   "clear": 0.05
+  },
+  {
+   "date": "2024-07-11",
+   "sat": "Sentinel-2B",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 40.5,
+   "clear": 0.942
+  },
+  {
+   "date": "2024-07-16",
+   "sat": "Sentinel-2A",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 83.1,
+   "clear": 0.0
+  },
+  {
+   "date": "2024-07-21",
+   "sat": "Sentinel-2B",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 43.4,
+   "clear": 0.511
+  },
+  {
+   "date": "2024-07-26",
+   "sat": "Sentinel-2A",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 79.9,
+   "clear": 1
+  },
+  {
+   "date": "2024-07-31",
+   "sat": "Sentinel-2B",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 100,
+   "clear": 0.0
+  },
+  {
+   "date": "2024-08-05",
+   "sat": "Sentinel-2A",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 50.1,
+   "clear": 0.603
+  },
+  {
+   "date": "2024-08-10",
+   "sat": "Sentinel-2B",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 25.6,
+   "clear": 1
+  },
+  {
+   "date": "2024-08-15",
+   "sat": "Sentinel-2A",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 98.0,
+   "clear": 0.0
+  },
+  {
+   "date": "2024-08-20",
+   "sat": "Sentinel-2B",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 86.0,
+   "clear": 0.0
+  },
+  {
+   "date": "2024-08-25",
+   "sat": "Sentinel-2A",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 96.8,
+   "clear": 0.0
+  },
+  {
+   "date": "2024-08-30",
+   "sat": "Sentinel-2B",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 95.0,
+   "clear": 0.0
+  },
+  {
+   "date": "2024-09-04",
+   "sat": "Sentinel-2A",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 19.0,
+   "clear": 1.0
+  },
+  {
+   "date": "2024-09-09",
+   "sat": "Sentinel-2B",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 100,
+   "clear": 0.0
+  },
+  {
+   "date": "2024-09-14",
+   "sat": "Sentinel-2A",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 34.5,
+   "clear": 0.987
+  },
+  {
+   "date": "2024-09-19",
+   "sat": "Sentinel-2B",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 66.0,
+   "clear": 0.904
+  },
+  {
+   "date": "2024-09-24",
+   "sat": "Sentinel-2A",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 5.5,
+   "clear": 0.999
+  },
+  {
+   "date": "2024-09-29",
+   "sat": "Sentinel-2B",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 70.6,
+   "clear": 0.069
+  },
+  {
+   "date": "2024-10-04",
+   "sat": "Sentinel-2A",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 19.5,
+   "clear": 1
+  },
+  {
+   "date": "2024-10-09",
+   "sat": "Sentinel-2B",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 76.0,
+   "clear": 0.747
+  },
+  {
+   "date": "2024-10-14",
+   "sat": "Sentinel-2A",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 38.5,
+   "clear": 0.505
+  },
+  {
+   "date": "2024-10-19",
+   "sat": "Sentinel-2B",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 44.0,
+   "clear": 0.797
+  },
+  {
+   "date": "2024-10-24",
+   "sat": "Sentinel-2A",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 96.8,
+   "clear": 1
+  },
+  {
+   "date": "2024-10-29",
+   "sat": "Sentinel-2B",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 97.3,
+   "clear": 0.0
+  },
+  {
+   "date": "2024-11-03",
+   "sat": "Sentinel-2A",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 52.8,
+   "clear": 0.0
+  },
+  {
+   "date": "2024-11-08",
+   "sat": "Sentinel-2B",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 5.9,
+   "clear": 1
+  },
+  {
+   "date": "2024-11-13",
+   "sat": "Sentinel-2A",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 7.8,
+   "clear": 0.887
+  },
+  {
+   "date": "2024-11-18",
+   "sat": "Sentinel-2B",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 61.3,
+   "clear": 0.087
+  },
+  {
+   "date": "2024-11-23",
+   "sat": "Sentinel-2A",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 88.9,
+   "clear": 0.0
+  },
+  {
+   "date": "2024-11-28",
+   "sat": "Sentinel-2B",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 92.8,
+   "clear": 0.0
+  },
+  {
+   "date": "2024-12-03",
+   "sat": "Sentinel-2A",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 98.8,
+   "clear": 0.0
+  },
+  {
+   "date": "2024-12-08",
+   "sat": "Sentinel-2B",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 100,
+   "clear": 0.0
+  },
+  {
+   "date": "2024-12-13",
+   "sat": "Sentinel-2A",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 100,
+   "clear": 0.0
+  },
+  {
+   "date": "2024-12-18",
+   "sat": "Sentinel-2B",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 7.1,
+   "clear": 1
+  },
+  {
+   "date": "2024-12-23",
+   "sat": "Sentinel-2A",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 28.0,
+   "clear": 1
+  },
+  {
+   "date": "2024-12-28",
+   "sat": "Sentinel-2B",
+   "tiles": [
+    "48QWJ"
+   ],
+   "cloud": 34.6,
+   "clear": 1
+  }
+ ],
+ "provenance": {
+  "collection": "COPERNICUS/S2_SR_HARMONIZED filterBounds(frame) 2024, linked to GOOGLE/CLOUD_SCORE_PLUS/V1/S2_HARMONIZED",
+  "cloud": "CLOUDY_PIXEL_PERCENTAGE of the 100 km tile (min over same-day tiles)",
+  "clear": "share of the frame with cs_cdf >= 0.6 (max over same-day tiles)",
+  "script": "scripts/data/export_ch14_gee.py",
+  "exported": "2026-11-04T06:29:26+00:00"
+ }
+}

@@ -1,0 +1,57 @@
+{
+ "width": 512,
+ "height": 512,
+ "resolution_m": 10,
+ "crs": "EPSG:32648",
+ "origin_xy": [
+  583980,
+  2331020
+ ],
+ "bands": [
+  "B2_raw",
+  "B3_raw",
+  "B4_raw",
+  "B2_cs",
+  "B3_cs",
+  "B4_cs",
+  "n_clear",
+  "n_all"
+ ],
+ "dtype": "uint16",
+ "layout": "BSQ",
+ "scale": 0.0001,
+ "date": "2023-10-05",
+ "window": [
+  "2023-08-21",
+  "2023-11-19"
+ ],
+ "n_images": 19,
+ "images": [
+  "20230821T032521_20230821T032853_T48QWJ",
+  "20230826T032519_20230826T033958_T48QWJ",
+  "20230831T032521_20230831T034140_T48QWJ",
+  "20230905T032519_20230905T034002_T48QWJ",
+  "20230910T032521_20230910T032848_T48QWJ",
+  "20230915T032519_20230915T033440_T48QWJ",
+  "20230920T032521_20230920T032849_T48QWJ",
+  "20230925T032519_20230925T034142_T48QWJ",
+  "20230930T032521_20230930T033630_T48QWJ",
+  "20231005T032609_20231005T033547_T48QWJ",
+  "20231010T032641_20231010T033740_T48QWJ",
+  "20231015T032719_20231015T033651_T48QWJ",
+  "20231020T032741_20231020T033902_T48QWJ",
+  "20231025T032819_20231025T033842_T48QWJ",
+  "20231030T032851_20231030T034106_T48QWJ",
+  "20231104T032919_20231104T034047_T48QWJ",
+  "20231109T032941_20231109T033418_T48QWJ",
+  "20231114T033009_20231114T033321_T48QWJ",
+  "20231119T033031_20231119T033553_T48QWJ"
+ ],
+ "notes": "*_raw: per-pixel median of all images; *_cs: median after masking cs_cdf < 0.6; n_clear / n_all: counts (no scale)",
+ "provenance": {
+  "collection": "COPERNICUS/S2_SR_HARMONIZED + Cloud Score+",
+  "attribution": "Contains modified Copernicus Sentinel data 2023",
+  "script": "scripts/data/export_ch07_preprocessing.py",
+  "exported": "2026-11-04T05:19:02+00:00"
+ }
+}

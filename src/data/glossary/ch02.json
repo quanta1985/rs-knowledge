@@ -1,0 +1,56 @@
+[
+ {
+  "id": "sun-synchronous-orbit",
+  "vi": "Quỹ đạo đồng bộ Mặt Trời (SSO)",
+  "en": "Sun-synchronous orbit (SSO)",
+  "def": {
+   "vi": "Quỹ đạo gần cực mà mặt phẳng quay 0,9856°/ngày theo Mặt Trời nhờ lực J2, nên vệ tinh luôn qua một vĩ độ vào cùng giờ địa phương.",
+   "en": "A near-polar orbit whose plane turns 0.9856°/day with the Sun thanks to J2, so the satellite passes each latitude at the same local time."
+  }
+ },
+ {
+  "id": "geostationary-orbit",
+  "vi": "Quỹ đạo địa tĩnh (GEO)",
+  "en": "Geostationary orbit (GEO)",
+  "def": {
+   "vi": "Quỹ đạo tròn trên xích đạo ở độ cao 35.786 km, chu kỳ bằng một ngày sao, nên vệ tinh đứng yên so với mặt đất.",
+   "en": "Circular equatorial orbit at 35,786 km altitude with a period of one sidereal day, so the satellite stays fixed above the ground."
+  }
+ },
+ {
+  "id": "ground-track",
+  "vi": "Vết bay (ground track)",
+  "en": "Ground track",
+  "def": {
+   "vi": "Đường mà điểm ngay dưới vệ tinh vẽ trên mặt đất. Vì Trái Đất quay, mỗi vòng vết bay lệch về phía tây.",
+   "en": "The path traced on the ground by the point directly below the satellite. Because the Earth rotates, it shifts west on each orbit."
+  }
+ },
+ {
+  "id": "j2",
+  "vi": "Hệ số J2 (độ dẹt Trái Đất)",
+  "en": "J2 (Earth oblateness)",
+  "def": {
+   "vi": "Hệ số trường hấp dẫn mô tả Trái Đất phình ở xích đạo; làm mặt phẳng quỹ đạo quay dần, là cơ sở của quỹ đạo đồng bộ Mặt Trời.",
+   "en": "Gravity-field coefficient describing the equatorial bulge; it makes orbit planes precess and enables sun-synchronous orbits."
+  }
+ },
+ {
+  "id": "repeat-cycle",
+  "vi": "Chu kỳ lặp vết bay",
+  "en": "Repeat cycle",
+  "def": {
+   "vi": "Số ngày để vết bay của một vệ tinh trùng lại đúng như cũ. Sentinel-2: 10 ngày (143 vòng); Landsat 8/9: 16 ngày.",
+   "en": "Days until a satellite's ground track repeats exactly. Sentinel-2: 10 days (143 orbits); Landsat 8/9: 16 days."
+  }
+ },
+ {
+  "id": "ltdn",
+  "vi": "Giờ qua nút xuống (LTDN)",
+  "en": "Local time of descending node (LTDN)",
+  "def": {
+   "vi": "Giờ địa phương khi vệ tinh SSO cắt xích đạo theo chiều đi xuống phía nam. Sentinel-2: 10:30; Landsat 8/9: khoảng 10:00.",
+   "en": "Local time when a sun-synchronous satellite crosses the equator southbound. Sentinel-2: 10:30; Landsat 8/9: about 10:00."
+  }
+ }
+]

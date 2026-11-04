@@ -1,0 +1,74 @@
+[
+ {
+  "id": "sar",
+  "vi": "Radar khẩu độ tổng hợp (SAR)",
+  "en": "Synthetic aperture radar (SAR)",
+  "def": {
+   "vi": "Radar chụp ảnh chủ động: phát xung vi ba và ghép tín hiệu dội về dọc đường bay thành một 'ăng-ten ảo' dài, cho ảnh chi tiết cả ngày lẫn đêm, xuyên qua mây.",
+   "en": "Active imaging radar that transmits microwave pulses and combines the echoes along the flight path into a long 'virtual antenna', giving detailed images day and night through clouds."
+  }
+ },
+ {
+  "id": "incidence-angle",
+  "vi": "Góc tới",
+  "en": "Incidence angle",
+  "def": {
+   "vi": "Góc giữa tia radar và phương thẳng đứng tại điểm trên mặt đất. Sentinel-1 IW: khoảng 29–46°.",
+   "en": "Angle between the radar beam and the vertical at the ground point. Sentinel-1 IW: about 29–46°."
+  }
+ },
+ {
+  "id": "backscatter",
+  "vi": "Tán xạ ngược (σ⁰)",
+  "en": "Backscatter (σ⁰)",
+  "def": {
+   "vi": "Tỷ lệ năng lượng radar dội ngược về vệ tinh trên một đơn vị diện tích mặt đất, thường biểu diễn bằng dB.",
+   "en": "Fraction of radar energy scattered back to the satellite per unit ground area; usually expressed in dB."
+  }
+ },
+ {
+  "id": "decibel",
+  "vi": "Decibel (dB)",
+  "en": "Decibel (dB)",
+  "def": {
+   "vi": "Thang logarit: dB = 10·log₁₀(tỷ số công suất). Giảm 10 dB là giảm 10 lần; giảm 3 dB là giảm một nửa.",
+   "en": "Logarithmic scale: dB = 10·log10(power ratio). −10 dB is ten times less power; −3 dB is half."
+  }
+ },
+ {
+  "id": "polarization",
+  "vi": "Phân cực",
+  "en": "Polarisation",
+  "def": {
+   "vi": "Hướng dao động của điện trường sóng. VV: phát và thu đứng; VH: phát đứng, thu ngang, nhạy với tán xạ khối trong thực vật.",
+   "en": "Orientation of the wave's electric field. VV: transmit and receive vertical; VH: transmit vertical, receive horizontal, sensitive to volume scattering in vegetation."
+  }
+ },
+ {
+  "id": "speckle",
+  "vi": "Nhiễu speckle",
+  "en": "Speckle",
+  "def": {
+   "vi": "Hạt 'muối tiêu' trên ảnh radar, do sóng từ nhiều vật nhỏ trong một pixel cộng hoặc triệt tiêu nhau. Đây là nhiễu nhân, giảm được bằng lọc hoặc lấy trung bình nhiều ảnh.",
+   "en": "Salt-and-pepper pattern in radar images caused by interference of echoes from many scatterers in a pixel; multiplicative, reduced by filtering or multi-looking."
+  }
+ },
+ {
+  "id": "layover",
+  "vi": "Chồng lấn (layover)",
+  "en": "Layover",
+  "def": {
+   "vi": "Méo hình radar khi sườn núi dốc hơn góc tới: đỉnh núi gần radar hơn chân núi nên hiện ra trước chân núi trong ảnh.",
+   "en": "Radar distortion when a slope is steeper than the incidence angle: the summit is closer to the radar than the foot and appears before it in the image."
+  }
+ },
+ {
+  "id": "insar",
+  "vi": "Giao thoa radar (InSAR)",
+  "en": "Radar interferometry (InSAR)",
+  "def": {
+   "vi": "So sánh pha của hai hay nhiều ảnh radar để đo địa hình hoặc chuyển dịch mặt đất cỡ milimét đến centimét.",
+   "en": "Comparing the phase of two or more radar images to measure topography or ground motion at millimetre to centimetre scale."
+  }
+ }
+]

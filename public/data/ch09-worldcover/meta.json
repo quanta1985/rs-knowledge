@@ -1,0 +1,34 @@
+{
+ "width": 512,
+ "height": 512,
+ "resolution_m": 10,
+ "crs": "EPSG:32648",
+ "origin_xy": [
+  583980,
+  2331020
+ ],
+ "bands": [
+  "class"
+ ],
+ "dtype": "uint16",
+ "layout": "BSQ",
+ "scale": 1,
+ "date": "2021",
+ "class_counts": {
+  "10": 61893,
+  "20": 29,
+  "30": 1806,
+  "40": 14901,
+  "50": 108379,
+  "60": 1799,
+  "80": 73332,
+  "90": 5
+ },
+ "provenance": {
+  "collection": "ESA/WorldCover/v200 (2021), band Map",
+  "resampling": "nearest neighbour from the 10 m WorldCover grid (EPSG:4326) to the hanoi-s2 UTM 48N grid",
+  "script": "scripts/data/export_ch09_worldcover.py",
+  "exported": "2026-11-04T05:18:07+00:00",
+  "attribution": "© ESA WorldCover project 2021 / Contains modified Copernicus Sentinel data (2021) processed by ESA WorldCover consortium"
+ }
+}

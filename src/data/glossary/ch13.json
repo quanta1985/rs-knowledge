@@ -1,0 +1,29 @@
+[
+ {
+  "id": "tree-cover-loss",
+  "vi": "Mất tán cây (Global Forest Change)",
+  "en": "Tree-cover loss (Global Forest Change)",
+  "def": {
+   "vi": "Pixel có tán cây bị thay thế hoàn toàn (chặt, khai thác rừng trồng, cháy, bão) trong một năm, theo bộ dữ liệu Landsat 30 m của Hansen và cs. Không đồng nghĩa với phá rừng.",
+   "en": "A pixel whose tree canopy was fully removed (clearing, plantation harvest, fire, storm) in a given year, from the 30 m Landsat dataset of Hansen et al. Not the same as deforestation."
+  }
+ },
+ {
+  "id": "urban-heat-island",
+  "vi": "Đảo nhiệt đô thị",
+  "en": "Urban heat island",
+  "def": {
+   "vi": "Hiện tượng đô thị nóng hơn vùng xung quanh do bê tông, mái nhà hấp thụ nhiều bức xạ và ít bốc hơi nước.",
+   "en": "Cities being warmer than their surroundings because concrete and roofs absorb radiation and evaporate little water."
+  }
+ },
+ {
+  "id": "tropospheric-no2",
+  "vi": "Cột NO₂ tầng đối lưu",
+  "en": "Tropospheric NO₂ column",
+  "def": {
+   "vi": "Tổng lượng NO₂ trong cột không khí từ mặt đất đến đỉnh tầng đối lưu trên một đơn vị diện tích (mol/m²), đo bằng TROPOMI trên Sentinel-5P. Không phải nồng độ tại mặt đất.",
+   "en": "Total NO₂ in the air column from the ground to the top of the troposphere per unit area (mol/m²), measured by TROPOMI on Sentinel-5P. Not a ground-level concentration."
+  }
+ }
+]

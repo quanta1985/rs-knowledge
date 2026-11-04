@@ -1,0 +1,61 @@
+{
+ "width": 512,
+ "height": 512,
+ "resolution_m": 10,
+ "crs": "EPSG:32648",
+ "origin_xy": [
+  583980,
+  2331020
+ ],
+ "bands": [
+  "B2",
+  "B3",
+  "B4",
+  "B5",
+  "B6",
+  "B7",
+  "B8",
+  "B8A",
+  "B11",
+  "B12"
+ ],
+ "dtype": "uint16",
+ "layout": "BSQ",
+ "scale": 0.0001,
+ "date": "2024-02-12",
+ "scene": {
+  "MEAN_SOLAR_AZIMUTH_ANGLE": 145.938157633395,
+  "MEAN_SOLAR_ZENITH_ANGLE": 41.4333536570532,
+  "PROCESSING_BASELINE": "05.10",
+  "RADIO_ADD_OFFSET_B11": -1000,
+  "RADIO_ADD_OFFSET_B12": -1000,
+  "RADIO_ADD_OFFSET_B2": -1000,
+  "RADIO_ADD_OFFSET_B3": -1000,
+  "RADIO_ADD_OFFSET_B4": -1000,
+  "RADIO_ADD_OFFSET_B5": -1000,
+  "RADIO_ADD_OFFSET_B6": -1000,
+  "RADIO_ADD_OFFSET_B7": -1000,
+  "RADIO_ADD_OFFSET_B8": -1000,
+  "RADIO_ADD_OFFSET_B8A": -1000,
+  "REFLECTANCE_CONVERSION_CORRECTION": 1.02804428645169,
+  "SOLAR_IRRADIANCE_B11": 247.08,
+  "SOLAR_IRRADIANCE_B12": 87.75,
+  "SOLAR_IRRADIANCE_B2": 1959.75,
+  "SOLAR_IRRADIANCE_B3": 1824.93,
+  "SOLAR_IRRADIANCE_B4": 1512.79,
+  "SOLAR_IRRADIANCE_B5": 1425.78,
+  "SOLAR_IRRADIANCE_B6": 1291.13,
+  "SOLAR_IRRADIANCE_B7": 1175.57,
+  "SOLAR_IRRADIANCE_B8": 1041.28,
+  "SOLAR_IRRADIANCE_B8A": 953.93,
+  "SPACECRAFT_NAME": "Sentinel-2B",
+  "system:index": "20240212T032849_20240212T033821_T48QWJ",
+  "SENSING_TIME": "2024-02-12T03:42:17"
+ },
+ "provenance": {
+  "collection": "COPERNICUS/S2_HARMONIZED (Level-1C top-of-atmosphere reflectance x 10000; the harmonized collection already removed the +1000 DN offset of baseline >= 04.00)",
+  "attribution": "Contains modified Copernicus Sentinel data 2024",
+  "script": "scripts/data/export_ch07_preprocessing.py",
+  "exported": "2026-11-04T05:18:02+00:00"
+ }
+}

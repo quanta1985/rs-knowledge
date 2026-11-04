@@ -1,0 +1,181 @@
+---
+title: Tiền xử lý — bức xạ, khí quyển, mây
+n: 7
+summary: Con số vệ tinh ghi được không phải là phản xạ của mặt đất. Chương này đi từ giá trị số trong tệp ảnh tới bức xạ, phản xạ đỉnh khí quyển và phản xạ mặt đất, rồi xử lý mây và bóng mây trên ảnh Sentinel-2 thật của Hà Nội.
+objectives:
+  - Đổi giá trị số (DN) của Sentinel-2 L1C thành phản xạ đỉnh khí quyển và bức xạ bằng metadata của ảnh.
+  - Giải thích vì sao ảnh đỉnh khí quyển ám lam và khí quyển ảnh hưởng mỗi kênh khác nhau.
+  - Lọc mây và bóng mây bằng Cloud Score+ và SCL; biết đánh đổi khi chọn ngưỡng.
+  - Tạo ảnh tổng hợp trung vị không mây và biết khi nào trung vị thất bại.
+updated: "2026-11-04"
+---
+import Term from '../../../components/Term.astro';
+import Depth from '../../../components/Depth.astro';
+import Figure from '../../../components/Figure.astro';
+import LabLinks from '../../../components/LabLinks.astro';
+import RadianceCalc from '../../../islands/RadianceCalc.tsx';
+import ToaSrLab from '../../../islands/ToaSrLab.tsx';
+import CloudMaskLab from '../../../islands/CloudMaskLab.tsx';
+import CompositeLab from '../../../islands/CompositeLab.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/ch07.json';
+
+## 7.1 Từ photon tới con số
+
+Ánh sáng Mặt Trời đi qua khí quyển, chạm mặt đất, phản xạ rồi lại đi qua khí quyển lần nữa trước khi tới cảm biến. Trên đường đi, khí quyển vừa **thêm** ánh sáng (tán xạ vào hướng nhìn) vừa **bớt** ánh sáng (hấp thụ, tán xạ ra ngoài). Vì vậy dữ liệu vệ tinh được phát hành theo nhiều <Term id="data-level">mức xử lý</Term>:
+
+| Mức Sentinel-2 | Giá trị trong ảnh | Dùng khi |
+|---|---|---|
+| Level-1C | <Term id="toa-reflectance">Phản xạ đỉnh khí quyển (TOA)</Term> × 10 000 | Cần dữ liệu gốc, tự hiệu chỉnh khí quyển, nghiên cứu mây |
+| Level-2A | <Term id="surface-reflectance">Phản xạ mặt đất</Term> × 10 000, kèm lớp SCL | Hầu hết ứng dụng: chỉ số phổ, phân loại, chuỗi thời gian |
+
+Chương 4, 6 và 11 dùng ảnh Level-2A. Chương này mở "hộp đen" để xem L2A được làm ra như thế nào.
+
+## 7.2 Hiệu chỉnh bức xạ: từ DN đến bức xạ
+
+Tệp Sentinel-2 L1C lưu số nguyên (DN). Từ mốc xử lý 04.00 (năm 2022), ESA cộng thêm 1000 vào mọi giá trị và ghi `RADIO_ADD_OFFSET = −1000` trong metadata. Đổi ngược lại:
+
+<p class="formula">ρ_TOA = (DN + RADIO_ADD_OFFSET) / 10 000</p>
+
+Muốn biết năng lượng thật sự tới cảm biến, đổi phản xạ thành <Term id="radiance">bức xạ</Term> L bằng bức xạ Mặt Trời E của từng kênh, góc thiên đỉnh Mặt Trời θs và hệ số khoảng cách Trái Đất – Mặt Trời U = 1/d²:
+
+<p class="formula">L = ρ_TOA · U · E · cos θs / π</p>
+
+<Figure
+  title="Hình 7.1 — Tính tay: từ giá trị số đến bức xạ, ảnh Sentinel-2B ngày 12/02/2024"
+  try="Chọn Hồ Tây và kênh B2, rồi đổi sang B8. Phần do khí quyển chiếm bao nhiêu phần trăm tín hiệu ở mỗi kênh? Đổi sang điểm thực vật bãi bồi: phần này còn lớn không?"
+  source="Sentinel-2B Level-1C (COPERNICUS/S2_HARMONIZED) và Level-2A (COPERNICUS/S2_SR_HARMONIZED), cảnh 20240212T032849_T48QWJ, cùng lưới 10 m của Chương 6. E, θs, U, RADIO_ADD_OFFSET lấy từ metadata của chính cảnh. Trung bình 3×3 pixel. Contains modified Copernicus Sentinel data 2024."
+>
+  <RadianceCalc client:visible lang="vi" />
+</Figure>
+
+<div class="worked">
+
+#### Ví dụ: kênh lam trên Hồ Tây
+
+Metadata ảnh ngày 12/02/2024: θs = 41,43°, U = 1,0280 (tháng 2 Trái Đất gần Mặt Trời, d ≈ 0,986 đơn vị thiên văn), E(B2) = 1959,75 W·m⁻²·µm⁻¹.
+
+1. DN trong tệp L1C gốc: 2210. Trừ 1000: 1210, nên ρ_TOA = 0,121.
+2. L = 0,121 × 1,028 × 1959,75 × cos 41,43° / π ≈ **58,2 W·m⁻²·sr⁻¹·µm⁻¹**.
+3. Sau hiệu chỉnh khí quyển (L2A), phản xạ mặt đất chỉ còn **0,040**. Khoảng **2/3** tín hiệu kênh lam trên mặt hồ là ánh sáng do khí quyển tán xạ.
+
+</div>
+
+## 7.3 Khí quyển làm gì với ảnh
+
+Hai quá trình chính:
+
+- **Tán xạ.** Phân tử khí nhỏ hơn bước sóng rất nhiều gây <Term id="rayleigh-scattering">tán xạ Rayleigh</Term>, mạnh tỷ lệ với λ⁻⁴. Kênh lam B2 (492 nm) bị tán xạ mạnh gấp (833/492)⁴ ≈ **8,2 lần** kênh cận hồng ngoại B8 (833 nm). Hạt <Term id="aerosol">sol khí</Term> (bụi, khói) to hơn, tán xạ ít phụ thuộc bước sóng hơn và gây mù.
+- **Hấp thụ.** Hơi nước, ôzôn, CO₂ hấp thụ ở những dải nhất định. Cảm biến đặt kênh vào các "cửa sổ khí quyển" (Chương 3) để tránh phần lớn hấp thụ, nhưng vẫn còn một ít.
+
+<Figure
+  title="Hình 7.2 — Cùng một lần chụp: phản xạ đỉnh khí quyển (trái) và phản xạ mặt đất (phải)"
+  try="Kéo vạch chia qua lại trên Hồ Tây. Phía TOA trông thế nào? Chọn 'Hiệu kênh lam' rồi chọn lần lượt các điểm: kênh nào có cột cao nhất, kênh nào âm?"
+  source="Sentinel-2B L1C và L2A ngày 12/02/2024, cùng lưới 10 m UTM 48N. Cả hai phía dùng cùng kéo giãn cố định 0–0,25 để thấy độ mù thật. Hiệu kênh lam: 0–0,15. Contains modified Copernicus Sentinel data 2024. Ảnh nền © Esri, Maxar, Earthstar Geographics."
+>
+  <ToaSrLab client:visible lang="vi" />
+</Figure>
+
+Trung bình trên cả khung 5,12 × 5,12 km, phản xạ TOA trừ phản xạ mặt đất:
+
+| Kênh | B2 lam | B3 lục | B4 đỏ | B8 NIR | B11 SWIR1 | B12 SWIR2 |
+|---|---|---|---|---|---|---|
+| TOA − mặt đất | +0,072 | +0,039 | +0,023 | −0,009 | −0,017 | −0,027 |
+
+Ảnh hưởng giảm dần từ lam sang đỏ, đúng như tán xạ Rayleigh. Ở NIR và SWIR, hiệu số lại **âm**: khí quyển hấp thụ một phần, nên hiệu chỉnh làm phản xạ mặt đất **tăng** lên. Ở điểm thực vật bãi bồi, B8 tăng từ 0,316 (TOA) lên 0,431 (mặt đất).
+
+Hệ quả thực tế: NDVI tính trên ảnh TOA thấp hơn trên ảnh mặt đất, và chênh lệch thay đổi theo ngày (độ mù khác nhau). Khi so sánh nhiều ngày, hãy dùng ảnh L2A.
+
+<Depth level="advanced" title="Hiệu chỉnh khí quyển làm như thế nào?">
+
+<Term id="atmospheric-correction">Hiệu chỉnh khí quyển</Term> cần biết khí quyển lúc chụp: lượng hơi nước, độ dày quang học sol khí, áp suất. Sen2Cor (bộ xử lý tạo Sentinel-2 L2A) ước lượng các đại lượng này **ngay trên ảnh**: hơi nước từ kênh B9 (945 nm), sol khí từ các pixel tối như rừng rậm và nước sâu. Sau đó nó tra bảng tính sẵn từ mô hình truyền bức xạ để đổi TOA thành phản xạ mặt đất.
+
+Phương pháp đơn giản nhất là **trừ vật thể tối** (Chavez, 1988): giả định pixel tối nhất của mỗi kênh có phản xạ gần 0, nên giá trị của nó chính là phần khí quyển cộng thêm. Cách này chỉ bù phần tán xạ, không bù hấp thụ.
+
+</Depth>
+
+## 7.4 Mây và bóng mây
+
+Hà Nội có rất nhiều mây (Chương 4: chỉ 92 trên 433 ngày chụp đủ trong). Phần lớn ảnh có một phần bị mây, nên phải **che** (mask) các pixel mây và bóng mây trước khi tính toán. Hai công cụ phổ biến cho Sentinel-2:
+
+- <Term id="cloud-score-plus">Cloud Score+</Term>: cho mỗi pixel một điểm từ 0 (mây hoặc bóng) đến 1 (trong). Băng `cs_cdf` được khuyên dùng với ngưỡng khoảng 0,5–0,65.
+- <Term id="scl">SCL</Term>: phân loại của Sen2Cor. Thường che các lớp 3 (bóng mây), 8, 9 (mây) và 10 (mây ti mỏng).
+
+<Figure
+  title="Hình 7.3 — Lọc mây trên ảnh Hà Nội ngày 05/10/2023"
+  try="Với cs_cdf, kéo ngưỡng từ 0,4 lên 0,8 và đọc phần trăm giữ lại. Chuyển sang SCL: vùng nào SCL che mà Cloud Score+ giữ? Chọn 'Khoét lỗ' để thấy bản đồ nền qua chỗ bị che."
+  source="Sentinel-2A L2A ngày 05/10/2023 (COPERNICUS/S2_SR_HARMONIZED), Cloud Score+ (GOOGLE/CLOUD_SCORE_PLUS/V1/S2_HARMONIZED, băng cs và cs_cdf), SCL của Sen2Cor. Kéo giãn cố định 0–0,3. 'Trùng với SCL' = tỷ lệ pixel mà hai mặt nạ cùng che hoặc cùng giữ. Contains modified Copernicus Sentinel data 2023. Ảnh nền © Esri, Maxar, Earthstar Geographics."
+>
+  <CloudMaskLab client:visible lang="vi" />
+</Figure>
+
+| Mặt nạ | Giữ lại | Ghi chú |
+|---|---|---|
+| cs_cdf ≥ 0,4 | 63,9 % | Lỏng: sót rìa mây mỏng |
+| cs_cdf ≥ 0,6 | 53,6 % | Ngưỡng dùng trong sổ tay |
+| cs_cdf ≥ 0,8 | 23,4 % | Chặt: mất nhiều đất trong |
+| SCL (3, 8, 9, 10) | 43,3 % | Che rộng quanh mây |
+
+Ở ngưỡng 0,6, Cloud Score+ và SCL **cùng kết luận** cho 87,4 % số pixel (45,3 % cùng che, 42,1 % cùng giữ). Phần khác nhau chủ yếu là 11,4 % khung ảnh SCL che mà Cloud Score+ giữ, nằm quanh rìa mây và bóng mây. Không có mặt nạ nào đúng tuyệt đối: ngưỡng chặt thì ít sót mây nhưng mất dữ liệu, ngưỡng lỏng thì ngược lại.
+
+<div class="worked">
+
+#### Ví dụ: bóng mây cho biết mây cao bao nhiêu
+
+Ảnh ngày 05/10/2023 chụp lúc Mặt Trời ở phương vị 146,8° (đông nam), góc thiên đỉnh 30,2°. Bóng mây vì thế đổ về phía **tây bắc**. Theo SCL, tâm đám mây lớn nhất ở hàng 313, cột 343; tâm vùng bóng lớn gần nó ở hàng 235, cột 261.
+
+1. Khoảng cách hai tâm: √(78² + 82²) × 10 m ≈ **1130 m**.
+2. Độ cao mây: h = 1130 / tan 30,2° ≈ **1,9 km**.
+
+Đây là ước lượng thô (hình đám mây và bóng không trùng khít nhau), nhưng nằm trong khoảng độ cao thường gặp của mây tích. Các thuật toán tìm bóng mây dùng đúng hình học này: chiếu mây theo hướng ngược Mặt Trời ở nhiều độ cao thử.
+
+</div>
+
+## 7.5 Ảnh tổng hợp không mây
+
+Khi một ngày không đủ trong, ta ghép nhiều ngày. Cách phổ biến là <Term id="median-composite">ảnh tổng hợp trung vị</Term>: tại mỗi pixel, lấy trung vị các lần chụp trong một khoảng thời gian.
+
+<Figure
+  title="Hình 7.4 — Ảnh tổng hợp trung vị 19 lần chụp, 21/08 – 19/11/2023"
+  try="So sánh 'Trung vị, không lọc mây' với 'Trung vị sau lọc mây'. Chọn 'Số ảnh trong' và di chuột: pixel nào chỉ còn 2 ảnh?"
+  source="19 ảnh Sentinel-2 L2A trong ±45 ngày quanh 05/10/2023. Trung vị từng kênh từng pixel, có hoặc không che cs_cdf < 0,6. Kéo giãn cố định 0–0,3. Contains modified Copernicus Sentinel data 2023. Ảnh nền © Esri, Maxar, Earthstar Geographics."
+>
+  <CompositeLab client:visible lang="vi" />
+</Figure>
+
+Trung vị thường được xem là "tự loại mây", nhưng điều đó chỉ đúng khi **hơn một nửa** số lần chụp là trong. Mùa mưa 2023 ở Hà Nội không như vậy: ảnh trung vị không lọc mây vẫn có **66 %** pixel sáng như mây (độ sáng trung bình ba kênh nhìn thấy > 0,2). Lọc mây trước rồi mới lấy trung vị, con số này chỉ còn **0,8 %**. Mỗi pixel còn lại từ 2 đến 11 ảnh trong (trung vị 7) trên tổng 19 ảnh.
+
+<Depth level="advanced" title="Trung vị, trung bình hay medoid?">
+
+- **Trung bình** bị mây kéo sáng lên ngay cả khi chỉ một ảnh có mây sót.
+- **Trung vị từng kênh** chống ngoại lai tốt, nhưng các kênh có thể lấy từ những ngày khác nhau, tạo ra phổ "không có thật".
+- **Medoid** (Flood, 2013) chọn nguyên một lần chụp gần trung vị nhiều chiều nhất, nên giữ phổ thật của một ngày.
+
+Với chuỗi thời gian (Chương 10), đừng tổng hợp quá dài: ghép cả mùa khô và mùa mưa sẽ trộn hai trạng thái của lúa và mặt nước.
+
+</Depth>
+
+## 7.6 Thực hành
+
+Notebook tính DN → phản xạ → bức xạ từ metadata, so sánh L1C với L2A ở sáu điểm, lọc mây bằng Cloud Score+ với nhiều ngưỡng và tạo ảnh tổng hợp. Script GEE tạo ảnh tổng hợp không mây cho vùng và thời gian bất kỳ.
+
+<LabLinks notebook="labs/ch07_preprocessing.ipynb" gee="labs/ch07_preprocessing.js" />
+
+**Bài tập gợi ý**
+
+1. Tính bức xạ kênh B4 của một điểm ở quê bạn từ ảnh L1C. So với ảnh chụp tháng 7: U khác bao nhiêu?
+2. Tạo ảnh tổng hợp mùa khô và mùa mưa cho cùng vùng. Mỗi pixel còn bao nhiêu ảnh trong?
+3. Áp dụng phương pháp trừ vật thể tối cho ảnh L1C Hà Nội. Kết quả gần L2A đến đâu?
+
+## 7.7 Ôn tập
+
+<Quiz client:visible lang="vi" items={quiz} />
+
+## Tài liệu tham khảo
+
+- Chavez, P. S. (1988). An improved dark-object subtraction technique for atmospheric scattering correction of multispectral data. *Remote Sensing of Environment*, 24(3), 459–479.
+- Drusch, M. và cs. (2012). Sentinel-2: ESA's optical high-resolution mission for GMES operational services. *Remote Sensing of Environment*, 120, 25–36.
+- Flood, N. (2013). Seasonal composite Landsat TM/ETM+ images using the medoid (a multi-dimensional median). *Remote Sensing*, 5(12), 6481–6500.
+- Main-Knorn, M. và cs. (2017). Sen2Cor for Sentinel-2. *Proc. SPIE 10427, Image and Signal Processing for Remote Sensing XXIII*, 1042704.
+- Pasquarella, V. J., Brown, C. F., Czerwinski, W., & Rucklidge, W. J. (2023). Comprehensive quality assessment of optical satellite imagery using weakly supervised video learning. *CVPR Workshops*, 2125–2135.
+- Vermote, E. F., Tanré, D., Deuzé, J. L., Herman, M., & Morcrette, J.-J. (1997). Second Simulation of the Satellite Signal in the Solar Spectrum, 6S: An overview. *IEEE Transactions on Geoscience and Remote Sensing*, 35(3), 675–686.

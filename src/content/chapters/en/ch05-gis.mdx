@@ -1,0 +1,190 @@
+---
+title: "GIS foundations: CRS, VN-2000, raster/vector"
+n: 5
+summary: A satellite image is only useful when you know where each pixel lies. This chapter goes from ellipsoid and datum to the UTM and VN-2000 projections, measures scale error across Viet Nam, and compares West Lake as a raster and as a vector.
+objectives:
+  - Distinguish ellipsoid, datum, projection and coordinate reference system (CRS); read EPSG codes.
+  - Convert a point between WGS84, UTM and VN-2000; explain why mixing the two datums shifts positions by about 200 m.
+  - Compute and explain the scale factor of the UTM and TM-3 projections across Viet Nam.
+  - Compare raster and vector in area, detail and storage.
+updated: "2026-11-04"
+---
+import Term from '../../../components/Term.astro';
+import Depth from '../../../components/Depth.astro';
+import Figure from '../../../components/Figure.astro';
+import LabLinks from '../../../components/LabLinks.astro';
+import CrsExplorer from '../../../islands/CrsExplorer.tsx';
+import ScaleFactorChart from '../../../islands/ScaleFactorChart.tsx';
+import RasterVector from '../../../islands/RasterVector.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/ch05.json';
+
+## 5.1 What a coordinate needs
+
+The Earth is not a perfect sphere. To write positions as numbers we replace it with an **ellipsoid**, a sphere flattened at the poles. We then choose how this ellipsoid sits relative to the real Earth; that choice is the <Term id="datum">datum</Term>. Finally, to measure distances in metres on paper or a screen, we flatten the curved surface with a **projection**.
+
+Together these make a <Term id="crs">coordinate reference system (CRS)</Term>. Every GIS package and Google Earth Engine names a CRS by its EPSG code.
+
+<Depth level="ref" title="Reference: EPSG codes common in Viet Nam">
+
+| EPSG | Name | Used for |
+|---|---|---|
+| 4326 | WGS 84 (lat/lon) | GPS, Google Earth, GeoJSON |
+| 32648 / 32649 | WGS 84 / UTM zone 48N / 49N | Sentinel-2 and Landsat tiles (this handbook uses 32648) |
+| 4756 | VN-2000 (lat/lon) | National datum |
+| 3405 / 3406 | VN-2000 / UTM zone 48N / 49N | Small-scale topographic maps |
+| 5897 | VN-2000 / TM-3 zone 482 (central meridian 105°) | Cadastral maps, e.g. Hanoi |
+| 9210 | VN-2000 / TM-3 105-45 | Cadastral maps, e.g. Ho Chi Minh City |
+
+Source: EPSG dataset (IOGP), queried through PROJ.
+
+</Depth>
+
+## 5.2 WGS84, VN-2000 and the datum shift
+
+GPS and most satellite imagery use **WGS84**. Since 2000 Viet Nam has used <Term id="vn2000">VN-2000</Term> (Decision 83/2000/QĐ-TTg), replacing the older HN-72. VN-2000 uses the **same ellipsoid** as WGS84 but shifts it to fit Viet Nam best. The same point therefore has two different pairs of latitude and longitude.
+
+Converting between them takes a <Term id="helmert">7-parameter Helmert transformation</Term>, with the parameters published in Circular 973/2001/TT-TCĐC.
+
+<Figure
+  title="Figure 5.1 — UTM zones, VN-2000 central meridians and one point in three coordinate systems"
+  try="Pick Hoan Kiem Lake and zoom in: the red dot is where the point lands if someone types VN-2000 numbers into a WGS84 map. How far apart are the dots? Click a few points in Ca Mau and Mong Cai and compare the scale factor k."
+  source="Datum shift: 7-parameter Helmert (Circular 973/2001/TT-TCĐC; EPSG:6960, coordinate-frame convention), checked against PROJ to 1e-8 degrees. Transverse Mercator: Snyder (1987) series, matching PROJ to 1 cm. Basemap © Esri, Maxar, Earthstar Geographics."
+>
+  <CrsExplorer client:visible lang="en" />
+</Figure>
+
+<div class="worked">
+
+#### Example: one point at Hoan Kiem Lake in four coordinate systems
+
+WGS84 point: 105.8342°E, 21.0278°N.
+
+1. **UTM zone 48N (WGS84):** E = 586,683.64 m, N = 2,325,450.79 m. Point scale factor k = 0.9996929.
+2. **Shift to the VN-2000 datum** (7-parameter Helmert): 105.8323173°E, 21.0287858°N. Longitude decreases, latitude increases.
+3. **VN-2000 / UTM 48N:** E = 586,487.43 m, N = 2,325,558.87 m. Compared with step 1 the point moves **ΔE = −196.2 m, ΔN = +108.1 m, 224.0 m in total**.
+4. **VN-2000 / TM-3, central meridian 105°, k₀ = 0.9999:** E = 586,513.38 m, N = 2,326,256.82 m. The northing is about 700 m larger than in step 3 only because of the different k₀ (0.9999 versus 0.9996).
+
+Lesson: an E, N pair means nothing without the name of its system. A 224 m error is a city block; 700 m can be a different ward.
+
+</div>
+
+<Depth level="advanced" title="The Helmert formula and the rotation-sign trap">
+
+From VN-2000 to WGS84 in Earth-centred 3-D coordinates (X, Y, Z):
+
+<p class="formula">X_WGS84 = T + (1 + s) · R · X_VN2000</p>
+
+Parameters (EPSG:6960): T = (−191.90441429, −39.30318279, −111.45032835) m; rotations rx = −0.00928836″, ry = 0.01975479″, rz = −0.00427372″; s = 0.252906278 ppm.
+
+The rotation matrix R comes in two conventions, **coordinate frame** and **position vector**, which differ only in the sign of the rotations. EPSG lists these parameters in the coordinate-frame convention. Entering them in software that expects the other convention without flipping the signs gives errors of a few decimetres. The handbook's own function agrees with PROJ to better than 1e-8 degrees (about 1 mm).
+
+The EPSG dataset also holds a second parameter set, EPSG:5194 "VN-2000 to WGS 84 (1)", and PROJ may pick it depending on location: at Ben Thanh Market the two sets differ by about 0.8 m. When sub-metre accuracy matters, state which transformation code you used.
+
+</Depth>
+
+## 5.3 Projections and scale error
+
+A curved surface cannot be flattened without distortion. The <Term id="utm">UTM projection</Term> divides the Earth into zones 6° wide. In each zone, lengths are exact along two lines about 180 km either side of the central meridian. Most of Viet Nam lies in **zone 48** (102°–108°E, central meridian 105°); the eastern part from 108°E is in **zone 49**.
+
+The <Term id="scale-factor">scale factor k</Term> says how much the grid enlarges or shrinks. On the UTM central meridian k = 0.9996 (shrinking by 400 ppm, i.e. 40 cm per km). Towards the zone edges k exceeds 1.
+
+<Figure
+  title="Figure 5.2 — Scale error versus longitude: UTM versus VN-2000 TM-3"
+  try="Move the pointer along the longitude axis. At Mong Cai, how many millimetres is 1 km on the UTM grid off? Move the TM-3 central meridian to 107°45′ (Da Nang): what is the error at Da Nang now?"
+  source="Point scale factor of the Transverse Mercator projection on the WGS84 ellipsoid, Snyder (1987) eq. 8-11. The TM-3 curve is solid within ±1.5° of its central meridian (one 3° zone)."
+>
+  <ScaleFactorChart client:visible lang="en" />
+</Figure>
+
+<details>
+<summary>Data table: UTM scale factor at some places</summary>
+
+| Place | Longitude | UTM zone | k | Error over 1 km |
+|---|---|---|---|---|
+| Lao Cai | 103.97°E | 48 | 0.999739 | −26 cm |
+| Hanoi (Hoan Kiem Lake) | 105.83°E | 48 | 0.999693 | −31 cm |
+| Mong Cai | 107.97°E | 48 | 1.000770 | +77 cm |
+| Da Nang | 108.22°E | 49 | 1.000694 | +69 cm |
+| Ca Mau | 104.75°E | 48 | 0.999609 | −39 cm |
+
+</details>
+
+An error of 77 cm per km does not matter when measuring rice area on 10 m imagery. It is far too large for cadastral maps: a 100 m parcel would be 7.7 cm off. Large-scale VN-2000 maps therefore use **3° zones (TM-3) with k₀ = 0.9999**, with a central meridian chosen per province, e.g. 105° for Hanoi. Within a 3° zone the error stays between −100 and about +200 ppm. At Hoan Kiem Lake the TM-3 scale factor is 0.9999925, practically true scale.
+
+## 5.4 Raster and vector
+
+The same lake can be stored in two ways:
+
+- <Term id="raster">Raster</Term>: a regular grid of cells, each marked "water" or "not water". Satellite images, DEMs and index maps are rasters.
+- <Term id="vector">Vector</Term>: a polygon storing the coordinates of every shoreline vertex. Administrative boundaries, roads and land parcels are usually vectors.
+
+<Figure
+  title="Figure 5.3 — West Lake as a raster and as a vector on the map"
+  try="Raise the pixel size from 10 m to 320 m: how does the raster area change? Raise the simplification tolerance to 100 m and zoom in on the shore: what happens to the vertex count, area and perimeter?"
+  source="Water mask: MNDWI = (B3 − B11)/(B3 + B11) ≥ 0 on the Sentinel-2B L2A scene of 12 Feb 2024 (Chapter 6), connected component containing West Lake. Vector: 0.5 contour of the 10 m mask (marching squares), Douglas–Peucker simplification in the browser. Coarser rasters: block water fraction ≥ 50 %. Uncompressed size: 1 byte per cell; 16 bytes per vertex (two 8-byte numbers). Contains modified Copernicus Sentinel data 2024."
+>
+  <RasterVector client:visible lang="en" />
+</Figure>
+
+The two tables below come from Figure 5.3.
+
+<details>
+<summary>Data table: raster at several pixel sizes</summary>
+
+| Pixel | Cells | Water cells | Area | Size |
+|---|---|---|---|---|
+| 10 m | 262,144 | 51,276 | 5.128 km² | 256 KB |
+| 40 m | 16,384 | 3,241 | 5.186 km² | 16 KB |
+| 80 m | 4,096 | 807 | 5.165 km² | 4 KB |
+| 320 m | 256 | 49 | 5.018 km² | 256 B |
+
+</details>
+
+<details>
+<summary>Data table: vector at several simplification tolerances</summary>
+
+| Tolerance | Vertices | Area | Perimeter | Size |
+|---|---|---|---|---|
+| 0 m | 2,403 | 5.100 km² | 20.48 km | 37.5 KB |
+| 10 m | 429 | 5.100 km² | 18.57 km | 6.7 KB |
+| 50 m | 61 | 5.089 km² | 15.21 km | 976 B |
+| 100 m | 38 | 5.055 km² | 14.34 km | 608 B |
+
+</details>
+
+Three lessons:
+
+1. **Area is robust, perimeter is not.** Going from 2,403 to 61 vertices reduces the area by only 0.2 %, but the perimeter loses almost 26 % because the shoreline's wiggles are straightened.
+2. The 10 m raster gives 5.128 km², the vector 5.100 km². The vector outline runs midway between shoreline pixel centres, so it trims half a pixel corner at every stair step.
+3. A raster spends storage on non-water too (262,144 cells for 51,276 water cells). A vector stores only the shoreline and is much more compact, but it cannot hold continuously varying values such as elevation or NDVI.
+
+<Depth level="advanced" title="Why does the raster area wobble as pixels grow?">
+
+At 40 m the area rises to 5.186 km², then falls to 5.018 km² at 320 m. The "≥ 50 % water" rule rounds every shoreline cell up or down. With small cells the rounding errors cancel and the total is stable. With large cells each rounding adds or removes a big patch, so the total depends on where the grid happens to fall. This is the mixed-pixel effect of Chapter 4, seen from the GIS side.
+
+</Depth>
+
+## 5.5 Lab
+
+The notebook uses `pyproj` to move a point through WGS84, UTM and VN-2000, then re-implements the Helmert transformation to check it. The second part compares West Lake's pixel area with the area of a polygon vectorised by Earth Engine. The GEE script draws UTM zones and vectorises any lake.
+
+<LabLinks notebook="labs/ch05_gis.ipynb" gee="labs/ch05_gis.js" />
+
+**Suggested exercises**
+
+1. Take the GPS position of your home. Compute its VN-2000 TM-3 coordinates using your province's central meridian (listed in Circular 973/2001/TT-TCĐC).
+2. Pick another lake (Ba Be, Tri An). By what percentage do the raster and vector areas differ?
+3. At which latitude in Viet Nam is the scale error at the edge of UTM zone 48 largest? Why?
+
+## 5.6 Review
+
+<Quiz client:visible lang="en" items={quiz} />
+
+## References
+
+- Douglas, D. H., & Peucker, T. K. (1973). Algorithms for the reduction of the number of points required to represent a digitized line or its caricature. *Cartographica*, 10(2), 112–122.
+- General Department of Land Administration (2001). Circular 973/2001/TT-TCĐC on applying the VN-2000 national reference and coordinate system.
+- IOGP. *EPSG Geodetic Parameter Dataset* (queried through PROJ/pyproj 3.7): EPSG:4756, 3405, 5897, 6960.
+- Prime Minister of Viet Nam (2000). Decision 83/2000/QĐ-TTg on the use of the national reference and coordinate system VN-2000.
+- Snyder, J. P. (1987). *Map Projections — A Working Manual*. U.S. Geological Survey Professional Paper 1395.

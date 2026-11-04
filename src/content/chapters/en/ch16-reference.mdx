@@ -1,0 +1,37 @@
+---
+title: Formula sheet & references
+n: 16
+summary: Every formula used in the handbook in one searchable table, and the reference lists of all chapters merged into one.
+objectives:
+  - Look up a formula and find the chapter that explains it.
+  - Find the source of a method or a dataset.
+updated: "2026-11-04"
+---
+import Depth from '../../../components/Depth.astro';
+import FormulaTable from '../../../islands/FormulaTable.tsx';
+import RefList from '../../../components/RefList.astro';
+
+## 16.1 Formula sheet
+
+Type an index name, symbol or unit to filter, or pick a topic. The number in the last column links to the chapter that explains the formula.
+
+<FormulaTable client:visible lang="en" />
+
+<Depth level="ref" title="Common constants">
+
+| Constant | Value |
+|---|---|
+| Earth's gravitational parameter μ = GM | 398,600.4418 km³/s² |
+| WGS84 equatorial radius | 6,378,137 m |
+| Speed of light c | 299,792,458 m/s |
+| Wien's constant | 2898 µm·K |
+| Stefan–Boltzmann constant σ | 5.67 × 10⁻⁸ W·m⁻²·K⁻⁴ |
+| Sentinel-1 wavelength (5.405 GHz) | ≈ 5.55 cm |
+
+</Depth>
+
+## 16.2 References for the whole handbook
+
+Merged automatically from the "References" section of every chapter. Each entry lists the chapters that cite it.
+
+<RefList />

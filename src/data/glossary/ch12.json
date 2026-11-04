@@ -1,0 +1,56 @@
+[
+ {
+  "id": "dem",
+  "vi": "Mô hình số độ cao (DEM)",
+  "en": "Digital elevation model (DEM)",
+  "def": {
+   "vi": "Raster mà mỗi ô chứa độ cao của mặt đất. DSM tính cả nhà cửa và cây; DTM chỉ có mặt đất trống.",
+   "en": "A raster whose cells hold the ground height. A DSM includes buildings and trees; a DTM is bare earth."
+  }
+ },
+ {
+  "id": "stereo-parallax",
+  "vi": "Thị sai lập thể",
+  "en": "Stereo parallax",
+  "def": {
+   "vi": "Độ dịch chuyển biểu kiến của một điểm giữa hai ảnh chụp từ hai vị trí; vật càng cao thị sai càng lớn, nhờ đó đo được độ cao.",
+   "en": "The apparent shift of a point between two images taken from different positions; the higher the object, the larger the shift, which gives its height."
+  }
+ },
+ {
+  "id": "hillshade",
+  "vi": "Bóng đổ địa hình",
+  "en": "Hillshade",
+  "def": {
+   "vi": "Ảnh mô phỏng độ sáng của địa hình dưới một nguồn sáng (phương vị và độ cao Mặt Trời) để dễ nhìn hình dạng núi.",
+   "en": "An image simulating how terrain is lit by a light source (sun azimuth and elevation), to make landforms easy to see."
+  }
+ },
+ {
+  "id": "slope",
+  "vi": "Độ dốc",
+  "en": "Slope",
+  "def": {
+   "vi": "Góc giữa mặt đất và mặt phẳng nằm ngang, tính từ độ cao các ô lân cận.",
+   "en": "Angle between the ground and the horizontal, computed from neighbouring elevations."
+  }
+ },
+ {
+  "id": "aspect",
+  "vi": "Hướng dốc",
+  "en": "Aspect",
+  "def": {
+   "vi": "Hướng mà sườn dốc quay mặt về (hướng xuống dốc), tính theo độ từ hướng Bắc theo chiều kim đồng hồ.",
+   "en": "The compass direction a slope faces (downslope), in degrees clockwise from north."
+  }
+ },
+ {
+  "id": "geoid",
+  "vi": "Geoid",
+  "en": "Geoid",
+  "def": {
+   "vi": "Mặt đẳng thế trọng trường gần với mực nước biển trung bình. Độ cao trên DEM thường tính từ geoid (EGM96, EGM2008), không phải từ ellipsoid.",
+   "en": "The equipotential surface close to mean sea level. DEM heights usually refer to a geoid (EGM96, EGM2008), not to the ellipsoid."
+  }
+ }
+]

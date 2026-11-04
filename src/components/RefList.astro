@@ -1,0 +1,47 @@
+---
+// Merged reference list: every "- …" item under "## Tài liệu tham khảo" / "## References" in all chapters of this language, read at build time.
+import fs from 'node:fs';
+import path from 'node:path';
+import { CHAPTERS } from '../data/chapters';
+import { langFromUrl, url } from '../i18n/ui';
+
+const lang = langFromUrl(Astro.url);
+const dir = path.join(process.cwd(), 'src/content/chapters', lang);
+const head = lang === 'vi' ? '## Tài liệu tham khảo' : '## References';
+const refs = new Map<string, { text: string; ch: Set<number> }>();
+for (const f of fs.readdirSync(dir).filter((x) => x.endsWith('.mdx')).sort()) {
+  const n = Number(f.slice(2, 4));
+  const src = fs.readFileSync(path.join(dir, f), 'utf8').replace(/\r/g, '');
+  const at = src.indexOf(`\n${head}\n`);
+  if (at < 0) continue;
+  const block = src.slice(at + head.length + 2).split(/\n## /)[0];
+  for (const line of block.split('\n').filter((l) => l.startsWith('- '))) {
+    const text = line.slice(2).trim();
+    // the same work cited in several chapters (possibly with different punctuation) is listed once
+    const alnum = (x: string) => x.toLowerCase().replace(/ và cs\.| et al\./g, '').replace(/[^\p{L}\p{N}]/gu, '');
+    const [who, rest = ''] = text.split(/\)\.\s*/);
+    const key = alnum(who) + alnum(rest).slice(0, 24); // authors + year + start of title; punctuation-insensitive
+    const e = refs.get(key) ?? { text, ch: new Set<number>() };
+    if (text.length > e.text.length) e.text = text; // keep the fuller variant (e.g. with DOI)
+    e.ch.add(n);
+    refs.set(key, e);
+  }
+}
+const list = [...refs.values()].sort((a, b) => a.text.localeCompare(b.text, lang));
+const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+// trusted text written by the authors: only *italic* and bare URLs are rendered
+const html = (s: string) => esc(s).replace(/\*([^*]+)\*/g, '<em>$1</em>').replace(/(https?:\/\/[^\s)]+[^\s).,])/g, '<a href="$1" rel="noopener">$1</a>');
+const slug = (n: number) => CHAPTERS.find((c) => c.n === n)?.slug;
+const L = lang === 'vi' ? { n: `${list.length} tài liệu từ các chương`, ch: 'Chương' } : { n: `${list.length} works cited across the chapters`, ch: 'Chapter' };
+---
+<p class="muted">{L.n}</p>
+<ol class="ref-list" style="padding-left: 1.4rem">
+  {list.map((r) => (
+    <li style="margin-bottom: 6px">
+      <span set:html={html(r.text)} />{' '}
+      <span class="muted" style="font-size: 0.82rem">
+        ({L.ch} {[...r.ch].sort((a, b) => a - b).map((n, i) => <>{i > 0 && ', '}<a href={url(`${lang}/${slug(n)}/`)}>{n}</a></>)})
+      </span>
+    </li>
+  ))}
+</ol>

@@ -4,8 +4,8 @@ export type Cube = {
   width: number;
   height: number;
   bands: string[];
-  /** Band-sequential surface reflectance x 10000. */
-  data: Uint16Array;
+  /** Band-sequential integers; physical value = data x scale (reflectance x 10000, or dB x 100 for SAR). */
+  data: Uint16Array | Int16Array;
   scale: number;
 };
 
@@ -15,7 +15,7 @@ export const bandIndex = (cube: Cube, band: string): number => {
   return i;
 };
 
-export const band = (cube: Cube, name: string): Uint16Array => {
+export const band = (cube: Cube, name: string): Uint16Array | Int16Array => {
   const n = cube.width * cube.height;
   const i = bandIndex(cube, name);
   return cube.data.subarray(i * n, (i + 1) * n);

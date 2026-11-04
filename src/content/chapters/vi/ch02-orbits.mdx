@@ -1,0 +1,188 @@
+---
+title: Quỹ đạo & độ phủ
+n: 2
+summary: Vì sao vệ tinh không rơi, vì sao hầu hết vệ tinh quan sát Trái Đất cùng bay ở độ nghiêng 98°, và Sentinel-2 cần bao nhiêu ngày để chụp hết Việt Nam. Mọi con số trong chương tính từ định luật Kepler, lực J2 và phần tử quỹ đạo thật.
+objectives:
+  - Tính chu kỳ và vận tốc của quỹ đạo tròn từ độ cao bằng định luật Kepler III.
+  - Phân biệt LEO, quỹ đạo đồng bộ Mặt Trời, MEO và GEO; biết mỗi loại dùng cho việc gì.
+  - Giải thích vì sao lực J2 cho phép quỹ đạo đồng bộ Mặt Trời và tính được độ nghiêng cần thiết.
+  - Đọc vết bay, dải chụp và chu kỳ lặp; ước lượng số ngày để phủ kín một vùng.
+updated: "2026-11-04"
+---
+import Term from '../../../components/Term.astro';
+import Depth from '../../../components/Depth.astro';
+import Figure from '../../../components/Figure.astro';
+import LabLinks from '../../../components/LabLinks.astro';
+import KeplerChart from '../../../islands/KeplerChart.tsx';
+import OrbitExplorer from '../../../islands/OrbitExplorer.tsx';
+import RevisitMap from '../../../islands/RevisitMap.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/ch02.json';
+
+<p class="muted" style="font-size:0.9rem">Chương này phỏng theo chương 2 (Cơ học quỹ đạo) của <a href="https://satellite-rs-handbook.netlify.app/" rel="noopener"><em>Sổ tay Vệ tinh & Viễn thám</em></a> (Nguyễn Văn Tín, CC BY 4.0), rút gọn cho người dùng ảnh viễn thám và thêm các hình tính trên quỹ đạo thật.</p>
+
+## 2.1 Vì sao vệ tinh không rơi
+
+Vệ tinh **luôn rơi**. Nó chỉ không chạm đất vì bay ngang đủ nhanh: trong lúc rơi, mặt đất cong đi đúng bằng quãng rơi. Ở độ cao 400 km, trọng lực vẫn còn 88,5 % so với mặt đất. Phi hành gia trên trạm vũ trụ lơ lửng vì cả trạm lẫn người cùng rơi tự do.
+
+Với quỹ đạo tròn bán kính r (tính từ tâm Trái Đất), lực hấp dẫn đóng vai trò lực hướng tâm:
+
+<p class="formula">v = √(μ / r),   T = 2π √(r³ / μ),   μ = GM = 398 600,4 km³/s²</p>
+
+Công thức thứ hai là **định luật Kepler III**: chu kỳ chỉ phụ thuộc kích thước quỹ đạo, không phụ thuộc khối lượng vệ tinh. Một CubeSat vài kg và một vệ tinh vài tấn ở cùng độ cao có cùng chu kỳ.
+
+<Figure
+  title="Hình 2.1 — Chu kỳ quỹ đạo theo độ cao"
+  try="Di chuột dọc đường cong. Ở độ cao nào chu kỳ đúng bằng một ngày sao (1436 phút)? Các vệ tinh quan sát Trái Đất nằm ở đâu trên đường cong?"
+  source="Đường cong: định luật Kepler III cho quỹ đạo tròn, bán kính xích đạo 6378,137 km. Chấm đặc: vệ tinh thật, độ cao suy từ chuyển động trung bình (CelesTrak, 04/11/2026). Chấm rỗng: quỹ đạo danh nghĩa của ISS, GPS và vệ tinh địa tĩnh."
+>
+  <KeplerChart client:visible lang="vi" />
+</Figure>
+
+<div class="worked">
+
+#### Ví dụ: Sentinel-2 ở độ cao 786 km
+
+1. Bán kính quỹ đạo: r = 6378,1 + 786 = 7164,1 km.
+2. Vận tốc: v = √(398 600,4 / 7164,1) = **7,46 km/s**.
+3. Chu kỳ: T = 2π √(7164,1³ / 398 600,4) = 6035 s = **100,6 phút**.
+4. Số vòng mỗi ngày: 1440 / 100,6 ≈ **14,3 vòng**. ESA thiết kế đúng 14 3/10 vòng mỗi ngày để vết bay lặp lại sau 10 ngày (143 vòng).
+
+Vệ tinh địa tĩnh cần T bằng một ngày sao (1436,07 phút). Giải ngược định luật Kepler III ra độ cao **35 786 km**, vận tốc **3,07 km/s**.
+
+</div>
+
+## 2.2 Các loại quỹ đạo
+
+<div class="table-wrap">
+
+| Quỹ đạo | Độ cao | Chu kỳ | Dùng cho |
+|---|---|---|---|
+| LEO (quỹ đạo thấp) | 160–2000 km | ~88–127 phút | Trạm vũ trụ, chòm vệ tinh viễn thông, viễn thám |
+| Đồng bộ Mặt Trời (một dạng LEO) | ~500–800 km, độ nghiêng ~97–99° | ~95–101 phút | Hầu hết vệ tinh quang học và radar: Sentinel, Landsat, VNREDSat-1 |
+| MEO (quỹ đạo trung bình) | 2000–35 786 km | 2–24 giờ | Định vị: GPS ở 20 200 km, chu kỳ 718,7 phút |
+| GEO (địa tĩnh) | 35 786 km, độ nghiêng 0° | 1436 phút | Viễn thông (Vinasat), khí tượng (Himawari) |
+
+</div>
+
+Chu kỳ và vận tốc trong bảng tính bằng công thức ở mục 2.1. Viễn thám độ phân giải cao cần bay thấp để gần mặt đất. Vệ tinh khí tượng địa tĩnh thì chấp nhận ở xa để luôn nhìn thấy cùng một vùng, chụp lại sau mỗi 10 phút.
+
+## 2.3 Quỹ đạo đồng bộ Mặt Trời và lực J2
+
+Trái Đất không tròn hoàn hảo: bán kính xích đạo lớn hơn bán kính cực khoảng 21 km. Phần phình ở xích đạo, mô tả bằng hệ số <Term id="j2">J2</Term>, kéo lệch quỹ đạo và làm **mặt phẳng quỹ đạo quay dần** quanh trục Trái Đất:
+
+<p class="formula">dΩ/dt = −(3/2) · n · J2 · (Re / a)² · cos i</p>
+
+trong đó n là vận tốc góc của vệ tinh, Re bán kính xích đạo, a bán kính quỹ đạo, i độ nghiêng. Ví dụ, với trạm ISS (420 km, 51,6°), mặt phẳng quỹ đạo quay **−4,95° mỗi ngày** (về phía tây).
+
+Trái Đất đi quanh Mặt Trời 360° trong 365,24 ngày, tức 0,9856° mỗi ngày về phía đông. Nếu chọn độ nghiêng sao cho dΩ/dt đúng bằng +0,9856°/ngày, mặt phẳng quỹ đạo quay theo Mặt Trời. Khi đó vệ tinh luôn qua một vĩ độ vào cùng giờ địa phương. Đó là <Term id="sun-synchronous-orbit">quỹ đạo đồng bộ Mặt Trời</Term>. Muốn dΩ/dt dương thì cos i phải âm, tức **i lớn hơn 90°**: vệ tinh bay hơi ngược chiều Trái Đất quay.
+
+<Figure
+  title="Hình 2.2 — Tự tạo một quỹ đạo tròn đi qua Việt Nam"
+  try="Chọn Sentinel-2 rồi kéo độ nghiêng từ 98,6° xuống 90°: dòng 'Đồng bộ Mặt Trời?' đổi thế nào? Chọn 'Địa tĩnh': vì sao chấm vệ tinh đứng yên trên quả địa cầu? Kéo độ cao lên 6000 km: còn độ nghiêng đồng bộ Mặt Trời không?"
+  source="Quỹ đạo tròn, chuyển động hai vật cộng trôi nút bậc nhất do J2 (J2 = 1,08263×10⁻³, Re = 6378,137 km), góc giờ sao theo IAU 1982. Nút lên đặt tại 105°E lúc 03:30 UTC ngày 04/11/2026 để vết bay đi qua Việt Nam. Thông số mẫu: ISS (NASA), Sentinel-2 (ESA), Landsat 9 (USGS), GPS, quỹ đạo địa tĩnh. Ảnh nền © Esri, Maxar, Earthstar Geographics."
+>
+  <OrbitExplorer client:visible lang="vi" />
+</Figure>
+
+Công thức J2 cho các vệ tinh thật (dùng phần tử CelesTrak ở Chương 1):
+
+<div class="table-wrap">
+
+| Vệ tinh | Độ cao | Độ nghiêng thật | Độ nghiêng SSO theo J2 | Mặt phẳng quay |
+|---|---|---|---|---|
+| Sentinel-2A | 789,0 km | 98,56° | 98,56° | 0,986°/ngày |
+| Landsat 9 | 702,5 km | 98,21° | 98,20° | 0,988°/ngày |
+| Sentinel-1A | 693,7 km | 98,16° | 98,16° | 0,985°/ngày |
+| VNREDSat-1 | 677,8 km | 97,89° | 98,10° | 0,961°/ngày |
+
+</div>
+
+Ba vệ tinh đầu có độ nghiêng gần như trùng giá trị lý thuyết: chúng được điều khiển để giữ quỹ đạo. VNREDSat-1 lệch 0,21°, nên giờ bay qua của nó đang trôi (Chương 1).
+
+<Depth level="advanced" title="Giới hạn độ cao của quỹ đạo đồng bộ Mặt Trời">
+
+Càng lên cao, J2 càng yếu (giảm theo (Re/a)² và theo n). Muốn vẫn quay đủ 0,9856°/ngày, cos i phải càng âm. Gần 6000 km, cần cos i ≈ −1, tức i ≈ 180°. Cao hơn nữa thì không còn độ nghiêng nào đạt được. Hình 2.2 hiện "không có (quá cao)" trong trường hợp này. Trên thực tế, quỹ đạo đồng bộ Mặt Trời gần như chỉ dùng ở dưới 1000 km.
+
+</Depth>
+
+## 2.4 Vết bay, dải chụp và thời gian quay lại
+
+<Term id="ground-track">Vết bay</Term> là đường mà điểm ngay dưới vệ tinh vẽ trên mặt đất. Trong một vòng 100,6 phút, Trái Đất quay được 25,2°, nên vòng sau lệch về phía tây 25,2° (khoảng 2800 km ở xích đạo). Dải chụp của Sentinel-2 rộng 290 km, nhỏ hơn nhiều khoảng lệch đó. Vì thế một vệ tinh phải chờ nhiều ngày, các vết bay mới lấp đầy khoảng trống.
+
+Sentinel-2 chỉ chụp trên **nhánh đi xuống**, khi vùng bên dưới đang là ban ngày. Nó cắt xích đạo lúc 10:30 giờ địa phương (<Term id="ltdn">LTDN</Term>), và vết bay lặp lại đúng sau <Term id="repeat-cycle">chu kỳ</Term> 10 ngày.
+
+<Figure
+  title="Hình 2.3 — Sentinel-2 chụp hết đất liền Việt Nam sau bao nhiêu ngày?"
+  try="Đặt 1 vệ tinh, kéo số ngày từ 1 đến 10 và đọc '% đất liền được chụp'. Chuyển sang 2 vệ tinh: cần bao nhiêu ngày? Sau 10 ngày, mỗi điểm được chụp trung bình mấy lần?"
+  source="Quỹ đạo tham chiếu Sentinel-2 (ESA): 14 3/10 vòng/ngày, độ nghiêng 98,62°, nút xuống 10:30 giờ địa phương, dải chụp 290 km; chỉ tính nhánh đi xuống trên vĩ độ 6–25°N. Điểm đất liền: lưới 0,1° bên trong đường biên LSIB 2017 (đã đơn giản hóa 2 km), 2778 điểm. Vị trí pha giữa các ngày là mô hình, không phải lịch chụp thật. Ảnh nền © Esri, Maxar, Earthstar Geographics."
+>
+  <RevisitMap client:visible lang="vi" />
+</Figure>
+
+Kết quả mô phỏng:
+
+<div class="table-wrap">
+
+| Số ngày | 1 vệ tinh: % đất liền được chụp | 2 vệ tinh lệch 180°: % đất liền được chụp |
+|---|---|---|
+| 1 | 40,0 % | 40,0 % |
+| 2 | 40,0 % | 72,9 % |
+| 4 | 65,9 % | 94,3 % |
+| 5 | 65,9 % | **100 %** |
+| 7 | 93,5 % | 100 % |
+| 10 | **100 %** | 100 % |
+
+</div>
+
+Việt Nam hẹp và dài theo hướng bắc nam, gần song song với vết bay. Vì vậy một lượt bay có thể phủ tới 40 % đất liền, nhưng cũng có những ngày không lượt nào đi qua. Với hai vệ tinh, sau 10 ngày mỗi điểm được chụp trung bình **2,23 lần**. Đó là lý do ESA nói "Sentinel-2 quay lại sau 5 ngày".
+
+Nhưng được chụp chưa phải là có ảnh dùng được. Chương 4 cho thấy ở Hà Nội năm 2022–2024 chỉ 92 trên 433 ngày có ảnh đủ trong. Ở vĩ độ Hà Nội, vệ tinh bay qua lúc khoảng **10:43** giờ địa phương, đúng lúc mây đối lưu mùa hè bắt đầu phát triển.
+
+<Depth level="ref" title="Bảng tra: thông số quỹ đạo các vệ tinh hay dùng">
+
+<div class="table-wrap">
+
+| Vệ tinh | Độ cao danh nghĩa | Độ nghiêng | Giờ qua xích đạo | Chu kỳ lặp |
+|---|---|---|---|---|
+| Sentinel-2A/B/C | 786 km | 98,62° | 10:30, nút xuống | 10 ngày (1 vệ tinh), 5 ngày (2 vệ tinh) |
+| Sentinel-1 | 693 km | 98,18° | 18:00, nút lên | 12 ngày (1 vệ tinh) |
+| Landsat 8, 9 | 705 km | 98,2° | ~10:00, nút xuống | 16 ngày (1 vệ tinh), 8 ngày (2 vệ tinh) |
+| MODIS Terra / Aqua | 705 km | 98,2° | 10:30 xuống / 13:30 lên (danh nghĩa) | 1–2 ngày |
+
+</div>
+
+Nguồn: ESA Sentinel-1 và Sentinel-2 User Handbooks, USGS Landsat Missions, NASA MODIS. Giờ qua xích đạo của Terra đã sớm dần vì không còn được duy trì quỹ đạo (Chương 1).
+
+</Depth>
+
+<Depth level="advanced" title="Phần tử quỹ đạo và bộ GP/TLE">
+
+Vị trí một vệ tinh tại một thời điểm cần đúng 6 số. Dạng dễ hình dung là 6 phần tử Kepler: bán trục lớn a, tâm sai e, độ nghiêng i, kinh độ nút lên Ω (RAAN), góc cận địa ω và dị thường trung bình M. CelesTrak phát hành chúng dưới dạng GP (OMM JSON) hoặc TLE, tính cho mô hình truyền quỹ đạo SGP4. Hình 1.2 và 2.2 dùng cách tính đơn giản hơn (quỹ đạo tròn, chỉ có trôi nút J2), đủ để minh họa nhưng sai khoảng chục km sau một ngày. Muốn dự báo lượt bay chính xác, hãy dùng SGP4 (thư viện `sgp4` của Python hoặc `satellite.js`).
+
+</Depth>
+
+## 2.5 Thực hành
+
+Notebook tính chu kỳ, vận tốc và độ nghiêng đồng bộ Mặt Trời theo độ cao, vẽ vết bay Sentinel-2 qua Việt Nam trong 10 ngày, rồi so với số ảnh Sentinel-2 thật chụp một điểm trong Earth Engine. Script GEE hiện khung các ảnh Sentinel-2 trong 10 ngày liên tiếp trên Việt Nam.
+
+<LabLinks notebook="labs/ch02_orbits.ipynb" gee="labs/ch02_orbits.js" />
+
+**Bài tập gợi ý**
+
+1. Tính độ nghiêng đồng bộ Mặt Trời cho độ cao 500 km. Nó lớn hơn hay nhỏ hơn ở 786 km?
+2. Landsat 8 và 9 có dải chụp 185 km, chu kỳ lặp 16 ngày. Hai vệ tinh cần bao nhiêu ngày để chụp hết Việt Nam?
+3. Đếm số ảnh Sentinel-2 thật chụp nơi bạn sống trong tháng 1/2024. Có khớp với "5 ngày một lần" không? Vì sao?
+
+## 2.6 Ôn tập
+
+<Quiz client:visible lang="vi" items={quiz} />
+
+## Tài liệu tham khảo
+
+- Drusch, M. và cs. (2012). Sentinel-2: ESA's optical high-resolution mission for GMES operational services. *Remote Sensing of Environment*, 120, 25–36.
+- ESA (2015). *Sentinel-2 User Handbook*. European Space Agency.
+- Kelso, T. S. *CelesTrak*. https://celestrak.org
+- Nguyễn Văn Tín. *Sổ tay Vệ tinh & Viễn thám*, chương 2. CC BY 4.0. https://satellite-rs-handbook.netlify.app/
+- Vallado, D. A. (2013). *Fundamentals of Astrodynamics and Applications* (4th ed.). Microcosm Press.
+- Wertz, J. R., & Larson, W. J. (Eds.) (1999). *Space Mission Analysis and Design* (3rd ed.). Microcosm / Kluwer.

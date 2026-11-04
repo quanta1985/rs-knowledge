@@ -1,0 +1,20 @@
+[
+ {
+  "id": "change-detection",
+  "vi": "Phát hiện biến động",
+  "en": "Change detection",
+  "def": {
+   "vi": "Xác định nơi, loại và thời điểm thay đổi của bề mặt từ ảnh nhiều thời điểm, bằng hiệu chỉ số, so sánh sau phân loại hoặc phân tích chuỗi thời gian.",
+   "en": "Finding where, what and when the surface changed from multi-date imagery, by index differencing, post-classification comparison or time-series analysis."
+  }
+ },
+ {
+  "id": "time-series",
+  "vi": "Chuỗi thời gian ảnh",
+  "en": "Image time series",
+  "def": {
+   "vi": "Dãy giá trị của cùng một pixel qua nhiều lần chụp hoặc nhiều năm, dùng để tìm xu hướng, mùa vụ và điểm gãy.",
+   "en": "The sequence of values of one pixel over many acquisitions or years, used to find trends, seasonality and breaks."
+  }
+ }
+]

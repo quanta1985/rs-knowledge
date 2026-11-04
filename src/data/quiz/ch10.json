@@ -1,0 +1,263 @@
+[
+ {
+  "q": {
+   "vi": "Điều kiện quan trọng nhất để so sánh hai ảnh khác thời điểm là gì?",
+   "en": "What matters most when comparing two images from different dates?"
+  },
+  "options": [
+   {
+    "vi": "Khác biệt giữa hai ảnh phải chủ yếu do mặt đất thay đổi, không do mùa, mây hay cảm biến",
+    "en": "Differences must come mainly from ground change, not season, clouds or sensor"
+   },
+   {
+    "vi": "Hai ảnh phải cùng kích thước tệp",
+    "en": "Same file size"
+   },
+   {
+    "vi": "Phải chụp cùng giờ trong ngày",
+    "en": "Same time of day only"
+   },
+   {
+    "vi": "Phải là ảnh màu thật",
+    "en": "They must be true colour"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Mùa, mây và chênh lệch cảm biến đều tạo ra 'biến động giả'.",
+   "en": "Season, clouds and sensor differences all create false change."
+  }
+ },
+ {
+  "q": {
+   "vi": "Trừ thẳng NDBI 2024 − 2000 ở Tây Hà Nội cho 73 km² 'tăng xây dựng'. Vì sao con số này đáng ngờ?",
+   "en": "Raw NDBI 2024 − 2000 flags 73 km² of 'built-up gain' in west Hanoi. Why is that suspicious?"
+  },
+  "options": [
+   {
+    "vi": "Trung vị hiệu NDBI cả khung là +0,094: gần như mọi pixel đều tăng, chủ yếu do khác cảm biến",
+    "en": "The frame median difference is +0.094: almost every pixel rose, mostly a sensor effect"
+   },
+   {
+    "vi": "Vì NDBI không dùng được cho đô thị",
+    "en": "NDBI cannot be used for cities"
+   },
+   {
+    "vi": "Vì ảnh 2024 có mây",
+    "en": "The 2024 image is cloudy"
+   },
+   {
+    "vi": "Vì 73 km² lớn hơn cả khung",
+    "en": "73 km² exceeds the frame"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Chuẩn hoá (trừ trung vị) hoặc so sánh sau phân loại giảm được lệch này.",
+   "en": "Normalising (subtracting the median) or post-classification comparison reduces this bias."
+  }
+ },
+ {
+  "q": {
+   "vi": "Ảnh tổng hợp trung vị giúp gì khi phát hiện biến động?",
+   "en": "How do median composites help change detection?"
+  },
+  "options": [
+   {
+    "vi": "Loại mây sót và làm mờ dao động mùa",
+    "en": "They remove leftover clouds and dampen seasonal swings"
+   },
+   {
+    "vi": "Tăng độ phân giải lên 10 m",
+    "en": "They raise resolution to 10 m"
+   },
+   {
+    "vi": "Loại bỏ chênh lệch cảm biến hoàn toàn",
+    "en": "They remove sensor differences completely"
+   },
+   {
+    "vi": "Không có tác dụng",
+    "en": "No effect"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Trung vị của nhiều lần chụp ít bị một lần chụp bất thường kéo lệch.",
+   "en": "A median of many observations is barely moved by one odd observation."
+  }
+ },
+ {
+  "q": {
+   "vi": "Vì sao Theil–Sen được dùng thay cho hồi quy bình phương nhỏ nhất với chuỗi NDVI?",
+   "en": "Why use Theil–Sen instead of least squares on NDVI series?"
+  },
+  "options": [
+   {
+    "vi": "Ít bị ảnh hưởng bởi năm nhiễu như 2012",
+    "en": "It is barely affected by noisy years like 2012"
+   },
+   {
+    "vi": "Vì nhanh hơn",
+    "en": "Because it is faster"
+   },
+   {
+    "vi": "Vì luôn cho độ dốc bằng 0",
+    "en": "It always gives zero slope"
+   },
+   {
+    "vi": "Vì không cần dữ liệu",
+    "en": "It needs no data"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Độ dốc Theil–Sen là trung vị độ dốc mọi cặp điểm.",
+   "en": "The Theil–Sen slope is the median of all pairwise slopes."
+  }
+ },
+ {
+  "q": {
+   "vi": "Pixel (202, 206): NDVI ≈ 0,63 trước 2008 và ≈ 0,19 sau. Xu hướng Theil–Sen −0,18/10 năm che mất điều gì?",
+   "en": "Pixel (202, 206): NDVI ≈ 0.63 before 2008 and ≈ 0.19 after. What does the −0.18/decade trend hide?"
+  },
+  "options": [
+   {
+    "vi": "Thay đổi diễn ra đột ngột trong một năm, không đều đặn",
+    "en": "The change was abrupt, within a year, not gradual"
+   },
+   {
+    "vi": "Pixel là nước",
+    "en": "The pixel is water"
+   },
+   {
+    "vi": "Không có thay đổi nào",
+    "en": "There was no change"
+   },
+   {
+    "vi": "Dữ liệu sai",
+    "en": "The data are wrong"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Mô hình bước nhảy (F = 197) khớp tốt hơn nhiều so với một đường thẳng.",
+   "en": "A step model (F = 197) fits far better than a straight line."
+  }
+ },
+ {
+  "q": {
+   "vi": "Vì sao năm 2012 có NDVI rất nhiễu?",
+   "en": "Why is 2012 NDVI so noisy?"
+  },
+  "options": [
+   {
+    "vi": "Gần như chỉ có Landsat 7 SLC-off; trung vị chỉ 1 lần chụp không mây",
+    "en": "Almost only Landsat 7 SLC-off; a median of just 1 clear observation"
+   },
+   {
+    "vi": "Năm 2012 có bão lớn",
+    "en": "A big storm in 2012"
+   },
+   {
+    "vi": "Landsat 8 chụp quá nhiều",
+    "en": "Landsat 8 took too many images"
+   },
+   {
+    "vi": "Do lỗi tính NDVI",
+    "en": "An NDVI formula error"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Landsat 5 ngừng chụp cuối 2011, Landsat 8 phóng năm 2013.",
+   "en": "Landsat 5 stopped at the end of 2011; Landsat 8 launched in 2013."
+  }
+ },
+ {
+  "q": {
+   "vi": "Vì sao nhiều pixel có năm gãy 2004?",
+   "en": "Why do many pixels break in 2004?"
+  },
+  "options": [
+   {
+    "vi": "2004 là năm sớm nhất được phép (cần ≥ 4 năm trước), cộng với sọc SLC-off từ 2003",
+    "en": "2004 is the earliest allowed year (≥ 4 years before), plus SLC-off stripes from 2003"
+   },
+   {
+    "vi": "Hà Nội xây toàn bộ năm 2004",
+    "en": "All of Hanoi was built in 2004"
+   },
+   {
+    "vi": "Do thủy triều",
+    "en": "Tides"
+   },
+   {
+    "vi": "Do WorldCover",
+    "en": "WorldCover"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Điểm gãy dồn về đầu hoặc cuối chuỗi cần được nghi ngờ.",
+   "en": "Breaks piled at the start or end of a series deserve suspicion."
+  }
+ },
+ {
+  "q": {
+   "vi": "Ở Mũi Cà Mau, vì sao 'Mọi mặt nước' cho nhiều bồi/xói hơn 'Chỉ biển'?",
+   "en": "At Ca Mau cape, why does 'All water' show more accretion/erosion than 'Sea only'?"
+  },
+  "options": [
+   {
+    "vi": "Vì tính cả ao tôm trong đất liền bị đào hoặc lấp",
+    "en": "It includes inland shrimp ponds dug or filled"
+   },
+   {
+    "vi": "Vì biển rộng hơn",
+    "en": "The sea is larger"
+   },
+   {
+    "vi": "Vì ngưỡng khác nhau",
+    "en": "Different thresholds"
+   },
+   {
+    "vi": "Vì ảnh 2000 thiếu",
+    "en": "The 2000 image is missing"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Chỉ nước nối với biển mới liên quan đến đường bờ.",
+   "en": "Only water connected to the sea concerns the shoreline."
+  }
+ },
+ {
+  "q": {
+   "vi": "Hạ ngưỡng MNDWI từ 0 xuống −0,1 làm diện tích bồi tăng từ 21 lên 46 km². Lý do chính?",
+   "en": "Lowering the MNDWI threshold from 0 to −0.1 raises accretion from 21 to 46 km². Main reason?"
+  },
+  "options": [
+   {
+    "vi": "Bãi bùn ướt năm 2000 bị xếp là nước, rồi thành đất khi rừng ngập mặn mọc",
+    "en": "Wet mudflats in 2000 count as water, then become land as mangroves grow"
+   },
+   {
+    "vi": "Biển rút xa hơn 20 km",
+    "en": "The sea retreated 20 km"
+   },
+   {
+    "vi": "Lỗi ảnh nền",
+    "en": "Basemap error"
+   },
+   {
+    "vi": "Do kênh NIR",
+    "en": "The NIR band"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Kết quả đường bờ nhạy với ngưỡng và thủy triều; hãy báo cáo phép thử độ nhạy.",
+   "en": "Shoreline results depend on the threshold and tide; report a sensitivity test."
+  }
+ }
+]

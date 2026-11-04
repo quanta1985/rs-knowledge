@@ -1,0 +1,83 @@
+[
+ {
+  "id": "classification",
+  "vi": "Phân loại ảnh",
+  "en": "Image classification",
+  "def": {
+   "vi": "Gán mỗi pixel (hoặc đối tượng) của ảnh vào một lớp như nước, cây, đô thị, dựa trên đặc trưng phổ và đôi khi cả không gian, thời gian.",
+   "en": "Assigning each pixel (or object) of an image to a class such as water, trees or built-up, based on spectral and sometimes spatial or temporal features."
+  }
+ },
+ {
+  "id": "training-sample",
+  "vi": "Mẫu huấn luyện",
+  "en": "Training sample",
+  "def": {
+   "vi": "Các pixel đã biết lớp, dùng để bộ phân loại có giám sát học đặc trưng của từng lớp. Phải tách riêng khỏi mẫu kiểm định.",
+   "en": "Pixels of known class used by a supervised classifier to learn each class; must be kept separate from the validation sample."
+  }
+ },
+ {
+  "id": "worldcover",
+  "vi": "ESA WorldCover",
+  "en": "ESA WorldCover",
+  "def": {
+   "vi": "Bản đồ lớp phủ toàn cầu độ phân giải 10 m của ESA (2020, 2021) từ Sentinel-1 và Sentinel-2, gồm 11 lớp. Bản thân nó cũng có sai số.",
+   "en": "ESA's global 10 m land-cover map (2020, 2021) from Sentinel-1 and Sentinel-2 with 11 classes; it has errors of its own."
+  }
+ },
+ {
+  "id": "minimum-distance",
+  "vi": "Phân loại khoảng cách nhỏ nhất",
+  "en": "Minimum-distance classifier",
+  "def": {
+   "vi": "Gán pixel vào lớp có vectơ phổ trung bình gần nó nhất; chỉ dùng tâm, không dùng độ phân tán của lớp.",
+   "en": "Assigns a pixel to the class whose mean spectrum is nearest; uses class centres only, not their spread."
+  }
+ },
+ {
+  "id": "maximum-likelihood",
+  "vi": "Phân loại hợp lý cực đại",
+  "en": "Maximum-likelihood classifier",
+  "def": {
+   "vi": "Giả định mỗi lớp có phân phối chuẩn nhiều chiều (trung bình và ma trận hiệp phương sai) và gán pixel vào lớp có xác suất cao nhất.",
+   "en": "Models each class as a multivariate normal distribution (mean and covariance) and assigns a pixel to the most probable class."
+  }
+ },
+ {
+  "id": "confusion-matrix",
+  "vi": "Ma trận nhầm lẫn",
+  "en": "Confusion matrix",
+  "def": {
+   "vi": "Bảng đếm điểm mẫu theo lớp trên bản đồ (hàng) và lớp tham chiếu (cột); đường chéo là các điểm đúng.",
+   "en": "Table counting sample points by map class (rows) and reference class (columns); the diagonal holds the correct points."
+  }
+ },
+ {
+  "id": "overall-accuracy",
+  "vi": "Độ chính xác tổng thể",
+  "en": "Overall accuracy",
+  "def": {
+   "vi": "Tỷ lệ diện tích (hoặc điểm mẫu) được phân loại đúng. Với mẫu phân tầng phải tính có trọng số theo diện tích lớp.",
+   "en": "Share of area (or sample points) classified correctly; with stratified samples it must be weighted by class area."
+  }
+ },
+ {
+  "id": "users-accuracy",
+  "vi": "Độ chính xác người dùng (UA)",
+  "en": "User's accuracy (UA)",
+  "def": {
+   "vi": "Trong các pixel bản đồ gán cho một lớp, tỷ lệ thật sự thuộc lớp đó. 1 − UA là sai số nhận nhầm (commission).",
+   "en": "Of the pixels the map assigns to a class, the share that truly belong to it; 1 − UA is the commission error."
+  }
+ },
+ {
+  "id": "producers-accuracy",
+  "vi": "Độ chính xác người sản xuất (PA)",
+  "en": "Producer's accuracy (PA)",
+  "def": {
+   "vi": "Trong diện tích thật của một lớp, tỷ lệ được bản đồ tìm đúng. 1 − PA là sai số bỏ sót (omission).",
+   "en": "Of a class's true area, the share the map finds; 1 − PA is the omission error."
+  }
+ }
+]

@@ -1,0 +1,182 @@
+---
+title: "Physics: EM radiation & the atmosphere"
+n: 3
+summary: Every satellite image is a measurement of electromagnetic radiation. This chapter explains the spectrum, black-body radiation, how the atmosphere absorbs and scatters sunlight (with the ASTM G173 reference solar spectrum), and measures Hanoi's surface temperature with Landsat 9's thermal band.
+objectives:
+  - Convert between wavelength and frequency; name the spectral regions used in remote sensing.
+  - Use Planck's, Wien's and the Stefan–Boltzmann laws to explain why optical images record reflected light and thermal images record emitted radiation.
+  - Read the solar spectrum outside the atmosphere and at the ground; spot absorption bands and atmospheric windows.
+  - Explain why Sentinel-2's B10 band sees cirrus clouds but not the ground.
+  - Read surface temperature from a Landsat image and tell it apart from air temperature.
+updated: "2026-11-04"
+---
+import Term from '../../../components/Term.astro';
+import Depth from '../../../components/Depth.astro';
+import Figure from '../../../components/Figure.astro';
+import LabLinks from '../../../components/LabLinks.astro';
+import PlanckLab from '../../../islands/PlanckLab.tsx';
+import SolarSpectrum from '../../../islands/SolarSpectrum.tsx';
+import LstMap from '../../../islands/LstMap.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/ch03.json';
+
+<p class="muted" style="font-size:0.9rem">This chapter is adapted from sections 8.1–8.3 and 8.5 of <a href="https://satellite-rs-handbook.netlify.app/" rel="noopener"><em>Sổ tay Vệ tinh & Viễn thám</em></a> (Nguyễn Văn Tín, CC BY 4.0). The table of spectral regions and the list of absorption bands follow the original. The figures use the ASTM G173 reference spectrum and a real Landsat 9 image.</p>
+
+## 3.1 The electromagnetic spectrum
+
+Light, infrared and radar waves are all **electromagnetic waves**; they differ only in wavelength. Wavelength λ and frequency f are linked by the speed of light c = 299,792,458 m/s:
+
+<p class="formula">c = λ · f</p>
+
+Example: Sentinel-1's radar transmits at f = 5.405 GHz, so λ = c / f = **5.55 cm**. Red light at λ = 0.665 µm has a frequency of about 451 THz.
+
+The <Term id="em-spectrum">electromagnetic spectrum</Term> is divided into regions. Remote sensing uses mainly these:
+
+<div class="table-wrap">
+
+| Region | Wavelength | Main source | Information |
+|---|---|---|---|
+| Visible (VIS) | 0.4–0.7 µm | Reflected sunlight | Colour, pigments, water turbidity |
+| Near infrared (NIR) | 0.7–1.3 µm | Reflected sunlight | Leaf structure, biomass, water boundaries |
+| Shortwave infrared (SWIR) | 1.3–3 µm | Reflected sunlight | Leaf and soil moisture, minerals, cloud versus snow |
+| Midwave infrared (MWIR) | 3–5 µm | Reflected and emitted | Hot spots (fires) |
+| Thermal infrared (TIR) | 8–14 µm | Emitted by the surface | Surface temperature, urban heat islands |
+| Microwave | 1 mm – 1 m | Radar's own pulses | Roughness, moisture, structure; through clouds |
+
+</div>
+
+Source: Sổ tay Vệ tinh & Viễn thám (CC BY 4.0).
+
+## 3.2 Black-body radiation
+
+Everything above 0 K emits radiation. An ideal <Term id="black-body">black body</Term> emits according to **Planck's law**: the radiation at each wavelength depends only on temperature. Two key consequences:
+
+<p class="formula">λmax = 2898 µm·K / T  (Wien),     M = σ T⁴  (Stefan–Boltzmann, σ = 5.67×10⁻⁸ W·m⁻²·K⁻⁴)</p>
+
+<Figure
+  title="Figure 3.1 — Planck curves: the Sun, a fire and Hanoi's surfaces"
+  try="Press 'Sun': the peak sits in the visible band. Press 'West Lake' and 'Hanoi bare soil': where does the peak move relative to Landsat's two thermal bands (red)? Drag the temperature to 1000 K: how does the share in the 8–14 µm window change?"
+  source="Planck's law with CODATA 2018 constants; band shares by numerical integration (400 points on a log grid). Solar effective temperature 5772 K (IAU 2015). West Lake and bare-soil temperatures: Landsat 9, 22 Dec 2023 (section 3.5). TIRS bands: USGS."
+>
+  <PlanckLab client:visible lang="en" />
+</Figure>
+
+Three numbers to remember, read from Figure 3.1:
+
+- **The Sun at 5772 K** peaks at **0.50 µm**, where the human eye is most sensitive. 36.6 % of its energy lies between 0.4 and 0.7 µm.
+- **A surface at 300 K** peaks at **9.66 µm**. 37.6 % of its energy lies in the 8–14 µm window, which is why thermal sensors put their bands at 10–12 µm.
+- **A fire at 1000 K** peaks at **2.90 µm**, so SWIR and midwave bands are very sensitive to hot spots.
+
+The Sun's curve is above the Earth's at every wavelength, but sunlight reaching the Earth is greatly diluted by distance. As a result, below about 4 µm sensors record mostly **reflected** sunlight, and above about 5 µm they record mostly radiation **emitted** by the surface itself.
+
+<Depth level="advanced" title="Real objects are not black bodies: emissivity">
+
+Real objects emit less than a black body at the same temperature. The ratio is the <Term id="emissivity">emissivity ε</Term>, from 0 to 1: water about 0.99, vegetation 0.96–0.99, polished metal very low. The temperature computed directly from the measured radiance, as if the object were a black body, is the **brightness temperature**; it is lower than the true temperature. To get <Term id="lst">land surface temperature (LST)</Term> you need ε and a correction for atmospheric water vapour. The Landsat Collection 2 Level-2 product in section 3.5 does both, with emissivity from the ASTER GED database.
+
+</Depth>
+
+## 3.3 The atmosphere: scattering, absorption and windows
+
+On its way down to the ground and back up, light meets two processes:
+
+- **Scattering**: gas molecules and particles redirect light. Rayleigh scattering by molecules scales with λ⁻⁴. Blue light (0.492 µm, band B2) is scattered (0.665/0.492)⁴ = **3.3 times** more than red light (0.665 µm, band B4). This is why the sky is blue and the blue band always looks the haziest.
+- **Absorption**: water vapour, CO₂ and ozone absorb energy at specific wavelengths. What remains are the <Term id="atmospheric-window">atmospheric windows</Term>.
+
+Figure 3.2 uses the **ASTM G173** reference spectra: sunlight outside the atmosphere and at the ground after crossing 1.5 standard atmospheres. The red area between the two curves is the energy absorbed or scattered away.
+
+<Figure
+  title="Figure 3.2 — Sunlight before and after the atmosphere, with Sentinel-2 and Landsat bands"
+  try="Hover at 1375 nm (Sentinel-2 band B10): what percentage of light gets through the atmosphere? Compare with B11 (1610 nm). Switch to 280–4000 nm and find the water-vapour bands near 1900 and 2700 nm."
+  source="ASTM G173-03 (SMARTS 2.9.2 model, U.S. Standard Atmosphere, air mass 1.5), NREL data as shipped with pvlib; bin means of 5 nm (below 1700 nm) and 10 nm. 'Transmittance' = direct AM1.5 / extraterrestrial: a model result for a standard atmosphere, not a measurement in Viet Nam. Sentinel-2 band centres and widths from ESA spectral response functions; OLI bands from USGS."
+>
+  <SolarSpectrum client:visible lang="en" />
+</Figure>
+
+<div class="table-wrap">
+
+| Sentinel-2 band | Wavelength range | Band-averaged transmittance (direct, AM1.5) | Meaning |
+|---|---|---|---|
+| B2 (blue) | 459–525 nm | 68.5 % | Strongest Rayleigh scattering of the 10 m bands |
+| B4 (red) | 649–680 nm | 82.4 % | Good window |
+| B8 (NIR) | 780–886 nm | 87.4 % | Good window |
+| B9 | 935–955 nm | 37.1 % | Placed **on purpose** in a water-vapour band to estimate water vapour |
+| B10 (cirrus) | 1358–1389 nm | 0.02 % | Water vapour absorbs nearly all light from the ground: the band sees only high **cirrus** clouds |
+| B11 (SWIR 1) | 1563–1657 nm | 94.3 % | Very good window |
+| B12 (SWIR 2) | 2093–2278 nm | 93.2 % | Very good window |
+
+</div>
+
+Values are the integrated direct irradiance divided by the integrated extraterrestrial irradiance over each band, from the original G173 data (0.5–5 nm steps). Figure 3.2 shows per-wavelength values, which can differ by a few percent at band edges.
+
+Integrated over 280–4000 nm, sunlight carries 1347.9 W/m² outside the atmosphere and 1000.4 W/m² at the ground (direct plus diffuse on the standard's 37° tilted surface). About a quarter is lost on the way down.
+
+<Depth level="advanced" title="From sensor counts to reflectance">
+
+The sensor records **digital numbers (DN)**. Calibration turns DN into **radiance** L (W·m⁻²·sr⁻¹·µm⁻¹). Dividing by the incoming solar energy gives **top-of-atmosphere (TOA) reflectance**:
+
+<p class="formula">ρTOA = π · L · d² / (ESUN · cos θs)</p>
+
+where d is the Earth–Sun distance (astronomical units), ESUN the extraterrestrial solar irradiance in the band and θs the solar zenith angle. Atmospheric correction removes the added scattered light and the absorbed part, giving **surface reflectance** (Sentinel-2 L2A). Chapter 7 compares the two on the Hanoi image.
+
+</Depth>
+
+## 3.4 Reflection, absorption and transmission at the surface
+
+Energy reaching a surface splits into **reflected**, **absorbed** and **transmitted** parts that always add up to 100 %. The reflected fraction varies with wavelength and is each surface's "signature". Leaves absorb red light strongly for photosynthesis but reflect near infrared strongly; water absorbs almost all near infrared. Chapter 6 measures these signatures on the Hanoi Sentinel-2 image: NDVI is 0.86 on floodplain crops and −0.10 on West Lake.
+
+The absorbed energy warms the surface and is emitted again as thermal radiation. The next section measures exactly that.
+
+## 3.5 Example: Hanoi's surface temperature from Landsat 9
+
+On 22 December 2023, Landsat 9 imaged Hanoi at **10:23** local time. Its TIRS-2 sensor measures radiance at 10.6–11.2 µm, close to the Planck peak of the Earth's surface. USGS converts that radiance into surface temperature (ST_B10).
+
+<Figure
+  title="Figure 3.3 — Surface temperature around West Lake – Red River, morning of 22 December 2023"
+  try="Move the pointer from West Lake to the old streets south of the lake: how many degrees warmer? How much does 'Emission peak (Wien)' change? Set opacity to 40 % to compare with the basemap."
+  source="Landsat 9 Collection 2 Level-2, scene LC09_127045_20231222, ST_B10 × 0.00341802 + 149 (K); native TIRS resolution 100 m, delivered at 30 m; nearest neighbour onto the 30 m UTM 48N grid sharing the corner of the Chapter 6 Sentinel-2 frame. Fixed colour scale 14–24 °C (viridis). Reference points: 3×3 means of 30 m pixels. Landsat courtesy of USGS. Basemap © Esri, Maxar, Earthstar Geographics."
+>
+  <LstMap client:visible lang="en" />
+</Figure>
+
+<div class="table-wrap">
+
+| Point (the six Chapter 6 points) | Surface temperature | λmax (Wien) |
+|---|---|---|
+| West Lake water | 15.8 °C | 10.03 µm |
+| Urban trees | 18.6 °C | 9.93 µm |
+| Red River water | 19.4 °C | 9.90 µm |
+| Floodplain vegetation | 19.5 °C | 9.90 µm |
+| Roofs and streets | 21.0 °C | 9.85 µm |
+| Bare soil / sand | 22.8 °C | 9.79 µm |
+
+</div>
+
+Within the 5.12 × 5.12 km frame, surface temperature ranges from 15.7 °C (2nd percentile) to 22.4 °C (98th percentile), median 19.9 °C. West Lake is about 5 °C cooler than the surrounding streets. One explanation: water has a large heat capacity and warms slowly after a winter night, while metal roofs, concrete and dry soil heat up quickly in the morning sun. This is a physical interpretation; the handbook has no measured lake temperature to check it.
+
+Remember that this is **surface** temperature (roofs, water, canopies), not the **air** temperature a weather station measures at 2 m. On a summer noon a metal roof can be tens of degrees hotter than the air.
+
+## 3.6 Lab
+
+The notebook draws Planck curves, computes λmax and window shares, reads the ASTM G173 spectrum to find the transmittance of each Sentinel-2 band, and loads Landsat 9 surface temperature for the West Lake frame in Earth Engine. The GEE script maps surface temperature for any date and area.
+
+<LabLinks notebook="labs/ch03_physics.ipynb" gee="labs/ch03_physics.js" />
+
+**Suggested exercises**
+
+1. Compute λmax for a metal roof at 60 °C. Is it still inside the 8–14 µm window?
+2. Take a summer Landsat 9 scene of Hanoi. Is West Lake still cooler than the surrounding streets? By how much?
+3. Why is Sentinel-2's B10 band missing from L2A products? (Hint: Figure 3.2.)
+
+## 3.7 Review
+
+<Quiz client:visible lang="en" items={quiz} />
+
+## References
+
+- ASTM International (2003, reapproved 2020). *ASTM G173-03: Standard Tables for Reference Solar Spectral Irradiances: Direct Normal and Hemispherical on 37° Tilted Surface*.
+- CCRS. *Fundamentals of Remote Sensing* (online tutorial). Natural Resources Canada.
+- Gueymard, C. A. (2004). The sun's total and spectral irradiance for solar energy applications and solar radiation models. *Solar Energy*, 76(4), 423–453.
+- Lillesand, T. M., Kiefer, R. W., & Chipman, J. W. (2015). *Remote Sensing and Image Interpretation* (7th ed.). Wiley.
+- Nguyễn Văn Tín. *Sổ tay Vệ tinh & Viễn thám*, chapter 8. CC BY 4.0. https://satellite-rs-handbook.netlify.app/
+- Prša, A., et al. (2016). Nominal values for selected solar and planetary quantities: IAU 2015 Resolution B3. *The Astronomical Journal*, 152(2), 41.
+- USGS. *Landsat 8–9 Collection 2 Level 2 Science Product Guide*. U.S. Geological Survey.

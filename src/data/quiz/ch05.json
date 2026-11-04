@@ -1,0 +1,263 @@
+[
+ {
+  "q": {
+   "vi": "Cùng một điểm ở Hồ Hoàn Kiếm, tọa độ UTM trên VN-2000 lệch bao nhiêu so với UTM trên WGS84?",
+   "en": "For one point at Hoan Kiem Lake, how far apart are its UTM coordinates on VN-2000 and on WGS84?"
+  },
+  "options": [
+   {
+    "vi": "Khoảng 224 m",
+    "en": "About 224 m"
+   },
+   {
+    "vi": "Dưới 1 m",
+    "en": "Less than 1 m"
+   },
+   {
+    "vi": "Khoảng 2 km",
+    "en": "About 2 km"
+   },
+   {
+    "vi": "Bằng nhau",
+    "en": "Identical"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "ΔE = −196,2 m, ΔN = +108,1 m, tổng 224,0 m. Lẫn hai hệ là lỗi định vị cỡ một dãy phố.",
+   "en": "ΔE = −196.2 m, ΔN = +108.1 m, 224.0 m in total. Mixing the two is a city-block-sized error."
+  }
+ },
+ {
+  "q": {
+   "vi": "VN-2000 và WGS84 khác nhau ở điểm nào?",
+   "en": "How do VN-2000 and WGS84 differ?"
+  },
+  "options": [
+   {
+    "vi": "Cùng ellipsoid nhưng đặt lệch nhau (datum khác)",
+    "en": "Same ellipsoid, positioned differently (different datum)"
+   },
+   {
+    "vi": "Khác ellipsoid hoàn toàn",
+    "en": "Completely different ellipsoids"
+   },
+   {
+    "vi": "VN-2000 không dùng kinh, vĩ độ",
+    "en": "VN-2000 has no latitude/longitude"
+   },
+   {
+    "vi": "Không khác gì",
+    "en": "They are identical"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "VN-2000 dùng ellipsoid WGS84 nhưng định vị cho lãnh thổ Việt Nam; chuyển đổi bằng 7 tham số Helmert.",
+   "en": "VN-2000 uses the WGS84 ellipsoid but positioned for Viet Nam; a 7-parameter Helmert transformation converts between them."
+  }
+ },
+ {
+  "q": {
+   "vi": "Hà Nội (105,83°E) nằm trong múi UTM nào?",
+   "en": "Which UTM zone contains Hanoi (105.83°E)?"
+  },
+  "options": [
+   {
+    "vi": "Múi 48 (102°–108°E)",
+    "en": "Zone 48 (102°–108°E)"
+   },
+   {
+    "vi": "Múi 49",
+    "en": "Zone 49"
+   },
+   {
+    "vi": "Múi 47",
+    "en": "Zone 47"
+   },
+   {
+    "vi": "Múi 50",
+    "en": "Zone 50"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Múi = ⌊(105,83 + 180)/6⌋ + 1 = 48; kinh tuyến trục 105°.",
+   "en": "Zone = ⌊(105.83 + 180)/6⌋ + 1 = 48; central meridian 105°."
+  }
+ },
+ {
+  "q": {
+   "vi": "Trên kinh tuyến trục của múi UTM, hệ số tỷ lệ k bằng bao nhiêu?",
+   "en": "What is the scale factor k on the central meridian of a UTM zone?"
+  },
+  "options": [
+   {
+    "vi": "0,9996",
+    "en": "0.9996"
+   },
+   {
+    "vi": "1",
+    "en": "1"
+   },
+   {
+    "vi": "0,9999",
+    "en": "0.9999"
+   },
+   {
+    "vi": "1,0004",
+    "en": "1.0004"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "UTM chọn k₀ = 0,9996 để sai số chia đều: thu nhỏ ở giữa múi, phóng to ở hai rìa.",
+   "en": "UTM uses k₀ = 0.9996 to spread the error: shrink at the centre, enlarge at the edges."
+  }
+ },
+ {
+  "q": {
+   "vi": "Ở Móng Cái (107,97°E, gần rìa múi 48), đo 1 km trên lưới UTM tương ứng bao nhiêu trên thực địa?",
+   "en": "At Mong Cai (107.97°E, near the edge of zone 48), what ground length corresponds to 1 km on the UTM grid?"
+  },
+  "options": [
+   {
+    "vi": "Ngắn hơn 1 km khoảng 0,77 m (k ≈ 1,00077)",
+    "en": "About 0.77 m shorter than 1 km (k ≈ 1.00077)"
+   },
+   {
+    "vi": "Đúng 1 km",
+    "en": "Exactly 1 km"
+   },
+   {
+    "vi": "Dài hơn 1 km khoảng 77 m",
+    "en": "About 77 m longer"
+   },
+   {
+    "vi": "Ngắn hơn 0,4 m",
+    "en": "0.4 m shorter"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "k > 1 nghĩa là lưới phóng to: 1 km trên lưới ứng với 1 km / 1,00077 ≈ 999,23 m trên mặt đất.",
+   "en": "k > 1 means the grid enlarges: 1 km on the grid is 1 km / 1.00077 ≈ 999.23 m on the ground."
+  }
+ },
+ {
+  "q": {
+   "vi": "Vì sao bản đồ địa chính VN-2000 dùng múi 3° với k₀ = 0,9999?",
+   "en": "Why do VN-2000 cadastral maps use 3° zones with k₀ = 0.9999?"
+  },
+  "options": [
+   {
+    "vi": "Để sai số tỷ lệ nhỏ, phù hợp đo đạc tỷ lệ lớn",
+    "en": "To keep scale error small for large-scale surveying"
+   },
+   {
+    "vi": "Để ảnh vệ tinh đẹp hơn",
+    "en": "To make satellite images look better"
+   },
+   {
+    "vi": "Vì UTM không dùng được ở Việt Nam",
+    "en": "Because UTM cannot be used in Viet Nam"
+   },
+   {
+    "vi": "Để tiết kiệm dung lượng",
+    "en": "To save storage"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Múi hẹp và k₀ gần 1 giữ sai số trong khoảng −100 đến +200 ppm (−10 đến +20 cm/km) trong múi.",
+   "en": "A narrow zone and k₀ close to 1 keep the error between about −100 and +200 ppm (−10 to +20 cm/km) inside the zone."
+  }
+ },
+ {
+  "q": {
+   "vi": "Hồ Tây dạng raster 10 m có diện tích 5,128 km², dạng vector 5,100 km². Vì sao khác nhau?",
+   "en": "West Lake as a 10 m raster covers 5.128 km², as a vector 5.100 km². Why the difference?"
+  },
+  "options": [
+   {
+    "vi": "Đường viền vector cắt chéo qua góc các pixel ven bờ",
+    "en": "The vector outline cuts diagonally across the corners of shoreline pixels"
+   },
+   {
+    "vi": "Vector luôn sai",
+    "en": "Vectors are always wrong"
+   },
+   {
+    "vi": "Do khác datum",
+    "en": "A different datum"
+   },
+   {
+    "vi": "Do ảnh có mây",
+    "en": "Clouds in the image"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Đường đồng mức 0,5 đi qua giữa tâm các pixel, nên ở chỗ bậc thang nó cắt bớt nửa góc pixel.",
+   "en": "The 0.5 contour runs midway between pixel centres, so on stair steps it trims half-pixel corners."
+  }
+ },
+ {
+  "q": {
+   "vi": "Giảm đường viền Hồ Tây từ 2403 xuống 61 đỉnh (dung sai 50 m) làm diện tích đổi bao nhiêu?",
+   "en": "Simplifying the West Lake outline from 2403 to 61 vertices (50 m tolerance) changes the area by how much?"
+  },
+  "options": [
+   {
+    "vi": "Từ 5,100 xuống 5,089 km² (0,2 %)",
+    "en": "From 5.100 to 5.089 km² (0.2 %)"
+   },
+   {
+    "vi": "Giảm một nửa",
+    "en": "It halves"
+   },
+   {
+    "vi": "Tăng gấp đôi",
+    "en": "It doubles"
+   },
+   {
+    "vi": "Không đổi chút nào",
+    "en": "Not at all"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Diện tích gần như giữ nguyên nhưng chu vi giảm từ 20,48 xuống 15,21 km: chi tiết bờ bị mất.",
+   "en": "The area barely changes but the perimeter drops from 20.48 to 15.21 km: shoreline detail is lost."
+  }
+ },
+ {
+  "q": {
+   "vi": "Lưới raster 10 m phủ khung 5,12 × 5,12 km cần bao nhiêu ô?",
+   "en": "How many cells does a 10 m raster need for a 5.12 × 5.12 km frame?"
+  },
+  "options": [
+   {
+    "vi": "262 144",
+    "en": "262,144"
+   },
+   {
+    "vi": "5 120",
+    "en": "5,120"
+   },
+   {
+    "vi": "51 276",
+    "en": "51,276"
+   },
+   {
+    "vi": "1 024",
+    "en": "1,024"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "512 × 512 = 262 144 ô, dù chỉ 51 276 ô là nước. Raster tốn chỗ cho cả vùng trống.",
+   "en": "512 × 512 = 262,144 cells, although only 51,276 are water. A raster spends storage on empty space too."
+  }
+ }
+]

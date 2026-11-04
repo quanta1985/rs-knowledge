@@ -1,0 +1,188 @@
+---
+title: Orbits & coverage
+n: 2
+summary: Why satellites do not fall, why most Earth-observation satellites fly at a 98° inclination, and how many days Sentinel-2 needs to image all of Viet Nam. Every number comes from Kepler's laws, the J2 effect and real orbital elements.
+objectives:
+  - Compute the period and velocity of a circular orbit from its altitude with Kepler's third law.
+  - Tell LEO, sun-synchronous, MEO and GEO orbits apart and know what each is used for.
+  - Explain how J2 makes sun-synchronous orbits possible and compute the required inclination.
+  - Read ground tracks, swaths and repeat cycles; estimate how many days it takes to cover a region.
+updated: "2026-11-04"
+---
+import Term from '../../../components/Term.astro';
+import Depth from '../../../components/Depth.astro';
+import Figure from '../../../components/Figure.astro';
+import LabLinks from '../../../components/LabLinks.astro';
+import KeplerChart from '../../../islands/KeplerChart.tsx';
+import OrbitExplorer from '../../../islands/OrbitExplorer.tsx';
+import RevisitMap from '../../../islands/RevisitMap.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/ch02.json';
+
+<p class="muted" style="font-size:0.9rem">This chapter is adapted from chapter 2 (Orbital mechanics) of <a href="https://satellite-rs-handbook.netlify.app/" rel="noopener"><em>Sổ tay Vệ tinh & Viễn thám</em></a> (Nguyễn Văn Tín, CC BY 4.0), shortened for image users and extended with figures computed on real orbits.</p>
+
+## 2.1 Why satellites do not fall
+
+A satellite **is always falling**. It misses the ground because it moves sideways fast enough: while it falls, the curved surface drops away by the same amount. At 400 km, gravity is still 88.5 % of its surface value. Astronauts float because the station and the crew fall freely together.
+
+For a circular orbit of radius r (from the Earth's centre), gravity provides the centripetal force:
+
+<p class="formula">v = √(μ / r),   T = 2π √(r³ / μ),   μ = GM = 398,600.4 km³/s²</p>
+
+The second formula is **Kepler's third law**: the period depends only on the size of the orbit, not on the satellite's mass. A few-kilogram CubeSat and a multi-tonne satellite at the same altitude share the same period.
+
+<Figure
+  title="Figure 2.1 — Orbital period versus altitude"
+  try="Hover along the curve. At what altitude does the period equal one sidereal day (1436 min)? Where do the Earth-observation satellites sit?"
+  source="Curve: Kepler's third law for circular orbits, equatorial radius 6378.137 km. Filled dots: real satellites, altitude from mean motion (CelesTrak, 4 Nov 2026). Hollow dots: nominal orbits of the ISS, GPS and a geostationary satellite."
+>
+  <KeplerChart client:visible lang="en" />
+</Figure>
+
+<div class="worked">
+
+#### Example: Sentinel-2 at 786 km
+
+1. Orbit radius: r = 6378.1 + 786 = 7164.1 km.
+2. Velocity: v = √(398,600.4 / 7164.1) = **7.46 km/s**.
+3. Period: T = 2π √(7164.1³ / 398,600.4) = 6035 s = **100.6 min**.
+4. Revolutions per day: 1440 / 100.6 ≈ **14.3**. ESA designed exactly 14 3/10 revolutions per day so the ground track repeats after 10 days (143 orbits).
+
+A geostationary satellite needs T equal to one sidereal day (1436.07 min). Solving Kepler's third law gives an altitude of **35,786 km** and a velocity of **3.07 km/s**.
+
+</div>
+
+## 2.2 Kinds of orbit
+
+<div class="table-wrap">
+
+| Orbit | Altitude | Period | Used for |
+|---|---|---|---|
+| LEO (low Earth orbit) | 160–2000 km | ~88–127 min | Space stations, telecom constellations, remote sensing |
+| Sun-synchronous (a kind of LEO) | ~500–800 km, inclination ~97–99° | ~95–101 min | Most optical and radar satellites: Sentinel, Landsat, VNREDSat-1 |
+| MEO (medium Earth orbit) | 2000–35,786 km | 2–24 h | Navigation: GPS at 20,200 km, period 718.7 min |
+| GEO (geostationary) | 35,786 km, inclination 0° | 1436 min | Telecom (Vinasat), meteorology (Himawari) |
+
+</div>
+
+Periods and velocities in the table follow from the formulas in section 2.1. High-resolution imaging needs to fly low, close to the ground. Geostationary weather satellites accept the distance so that they always see the same region and can image it every 10 minutes.
+
+## 2.3 Sun-synchronous orbits and J2
+
+The Earth is not a perfect sphere: its equatorial radius is about 21 km larger than its polar radius. This bulge, described by the <Term id="j2">J2</Term> coefficient, pulls on orbits and makes the **orbit plane precess** around the Earth's axis:
+
+<p class="formula">dΩ/dt = −(3/2) · n · J2 · (Re / a)² · cos i</p>
+
+where n is the satellite's angular rate, Re the equatorial radius, a the orbit radius and i the inclination. For the ISS (420 km, 51.6°) the plane turns **−4.95° per day** (westward).
+
+The Earth goes around the Sun by 360° in 365.24 days, 0.9856° per day eastward. If the inclination makes dΩ/dt exactly +0.9856°/day, the orbit plane follows the Sun and the satellite passes each latitude at the same local time. That is a <Term id="sun-synchronous-orbit">sun-synchronous orbit</Term>. A positive dΩ/dt needs a negative cos i, i.e. **i above 90°**: the satellite flies slightly against the Earth's rotation.
+
+<Figure
+  title="Figure 2.2 — Build your own circular orbit passing over Viet Nam"
+  try="Choose Sentinel-2, then drag the inclination from 98.6° down to 90°: what happens to 'Sun-synchronous?'? Choose 'Geostationary': why does the satellite stand still on the globe? Raise the altitude to 6000 km: is there still a sun-synchronous inclination?"
+  source="Circular two-body orbit plus first-order J2 node drift (J2 = 1.08263×10⁻³, Re = 6378.137 km), sidereal time after IAU 1982. Ascending node placed at 105°E at 03:30 UTC on 4 Nov 2026 so the track crosses Viet Nam. Presets: ISS (NASA), Sentinel-2 (ESA), Landsat 9 (USGS), GPS, geostationary. Basemap © Esri, Maxar, Earthstar Geographics."
+>
+  <OrbitExplorer client:visible lang="en" />
+</Figure>
+
+The J2 formula applied to real satellites (CelesTrak elements from Chapter 1):
+
+<div class="table-wrap">
+
+| Satellite | Altitude | Actual inclination | J2 sun-synchronous inclination | Plane rotation |
+|---|---|---|---|---|
+| Sentinel-2A | 789.0 km | 98.56° | 98.56° | 0.986°/day |
+| Landsat 9 | 702.5 km | 98.21° | 98.20° | 0.988°/day |
+| Sentinel-1A | 693.7 km | 98.16° | 98.16° | 0.985°/day |
+| VNREDSat-1 | 677.8 km | 97.89° | 98.10° | 0.961°/day |
+
+</div>
+
+The first three match the theory almost exactly: they are actively kept in their orbits. VNREDSat-1 is 0.21° off, so its overpass time is drifting (Chapter 1).
+
+<Depth level="advanced" title="The altitude limit of sun-synchronous orbits">
+
+Higher up, J2 weakens (through (Re/a)² and n). To still turn 0.9856°/day, cos i must become more negative. Near 6000 km it needs cos i ≈ −1, i.e. i ≈ 180°; above that no inclination works. Figure 2.2 then shows "none (too high)". In practice sun-synchronous orbits are used almost only below 1000 km.
+
+</Depth>
+
+## 2.4 Ground tracks, swaths and revisit
+
+The <Term id="ground-track">ground track</Term> is the path traced by the point directly below the satellite. During one 100.6-minute orbit the Earth turns 25.2°, so the next track is 25.2° further west (about 2800 km at the equator). Sentinel-2's swath is 290 km, much narrower than that gap, so a single satellite needs many days for its tracks to fill the gaps.
+
+Sentinel-2 images only on the **descending pass**, when the ground below is in daylight. It crosses the equator at 10:30 local time (<Term id="ltdn">LTDN</Term>), and its track repeats exactly after a 10-day <Term id="repeat-cycle">repeat cycle</Term>.
+
+<Figure
+  title="Figure 2.3 — How many days does Sentinel-2 need to image all of Viet Nam's land?"
+  try="With 1 satellite, drag the days from 1 to 10 and read 'Land seen at least once'. Switch to 2 satellites: how many days now? After 10 days, how many times is each point imaged on average?"
+  source="Sentinel-2 reference orbit (ESA): 14 3/10 revolutions per day, inclination 98.62°, descending node at 10:30 local time, 290 km swath; only descending passes between 6 and 25°N. Land points: 0.1° grid inside the LSIB 2017 outline (simplified to 2 km), 2778 points. Day-to-day phasing is modelled, not the real acquisition plan. Basemap © Esri, Maxar, Earthstar Geographics."
+>
+  <RevisitMap client:visible lang="en" />
+</Figure>
+
+Simulation results:
+
+<div class="table-wrap">
+
+| Days | 1 satellite: land seen | 2 satellites 180° apart: land seen |
+|---|---|---|
+| 1 | 40.0 % | 40.0 % |
+| 2 | 40.0 % | 72.9 % |
+| 4 | 65.9 % | 94.3 % |
+| 5 | 65.9 % | **100 %** |
+| 7 | 93.5 % | 100 % |
+| 10 | **100 %** | 100 % |
+
+</div>
+
+Viet Nam is long and narrow from north to south, almost parallel to the tracks. One pass can therefore cover up to 40 % of the land, but some days no pass crosses it at all. With two satellites each point is imaged **2.23 times** on average in 10 days. That is why ESA says "Sentinel-2 revisits every 5 days".
+
+Being imaged is not the same as having a usable image. Chapter 4 showed that in Hanoi only 92 of 433 dates in 2022–2024 were clear enough. At Hanoi's latitude the satellite passes at about **10:43** local time, just when summer convective clouds start to build.
+
+<Depth level="ref" title="Reference: orbit parameters of common satellites">
+
+<div class="table-wrap">
+
+| Satellite | Nominal altitude | Inclination | Equator crossing | Repeat cycle |
+|---|---|---|---|---|
+| Sentinel-2A/B/C | 786 km | 98.62° | 10:30, descending node | 10 days (1 satellite), 5 days (2) |
+| Sentinel-1 | 693 km | 98.18° | 18:00, ascending node | 12 days (1 satellite) |
+| Landsat 8, 9 | 705 km | 98.2° | ~10:00, descending node | 16 days (1 satellite), 8 days (2) |
+| MODIS Terra / Aqua | 705 km | 98.2° | 10:30 descending / 13:30 ascending (nominal) | 1–2 days |
+
+</div>
+
+Sources: ESA Sentinel-1 and Sentinel-2 User Handbooks, USGS Landsat Missions, NASA MODIS. Terra's crossing time has been getting earlier since its orbit stopped being maintained (Chapter 1).
+
+</Depth>
+
+<Depth level="advanced" title="Orbital elements and GP/TLE sets">
+
+Six numbers fix a satellite's position at a given time. The easiest to picture are the six Keplerian elements: semi-major axis a, eccentricity e, inclination i, right ascension of the ascending node Ω (RAAN), argument of perigee ω and mean anomaly M. CelesTrak publishes them as GP (OMM JSON) or TLE sets, computed for the SGP4 propagator. Figures 1.2 and 2.2 use a simpler model (circular orbit, J2 node drift only), good enough for illustration but off by about ten km after a day. For accurate pass prediction, use SGP4 (the Python `sgp4` package or `satellite.js`).
+
+</Depth>
+
+## 2.5 Lab
+
+The notebook computes period, velocity and sun-synchronous inclination versus altitude, draws Sentinel-2's tracks over Viet Nam for 10 days, and compares them with the real number of Sentinel-2 images of a point in Earth Engine. The GEE script shows the footprints of Sentinel-2 images over Viet Nam for 10 consecutive days.
+
+<LabLinks notebook="labs/ch02_orbits.ipynb" gee="labs/ch02_orbits.js" />
+
+**Suggested exercises**
+
+1. Compute the sun-synchronous inclination at 500 km. Is it larger or smaller than at 786 km?
+2. Landsat 8 and 9 have a 185 km swath and a 16-day repeat cycle. How many days do the two need to image all of Viet Nam?
+3. Count the real Sentinel-2 images of your home town in January 2024. Does it match "every 5 days"? Why or why not?
+
+## 2.6 Review
+
+<Quiz client:visible lang="en" items={quiz} />
+
+## References
+
+- Drusch, M., et al. (2012). Sentinel-2: ESA's optical high-resolution mission for GMES operational services. *Remote Sensing of Environment*, 120, 25–36.
+- ESA (2015). *Sentinel-2 User Handbook*. European Space Agency.
+- Kelso, T. S. *CelesTrak*. https://celestrak.org
+- Nguyễn Văn Tín. *Sổ tay Vệ tinh & Viễn thám*, chapter 2. CC BY 4.0. https://satellite-rs-handbook.netlify.app/
+- Vallado, D. A. (2013). *Fundamentals of Astrodynamics and Applications* (4th ed.). Microcosm Press.
+- Wertz, J. R., & Larson, W. J. (Eds.) (1999). *Space Mission Analysis and Design* (3rd ed.). Microcosm / Kluwer.

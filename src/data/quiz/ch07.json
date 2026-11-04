@@ -1,0 +1,263 @@
+[
+ {
+  "q": {
+   "vi": "Trên ảnh Hà Nội 12/02/2024, kênh nào có phản xạ TOA cao hơn phản xạ mặt đất nhiều nhất?",
+   "en": "On the 12 Feb 2024 Hanoi image, which band has TOA reflectance furthest above surface reflectance?"
+  },
+  "options": [
+   {
+    "vi": "B2 (lam, 492 nm)",
+    "en": "B2 (blue, 492 nm)"
+   },
+   {
+    "vi": "B4 (đỏ)",
+    "en": "B4 (red)"
+   },
+   {
+    "vi": "B8 (cận hồng ngoại)",
+    "en": "B8 (near-infrared)"
+   },
+   {
+    "vi": "B12 (SWIR)",
+    "en": "B12 (SWIR)"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Trung bình cả khung B2 cao hơn 0,072; tán xạ Rayleigh tỷ lệ λ⁻⁴ nên mạnh nhất ở kênh lam.",
+   "en": "Over the frame B2 is 0.072 higher; Rayleigh scattering scales with λ⁻⁴, so blue is hit hardest."
+  }
+ },
+ {
+  "q": {
+   "vi": "Tán xạ Rayleigh ở 492 nm mạnh gấp khoảng bao nhiêu lần ở 833 nm?",
+   "en": "Rayleigh scattering at 492 nm is roughly how many times stronger than at 833 nm?"
+  },
+  "options": [
+   {
+    "vi": "Khoảng 8 lần",
+    "en": "About 8 times"
+   },
+   {
+    "vi": "Khoảng 1,7 lần",
+    "en": "About 1.7 times"
+   },
+   {
+    "vi": "Khoảng 2,9 lần",
+    "en": "About 2.9 times"
+   },
+   {
+    "vi": "Bằng nhau",
+    "en": "The same"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "(833/492)⁴ ≈ 8,2.",
+   "en": "(833/492)⁴ ≈ 8.2."
+  }
+ },
+ {
+  "q": {
+   "vi": "Vì sao phản xạ TOA của Hồ Tây ở kênh lam (0,121) gấp khoảng 3 lần phản xạ mặt đất (0,040)?",
+   "en": "Why is West Lake's blue TOA reflectance (0.121) about three times its surface reflectance (0.040)?"
+  },
+  "options": [
+   {
+    "vi": "Khí quyển tán xạ thêm ánh sáng lam vào đường nhìn của vệ tinh",
+    "en": "The atmosphere scatters extra blue light into the satellite's view"
+   },
+   {
+    "vi": "Nước hồ phản xạ mạnh ánh sáng lam",
+    "en": "Lake water reflects blue strongly"
+   },
+   {
+    "vi": "Cảm biến bị bão hòa",
+    "en": "The sensor saturates"
+   },
+   {
+    "vi": "Do bóng mây",
+    "en": "A cloud shadow"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Mặt nước tối, nên phần ánh sáng do khí quyển tán xạ chiếm phần lớn tín hiệu ở kênh lam.",
+   "en": "Water is dark, so light scattered by the atmosphere makes up most of the blue signal."
+  }
+ },
+ {
+  "q": {
+   "vi": "Trong công thức L = ρ·U·E·cos θs / π, U = 1,028 vào tháng 2 nghĩa là gì?",
+   "en": "In L = ρ·U·E·cos θs / π, what does U = 1.028 in February mean?"
+  },
+  "options": [
+   {
+    "vi": "Trái Đất gần Mặt Trời hơn khoảng cách trung bình nên nhận nhiều năng lượng hơn",
+    "en": "The Earth is closer to the Sun than average, so it receives more energy"
+   },
+   {
+    "vi": "Khí quyển trong hơn",
+    "en": "The atmosphere is clearer"
+   },
+   {
+    "vi": "Vệ tinh bay thấp hơn",
+    "en": "The satellite flies lower"
+   },
+   {
+    "vi": "Ảnh được kéo giãn",
+    "en": "The image is stretched"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "U = 1/d²; tháng 1–2 Trái Đất gần điểm cận nhật, d ≈ 0,986 đơn vị thiên văn.",
+   "en": "U = 1/d²; in January–February the Earth is near perihelion, d ≈ 0.986 AU."
+  }
+ },
+ {
+  "q": {
+   "vi": "Trên ảnh 05/10/2023, ngưỡng Cloud Score+ cs_cdf ≥ 0,6 giữ lại bao nhiêu phần khung ảnh?",
+   "en": "On the 5 Oct 2023 image, how much of the frame does Cloud Score+ cs_cdf ≥ 0.6 keep?"
+  },
+  "options": [
+   {
+    "vi": "53,6 %",
+    "en": "53.6 %"
+   },
+   {
+    "vi": "23,4 %",
+    "en": "23.4 %"
+   },
+   {
+    "vi": "87,4 %",
+    "en": "87.4 %"
+   },
+   {
+    "vi": "100 %",
+    "en": "100 %"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Tăng ngưỡng lên 0,8 chỉ còn 23,4 %: ngưỡng càng chặt càng mất nhiều dữ liệu.",
+   "en": "At 0.8 only 23.4 % remains: the stricter the threshold, the more data is lost."
+  }
+ },
+ {
+  "q": {
+   "vi": "Vì sao mặt nạ mây phải che cả bóng mây?",
+   "en": "Why must a cloud mask also remove cloud shadows?"
+  },
+  "options": [
+   {
+    "vi": "Bóng mây làm pixel tối giả, dễ bị nhầm là nước hoặc làm sai chỉ số",
+    "en": "Shadows make pixels falsely dark, mimicking water and corrupting indices"
+   },
+   {
+    "vi": "Bóng mây là mây mỏng",
+    "en": "Shadows are thin clouds"
+   },
+   {
+    "vi": "Bóng mây không có trong ảnh L2A",
+    "en": "L2A has no shadows"
+   },
+   {
+    "vi": "Để tăng diện tích giữ lại",
+    "en": "To keep more area"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Pixel trong bóng mây vẫn là mặt đất nhưng thiếu sáng, nên phổ không còn đúng.",
+   "en": "A shadowed pixel is still ground but poorly lit, so its spectrum is wrong."
+  }
+ },
+ {
+  "q": {
+   "vi": "Bóng mây nằm cách tâm đám mây khoảng 1,13 km, góc thiên đỉnh Mặt Trời 30,2°. Mây cao khoảng bao nhiêu?",
+   "en": "A cloud shadow lies about 1.13 km from its cloud; solar zenith is 30.2°. Roughly how high is the cloud?"
+  },
+  "options": [
+   {
+    "vi": "Khoảng 1,9 km",
+    "en": "About 1.9 km"
+   },
+   {
+    "vi": "Khoảng 0,6 km",
+    "en": "About 0.6 km"
+   },
+   {
+    "vi": "Khoảng 1,13 km",
+    "en": "About 1.13 km"
+   },
+   {
+    "vi": "Khoảng 10 km",
+    "en": "About 10 km"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "h = khoảng cách / tan θs = 1,13 / tan 30,2° ≈ 1,9 km (ước lượng thô từ tâm hai vùng).",
+   "en": "h = distance / tan θs = 1.13 / tan 30.2° ≈ 1.9 km (rough, from the region centroids)."
+  }
+ },
+ {
+  "q": {
+   "vi": "Ảnh trung vị 19 lần chụp mùa mưa 2023, không lọc mây, có 66 % pixel sáng như mây. Vì sao?",
+   "en": "A median of 19 rainy-season 2023 images without cloud masking leaves 66 % of pixels cloud-bright. Why?"
+  },
+  "options": [
+   {
+    "vi": "Ở nhiều pixel, hơn nửa số lần chụp có mây, nên trung vị cũng là mây",
+    "en": "At many pixels more than half the acquisitions are cloudy, so the median is cloud too"
+   },
+   {
+    "vi": "Trung vị luôn sáng hơn trung bình",
+    "en": "The median is always brighter than the mean"
+   },
+   {
+    "vi": "Do hiệu chỉnh khí quyển sai",
+    "en": "A failed atmospheric correction"
+   },
+   {
+    "vi": "Do quá ít ảnh",
+    "en": "Too few images"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Trung vị chỉ loại được mây khi phần lớn lần chụp là trong. Lọc mây trước rồi mới lấy trung vị: còn 0,8 %.",
+   "en": "A median rejects clouds only when most looks are clear. Mask first, then take the median: 0.8 % remain."
+  }
+ },
+ {
+  "q": {
+   "vi": "Mặt nạ SCL che 11,4 % khung ảnh mà Cloud Score+ vẫn giữ. Nhận xét nào hợp lý?",
+   "en": "SCL masks 11.4 % of the frame that Cloud Score+ keeps. Which reading is sound?"
+  },
+  "options": [
+   {
+    "vi": "Hai phương pháp khác nhau ở rìa mây và bóng mây; cần nhìn ảnh để chọn ngưỡng",
+    "en": "The methods disagree at cloud and shadow edges; look at the image before choosing"
+   },
+   {
+    "vi": "SCL luôn đúng",
+    "en": "SCL is always right"
+   },
+   {
+    "vi": "Cloud Score+ luôn đúng",
+    "en": "Cloud Score+ is always right"
+   },
+   {
+    "vi": "Hai phương pháp giống hệt nhau",
+    "en": "The two are identical"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Không có mặt nạ hoàn hảo; mỗi ứng dụng chọn đánh đổi giữa sót mây và mất dữ liệu.",
+   "en": "No mask is perfect; each application trades missed clouds against lost data."
+  }
+ }
+]

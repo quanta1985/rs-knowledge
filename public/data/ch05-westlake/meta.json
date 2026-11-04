@@ -1,0 +1,23 @@
+{
+ "width": 512,
+ "height": 512,
+ "resolution_m": 10,
+ "crs": "EPSG:32648",
+ "origin_xy": [
+  583980,
+  2331020
+ ],
+ "bands": [
+  "water"
+ ],
+ "dtype": "uint16",
+ "layout": "BSQ",
+ "scale": 1,
+ "date": "2024-02-12",
+ "provenance": {
+  "source": "Sentinel-2B L2A 2024-02-12 (public/data/hanoi-s2)",
+  "rule": "MNDWI (B3, B11) >= 0, component containing row 300 col 160",
+  "script": "scripts/data/export_ch05_westlake.py",
+  "attribution": "Contains modified Copernicus Sentinel data 2024"
+ }
+}

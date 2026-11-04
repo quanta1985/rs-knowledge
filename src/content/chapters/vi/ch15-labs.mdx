@@ -1,0 +1,61 @@
+---
+title: Bài thực hành Python / GEE
+n: 15
+summary: Mục lục mọi bài thực hành của sổ tay, kèm hướng dẫn cài đặt Earth Engine, chạy notebook trên Google Colab và chạy script trong Code Editor.
+objectives:
+  - Đăng ký và cấu hình một dự án Google Cloud để dùng Earth Engine.
+  - Chạy notebook Python trên Colab và script JavaScript trong Code Editor.
+  - Biết cách xử lý các lỗi hay gặp khi bắt đầu.
+updated: "2026-11-04"
+---
+import Depth from '../../../components/Depth.astro';
+import LabIndex from '../../../components/LabIndex.astro';
+
+## 15.1 Danh sách bài thực hành
+
+Mỗi chương có hai phiên bản của cùng một bài: **notebook Python** chạy trên Google Colab và **script JavaScript** dán vào Earth Engine Code Editor. Danh sách dưới đây được tạo tự động từ thư mục `labs/` mỗi lần xây dựng trang, nên luôn đầy đủ.
+
+<LabIndex />
+
+## 15.2 Chuẩn bị một lần: tài khoản Earth Engine
+
+1. Dùng một tài khoản Google (Gmail hoặc tài khoản của trường).
+2. Mở https://code.earthengine.google.com/register và chọn mục đích **phi thương mại** (nghiên cứu, giảng dạy, học tập).
+3. Tạo mới hoặc chọn một **dự án Google Cloud**, rồi bật Earth Engine API cho dự án đó. Ghi lại **mã dự án** (Project ID), ví dụ `my-rs-course-2026`.
+4. Mở https://code.earthengine.google.com: nếu thấy Code Editor và bản đồ là đã xong.
+
+## 15.3 Chạy notebook Python trên Colab
+
+1. Bấm "Mở" ở cột Python của bài thực hành cần làm. Notebook mở trong Google Colab.
+2. Ở ô mã đầu tiên, sửa `PROJECT = 'YOUR-CLOUD-PROJECT-ID'` thành mã dự án của bạn.
+3. Chọn **Runtime → Run all**. Lần đầu, `ee.Authenticate()` mở cửa sổ đăng nhập Google; hãy chấp nhận quyền truy cập.
+4. Muốn lưu bài làm, chọn **File → Save a copy in Drive**.
+
+## 15.4 Chạy script trong Code Editor
+
+1. Bấm "Xem script" ở cột GEE và sao chép toàn bộ nội dung.
+2. Trong Code Editor, tạo script mới (**New → File**), dán vào rồi bấm **Run**.
+3. Các con số hiện ở tab **Console**; các lớp bản đồ hiện ở khung **Layers**, góc trên bên phải bản đồ.
+
+## 15.5 Chạy trên máy cá nhân
+
+```bash
+pip install earthengine-api numpy scipy matplotlib
+earthengine authenticate
+```
+
+Sau đó mở notebook bằng Jupyter và sửa `PROJECT` như khi chạy trên Colab.
+
+<Depth level="advanced" title="Các lỗi hay gặp">
+
+| Thông báo lỗi | Nguyên nhân thường gặp | Cách xử lý |
+|---|---|---|
+| Project … is not registered / not found | Chưa đăng ký dự án cho Earth Engine, hoặc gõ sai mã dự án | Làm lại mục 15.2, kiểm tra `PROJECT` |
+| Earth Engine API has not been used in project … | Chưa bật Earth Engine API | Bật API trong Google Cloud Console của dự án |
+| User memory limit exceeded / Computation timed out | Yêu cầu quá lớn so với `getInfo()` | Thu nhỏ vùng, tăng `scale`, hoặc dùng `Export` |
+| Collection query aborted after accumulating over 5000 elements | In ra một collection quá lớn | Lọc chặt hơn; in `size()` thay vì in cả collection |
+| Dictionary does not contain key | Tên band đổi sau một phép tính (ví dụ `ee.Image(10).pow(…)` có tên `constant`) | Đặt lại tên bằng `rename()` |
+
+</Depth>
+
+Mọi bài thực hành đều đã được chạy thử đầy đủ bằng Python trước khi đưa lên. Nếu một bài báo lỗi, rất có thể bộ dữ liệu trong Earth Engine đã đổi phiên bản; hãy kiểm tra danh mục dữ liệu (Data Catalog) của Earth Engine.

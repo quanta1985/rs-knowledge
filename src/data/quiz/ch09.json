@@ -1,0 +1,263 @@
+[
+ {
+  "q": {
+   "vi": "Khác biệt chính giữa phân loại có giám sát và không giám sát là gì?",
+   "en": "What is the main difference between supervised and unsupervised classification?"
+  },
+  "options": [
+   {
+    "vi": "Có giám sát cần mẫu huấn luyện đã biết lớp; không giám sát tự gom cụm rồi người dùng đặt tên",
+    "en": "Supervised needs labelled training samples; unsupervised clusters first and the user names clusters"
+   },
+   {
+    "vi": "Có giám sát chỉ dùng ảnh radar",
+    "en": "Supervised only uses radar"
+   },
+   {
+    "vi": "Không giám sát luôn chính xác hơn",
+    "en": "Unsupervised is always more accurate"
+   },
+   {
+    "vi": "Không có khác biệt",
+    "en": "There is no difference"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Hình 9.1 cần bạn bấm mẫu; Hình 9.3 (k-means) không cần mẫu nhưng cụm không tự có tên.",
+   "en": "Figure 9.1 needs your samples; Figure 9.3 (k-means) does not, but clusters come without names."
+  }
+ },
+ {
+  "q": {
+   "vi": "Bộ phân loại hợp lý cực đại dùng thêm thông tin gì so với khoảng cách nhỏ nhất?",
+   "en": "What does maximum likelihood use that minimum distance does not?"
+  },
+  "options": [
+   {
+    "vi": "Ma trận hiệp phương sai (độ phân tán) của mỗi lớp",
+    "en": "Each class's covariance matrix (spread)"
+   },
+   {
+    "vi": "Ảnh nền vệ tinh",
+    "en": "The basemap"
+   },
+   {
+    "vi": "Số pixel của ảnh",
+    "en": "The number of pixels"
+   },
+   {
+    "vi": "Độ cao địa hình",
+    "en": "Terrain height"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Nhờ hiệp phương sai, lớp phân tán rộng như Đô thị chiếm vùng rộng hơn trong không gian phổ, và ranh giới giữa các lớp cong.",
+   "en": "With the covariance, widely spread classes like Built-up claim larger regions and boundaries curve."
+  }
+ },
+ {
+  "q": {
+   "vi": "Vì sao cả hai bộ phân loại đều cho quá ít cây gỗ ở khung Hồ Tây?",
+   "en": "Why do both classifiers find too few trees in the West Lake frame?"
+  },
+  "options": [
+   {
+    "vi": "Tán cây đường phố nhỏ, pixel 10 m trộn cây với mái nhà, đường nên giống thực vật thấp",
+    "en": "Street-tree crowns are small; 10 m pixels mix them with roofs and roads, so they look like low vegetation"
+   },
+   {
+    "vi": "Ảnh chụp ban đêm",
+    "en": "The image was taken at night"
+   },
+   {
+    "vi": "Sentinel-2 không có kênh NIR",
+    "en": "Sentinel-2 has no NIR band"
+   },
+   {
+    "vi": "WorldCover không có lớp cây",
+    "en": "WorldCover has no tree class"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Đây là vấn đề pixel hỗn hợp của Chương 4.",
+   "en": "This is the mixed-pixel problem of Chapter 4."
+  }
+ },
+ {
+  "q": {
+   "vi": "Độ chính xác người dùng (UA) của lớp Đất trống là 4 %. Nghĩa là gì?",
+   "en": "User's accuracy of Bare is 4 %. What does it mean?"
+  },
+  "options": [
+   {
+    "vi": "Trong pixel bản đồ gọi là đất trống, chỉ khoảng 4 % đúng là đất trống",
+    "en": "Only about 4 % of pixels the map calls bare are really bare"
+   },
+   {
+    "vi": "Bản đồ tìm được 4 % đất trống thật",
+    "en": "The map finds 4 % of the real bare land"
+   },
+   {
+    "vi": "Đất trống chiếm 4 % khung",
+    "en": "Bare covers 4 % of the frame"
+   },
+   {
+    "vi": "Có 4 điểm mẫu đất trống",
+    "en": "There are 4 bare sample points"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "UA nhìn từ phía người dùng bản đồ (sai số nhận nhầm); PA nhìn từ phía mặt đất (sai số bỏ sót).",
+   "en": "UA is the map user's view (commission); PA is the ground's view (omission)."
+  }
+ },
+ {
+  "q": {
+   "vi": "Với mẫu phân tầng 50 điểm mỗi lớp, vì sao OA đếm thẳng (60,8 %) khác OA có trọng số (72,5 %)?",
+   "en": "With 50 points per class, why does the raw OA (60.8 %) differ from the weighted OA (72.5 %)?"
+  },
+  "options": [
+   {
+    "vi": "Mỗi lớp được lấy số điểm như nhau dù diện tích khác nhau, nên phải đặt trọng số theo diện tích",
+    "en": "Every class got the same number of points regardless of size, so results must be area-weighted"
+   },
+   {
+    "vi": "Do lỗi làm tròn",
+    "en": "Rounding errors"
+   },
+   {
+    "vi": "Do kappa",
+    "en": "Because of kappa"
+   },
+   {
+    "vi": "Hai con số luôn bằng nhau",
+    "en": "They are always equal"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Lớp nhỏ, sai nhiều như Đất trống bị đại diện quá mức khi đếm thẳng.",
+   "en": "Small, error-prone classes like Bare are over-represented in a plain count."
+  }
+ },
+ {
+  "q": {
+   "vi": "Bản đồ đếm được 2,54 km² cây gỗ; ước lượng từ mẫu là 5,91 ± 1,02 km². Nên báo cáo số nào?",
+   "en": "The map counts 2.54 km² of trees; the sample estimate is 5.91 ± 1.02 km². Which to report?"
+  },
+  "options": [
+   {
+    "vi": "5,91 ± 1,02 km² (ước lượng có hiệu chỉnh, kèm khoảng tin cậy)",
+    "en": "5.91 ± 1.02 km² (adjusted estimate with interval)"
+   },
+   {
+    "vi": "2,54 km² vì đếm hết mọi pixel",
+    "en": "2.54 km² because it counts every pixel"
+   },
+   {
+    "vi": "Trung bình của hai số",
+    "en": "The average of the two"
+   },
+   {
+    "vi": "Không số nào",
+    "en": "Neither"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Đếm pixel giữ nguyên mọi sai số của bản đồ. Olofsson và cs. (2014) khuyên báo cáo ước lượng hiệu chỉnh từ mẫu kèm khoảng tin cậy.",
+   "en": "Pixel counting keeps all the map's errors. Olofsson et al. (2014) recommend the sample-based adjusted estimate with a confidence interval."
+  }
+ },
+ {
+  "q": {
+   "vi": "Vì sao nên dùng thiết kế mẫu phân tầng khi có lớp hiếm?",
+   "en": "Why use a stratified design when a class is rare?"
+  },
+  "options": [
+   {
+    "vi": "Để lớp hiếm có đủ điểm mẫu, giúp ước lượng UA và diện tích ổn định hơn",
+    "en": "So the rare class gets enough points for stable UA and area estimates"
+   },
+   {
+    "vi": "Để giảm tổng số điểm xuống 0",
+    "en": "To reduce the sample to zero"
+   },
+   {
+    "vi": "Để khỏi cần dữ liệu tham chiếu",
+    "en": "To avoid needing reference data"
+   },
+   {
+    "vi": "Vì mẫu ngẫu nhiên bị cấm",
+    "en": "Because random sampling is forbidden"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Với 250 điểm ngẫu nhiên đơn giản, Đất trống (6 % bản đồ) chỉ nhận khoảng 15 điểm.",
+   "en": "With 250 simple random points, Bare (6 % of the map) gets only about 15."
+  }
+ },
+ {
+  "q": {
+   "vi": "Vì sao 'trùng WorldCover 70,5 %' không phải là độ chính xác thật?",
+   "en": "Why is '70.5 % agreement with WorldCover' not the true accuracy?"
+  },
+  "options": [
+   {
+    "vi": "WorldCover cũng là bản đồ có sai số và là năm 2021, khác năm ảnh",
+    "en": "WorldCover is itself an imperfect map and dates from 2021, not the image year"
+   },
+   {
+    "vi": "Vì 70,5 % quá thấp",
+    "en": "Because 70.5 % is too low"
+   },
+   {
+    "vi": "Vì không dùng kappa",
+    "en": "Because kappa was not used"
+   },
+   {
+    "vi": "Vì ảnh có mây",
+    "en": "Because the image is cloudy"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Tham chiếu phải tốt hơn bản đồ cần kiểm tra, ví dụ giải đoán ảnh độ phân giải rất cao hoặc thực địa.",
+   "en": "Reference data must be better than the map being checked, e.g. very-high-resolution interpretation or field data."
+  }
+ },
+ {
+  "q": {
+   "vi": "Với k = 5, k-means cho ba cụm chủ yếu là đô thị. Điều đó cho thấy gì?",
+   "en": "With k = 5, k-means gives three mostly built-up clusters. What does that show?"
+  },
+  "options": [
+   {
+    "vi": "Cụm theo phổ không trùng với lớp theo chức năng; người dùng phải gộp và đặt tên cụm",
+    "en": "Spectral clusters do not match functional classes; the user must merge and name them"
+   },
+   {
+    "vi": "k-means bị lỗi",
+    "en": "k-means is broken"
+   },
+   {
+    "vi": "Ảnh chỉ có đô thị",
+    "en": "The image is all built-up"
+   },
+   {
+    "vi": "Nên luôn chọn k = 2",
+    "en": "k should always be 2"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Mái tôn sáng, mái ngói và đường nhựa có phổ khác nhau dù cùng là đô thị.",
+   "en": "Bright metal roofs, tiles and asphalt differ spectrally though all are built-up."
+  }
+ }
+]

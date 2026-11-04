@@ -1,7 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import type { Lang } from '../i18n/ui';
 import { bandLabel } from './bands';
-import { useScene } from './cube';
+import { frameQuad, useScene } from './cube';
+import MapStage from './MapStage';
+import { Pills, Slider, StatPanel } from './VizUi';
 import { composite, type StretchMode } from './draw';
 
 type RGB = [string, string, string];
@@ -22,58 +24,51 @@ const PRESETS: { id: string; rgb: RGB; name: Record<Lang, string>; read: Record<
 
 const TXT = {
   vi: { loading: 'Đang tải ảnh…', preset: 'Tổ hợp mẫu', custom: 'Tự chọn', r: 'Đỏ', g: 'Lục', b: 'Lam', stretch: 'Kéo giãn',
-        p298: '2–98 % mỗi kênh', fixed: 'Cố định 0–0,3', none: 'Không kéo giãn (0–1)', lim: 'Giới hạn hiển thị (phản xạ)',
-        canvas: 'Ảnh tổ hợp màu Sentinel-2, Hà Nội' },
+        p298: '2–98 %', fixed: '0–0,3', none: '0–1', lim: 'Giới hạn hiển thị (phản xạ)', op: 'Độ mờ', read: 'Cách đọc',
+        label: 'Bản đồ tổ hợp màu Sentinel-2, Hà Nội' },
   en: { loading: 'Loading image…', preset: 'Preset', custom: 'Custom', r: 'Red', g: 'Green', b: 'Blue', stretch: 'Stretch',
-        p298: '2–98 % per band', fixed: 'Fixed 0–0.3', none: 'No stretch (0–1)', lim: 'Display limits (reflectance)',
-        canvas: 'Sentinel-2 colour composite, Hanoi' },
+        p298: '2–98 %', fixed: '0–0.3', none: '0–1', lim: 'Display limits (reflectance)', op: 'Opacity', read: 'How to read',
+        label: 'Sentinel-2 colour composite map, Hanoi' },
 };
+const GUN = ['#e5484d', '#30a46c', '#3e63dd'];
 
 export default function BandComposer({ lang }: { lang: Lang }) {
   const T = TXT[lang];
   const { scene, error } = useScene();
-  const canvas = useRef<HTMLCanvasElement>(null);
   const [rgb, setRgb] = useState<RGB>(['B8', 'B4', 'B3']);
   const [mode, setMode] = useState<StretchMode>('p2-98');
+  const [op, setOp] = useState(1);
   const out = useMemo(() => scene && composite(scene.cube, rgb, mode), [scene, rgb, mode]);
-
-  useEffect(() => { if (out) canvas.current?.getContext('2d')?.putImageData(out.img, 0, 0); }, [out]);
+  const overlays = useMemo(() => [{ id: 'rgb', image: out?.img ?? null, opacity: op }], [out, op]);
+  const quad = useMemo(() => scene && frameQuad(scene.meta), [scene]);
 
   if (error) return <p className="viz status" role="alert">Error: {error}</p>;
-  if (!scene || !out) return <p className="viz status" aria-live="polite">{T.loading}</p>;
+  if (!scene || !out || !quad) return <p className="viz status" aria-live="polite">{T.loading}</p>;
 
   const preset = PRESETS.find((p) => p.rgb.join() === rgb.join());
   const nf = (v: number) => v.toLocaleString(lang === 'vi' ? 'vi-VN' : 'en-US', { maximumFractionDigits: 3 });
   const setGun = (i: number, b: string) => setRgb((c) => c.map((x, j) => (j === i ? b : x)) as RGB);
 
-  return (
-    <div className="viz two">
-      <canvas ref={canvas} width={scene.cube.width} height={scene.cube.height}
-        aria-label={`${T.canvas}: R=${rgb[0]}, G=${rgb[1]}, B=${rgb[2]}`} role="img" />
-      <div>
-        <div className="seg" role="group" aria-label={T.preset} style={{ flexWrap: 'wrap', marginBottom: 'var(--s3)' }}>
-          {PRESETS.map((p) => (
-            <button key={p.id} type="button" aria-pressed={preset?.id === p.id} onClick={() => setRgb(p.rgb)}>{p.name[lang]}</button>
-          ))}
-        </div>
-        <div className="controls" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
-          {[T.r, T.g, T.b].map((gun, i) => (
-            <label key={gun} style={{ justifyContent: 'space-between' }}>
-              <span><span aria-hidden="true" style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, marginRight: 6, background: ['#e5484d', '#30a46c', '#3e63dd'][i] }} />{gun}</span>
-              <select value={rgb[i]} onChange={(e) => setGun(i, e.target.value)}>
-                {scene.cube.bands.map((b) => <option key={b} value={b}>{bandLabel(b, lang)}</option>)}
-              </select>
-            </label>
-          ))}
-          <label style={{ justifyContent: 'space-between' }}>{T.stretch}
-            <select value={mode} onChange={(e) => setMode(e.target.value as StretchMode)}>
-              <option value="p2-98">{T.p298}</option><option value="fixed-0.3">{T.fixed}</option><option value="none">{T.none}</option>
-            </select>
-          </label>
-        </div>
-        <p style={{ marginTop: 'var(--s3)' }}><strong>{preset ? preset.name[lang] : T.custom}</strong>{preset && <> — {preset.read[lang]}</>}</p>
-        <p className="readout num">{T.lim}: {out.limits.map((l, i) => `${['R', 'G', 'B'][i]} ${nf(l.lo)}–${nf(l.hi)}`).join(' · ')}</p>
-      </div>
-    </div>
+  const hud = (
+    <StatPanel title={`${preset ? preset.name[lang] : T.custom} · R ${rgb[0]} G ${rgb[1]} B ${rgb[2]}`}
+      rows={out.limits.map((l, i) => ({ k: <span><i aria-hidden="true" style={{ display: 'inline-block', width: 9, height: 9, borderRadius: 2, marginRight: 6, background: GUN[i] }} />{[T.r, T.g, T.b][i]} ({rgb[i]})</span>,
+        v: `${nf(l.lo)}–${nf(l.hi)}`, tone: 'accent' as const }))}>
+      {preset && <p style={{ margin: '8px 0 0', fontSize: '0.8rem', lineHeight: 1.5, fontFamily: 'var(--font-body)' }}><b style={{ color: '#4fc3cd' }}>{T.read}:</b> {preset.read[lang]}</p>}
+      <p style={{ margin: '6px 0 0', fontSize: '0.7rem', color: '#94a3b8' }}>{T.lim}</p>
+    </StatPanel>
   );
+  const bar = <>
+    <Pills label={T.preset} value={preset?.id ?? ''} onChange={(id) => setRgb(PRESETS.find((p) => p.id === id)!.rgb)} options={PRESETS.map((p) => ({ v: p.id, label: p.name[lang] }))} />
+    {[T.r, T.g, T.b].map((gun, i) => (
+      <label key={gun} className="ctl"><span className="ctl-label" style={{ color: GUN[i] }}>{gun}</span>
+        <select className="stage-select" value={rgb[i]} onChange={(e) => setGun(i, e.target.value)}>
+          {scene.cube.bands.map((b) => <option key={b} value={b}>{bandLabel(b, lang)}</option>)}
+        </select>
+      </label>
+    ))}
+    <Pills label={T.stretch} value={mode} onChange={setMode} options={[{ v: 'p2-98', label: T.p298 }, { v: 'fixed-0.3', label: T.fixed }, { v: 'none', label: T.none }]} />
+    <Slider label={T.op} value={op} min={0} max={1} step={0.05} fmt={(v) => `${Math.round(v * 100)} %`} onChange={setOp} />
+  </>;
+
+  return <MapStage lang={lang} label={`${T.label}: R=${rgb[0]}, G=${rgb[1]}, B=${rgb[2]}`} quad={quad} overlays={overlays} hud={hud} bar={bar} height={620} />;
 }

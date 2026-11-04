@@ -1,0 +1,30 @@
+{
+ "name": {
+  "vi": "Fansipan – Sa Pa, Lào Cai",
+  "en": "Fansipan – Sa Pa, Lao Cai"
+ },
+ "width": 600,
+ "height": 600,
+ "resolution_m": 30,
+ "crs": "EPSG:32648",
+ "origin_xy": [
+  368000,
+  2478000
+ ],
+ "bands": [
+  "cop",
+  "srtm"
+ ],
+ "dtype": "int16",
+ "layout": "BSQ",
+ "scale": 1,
+ "unit": "m",
+ "provenance": {
+  "cop": "COPERNICUS/DEM/GLO30_2024_1 (Copernicus DEM GLO-30 release 2024_1, TanDEM-X 2011-2015, EGM2008 heights)",
+  "srtm": "USGS/SRTMGL1_003 (SRTM 1 arc-second, Feb 2000, EGM96 heights)",
+  "resampling": "bilinear onto a 30 m UTM 48N grid, rounded to whole metres",
+  "script": "scripts/data/export_ch12_dem.py",
+  "exported": "2026-11-04T05:19:28+00:00",
+  "attribution": "Copernicus DEM © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018, provided under COPERNICUS by the EU and ESA; SRTM courtesy NASA/USGS"
+ }
+}

@@ -1,0 +1,59 @@
+{
+ "name": {
+  "vi": "Mũi Cà Mau",
+  "en": "Ca Mau cape"
+ },
+ "width": 500,
+ "height": 500,
+ "origin_xy": [
+  466095,
+  960345
+ ],
+ "dtype": "uint16",
+ "scale": 0.0001,
+ "date": "2000 / 2024",
+ "periods": {
+  "2000": [
+   "1999-10-01",
+   "2001-05-01"
+  ],
+  "2024": [
+   "2023-10-01",
+   "2025-05-01"
+  ]
+ },
+ "clear_observations": {
+  "2000": {
+   "scenes": 63,
+   "clear_obs_p5_p50": [
+    16.0,
+    22.0
+   ]
+  },
+  "2024": {
+   "scenes": 123,
+   "clear_obs_p5_p50": [
+    23.0,
+    31.0
+   ]
+  }
+ },
+ "provenance": {
+  "collections": "LANDSAT/LT05, LE07 (1999-10..2001-04); LC08, LC09 (2023-10..2025-04), C02 T1_L2",
+  "composite": "per-pixel median of clear observations (QA_PIXEL bits 1, 3, 4 masked)",
+  "script": "scripts/data/export_ch10_landsat.py",
+  "attribution": "Landsat imagery courtesy of the U.S. Geological Survey"
+ },
+ "bands": [
+  "green_2000",
+  "nir_2000",
+  "swir1_2000",
+  "green_2024",
+  "nir_2024",
+  "swir1_2024"
+ ],
+ "layout": "BSQ",
+ "crs": "EPSG:32648",
+ "resolution_m": 30,
+ "exported": "2026-11-04T05:42:38+00:00"
+}

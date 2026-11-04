@@ -1,0 +1,231 @@
+---
+title: SAR radar & applications
+n: 11
+summary: Radar brings its own illumination and sees through clouds. This chapter uses real Sentinel-1 images of Hanoi and An Giang to explain side-looking geometry, backscatter, speckle, flood mapping after Typhoon Yagi, and rice monitoring when optical images are clouded out.
+objectives:
+  - Explain why radar images through clouds and why it must look sideways.
+  - Compute slant range and ground-range resolution from the incidence angle; recognise foreshortening, layover and shadow.
+  - Read backscatter σ⁰ (dB) of water, crops, trees and buildings in VV and VH.
+  - Filter speckle and map floods with a threshold and with change detection, knowing the limits of each.
+  - Use a Sentinel-1 time series to fill the cloud gaps of an NDVI series.
+updated: "2026-11-04"
+---
+import Term from '../../../components/Term.astro';
+import Depth from '../../../components/Depth.astro';
+import Figure from '../../../components/Figure.astro';
+import LabLinks from '../../../components/LabLinks.astro';
+import SarAcquisition from '../../../islands/SarAcquisition.tsx';
+import SarGeometry from '../../../islands/SarGeometry.tsx';
+import SarExplorer from '../../../islands/SarExplorer.tsx';
+import FloodLab from '../../../islands/FloodLab.tsx';
+import RiceSar from '../../../islands/RiceSar.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/ch11.json';
+
+## 11.1 Why radar
+
+In Chapter 4, only **92 of 433 Sentinel-2 acquisition dates** over West Lake in 2022–2024 were clear enough to use. Optical sensors measure reflected sunlight, so clouds mean missing data.
+
+<Term id="sar">Synthetic aperture radar (SAR)</Term> is an **active** sensor: the satellite transmits microwave pulses and records the echoes. Sentinel-1's C-band waves are about 5.5 cm long, far longer than cloud droplets, so they pass through clouds almost unattenuated, day or night. The price: radar images have no colour and are harder to read than optical ones.
+
+<Depth level="ref" title="Reference: common radar bands">
+
+<div class="table-wrap">
+
+| Band | Wavelength | Example satellites | Notes |
+|---|---|---|---|
+| X | ~3 cm | TerraSAR-X, COSMO-SkyMed | High detail; scatters from the top of canopies |
+| C | ~5.5 cm | Sentinel-1, RADARSAT | Balanced; open data, regular global coverage |
+| L | ~24 cm | ALOS-2 PALSAR-2, NISAR | Penetrates forest canopies; more stable interferometry over vegetation |
+| P | ~70 cm | BIOMASS | Forest biomass |
+
+</div>
+
+Sentinel-1: 5.405 GHz (λ ≈ 5.55 cm); the IW mode covers a ~250 km swath, GRD products are sampled at 10 m. In 2023–2024 only Sentinel-1A was operating (Sentinel-1B failed at the end of 2021), so each orbit repeats every 12 days.
+
+</Depth>
+
+## 11.2 Side-looking geometry
+
+A radar cannot look straight down: two points symmetric about the ground track would echo back at the same time and could not be separated. Sentinel-1 therefore **looks to the right** of its flight direction. The angle between the beam and the vertical at the ground is the <Term id="incidence-angle">incidence angle θ</Term>.
+
+<Figure
+  title="Figure 11.1 — Sentinel-1 passing over Hanoi: ground track, IW swath and radar beam"
+  try="Drag the incidence angle from 29° to 46° (the two edges of the IW swath). How do the slant range R and the ground resolution change? Switch between ascending and descending: from which side is Hanoi seen?"
+  source="Circular orbit h = 693 km, inclination 98.18° (ESA Sentinel-1 User Guide), spherical Earth R = 6371 km, two-body motion; positions are illustrative, not the actual orbit of a given day. IW slant-range resolution 2.65 m. Basemap © Esri, Maxar, Earthstar Geographics."
+>
+  <SarAcquisition client:visible lang="en" />
+</Figure>
+
+At θ = 37° the off-nadir angle at the satellite is only 32.9° because the Earth is curved. The beam travels **845 km** to the ground, and the target lies **459 km** from the ground track. Radar measures the echo's travel time, which is slant range; to get ground distance, divide by sin θ:
+
+<p class="formula">ground-range resolution = slant-range resolution / sin θ = 2.65 m / sin 37° ≈ 4.4 m</p>
+
+The smaller the incidence angle (near the track), the smaller sin θ, so the coarser the ground pixel.
+
+### Terrain distorts the image
+
+On sloping ground the local incidence angle depends on the slope. Three effects are common in northern and central Viet Nam's mountains:
+
+- **Foreshortening:** a slope facing the radar, less steep than θ, looks compressed and bright.
+- **Layover:** a slope steeper than θ; the summit is closer to the radar than the foot, so it appears **before** the foot in the image.
+- **Shadow:** a back slope steeper than 90° − θ receives no signal and is completely dark, with no information.
+
+<Figure
+  title="Figure 11.2 — Foreshortening, layover and radar shadow on a hill"
+  try="At an incidence angle of 37°, raise the front slope from 25° to 45°: when does the order of the coloured points in the image strip reverse? Raise the back slope to 60°: which points become hollow?"
+  source="Schematic, plane-wave approximation. Image position = x·sin θ − z·cos θ."
+>
+  <SarGeometry client:visible lang="en" />
+</Figure>
+
+The West Lake frame is almost flat, so these effects do not show here. In mountains, Sentinel-1 images need terrain correction with a DEM (Chapter 12). Earth Engine applies it to `COPERNICUS/S1_GRD` with SRTM 30 m, but it **cannot** recover information in shadow and layover areas.
+
+## 11.3 Backscatter and polarisation
+
+A radar pixel stores the <Term id="backscatter">backscatter coefficient σ⁰</Term>, the fraction of energy scattered back to the satellite, usually in <Term id="decibel">decibels</Term>: σ⁰(dB) = 10·log₁₀ σ⁰. Every −10 dB is ten times less energy. Four mechanisms set σ⁰:
+
+1. **Specular reflection:** calm water reflects the wave away from the satellite, so it looks **dark**.
+2. **Surface scattering:** the rougher the soil (relative to the 5.5 cm wavelength), the brighter.
+3. **Volume scattering:** the wave bounces many times inside canopies and rice fields, so the target looks moderately bright and the signal is **depolarised**.
+4. **Double bounce:** walls and ground form corner reflectors that send energy straight back, so the target looks **very bright**.
+
+<Term id="polarization">Polarisation</Term> is the direction in which the wave oscillates. Sentinel-1 transmits vertically (V) and receives both vertically (VV) and horizontally (VH). VH only carries signal when the wave is depolarised, mainly by volume scattering in vegetation.
+
+<Figure
+  title="Figure 11.3 — Sentinel-1 image of West Lake – Red River on the map, 12 February 2024"
+  try="Switch between VV and VH: which surfaces darken most? Hover over West Lake, the old quarter and the floodplain to read σ⁰. Choose RGB: what colour are built-up areas and vegetation?"
+  source="Sentinel-1A IW GRD, relative orbit 128 ascending, 12 Feb 2024 (same day as the Chapter 6 Sentinel-2 scene), terrain-corrected σ⁰ from Earth Engine, nearest-neighbour onto the 10 m UTM 48N grid. Fixed stretch: VV −25…+5 dB, VH −32…−2 dB, VV−VH 0…15 dB. Reference points: 3×3 pixel mean in linear power, no speckle filter. Contains modified Copernicus Sentinel data 2024."
+>
+  <SarExplorer client:visible lang="en" />
+</Figure>
+
+The six Chapter 6 reference points (Figure 11.3, data table):
+
+<div class="table-wrap">
+
+| Point | VV (dB) | VH (dB) | Main mechanism |
+|---|---|---|---|
+| Roofs and streets | −3.0 | −5.9 | Double bounce: brightest |
+| Floodplain vegetation | −9.7 | −14.1 | Volume scattering in crops |
+| Urban trees | −9.4 | −15.7 | Volume scattering in canopies |
+| Bare soil / sand | −15.9 | −27.9 | Surface scattering, little depolarisation (VV − VH = 12 dB) |
+| West Lake water | −16.9 | −20.9 | Specular, possibly wind-roughened |
+| Red River water | −20.4 | −23.0 | Specular: darkest |
+
+</div>
+
+The Red River and the built-up point differ by 17.4 dB, a power ratio of about 55. That is why water is the easiest target to separate in radar images. Floodplain vegetation and urban trees have almost the same VV and differ by only 1.6 dB in VH. A single radar image struggles to tell vegetation types apart; a time series does better (section 11.6).
+
+<Depth level="advanced" title="Why is West Lake (−16.9 dB) brighter than the Red River (−20.4 dB)?">
+
+Water is dark only when it is smooth compared with the wavelength. Wind ripples of a few centimetres on a wide lake send some energy back. In a 20 × 20 pixel window in the middle of the lake the mean VV is −18.3 dB, lower than the 3 × 3 point above because of speckle (section 11.4). The −15 dB water threshold in section 11.5 leaves room for this. This is a physical interpretation; the handbook has no wind measurements at the lake on 12 Feb 2024.
+
+The bright cross in the upper left of the image is the **sidelobe** pattern of a very strong reflector (usually a metal structure): its energy leaks along the range and azimuth directions. It is a property of SAR image formation, not a cross-shaped object.
+
+</Depth>
+
+## 11.4 Speckle
+
+Each radar pixel is the sum of echoes from many small scatterers inside it. They add up or cancel depending on their phase, so two neighbouring pixels on the same lake can differ by several dB. This salt-and-pepper texture is <Term id="speckle">speckle</Term>. It is **multiplicative**: it scales with the signal instead of being added like electronic noise.
+
+In Figure 11.3, pick a filter and read "VV std. dev., West Lake" in the panel:
+
+| Filter | VV standard deviation in a 20 × 20 px window in West Lake |
+|---|---|
+| None | 2.04 dB |
+| Boxcar 5 × 5 | 0.94 dB |
+| Lee 5 × 5 | 0.97 dB |
+| Boxcar 9 × 9 | 0.56 dB |
+
+Larger windows give smoother images but **blur shorelines and streets**. The Lee (1980) filter addresses this: in homogeneous areas it averages like a boxcar, but where the variance exceeds what speckle alone would cause (usually at edges) it stays close to the original value. Inside the lake both filters reduce speckle about equally; zoom in on the West Lake shore to see where they differ.
+
+<Depth level="advanced" title="Average in power, not in dB">
+
+dB is logarithmic. The mean of dB values is always **lower** than the dB of the mean power (Jensen's inequality). Every filter and zonal statistic in this handbook converts to linear power 10^(dB/10), computes, then converts back. The Lee filter uses the equivalent number of looks ENL = 4.4 of IW GRDH products:
+
+<p class="formula">I' = m + W (I − m),  W = max(0, 1 − Cu² / Ci²),  Cu² = 1/ENL,  Ci² = var / m²</p>
+
+</Depth>
+
+## 11.5 Example: mapping floods after Typhoon Yagi
+
+Typhoon Yagi made landfall in Quang Ninh – Hai Phong on 7 September 2024. Heavy rain afterwards raised the Red River through Hanoi and flooded many riverside areas. The sky was mostly cloudy, so optical images were of little use. Sentinel-1 has two images from the same descending orbit 91, on 31 August (before) and 12 September (after), exactly one 12-day cycle apart.
+
+<Figure
+  title="Figure 11.4 — Water before and after Typhoon Yagi on the Hanoi map"
+  try="In 'Threshold' mode try −15 dB, then press Otsu: how much does the new-water area change? Switch to 'Change detection' with a −3 dB decrease: which new areas appear along the Red River? Set opacity to 50 % to compare with the basemap."
+  source="Sentinel-1A IW GRD, VV, relative orbit 91 descending, 31 Aug 2024 and 12 Sep 2024, Lee 5×5 filter in the browser. 'Water' = VV below the threshold before the event; 'new water' = not water before and (VV after below the threshold) or (VV after − VV before below the decrease). Not validated against field data. Contains modified Copernicus Sentinel data 2024. Basemap © Esri, Maxar, Earthstar Geographics."
+>
+  <FloodLab client:visible lang="en" />
+</Figure>
+
+Three methods, three answers:
+
+| Method | Water on both dates | New water after the typhoon |
+|---|---|---|
+| Threshold −15 dB | 6.75 km² | 0.97 km² |
+| Otsu threshold on the post image (−11 dB) | 7.47 km² | 1.57 km² |
+| Change detection, VV drop > 3 dB | 6.75 km² | 2.41 km² |
+
+Change detection finds **2.5 times** the area of the −15 dB threshold, mostly on the floodplain east of the Red River. At the Chapter 6 floodplain-vegetation point, for example, VV fell from −7.9 dB to −16.3 dB. When crops are partly submerged, leaves still stick out of the water, so σ⁰ drops sharply but may not fall below the open-water threshold. Otsu picks −11 dB because the frame is mostly urban and the histogram has no clear second peak, so this automatic threshold easily counts wet soil and dark areas as "water".
+
+**Before using the result:**
+
+- This is a **likely-flooded** map, not validated by field data or aerial images. Do not use it as damage statistics.
+- Flooded buildings often **brighten** (walls and water form double bounce), so both methods miss flooding in built-up areas.
+- 12 September is a single snapshot; the flood peak may have been on another day.
+
+## 11.6 Example: monitoring rice under clouds
+
+The Chapter 6 NDVI series for An Giang rice fields has a long hole: **no clear Sentinel-2 image from 18 June to 16 September 2024**, the middle of the rainy season. Over the same period Sentinel-1 orbit 26 acquired 6 images.
+
+<Figure
+  title="Figure 11.5 — NDVI (Sentinel-2) and σ⁰ (Sentinel-1) of the same rice fields"
+  try="Hover over July–September 2024 in the lower chart: on which date is VH lowest? When NDVI reappears on 16 September, does its value fit the VH trend?"
+  source="Sentinel-2 L2A: median NDVI of cropland (ESA WorldCover class 40) in a 2 × 2 km box around 105.08°E 10.45°N, keeping acquisitions with ≥ 60 % clear pixels. Sentinel-1A IW GRD: a single relative orbit (26) to keep the viewing geometry fixed, mean σ⁰ in linear power over the same cropland pixels. Points are not connected across gaps > 40 days. Contains modified Copernicus Sentinel data 2023–2024."
+>
+  <RiceSar client:visible lang="en" />
+</Figure>
+
+VH drops on 15 August (−21.0 dB) and 27 August 2024 (−23.4 dB), then recovers to −17.4 dB on 8 September and −16.1 dB on 20 September. When NDVI returns it reads 0.60 (16 September) and then 0.79 (26 September). A consistent reading: in late August the fields had just been harvested and flooded for land preparation and sowing (open water, so low VH); then the new crop grew and volume scattering raised VH. This is an **interpretation not checked against a field crop calendar**, but it matches the two-to-three rice crops per year typical of An Giang.
+
+## 11.7 Radar interferometry (InSAR) and subsidence
+
+<Depth level="advanced" title="Measuring ground motion with the phase">
+
+Besides intensity, radar records the **phase** of the echo. Comparing the phase of two images taken from nearly the same position at different times gives an <Term id="insar">interferogram</Term>. If the ground moves away from the radar by half a wavelength (λ/2 ≈ 2.8 cm for Sentinel-1) along the line of sight, the phase turns one full cycle and draws one fringe. Stacking tens to hundreds of images (PS-InSAR, SBAS) measures subsidence of millimetres per year.
+
+The Mekong Delta is the textbook case. Erban et al. (2014) measured average subsidence of the order of 1–2 cm per year with InSAR, locally several centimetres. Minderhoud et al. (2017) showed with a model that groundwater extraction is the main driver. Such rates are many times faster than sea-level rise.
+
+There is no interactive InSAR figure yet: phase (SLC) data are not available in Earth Engine. To practise, use the free ASF HyP3 service or ESA's SNAP software.
+
+</Depth>
+
+## 11.8 Lab
+
+The Python notebook loads Sentinel-1 for the same West Lake frame, compares VV and VH, filters speckle, maps the Yagi flood with both methods and plots the An Giang VH series. The GEE script maps floods for any area and pair of dates.
+
+<LabLinks notebook="labs/ch11_sar.ipynb" gee="labs/ch11_sar.js" />
+
+**Suggested exercises**
+
+1. Move to another flooded area (for example Lao Cai or Yen Bai after Typhoon Yagi). Is −15 dB still a sensible threshold in mountains? Why not (hint: radar shadow)?
+2. Extract the VH series of a rice area near you. How many crops were grown in 2024?
+3. Compare the Sentinel-1 flood map with the first cloud-free Sentinel-2 image after the typhoon. Where do they disagree?
+
+## 11.9 Review
+
+<Quiz client:visible lang="en" items={quiz} />
+
+## References
+
+- Erban, L. E., Gorelick, S. M., & Zebker, H. A. (2014). Groundwater extraction, land subsidence, and sea-level rise in the Mekong Delta, Vietnam. *Environmental Research Letters*, 9(8), 084010.
+- ESA (2013). *Sentinel-1 User Handbook*. European Space Agency.
+- Lee, J.-S. (1980). Digital image enhancement and noise filtering by use of local statistics. *IEEE Transactions on Pattern Analysis and Machine Intelligence*, PAMI-2(2), 165–168.
+- Minderhoud, P. S. J., et al. (2017). Impacts of 25 years of groundwater extraction on subsidence in the Mekong delta, Vietnam. *Environmental Research Letters*, 12(6), 064006.
+- Moreira, A., et al. (2013). A tutorial on synthetic aperture radar. *IEEE Geoscience and Remote Sensing Magazine*, 1(1), 6–43.
+- Nguyen, D. B., Gruber, A., & Wagner, W. (2016). Mapping rice extent and cropping scheme in the Mekong Delta using Sentinel-1A data. *Remote Sensing Letters*, 7(12), 1209–1218.
+- Otsu, N. (1979). A threshold selection method from gray-level histograms. *IEEE Transactions on Systems, Man, and Cybernetics*, 9(1), 62–66.
+- Torres, R., et al. (2012). GMES Sentinel-1 mission. *Remote Sensing of Environment*, 120, 9–24.
+- Twele, A., Cao, W., Plank, S., & Martinis, S. (2016). Sentinel-1-based flood mapping: a fully automated processing chain. *International Journal of Remote Sensing*, 37(13), 2990–3004.

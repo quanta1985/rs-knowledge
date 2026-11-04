@@ -1,0 +1,74 @@
+[
+ {
+  "id": "crs",
+  "vi": "Hệ quy chiếu tọa độ (CRS)",
+  "en": "Coordinate reference system (CRS)",
+  "def": {
+   "vi": "Bộ quy tắc gắn con số tọa độ với vị trí trên Trái Đất: gồm datum (ellipsoid và cách đặt nó) và, nếu là tọa độ phẳng, một phép chiếu bản đồ.",
+   "en": "The rules that tie coordinate numbers to places on Earth: a datum (ellipsoid and how it is placed) and, for plane coordinates, a map projection."
+  }
+ },
+ {
+  "id": "datum",
+  "vi": "Datum (hệ quy chiếu)",
+  "en": "Datum",
+  "def": {
+   "vi": "Cách đặt ellipsoid so với Trái Đất thật. Cùng một điểm có kinh, vĩ độ khác nhau trên hai datum khác nhau, ví dụ WGS84 và VN-2000.",
+   "en": "How the ellipsoid is positioned relative to the real Earth. The same point has different latitude and longitude on different datums, e.g. WGS84 and VN-2000."
+  }
+ },
+ {
+  "id": "vn2000",
+  "vi": "VN-2000",
+  "en": "VN-2000",
+  "def": {
+   "vi": "Hệ quy chiếu và hệ tọa độ quốc gia của Việt Nam từ năm 2000 (Quyết định 83/2000/QĐ-TTg): ellipsoid WGS84 được định vị cho lãnh thổ Việt Nam, phép chiếu UTM.",
+   "en": "Viet Nam's national datum and coordinate system since 2000 (Decision 83/2000/QĐ-TTg): the WGS84 ellipsoid positioned for Viet Nam, with UTM projection."
+  }
+ },
+ {
+  "id": "utm",
+  "vi": "Phép chiếu UTM",
+  "en": "UTM projection",
+  "def": {
+   "vi": "Phép chiếu ngang Mercator chia Trái Đất thành 60 múi rộng 6°, hệ số tỷ lệ trên kinh tuyến trục 0,9996. Việt Nam nằm chủ yếu trong múi 48 và 49.",
+   "en": "Transverse Mercator in 60 zones 6° wide with scale factor 0.9996 on the central meridian. Viet Nam lies mostly in zones 48 and 49."
+  }
+ },
+ {
+  "id": "scale-factor",
+  "vi": "Hệ số tỷ lệ (k)",
+  "en": "Scale factor (k)",
+  "def": {
+   "vi": "Tỷ số giữa độ dài trên mặt phẳng chiếu và độ dài thật trên ellipsoid. k > 1: bản đồ phóng to; k < 1: thu nhỏ.",
+   "en": "Ratio of a length on the projected plane to the true length on the ellipsoid. k > 1 enlarges, k < 1 shrinks."
+  }
+ },
+ {
+  "id": "helmert",
+  "vi": "Phép chuyển đổi Helmert 7 tham số",
+  "en": "7-parameter Helmert transformation",
+  "def": {
+   "vi": "Phép chuyển tọa độ không gian giữa hai datum: 3 dịch chuyển, 3 góc xoay và 1 hệ số tỷ lệ.",
+   "en": "Transformation of 3-D coordinates between two datums: 3 translations, 3 rotations and 1 scale change."
+  }
+ },
+ {
+  "id": "raster",
+  "vi": "Dữ liệu raster",
+  "en": "Raster data",
+  "def": {
+   "vi": "Mô tả thế giới bằng lưới ô vuông đều nhau; mỗi ô mang một giá trị. Ảnh vệ tinh và DEM là raster.",
+   "en": "Represents the world as a regular grid of cells, each holding a value. Satellite images and DEMs are rasters."
+  }
+ },
+ {
+  "id": "vector",
+  "vi": "Dữ liệu vector",
+  "en": "Vector data",
+  "def": {
+   "vi": "Mô tả đối tượng bằng điểm, đường và vùng có tọa độ đỉnh chính xác, ví dụ ranh giới hồ, đường giao thông.",
+   "en": "Represents features as points, lines and polygons with exact vertex coordinates, e.g. a lake shoreline or a road."
+  }
+ }
+]

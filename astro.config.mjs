@@ -8,4 +8,5 @@ export default defineConfig({
   base: '/rs-knowledge',
   trailingSlash: 'always',
   integrations: [mdx(), react()],
+  vite: { worker: { format: 'es' } }, // MapLibre starts its worker as a module worker
 });

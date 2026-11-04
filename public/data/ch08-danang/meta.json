@@ -1,0 +1,39 @@
+{
+ "name": {
+  "vi": "Đà Nẵng: sân bay, sông Hàn, bờ biển",
+  "en": "Da Nang: airport, Han River, coast"
+ },
+ "width": 512,
+ "height": 512,
+ "resolution_m": 10,
+ "crs": "EPSG:32649",
+ "origin_xy": [
+  199460,
+  1779580
+ ],
+ "bands": [
+  "B2",
+  "B3",
+  "B4",
+  "B8",
+  "B11",
+  "B12"
+ ],
+ "dtype": "uint16",
+ "layout": "BSQ",
+ "scale": 0.0001,
+ "date": "2023-03-23",
+ "scene": {
+  "MGRS_TILE": "48PZC",
+  "SPACECRAFT_NAME": "Sentinel-2B",
+  "clear_frac": 1,
+  "system:index": "20230323T030529_20230323T032141_T48PZC"
+ },
+ "provenance": {
+  "collection": "COPERNICUS/S2_SR_HARMONIZED (Level-2A), date chosen by Cloud Score+ cs_cdf >= 0.6",
+  "resampling": "20 m bands (B11, B12) nearest-neighbour to 10 m",
+  "script": "scripts/data/export_ch08_scenes.py",
+  "exported": "2026-11-04T06:10:03+00:00",
+  "attribution": "Contains modified Copernicus Sentinel data 2023"
+ }
+}
