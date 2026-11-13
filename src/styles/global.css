@@ -371,6 +371,9 @@ span.key i { display: inline-block; width: 11px; height: 11px; border-radius: 3p
 .map-pin span { font: 600 11px var(--font-body); color: #fff; text-shadow: 0 0 3px #000, 0 0 2px #000; white-space: nowrap; }
 .map-sov { pointer-events: none; font: 600 11px var(--font-body); color: #fff; text-shadow: 0 0 3px #000, 0 0 2px #000; white-space: nowrap; }
 .map-sov.sea { font: italic 600 15px var(--font-head); letter-spacing: 0.2em; color: #cfe6ff; }
+/* light gray basemap: dark labels with a light halo */
+.stage[data-base='map'] .map-sov, .stage[data-base='map'] .map-pin span { color: #1b2a44; text-shadow: 0 0 3px #fff, 0 0 2px #fff; }
+.stage[data-base='map'] .map-sov.sea { color: #2c5d8a; }
 @media (max-width: 720px) {
   .stage { height: auto; overflow: visible; background: none; }
   .stage .stage-map { position: relative; height: 360px; border-radius: var(--radius); overflow: hidden; background: #0b1220; }

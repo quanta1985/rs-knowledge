@@ -102,7 +102,7 @@ tar -C dist-home -czf - . | ssh -i ~/.ssh/id_ed25519_quanta quanta@14.231.137.16
 - **Simulated vs real**: figures that derive coarser/fewer-band/fewer-bit data from the S2 cube (aggregation, band subsets, quantisation, linear mixing) must say "simulated" in their `source`; only `res-*` products are real other-sensor data, and their acquisition dates differ from the S2 scene.
 - **Map and globe stages** (dark; user requirement: "interactive maps, pro information design like the original app"):
   - `MapStage.tsx` (MapLibre GL 6, lazy-loaded; worker via `?worker&url`):
-    - Dark stage with an Esri World Imagery / CARTO basemap toggle.
+    - Dark stage with a basemap toggle: Esri World Imagery + Reference labels, or Esri Light Gray Canvas (base + reference). All keyless. Do NOT use CARTO basemaps: they now stamp "API KEY REQUIRED" on every tile.
     - Raster overlays are image sources on a corner quad (`frameQuad(meta)` from `cube.ts`, inverse UTM in `lib/geo.ts`), drawn with nearest resampling.
     - HTML pin markers; floating HUD (`hud`) top-right and control bar (`bar`) bottom.
     - `onMap(map, ml)` is the escape hatch for GeoJSON layers; `bounds` sets the view when there is no raster (default: Viet Nam). Hover maps to a pixel via `lonLatToPixel`.

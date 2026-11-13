@@ -20,13 +20,16 @@ const STYLE: StyleSpecification = {
     imagery: { type: 'raster', tiles: [`${ESRI}/World_Imagery/MapServer/tile/{z}/{y}/{x}`], tileSize: 256, maxzoom: 19,
       attribution: 'Imagery © Esri, Maxar, Earthstar Geographics' },
     labels: { type: 'raster', tiles: [`${ESRI}/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}`], tileSize: 256, maxzoom: 19 },
-    carto: { type: 'raster', tiles: ['a', 'b', 'c'].map((s) => `https://${s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png`), tileSize: 256, maxzoom: 19,
-      attribution: '© OpenStreetMap contributors © CARTO' },
+    // "map" mode: Esri Light Gray Canvas (keyless, like the imagery). CARTO's basemaps now stamp "API KEY REQUIRED" on every tile.
+    gray: { type: 'raster', tiles: [`${ESRI}/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}`], tileSize: 256, maxzoom: 16,
+      attribution: 'Esri, HERE, Garmin, © OpenStreetMap contributors' },
+    grayRef: { type: 'raster', tiles: [`${ESRI}/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}`], tileSize: 256, maxzoom: 16 },
   },
   layers: [
     { id: 'bg', type: 'background', paint: { 'background-color': '#0b1220' } },
     { id: 'imagery', type: 'raster', source: 'imagery' },
-    { id: 'carto', type: 'raster', source: 'carto', layout: { visibility: 'none' } },
+    { id: 'gray', type: 'raster', source: 'gray', layout: { visibility: 'none' } },
+    { id: 'grayRef', type: 'raster', source: 'grayRef', layout: { visibility: 'none' } },
     { id: 'labels', type: 'raster', source: 'labels', paint: { 'raster-opacity': 0.85 } },
   ],
 };
@@ -149,7 +152,8 @@ export default function MapStage({ lang, label, quad, bounds, overlays = [], hud
     const m = map.current;
     if (!ready || !m) return;
     m.setLayoutProperty('imagery', 'visibility', base === 'imagery' ? 'visible' : 'none');
-    m.setLayoutProperty('carto', 'visibility', base === 'map' ? 'visible' : 'none');
+    m.setLayoutProperty('gray', 'visibility', base === 'map' ? 'visible' : 'none');
+    m.setLayoutProperty('grayRef', 'visibility', base === 'map' ? 'visible' : 'none');
     m.setLayoutProperty('labels', 'visibility', base === 'imagery' ? 'visible' : 'none');
   }, [ready, base]);
 
@@ -204,7 +208,7 @@ export default function MapStage({ lang, label, quad, bounds, overlays = [], hud
   }, [ready, markerKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div className="stage" style={{ ['--stage-h' as string]: `${height}px` }}>
+    <div className="stage" data-base={base} style={{ ['--stage-h' as string]: `${height}px` }}>
       <div ref={el} className="stage-map" role="region" aria-label={label} />
       {!ready && <p className="stage-status" aria-live="polite">{failed ? T.fail : T.loading}</p>}
       <div className="stage-tl">
