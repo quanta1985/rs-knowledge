@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-Bilingual (vi/en) interactive satellite, remote-sensing and GIS handbook for teaching, with Viet Nam examples on real data. Astro 7 + MDX + React islands, static output to GitHub Pages at `https://quanta1985.github.io/rs-knowledge/` (`base: '/rs-knowledge'` in `astro.config.mjs`).
+**GIS and Remote Sensing Knowledge** (app name, `siteTitle` in `ui.ts`, same in vi and en): a bilingual (vi/en) interactive satellite, remote-sensing and GIS handbook for teaching, with Viet Nam examples on real data. Author/owner: Trần Anh Quân (HUMG). Astro 7 + MDX + React islands, static output deployed twice: GitHub Pages `https://quanta1985.github.io/rs-knowledge/` (default `base: '/rs-knowledge'`) and the author's homepage `http://remosat.usth.edu.vn/~quanta/rs-knowledge/` (see "Deploy to the homepage"). `astro.config.mjs` reads `SITE_URL` / `SITE_BASE` env vars to switch.
 
 ## Commands
 
@@ -41,10 +41,12 @@ The user's homepage `http://remosat.usth.edu.vn/~quanta/` (static HTML in `/home
 
 ```bash
 SITE_URL=http://remosat.usth.edu.vn SITE_BASE=/~quanta/rs-knowledge BUILD_ID=home npx astro build && npx pagefind --site dist-home
-tar -C dist-home -czf - . | ssh -i ~/.ssh/id_ed25519_quanta quanta@14.231.137.16 'cd /home/quanta/public_html/rs-knowledge && tar -xzf - --no-same-owner && find . -type d -exec chmod 755 {} + && find . -type f -exec chmod 644 {} +'
+tar -C dist-home -czf - . | ssh -i ~/.ssh/id_ed25519_quanta quanta@14.231.137.16 'set -e; cd /home/quanta/public_html; rm -rf rs-knowledge.new; mkdir rs-knowledge.new; tar -C rs-knowledge.new -xzf - --no-same-owner; find rs-knowledge.new -type d -exec chmod 755 {} +; find rs-knowledge.new -type f -exec chmod 644 {} +; mv rs-knowledge rs-knowledge.old; mv rs-knowledge.new rs-knowledge; rm -rf rs-knowledge.old'
 ```
 
-Before editing any HTML page on that server, copy it to `<page>.bak-YYYYMMDD` (the user's own convention).
+- Upload into `rs-knowledge.new` and swap (above), so stale hashed assets do not pile up. Check afterwards: `find rs-knowledge -type f | wc -l` equals `find dist-home -type f | wc -l`.
+- The two copies do NOT sync: a push updates GitHub Pages only; the homepage copy needs this build + upload. When the user asks to "push", ask or do both.
+- The homepage pages are the user's hand-written static site (`css/main.css`, `.cards.fill` / `article.card` with `img.thumb` + `h3 a` + `p` + `p.refs`). Before editing any HTML page there, copy it to `<page>.bak-YYYYMMDD` (the user's own convention). Plain `ssh` prints post-quantum warnings on stderr; filter them out.
 
 ### Environment gotchas (Windows)
 
@@ -126,7 +128,7 @@ Before editing any HTML page on that server, copy it to `<page>.bak-YYYYMMDD` (t
 - Every number quoted in chapter prose must come from the exported data or a `*_numbers.ts` script (don't estimate). Facts about missions and launches need a cited source; drop what cannot be verified. Interpretations not backed by ground truth, and illustrative presets, are labelled as such.
 - Figures: fixed −1…+1 scale for indices, disclose stretch (2–98 %), Okabe-Ito/BrBG/viridis palettes with shape/dash redundancy, data table in `<details>`, provenance (incl. snapshot date) in the Figure `source`. Never connect time-series points across gaps > 40 days.
 - Sovereignty: every MapStage shows Viet Nam's labels (`SOVEREIGN` in `MapStage.tsx`). Full names show at zoom 4–9. Below zoom 4 the labels shorten to "Hoàng Sa (Việt Nam)" / "Trường Sa (Việt Nam)" and the sea label is hidden. National views use bounds that include both archipelagos, and globes that label places include Hoàng Sa / Trường Sa.
-- Imagery attribution "Contains modified Copernicus Sentinel data" must stay in the footer/sources. Footer copyright: © Trần Anh Quân (quantrananh.humg@gmail.com). The CC BY 4.0 source handbook that parts of Part A were developed from is credited in exactly ONE place, the note under `<RefList />` in `ch16-reference.mdx` (vi + en); the user asked for no other mention (no chapter intros, reference-list entries, figure sources or footer text). That single credit is what keeps the site within CC BY 4.0: do not remove it.
+- Imagery attribution "Contains modified Copernicus Sentinel data" must stay in the footer/sources. Footer (`Base.astro`): line 1 = "© 2026 Trần Anh Quân · quantrananh.humg@gmail.com (mailto) · Trang chủ của tác giả / Author's homepage" linking to `http://remosat.usth.edu.vn/~quanta/`; line 2 = `t('footer')` (imagery attribution only) · Glossary. The CC BY 4.0 source handbook that parts of Part A were developed from is credited in exactly ONE place, the note under `<RefList />` in `ch16-reference.mdx` (vi + en); the user asked for no other mention (no chapter intros, reference-list entries, figure sources or footer text). That single credit is what keeps the site within CC BY 4.0: do not remove it.
 - New chapter checklist:
   1. Add the chapter to `CHAPTERS` and write the vi + en MDX.
   2. Add `src/data/quiz/<id>.json` and `src/data/glossary/<id>.json` (unique ids).
@@ -137,14 +139,17 @@ Before editing any HTML page on that server, copy it to `<page>.bak-YYYYMMDD` (t
   7. Finish with a `code-reviewer` pass.
 - Commits/pushes only when the user asks. Commit messages end with `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`. `.gitattributes` forces LF and marks `*.u16z` binary.
 
-## Status (2026-11-13: redesign + deepened Part A done locally, not yet committed/pushed)
+## Status (2026-11-13: deployed)
 
-- 21 chapters in vi + en (49 pages). 161/161 unit tests; type check clean. Part A chapters 1–7 were rewritten to cover every section of the source handbook (2–3× longer, a hero stage figure at the top of each chapter, ~50 new islands). Part B/C got an emphasis pass (Formula/Note/Stats/Steps), no new facts.
+- Live on both hosts, last commit `9e64137` (GitHub Pages redeploys on every push to `main`; the homepage copy was uploaded from the same commit).
+- 21 chapters in vi + en (49 pages). 161/161 unit tests; type check clean. Part A chapters 1–7 cover every section of the source handbook (2–3× longer, a hero stage figure at the top of each chapter, ~50 new islands). Part B/C got an emphasis pass (Formula/Note/Stats/Steps), no new facts.
 - Site-wide smoke: 21 chapters × vi/en × 1440/390 px. No console errors, no horizontal overflow, no figure stuck loading.
-- Code review of the new Part A islands: the one HIGH (ConstellationGlobe empty-median crash) and the MEDIUM items are fixed.
-- The live site still shows the previous version (commit `23cb302`); every push to `main` redeploys.
+- Code review of the new Part A islands: the one HIGH (ConstellationGlobe empty-median crash) and the MEDIUM items are fixed. Not fixed (minor): GnssTrilat/GnssSkyDop sliders lack aria-valuenow/min/max.
+- Branding: satellite logo in `AppBar.astro` and `public/favicon.svg` (same SVG paths). Home hero: the Sentinel-1 inset sits top-left (`.hero-shot .inset { top }`); anchoring it to the bottom covered the caption.
 - Known gaps:
   - Lab notebooks were not updated for the new Part A sections (they still run).
   - Not verified against a primary source: Sentinel-2 X-band rate (560 Mbit/s per eoPortal; no ESA mission document found), SMAD efficiencies/coating α/ε/Isp ranges (textbook typical values), FCC 2022 document title, the GPS SPS PS 2020 PDF (gone from gps.gov), Cục Tần số vô tuyến điện's parent ministry. DVB-S2 thresholds ARE verified (ETSI EN 302 307-1 Table 13).
   - `ch01-satnow.json` Starlink subset was patched once by hand after a CelesTrak 403; `export_ch01_satnow.py` is fixed but not re-run (re-running changes the numbers quoted in Chapter 1: re-run `scripts/ch01_numbers.ts` and update the prose).
+  - On 390 px phones three formulas (ch09-classification, ch12-dem Horn/slope) scroll 10–31 px inside their card.
   - The GEE JS scripts `labs/*.js` in the Code Editor; globe frame rates (Starlink 11k, SatNow 17k points) on a real GPU.
+  - The home page of the author's site (`index.html` "Recent maps and apps" mosaic, 4 tiles) does not list the app; adding it means replacing a tile, which the user has not decided.
