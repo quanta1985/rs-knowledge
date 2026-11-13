@@ -35,6 +35,17 @@ cd scripts && python build_lab_{launch,bus,signals,constellations,gnss}.py [--ru
 
 GEE project: `claudev1-503808`. Push to `main` deploys via `.github/workflows/deploy.yml` (runs `npm test`, then `withastro/action`).
 
+### Deploy to the homepage (second copy)
+
+The user's homepage `http://remosat.usth.edu.vn/~quanta/` (static HTML in `/home/quanta/public_html` on `quanta@14.231.137.16`, key `~/.ssh/id_ed25519_quanta`) hosts a copy at `rs-knowledge/`, linked from a card on `teaching.html` ("Teaching material") and as the first card on `software.html` (thumbnails `img/software/rs-knowledge{,-2x}.webp`, 480×360 / 960×720). To update it:
+
+```bash
+SITE_URL=http://remosat.usth.edu.vn SITE_BASE=/~quanta/rs-knowledge BUILD_ID=home npx astro build && npx pagefind --site dist-home
+tar -C dist-home -czf - . | ssh -i ~/.ssh/id_ed25519_quanta quanta@14.231.137.16 'cd /home/quanta/public_html/rs-knowledge && tar -xzf - --no-same-owner && find . -type d -exec chmod 755 {} + && find . -type f -exec chmod 644 {} +'
+```
+
+Before editing any HTML page on that server, copy it to `<page>.bak-YYYYMMDD` (the user's own convention).
+
 ### Environment gotchas (Windows)
 
 - Lab generators import `scripts/labkit.py`: run them WITHOUT `-I` (isolated mode drops the script dir from `sys.path`). Data scripts may use `-I`.
