@@ -25,6 +25,6 @@ Dữ liệu ảnh được tạo lại bằng / Imagery is regenerated with `scr
 
 ## Giấy phép & ghi công / License & attribution
 
-- Nội dung / content: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+- © 2026 Trần Anh Quân · quantrananh.humg@gmail.com. Nội dung / content: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
 - Ảnh vệ tinh / imagery: *Contains modified Copernicus Sentinel data (2019–2024).* Landsat courtesy of the U.S. Geological Survey. MODIS courtesy of NASA LP DAAC. ESA WorldCover 2021 (CC BY 4.0).
-- Cách trình bày tương tác lấy cảm hứng từ / interactive presentation inspired by *Sổ tay Vệ tinh & Viễn thám* — Nguyễn Văn Tín (Estas Nino), CC BY 4.0. Chương nào cải biên từ tác phẩm đó sẽ ghi nguồn ngay trong chương. / Chapters adapted from that work will credit it in the chapter itself.
+- Nguồn tham khảo của một số chương Phần A được ghi tại chương 21 (Tra cứu). / Sources for some Part A chapters are credited in Chapter 21 (Reference).
