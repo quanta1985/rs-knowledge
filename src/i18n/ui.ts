@@ -39,9 +39,10 @@ export const UI = {
   partB: { vi: 'Phần B · Viễn thám & xử lý ảnh', en: 'Part B · Remote sensing & image analysis' },
   partC: { vi: 'Phần C · Ứng dụng & tra cứu', en: 'Part C · Applications & reference' },
   footer: {
-    vi: '© 2026 Trần Anh Quân · quantrananh.humg@gmail.com. Dữ liệu ảnh: chứa dữ liệu Copernicus Sentinel đã xử lý; Landsat: USGS; MODIS: NASA LP DAAC.',
-    en: '© 2026 Trần Anh Quân · quantrananh.humg@gmail.com. Imagery: contains modified Copernicus Sentinel data; Landsat courtesy of USGS; MODIS courtesy of NASA LP DAAC.',
+    vi: 'Dữ liệu ảnh: chứa dữ liệu Copernicus Sentinel đã xử lý; Landsat: USGS; MODIS: NASA LP DAAC.',
+    en: 'Imagery: contains modified Copernicus Sentinel data; Landsat courtesy of USGS; MODIS courtesy of NASA LP DAAC.',
   },
+  homepage: { vi: 'Trang chủ của tác giả', en: "Author's homepage" },
   glossaryMore: { vi: 'Xem trong bảng thuật ngữ', en: 'See glossary' },
 } satisfies Record<string, Bi>;
 

@@ -38,6 +38,7 @@ const fullTitle = title === t(lang, 'siteTitle') ? title : `${title} · ${t(lang
     <AppBar lang={lang} current={current} showDepth={showDepth} />
     <slot />
     <footer class="site-footer">
+      <p>© 2026 Trần Anh Quân · <a href="mailto:quantrananh.humg@gmail.com">quantrananh.humg@gmail.com</a> · <a href="http://remosat.usth.edu.vn/~quanta/">{t(lang, 'homepage')}</a></p>
       <p>{t(lang, 'footer')} · <a href={url(`${lang}/glossary/`)}>{t(lang, 'glossary')}</a></p>
     </footer>
     <div class="present-hint" aria-hidden="true">{t(lang, 'presentHint')}</div>
