@@ -439,7 +439,7 @@ span.key i { display: inline-block; width: 11px; height: 11px; border-radius: 3p
 .home-stats dd { margin: 0; font: 600 2rem/1.1 var(--font-display); color: var(--primary); }
 .hero-shot { position: relative; margin: 0; }
 .hero-shot > img:first-child { width: 100%; height: auto; display: block; border-radius: 10px; box-shadow: 0 20px 50px #15213b33; }
-.hero-shot .inset { position: absolute; width: 34%; height: auto; left: -20px; bottom: 30px; border-radius: 8px; border: 3px solid var(--surface); box-shadow: 0 12px 30px #15213b40; }
+.hero-shot .inset { position: absolute; width: 34%; height: auto; left: -20px; top: 28px; border-radius: 8px; border: 3px solid var(--surface); box-shadow: 0 12px 30px #15213b40; }
 .hero-hud { position: absolute; top: 14px; right: 14px; width: 210px; background: rgba(11, 17, 32, 0.84); border: 1px solid rgba(79, 195, 205, 0.25); border-radius: 6px; padding: 10px 12px; backdrop-filter: blur(6px);
   --st-fg: #e6ebf4; --st-muted: #94a3b8; --st-accent: #4fc3cd; --st-line: rgba(148, 163, 184, 0.24); }
 .hero-shot figcaption { font-size: 0.82rem; color: var(--fg-3); margin-top: 12px; }
@@ -457,7 +457,7 @@ a.card:hover { border-color: var(--primary); box-shadow: var(--shadow); transfor
 .card.planned .mono-label { color: var(--fg-3); }
 @media (max-width: 900px) {
   .home-hero { grid-template-columns: minmax(0, 1fr); padding-top: 36px; gap: 36px; }
-  .hero-shot .inset { left: 8px; bottom: 44px; width: 30%; }
+  .hero-shot .inset { left: 8px; top: 8px; width: 30%; }
   .home-stats { gap: 28px; }
 }
 
