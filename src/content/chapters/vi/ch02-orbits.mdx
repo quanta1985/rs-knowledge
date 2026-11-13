@@ -1,43 +1,123 @@
 ---
 title: Quỹ đạo & độ phủ
 n: 2
-summary: Vì sao vệ tinh không rơi, vì sao hầu hết vệ tinh quan sát Trái Đất cùng bay ở độ nghiêng 98°, và Sentinel-2 cần bao nhiêu ngày để chụp hết Việt Nam. Mọi con số trong chương tính từ định luật Kepler, lực J2 và phần tử quỹ đạo thật.
+summary: Vì sao vệ tinh không rơi, sáu con số mô tả một quỹ đạo, vì sao hầu hết vệ tinh quan sát Trái Đất cùng bay ở độ nghiêng 98°, quỹ đạo thật lệch khỏi elip Kepler ra sao, và Sentinel-2 cần bao nhiêu ngày để chụp hết Việt Nam. Mọi con số trong chương tính từ định luật Kepler, lực J2 và phần tử quỹ đạo thật.
 objectives:
-  - Tính chu kỳ và vận tốc của quỹ đạo tròn từ độ cao bằng định luật Kepler III.
-  - Phân biệt LEO, quỹ đạo đồng bộ Mặt Trời, MEO và GEO; biết mỗi loại dùng cho việc gì.
+  - Phát biểu ba định luật Kepler; tính chu kỳ, vận tốc tròn, vận tốc thoát và dùng phương trình vis-viva cho quỹ đạo elip.
+  - Đọc sáu tham số Kepler trên hình vẽ và giải mã một bộ TLE thật thành chu kỳ, bán trục lớn và độ cao.
+  - Phân biệt LEO, SSO, MEO, GEO, GTO và Molniya; biết mỗi loại dùng cho việc gì.
+  - Kể các nhiễu loạn chính (J2, lực cản, Mặt Trăng và Mặt Trời, áp suất bức xạ) và ước lượng tuổi thọ quỹ đạo theo độ cao.
   - Giải thích vì sao lực J2 cho phép quỹ đạo đồng bộ Mặt Trời và tính được độ nghiêng cần thiết.
-  - Đọc vết bay, dải chụp và chu kỳ lặp; ước lượng số ngày để phủ kín một vùng.
-updated: "2026-11-04"
+  - Đọc vết bay, chu kỳ lặp và vùng nhìn thấy; tính góc tâm, khoảng cách nghiêng và thời gian bay qua từ độ cao và góc ngẩng.
+updated: "2026-11-05"
 ---
 import Term from '../../../components/Term.astro';
 import Depth from '../../../components/Depth.astro';
 import Figure from '../../../components/Figure.astro';
 import LabLinks from '../../../components/LabLinks.astro';
-import KeplerChart from '../../../islands/KeplerChart.tsx';
+import Note from '../../../components/Note.astro';
+import Tiles from '../../../components/Tiles.astro';
+import Formula from '../../../components/Formula.astro';
+import Stats from '../../../components/Stats.astro';
+import Steps from '../../../components/Steps.astro';
+import Predict from '../../../islands/Predict.tsx';
 import OrbitExplorer from '../../../islands/OrbitExplorer.tsx';
+import KeplerEllipse from '../../../islands/KeplerEllipse.tsx';
+import KeplerChart from '../../../islands/KeplerChart.tsx';
+import ElementsDiagram from '../../../islands/ElementsDiagram.tsx';
+import TleReader from '../../../islands/TleReader.tsx';
+import OrbitTypes from '../../../islands/OrbitTypes.tsx';
+import J2Drift from '../../../islands/J2Drift.tsx';
+import SsoYear from '../../../islands/SsoYear.tsx';
 import RevisitMap from '../../../islands/RevisitMap.tsx';
+import VisibilityGeometry from '../../../islands/VisibilityGeometry.tsx';
 import Quiz from '../../../islands/Quiz.tsx';
 import quiz from '../../../data/quiz/ch02.json';
 
-<p class="muted" style="font-size:0.9rem">Chương này phỏng theo chương 2 (Cơ học quỹ đạo) của <a href="https://satellite-rs-handbook.netlify.app/" rel="noopener"><em>Sổ tay Vệ tinh & Viễn thám</em></a> (Nguyễn Văn Tín, CC BY 4.0), rút gọn cho người dùng ảnh viễn thám và thêm các hình tính trên quỹ đạo thật.</p>
+<Figure
+  title="Hình 2.1 — Sáu loại quỹ đạo quanh Trái Đất, bay thật trên quả địa cầu"
+  try="Bắt đầu với ISS rồi lần lượt chọn Sentinel-2, GPS, Địa tĩnh, Molniya và GTO: chu kỳ và vận tốc thay đổi thế nào? Với Molniya, nhìn dòng 'Lúc này': vệ tinh chạy nhanh ở đâu, chậm ở đâu? Chọn Sentinel-2 rồi kéo độ nghiêng xuống 90°: dòng 'Đồng bộ Mặt Trời?' đổi ra sao? Chấm đỏ là Hà Nội."
+  source="Bài toán hai vật với quỹ đạo elip (phương trình Kepler) cộng trôi thế kỷ bậc nhất của nút lên và cận địa do J2 (J2 = 1,08263×10⁻³, Re = 6378,137 km), giờ sao theo IAU 1982. Nút lên đặt tại 105°E lúc 03:30 UTC ngày 04/11/2026. Thông số mẫu: ISS (NASA), Sentinel-2 (ESA), GPS (GPS.gov), quỹ đạo địa tĩnh, Molniya (chu kỳ nửa ngày sao, cận địa 600 km, i = 63,4°, ω = 270°), GTO chuẩn của Ariane 5 (250 × 35 943 km, i = 6°, ω = 178°; Arianespace, Ariane 5 User's Manual). Ảnh nền © Esri, Maxar, Earthstar Geographics."
+>
+  <OrbitExplorer client:visible lang="vi" />
+</Figure>
 
-## 2.1 Vì sao vệ tinh không rơi
+## 2.1 Lực hấp dẫn và ba định luật Kepler
 
-Vệ tinh **luôn rơi**. Nó chỉ không chạm đất vì bay ngang đủ nhanh: trong lúc rơi, mặt đất cong đi đúng bằng quãng rơi. Ở độ cao 400 km, trọng lực vẫn còn 88,5 % so với mặt đất. Phi hành gia trên trạm vũ trụ lơ lửng vì cả trạm lẫn người cùng rơi tự do.
+Vệ tinh **luôn rơi**. Nó chỉ không chạm đất vì bay ngang đủ nhanh: trong lúc rơi, mặt đất cong đi đúng bằng quãng rơi. Lực kéo nó xuống là lực hấp dẫn Newton giữa Trái Đất và vệ tinh:
 
-Với quỹ đạo tròn bán kính r (tính từ tâm Trái Đất), lực hấp dẫn đóng vai trò lực hướng tâm:
+<Formula label="Lực hấp dẫn và tham số hấp dẫn chuẩn" tex="F = \frac{G M_\oplus m}{r^2}, \qquad \mu \equiv G M_\oplus = 398\,600{,}4\ \text{km}^3/\text{s}^2" where="
+r :: khoảng cách từ tâm Trái Đất tới vệ tinh (km)
+m :: khối lượng vệ tinh
+\mu :: tham số hấp dẫn chuẩn của Trái Đất, đo chính xác hơn nhiều so với G hay M riêng lẻ
+" />
 
-<p class="formula">v = √(μ / r),   T = 2π √(r³ / μ),   μ = GM = 398 600,4 km³/s²</p>
+<Predict client:visible lang="vi"
+  title="Trên trạm vũ trụ còn bao nhiêu trọng lực?"
+  q="Phi hành gia trên Trạm Vũ trụ Quốc tế (khoảng 400 km) lơ lửng. Gia tốc trọng trường ở đó bằng bao nhiêu phần trăm so với ở mặt đất?"
+  options={["Gần 0 %", "Khoảng 10 %", "Khoảng 50 %", "Khoảng 90 %"]} answer={3}
+  why="Lực hấp dẫn giảm theo 1/r². Ở 400 km, r chỉ lớn hơn bán kính Trái Đất 6 %, nên g còn (6378/6778)² ≈ 88,5 %. Phi hành gia lơ lửng vì cả trạm lẫn người cùng rơi tự do, không phải vì hết trọng lực." />
 
-Công thức thứ hai là **định luật Kepler III**: chu kỳ chỉ phụ thuộc kích thước quỹ đạo, không phụ thuộc khối lượng vệ tinh. Một CubeSat vài kg và một vệ tinh vài tấn ở cùng độ cao có cùng chu kỳ.
+Trong cơ học quỹ đạo người ta gần như luôn dùng tích μ = GM thay cho G và M riêng. Bán kính xích đạo Trái Đất là 6378,137 km (WGS84), bán kính trung bình 6371 km. Ở 400 km, gia tốc trọng trường vẫn còn **88,5 %** so với mặt đất.
+
+Johannes Kepler rút ra ba định luật từ số liệu quan sát Sao Hỏa của Tycho Brahe (1609 và 1619). Newton sau đó chứng minh cả ba từ định luật hấp dẫn. Chúng đúng cho vệ tinh nhân tạo quanh Trái Đất:
+
+<Tiles items={[
+  { t: 'Định luật 1: quỹ đạo là elip', d: 'Trái Đất nằm ở một tiêu điểm. Quỹ đạo tròn là elip có tâm sai bằng 0. Điểm gần nhất là cận địa (perigee), xa nhất là viễn địa (apogee).' },
+  { t: 'Định luật 2: quét diện tích đều', d: 'Đoạn nối Trái Đất với vệ tinh quét những diện tích bằng nhau trong những khoảng thời gian bằng nhau: nhanh ở cận địa, chậm ở viễn địa (bảo toàn mômen động lượng).' },
+  { t: 'Định luật 3: T² tỉ lệ a³', d: 'Chu kỳ chỉ phụ thuộc bán trục lớn a, không phụ thuộc tâm sai hay khối lượng vệ tinh.' },
+]} />
+
+<Formula label="Định luật Kepler III" tex="T = 2\pi\sqrt{\frac{a^3}{\mu}}" where="
+T :: chu kỳ quỹ đạo (s)
+a :: bán trục lớn (km); với quỹ đạo tròn, a = r = R⊕ + h
+" />
+
+Một CubeSat 4 kg và trạm ISS 420 tấn ở cùng độ cao có cùng chu kỳ. Hình 2.2 cho thấy định luật 1 và 2 hoạt động: quỹ đạo chuyển tiếp địa tĩnh GTO được chia thành những khoảng thời gian bằng nhau, và diện tích từng hình quạt được đo, không giả định.
 
 <Figure
-  title="Hình 2.1 — Chu kỳ quỹ đạo theo độ cao"
-  try="Di chuột dọc đường cong. Ở độ cao nào chu kỳ đúng bằng một ngày sao (1436 phút)? Các vệ tinh quan sát Trái Đất nằm ở đâu trên đường cong?"
-  source="Đường cong: định luật Kepler III cho quỹ đạo tròn, bán kính xích đạo 6378,137 km. Chấm đặc: vệ tinh thật, độ cao suy từ chuyển động trung bình (CelesTrak, 04/11/2026). Chấm rỗng: quỹ đạo danh nghĩa của ISS, GPS và vệ tinh địa tĩnh."
+  title="Hình 2.2 — Elip Kepler: quét diện tích bằng nhau trong thời gian bằng nhau"
+  try="Ở GTO, so sánh hình quạt hẹp và dài gần viễn địa với hình quạt rộng và ngắn gần cận địa: diện tích đo được có bằng nhau không? Kéo e từ 0 lên 0,8 và đọc tỉ số v cận ÷ v viễn. Chọn LEO tròn: các chấm cách đều nhau."
+  source="Bài toán hai vật, phương trình Kepler giải bằng lặp Newton; vận tốc theo vis-viva, μ = 398 600,4418 km³/s², Re = 6378,137 km. Diện tích hình quạt tính bằng công thức đa giác (shoelace) trên 40 điểm mỗi cung. Mỗi vòng quỹ đạo chạy 10 giây trên màn hình, bất kể chu kỳ thật."
 >
-  <KeplerChart client:visible lang="vi" />
+  <KeplerEllipse client:visible lang="vi" />
 </Figure>
+
+### Vận tốc tròn, vận tốc thoát và phương trình vis-viva
+
+Với quỹ đạo tròn, lực hấp dẫn đóng vai trò lực hướng tâm: μm/r² = mv²/r. Từ đó:
+
+<Formula label="Vận tốc tròn và vận tốc thoát" tex="v_{c} = \sqrt{\frac{\mu}{r}}, \qquad v_{esc} = \sqrt{\frac{2\mu}{r}} = \sqrt{2}\,v_{c}" where="
+v_{c} :: vận tốc để bay vòng tròn ở bán kính r
+v_{esc} :: vận tốc tối thiểu để thoát hẳn khỏi Trái Đất từ bán kính r
+" />
+
+<Stats items={[
+  { v: '7,91', u: 'km/s', l: 'vận tốc tròn sát mặt đất (vận tốc vũ trụ cấp 1)' },
+  { v: '11,18', u: 'km/s', l: 'vận tốc thoát từ mặt đất (cấp 2)' },
+  { v: '7,67', u: 'km/s', l: 'vận tốc tròn ở 400 km (ISS)' },
+  { v: '3,07', u: 'km/s', l: 'vận tốc tròn ở quỹ đạo địa tĩnh' },
+]} caption="Tính từ μ = 398 600,4 km³/s² và bán kính xích đạo 6378,137 km (scripts/ch02_numbers.ts)." />
+
+Với quỹ đạo elip, vận tốc tại khoảng cách r bất kỳ cho bởi **phương trình <Term id="ch02-vis-viva">vis-viva</Term>**, công cụ quan trọng nhất khi tính thay đổi quỹ đạo:
+
+<Formula label="Vis-viva và năng lượng riêng" tex="v^2 = \mu\left(\frac{2}{r} - \frac{1}{a}\right), \qquad \varepsilon = \frac{v^2}{2} - \frac{\mu}{r} = -\frac{\mu}{2a}" where="
+v :: vận tốc tại bán kính r (km/s)
+a :: bán trục lớn; a = r cho quỹ đạo tròn, a → ∞ cho quỹ đạo thoát
+\varepsilon :: năng lượng riêng (trên mỗi kg); âm nghĩa là vệ tinh bị Trái Đất giữ lại
+" />
+
+<Note kind="myth">
+
+"Quỹ đạo cao hơn thì vệ tinh bay nhanh hơn." Ngược lại: vệ tinh địa tĩnh chỉ bay 3,07 km/s, ISS bay 7,67 km/s. Nhưng muốn **lên** quỹ đạo cao phải tốn thêm năng lượng: ε tăng từ −29,40 km²/s² ở 400 km lên −4,73 km²/s² ở quỹ đạo địa tĩnh. Phần năng lượng thêm vào nằm ở thế năng, không phải ở vận tốc. Cách chuyển quỹ đạo bằng hai lần đốt động cơ (Hohmann) nằm ở Chương 3.
+
+</Note>
+
+<Predict client:visible lang="vi"
+  title="Vệ tinh Vinasat bay nhanh cỡ nào?"
+  q="Vệ tinh viễn thông Vinasat đứng yên trên bầu trời Việt Nam, ở độ cao 35 786 km. Thật ra nó bay trên quỹ đạo nhanh bao nhiêu?"
+  slider={{ min: 0, max: 10, step: 0.05, unit: 'km/s' }} answer={3.07} tol={0.35}
+  why="r = 6378 + 35 786 = 42 164 km, v = √(398 600 / 42 164) = 3,07 km/s, hơn 11 000 km/h. Nó 'đứng yên' vì quay một vòng đúng bằng một vòng tự quay của Trái Đất, không phải vì không chuyển động." />
 
 <div class="worked">
 
@@ -48,44 +128,242 @@ Công thức thứ hai là **định luật Kepler III**: chu kỳ chỉ phụ t
 3. Chu kỳ: T = 2π √(7164,1³ / 398 600,4) = 6035 s = **100,6 phút**.
 4. Số vòng mỗi ngày: 1440 / 100,6 ≈ **14,3 vòng**. ESA thiết kế đúng 14 3/10 vòng mỗi ngày để vết bay lặp lại sau 10 ngày (143 vòng).
 
-Vệ tinh địa tĩnh cần T bằng một ngày sao (1436,07 phút). Giải ngược định luật Kepler III ra độ cao **35 786 km**, vận tốc **3,07 km/s**.
+#### Ví dụ: quỹ đạo địa tĩnh và GTO
+
+1. Vệ tinh địa tĩnh cần T bằng một **ngày sao**: 86 164 s, thời gian Trái Đất quay đúng 360° so với các vì sao, ngắn hơn ngày Mặt Trời 3 phút 56 giây.
+2. Giải ngược Kepler III: a = ∛(μ (T/2π)²) = **42 164 km**, tức độ cao **35 786 km**, vận tốc **3,07 km/s**.
+3. Quỹ đạo chuyển tiếp GTO cận địa 250 km, viễn địa 35 786 km: a = (6628 + 42 164)/2 = 24 396 km, e = 0,728, chu kỳ **10,5 giờ**.
+4. Vis-viva: ở cận địa v = **10,19 km/s**, ở viễn địa chỉ **1,60 km/s**. Tỉ số 6,36 đúng bằng r_viễn / r_cận, như định luật 2 dự báo.
 
 </div>
 
-## 2.2 Các loại quỹ đạo
+Hình 2.3 vẽ định luật Kepler III cho mọi độ cao, cùng các vệ tinh thật.
+
+<Figure
+  title="Hình 2.3 — Chu kỳ quỹ đạo theo độ cao"
+  try="Di chuột dọc đường cong. Ở độ cao nào chu kỳ đúng bằng một ngày sao (1436 phút)? Các vệ tinh quan sát Trái Đất nằm ở đâu trên đường cong?"
+  source="Đường cong: định luật Kepler III cho quỹ đạo tròn, bán kính xích đạo 6378,137 km. Chấm đặc: vệ tinh thật, độ cao suy từ chuyển động trung bình (CelesTrak, 04/11/2026). Chấm rỗng: quỹ đạo danh nghĩa của ISS, GPS và vệ tinh địa tĩnh."
+>
+  <KeplerChart client:visible lang="vi" />
+</Figure>
+
+<Note kind="key">
+
+<mark class="key">Chu kỳ chỉ phụ thuộc bán trục lớn a; vận tốc ở mỗi điểm cho bởi vis-viva.</mark> Ba con số cần thuộc: LEO khoảng 7,6 km/s và 95 phút; quỹ đạo địa tĩnh 3,07 km/s, một ngày sao, 35 786 km.
+
+</Note>
+
+## 2.2 Sáu tham số quỹ đạo Kepler
+
+Để biết vị trí một vệ tinh trong không gian tại một thời điểm, cần đúng **6 con số**: tương đương 3 tọa độ vị trí cộng 3 thành phần vận tốc. Dạng dễ hình dung nhất là bộ <Term id="ch02-orbital-elements">tham số Kepler</Term>, chia thành ba nhóm:
+
+<Tiles items={[
+  { t: 'Kích thước, hình dạng: a, e', d: 'Bán trục lớn a quyết định chu kỳ và năng lượng. Tâm sai e quyết định độ dẹt: r_cận = a(1−e), r_viễn = a(1+e).' },
+  { t: 'Định hướng: i, Ω, ω', d: 'Độ nghiêng i và kinh độ nút lên Ω đặt mặt phẳng quỹ đạo trong không gian; góc cận địa ω xoay elip trong mặt phẳng đó.' },
+  { t: 'Vị trí: ν (hoặc M)', d: 'Dị thường thực ν là góc từ cận địa tới vệ tinh. Dị thường trung bình M là cùng thông tin, tính như thể vệ tinh chạy đều.' },
+]} />
+
+Các góc được đo trong **hệ quy chiếu quán tính lấy tâm Trái Đất (ECI)**: trục x hướng về **điểm xuân phân ♈** (hướng Mặt Trời lúc xuân phân), trục z hướng cực Bắc. Mặt phẳng quỹ đạo cắt mặt phẳng xích đạo theo **đường nút**. Điểm vệ tinh đi qua xích đạo lên phía bắc là <Term id="ch02-raan">nút lên ☊</Term>.
+
+<Figure
+  title="Hình 2.4 — Sáu tham số Kepler: mỗi thanh trượt đổi một thứ"
+  try="Kéo Ω: cả mặt phẳng quỹ đạo xoay quanh trục cực, nhưng hình elip không đổi. Kéo ω: elip xoay trong mặt phẳng, nút lên đứng yên. Kéo i qua 90°: vệ tinh chuyển sang bay nghịch hành. Kéo e về 0: cận địa còn ý nghĩa không? Kéo trên hình để xoay góc nhìn."
+  source="Hình vẽ đúng tỉ lệ (Trái Đất bán kính 6378 km). Vị trí tính từ tham số Kepler bằng phép quay Ω, i, ω chuẩn (Vallado 2013, thuật toán COE2RV); phép chiếu trực giao, góc ngẩng camera 22°."
+>
+  <ElementsDiagram client:visible lang="vi" />
+</Figure>
 
 <div class="table-wrap">
 
-| Quỹ đạo | Độ cao | Chu kỳ | Dùng cho |
+| Ký hiệu | Tên | Ý nghĩa | Giá trị điển hình |
 |---|---|---|---|
-| LEO (quỹ đạo thấp) | 160–2000 km | ~88–127 phút | Trạm vũ trụ, chòm vệ tinh viễn thông, viễn thám |
-| Đồng bộ Mặt Trời (một dạng LEO) | ~500–800 km, độ nghiêng ~97–99° | ~95–101 phút | Hầu hết vệ tinh quang học và radar: Sentinel, Landsat, VNREDSat-1 |
-| MEO (quỹ đạo trung bình) | 2000–35 786 km | 2–24 giờ | Định vị: GPS ở 20 200 km, chu kỳ 718,7 phút |
-| GEO (địa tĩnh) | 35 786 km, độ nghiêng 0° | 1436 phút | Viễn thông (Vinasat), khí tượng (Himawari) |
+| a | Bán trục lớn | Kích thước quỹ đạo; quyết định chu kỳ và năng lượng | LEO 6800–7200 km; GEO 42 164 km |
+| e | Tâm sai | 0 là tròn, 0–1 là elip | Vệ tinh viễn thám ~0,0001–0,001; GTO ~0,73; Molniya ~0,74 |
+| i | Độ nghiêng | Góc giữa mặt phẳng quỹ đạo và xích đạo; trên 90° là nghịch hành | ISS 51,6°; GPS 55°; SSO ~98° |
+| Ω | Kinh độ nút lên (RAAN) | Xoay mặt phẳng quanh trục cực, đo từ ♈ tới nút lên | Các mặt phẳng của một chòm vệ tinh cách đều nhau về Ω |
+| ω | Góc cận địa | Vị trí cận địa trong mặt phẳng, đo từ nút lên theo chiều bay | Molniya 270°: viễn địa treo trên Bắc bán cầu |
+| ν hoặc M | Dị thường thực / trung bình | Vị trí vệ tinh trên quỹ đạo tại thời điểm tham chiếu (epoch) | Thay đổi liên tục 0–360° |
 
 </div>
 
-Chu kỳ và vận tốc trong bảng tính bằng công thức ở mục 2.1. Viễn thám độ phân giải cao cần bay thấp để gần mặt đất. Vệ tinh khí tượng địa tĩnh thì chấp nhận ở xa để luôn nhìn thấy cùng một vùng, chụp lại sau mỗi 10 phút.
+<Formula label="Bán kính theo dị thường thực" tex="r = \frac{a(1-e^2)}{1+e\cos\nu}, \qquad r_p = a(1-e), \quad r_a = a(1+e)" where="
+\nu :: dị thường thực: ν = 0 ở cận địa, 180° ở viễn địa
+r_p,\ r_a :: bán kính cận địa và viễn địa (trừ 6378 km để ra độ cao)
+" />
 
-## 2.3 Quỹ đạo đồng bộ Mặt Trời và lực J2
+<Note kind="key">
 
-Trái Đất không tròn hoàn hảo: bán kính xích đạo lớn hơn bán kính cực khoảng 21 km. Phần phình ở xích đạo, mô tả bằng hệ số <Term id="j2">J2</Term>, kéo lệch quỹ đạo và làm **mặt phẳng quỹ đạo quay dần** quanh trục Trái Đất:
+<mark class="key">a và e cho kích thước và hình dạng, i, Ω, ω cho hướng của quỹ đạo trong không gian, ν cho vị trí vệ tinh trên đó.</mark> Một quỹ đạo tròn chỉ cần a và i để mô tả hình dạng và độ nghiêng; ω mất ý nghĩa khi không có cận địa.
 
-<p class="formula">dΩ/dt = −(3/2) · n · J2 · (Re / a)² · cos i</p>
+</Note>
 
-trong đó n là vận tốc góc của vệ tinh, Re bán kính xích đạo, a bán kính quỹ đạo, i độ nghiêng. Ví dụ, với trạm ISS (420 km, 51,6°), mặt phẳng quỹ đạo quay **−4,95° mỗi ngày** (về phía tây).
+<Note kind="why">
 
-Trái Đất đi quanh Mặt Trời 360° trong 365,24 ngày, tức 0,9856° mỗi ngày về phía đông. Nếu chọn độ nghiêng sao cho dΩ/dt đúng bằng +0,9856°/ngày, mặt phẳng quỹ đạo quay theo Mặt Trời. Khi đó vệ tinh luôn qua một vĩ độ vào cùng giờ địa phương. Đó là <Term id="sun-synchronous-orbit">quỹ đạo đồng bộ Mặt Trời</Term>. Muốn dΩ/dt dương thì cos i phải âm, tức **i lớn hơn 90°**: vệ tinh bay hơi ngược chiều Trái Đất quay.
+Độ nghiêng bị giới hạn bởi vĩ độ bãi phóng: phóng thẳng từ vĩ độ φ chỉ đạt được i ≥ φ. Muốn xuống i = 0° cho vệ tinh địa tĩnh phải tốn thêm nhiên liệu để "bẻ" mặt phẳng, nên bãi phóng gần xích đạo có lợi. Chương 3 tính cái giá này.
+
+</Note>
+
+### Đọc một bộ TLE
+
+**<Term id="ch02-tle">TLE</Term>** (two-line element set) là định dạng văn bản 69 cột mỗi dòng, do Lực lượng Không gian Mỹ phát hành và được công bố trên CelesTrak và Space-Track. Nó chứa các tham số "trung bình" dành riêng cho mô hình truyền quỹ đạo **SGP4**. Hình 2.5 là bộ TLE thật của VNREDSat-1, vệ tinh quan sát Trái Đất đầu tiên của Việt Nam, tải từ CelesTrak ngày 05/11/2026.
 
 <Figure
-  title="Hình 2.2 — Tự tạo một quỹ đạo tròn đi qua Việt Nam"
-  try="Chọn Sentinel-2 rồi kéo độ nghiêng từ 98,6° xuống 90°: dòng 'Đồng bộ Mặt Trời?' đổi thế nào? Chọn 'Địa tĩnh': vì sao chấm vệ tinh đứng yên trên quả địa cầu? Kéo độ cao lên 6000 km: còn độ nghiêng đồng bộ Mặt Trời không?"
-  source="Quỹ đạo tròn, chuyển động hai vật cộng trôi nút bậc nhất do J2 (J2 = 1,08263×10⁻³, Re = 6378,137 km), góc giờ sao theo IAU 1982. Nút lên đặt tại 105°E lúc 03:30 UTC ngày 04/11/2026 để vết bay đi qua Việt Nam. Thông số mẫu: ISS (NASA), Sentinel-2 (ESA), Landsat 9 (USGS), GPS, quỹ đạo địa tĩnh. Ảnh nền © Esri, Maxar, Earthstar Geographics."
+  title="Hình 2.5 — Giải mã bộ TLE thật của VNREDSat-1"
+  try="Chạm vào nhóm '14.64781302' ở dòng 2: chuyển động trung bình cho ra chu kỳ, bán trục lớn và độ cao. Chạm vào '0001582': vì sao không có dấu thập phân? Chạm vào '26308.46606966': đó là ngày giờ nào? Chạm vào chữ số cuối mỗi dòng: tổng kiểm tra có đúng không?"
+  source="TLE VNREDSat-1 (NORAD 39160) từ CelesTrak, tải 05/11/2026 01:39 UTC, epoch 04/11/2026 11:11 UTC (scripts/data/export_ch02_tle.py). Định dạng theo Kelso, CelesTrak 'NORAD Two-Line Element Set Format'. Giải mã và tổng kiểm tra: src/lib/kepler.ts (parseTle), bán trục lớn từ Kepler III."
 >
-  <OrbitExplorer client:visible lang="vi" />
+  <TleReader client:visible lang="vi" />
 </Figure>
 
-Công thức J2 cho các vệ tinh thật (dùng phần tử CelesTrak ở Chương 1):
+<Predict client:visible lang="vi"
+  title="Từ một con số ra độ cao"
+  q="Trường cuối dòng 2 cho biết VNREDSat-1 bay 14,648 vòng mỗi ngày. Hãy ước lượng độ cao của nó (gợi ý: Sentinel-2 bay 14,3 vòng/ngày ở 786 km)."
+  slider={{ min: 300, max: 1200, step: 10, unit: 'km' }} answer={678} tol={40}
+  why="Chu kỳ 1440 / 14,648 = 98,31 phút. Kepler III: a = ∛(μ(T/2π)²) = 7056 km, trừ bán kính 6378 km ra khoảng 678 km. Nhiều vòng hơn mỗi ngày nghĩa là chu kỳ ngắn hơn, nên thấp hơn Sentinel-2." />
+
+<Steps title="Từ TLE ra độ cao, từng bước (VNREDSat-1)" items={[
+  { tag: 'n', t: 'Đọc chuyển động trung bình', d: 'Cột 53–63 dòng 2: n = 14,64781302 vòng/ngày.' },
+  { tag: 'T', t: 'Đổi ra chu kỳ', d: 'T = 1440 / n = 98,31 phút = 5898 s.' },
+  { tag: 'a', t: 'Kepler III ngược', d: 'a = ∛(μ (T/2π)²) = 7055,9 km.' },
+  { tag: 'h', t: 'Trừ bán kính, dùng tâm sai', d: 'e = 0,0001582 nên cận địa 676,7 km, viễn địa 678,9 km: gần như tròn.' },
+]} />
+
+<Note kind="warn">
+
+TLE là tham số trung bình gắn với SGP4, không phải tham số Kepler "thật" tại một thời điểm. Đưa thẳng chúng vào công thức hai vật sẽ sai. Độ chính xác của TLE cỡ 1 km tại epoch và xấu dần vài km mỗi ngày, nhất là ở quỹ đạo thấp nơi lực cản thay đổi theo hoạt động Mặt Trời (Vallado và cs., 2006). Nhà vận hành dùng quỹ đạo chính xác hơn nhiều: Sentinel-1 có quỹ đạo hậu xử lý sai số cỡ 5 cm, đủ cho đo biến dạng mặt đất bằng InSAR (Chương 16).
+
+</Note>
+
+<Depth level="advanced" title="Hệ quy chiếu ECI, ECEF và các thang thời gian">
+
+Tham số Kepler sống trong hệ **ECI** (quán tính, không quay theo Trái Đất). Bản đồ và GNSS dùng hệ **ECEF** (gắn với Trái Đất, quay cùng nó). Hai hệ lệch nhau một góc quay quanh trục z bằng **giờ sao Greenwich** (GMST), tăng 360,9856° mỗi ngày Mặt Trời; các hình trong chương dùng công thức IAU 1982. Chuyển đổi chính xác còn cần tuế sai, chương động và chuyển động cực (Vallado 2013).
+
+Thời gian cũng có nhiều thang. **TAI** là giờ nguyên tử quốc tế, đều tuyệt đối. **UTC** bám theo Trái Đất quay bằng giây nhuận: từ 01/01/2017, TAI − UTC = 37 s. **Giờ GPS** bằng TAI − 19 s và không có giây nhuận, nên hiện GPS − UTC = 18 s (IERS Bulletin C). Epoch trong TLE là UTC.
+
+</Depth>
+
+## 2.3 Các loại quỹ đạo
+
+<Figure
+  title="Hình 2.6 — Các loại quỹ đạo vẽ đúng tỉ lệ"
+  try="Bấm Chạy và so tốc độ các chấm: chấm LEO quay hơn 15 vòng trong lúc chấm GEO quay một vòng. Chọn GTO: nó chạm vòng GEO ở đâu? Chọn Molniya: vì sao vệ tinh 'treo' lâu ở phía trên?"
+  source="Quỹ đạo tính bằng Kepler III và vis-viva (src/lib/kepler.ts), Re = 6378,137 km; mỗi quỹ đạo vẽ trong mặt phẳng của nó với cùng một tỉ lệ. GTO 250 × 35 786 km; Molniya chu kỳ nửa ngày sao, cận địa 600 km; GPS 20 200 km (GPS.gov); Galileo 23 222 km (ESA). Trễ ánh sáng tính với c = 299 792,458 km/s."
+>
+  <OrbitTypes client:visible lang="vi" />
+</Figure>
+
+Nếu thu Trái Đất lại bằng quả bóng đá đường kính 22 cm, ISS bay cách mặt bóng chỉ khoảng **7 mm**, còn vệ tinh địa tĩnh cách tâm bóng khoảng **73 cm**. Quỹ đạo thấp là một lớp vỏ rất mỏng sát Trái Đất.
+
+<div class="table-wrap">
+
+| Quỹ đạo | Độ cao | Chu kỳ | Vận tốc | Dùng cho |
+|---|---|---|---|---|
+| VLEO (rất thấp) | dưới ~450 km | ~90–93 phút | ~7,7 km/s | Ảnh siêu phân giải, trễ cực thấp; phải đẩy liên tục để bù lực cản |
+| LEO | ~450–2000 km | ~94–127 phút | 6,9–7,6 km/s | Viễn thám, Starlink (550 km), OneWeb (1200 km), ISS |
+| SSO (một dạng LEO) | ~500–800 km, i ≈ 97–99° | ~95–101 phút | ~7,5 km/s | Hầu hết vệ tinh quang học và radar: Landsat, Sentinel, VNREDSat-1 |
+| MEO | 2000–35 786 km | 2–24 giờ | 3,1–6,9 km/s | GNSS: GPS 20 200 km (718,7 phút), Galileo 23 222 km |
+| GEO (địa tĩnh) | 35 786 km, i = 0°, e = 0 | 1 ngày sao (1436,1 phút) | 3,07 km/s | Viễn thông (Vinasat), khí tượng (Himawari) |
+| GTO | cận ~250 km, viễn 35 786 km | ~10,5 giờ | 10,2 ở cận / 1,6 ở viễn (km/s) | Quỹ đạo tạm, tên lửa thả vệ tinh địa tĩnh ở đây |
+| Molniya (HEO) | cận ~600 km, viễn ~39 800 km, i = 63,4° | nửa ngày sao (~718 phút) | 10,0 ở cận / 1,5 ở viễn (km/s) | Phủ vùng vĩ độ cao (Nga) |
+| Điểm Lagrange L1, L2 | ~1,5 triệu km | cùng Trái Đất quanh Mặt Trời, 1 năm | — | SOHO, DSCOVR (L1); JWST (L2) |
+
+</div>
+
+Chu kỳ và vận tốc trong bảng tính bằng công thức ở mục 2.1. Viễn thám độ phân giải cao cần bay thấp để gần mặt đất. Vệ tinh khí tượng địa tĩnh thì chấp nhận ở xa để luôn nhìn thấy cùng một vùng: Himawari chụp toàn bộ nửa Trái Đất mỗi 10 phút.
+
+<Stats items={[
+  { v: '1,8', u: 'ms', l: 'trễ ánh sáng thẳng đứng tới LEO 550 km' },
+  { v: '67', u: 'ms', l: 'tới GPS 20 200 km' },
+  { v: '119', u: 'ms', l: 'tới quỹ đạo địa tĩnh 35 786 km' },
+]} caption="Một chiều, thẳng đứng, c = 299 792,458 km/s. Đi một vòng lên vệ tinh địa tĩnh rồi xuống mất ít nhất gần 0,24 s: lý do gọi điện qua GEO có độ trễ dễ nhận ra (Chương 5)." />
+
+<Depth level="advanced" title="Vì sao Molniya chọn i = 63,4°?">
+
+Lực J2 (mục 2.4) làm góc cận địa ω trôi với tốc độ tỉ lệ (5cos²i − 1). Tại cos²i = 1/5, tức **i = 63,4°** hoặc 116,6°, sự trôi này bằng 0. Đây là <Term id="ch02-critical-inclination">độ nghiêng tới hạn</Term>. Nhờ nó, viễn địa của Molniya luôn nằm trên Bắc bán cầu, nơi vệ tinh chạy chậm: nó dành khoảng 11 trong 12 giờ mỗi vòng ở Bắc bán cầu. Hình 2.7 cho thấy đường trôi cận địa cắt trục 0 đúng tại 63,4° ở mọi độ cao.
+
+</Depth>
+
+<Note kind="key">
+
+<mark class="key">Quỹ đạo được chọn theo việc cần làm: thấp để nhìn rõ, đồng bộ Mặt Trời để ánh sáng ổn định, MEO cho định vị, GEO để đứng yên trên một vùng.</mark>
+
+</Note>
+
+## 2.4 Nhiễu loạn: vì sao quỹ đạo thật không phải elip hoàn hảo
+
+Định luật Kepler chỉ đúng cho bài toán hai vật, với Trái Đất là khối cầu đồng nhất. Thực tế có nhiều lực nhỏ làm quỹ đạo thay đổi dần:
+
+<div class="table-wrap">
+
+| Nhiễu loạn | Nguyên nhân | Tác động chính | Mạnh nhất ở |
+|---|---|---|---|
+| <Term id="j2">J2</Term> | Trái Đất dẹt: bán kính xích đạo lớn hơn bán kính cực 21,4 km; J2 = 1,08263×10⁻³ | Mặt phẳng quỹ đạo quay dần (nút lên trôi), cận địa trôi | LEO; là nhiễu loạn lớn nhất |
+| Lực cản khí quyển | Khí quyển loãng vẫn còn ở vài trăm km; mật độ tăng mạnh khi Mặt Trời hoạt động | Mất năng lượng, quỹ đạo hạ dần rồi rơi | Dưới ~700 km |
+| Lực hút Mặt Trăng và Mặt Trời | Vật thể thứ ba | Độ nghiêng quỹ đạo địa tĩnh tăng khoảng 0,75–0,95°/năm | GEO, HEO |
+| Áp suất bức xạ Mặt Trời | Photon mang động lượng đẩy lên tấm pin | Tâm sai thay đổi theo mùa | Vệ tinh nhẹ, diện tích lớn, quỹ đạo cao |
+| Bất đối xứng xích đạo (J22) | Xích đạo hơi elip | Vệ tinh địa tĩnh trôi dọc kinh tuyến về hai điểm bền gần 75°E và 105°W | GEO |
+
+</div>
+
+J2 là hệ số đầu tiên (và lớn nhất) trong khai triển trường hấp dẫn của Trái Đất. Phần phình ở xích đạo kéo lệch quỹ đạo, làm **mặt phẳng quỹ đạo quay dần** quanh trục Trái Đất và **cận địa trôi** trong mặt phẳng. Tốc độ trôi trung bình theo thời gian (trôi "thế kỷ"):
+
+<Formula label="Trôi nút lên và cận địa do J2" tex="\dot\Omega = -\frac{3}{2}\, n J_2 \left(\frac{R_\oplus}{p}\right)^{2}\cos i, \qquad \dot\omega = \frac{3}{4}\, n J_2 \left(\frac{R_\oplus}{p}\right)^{2}\left(5\cos^2 i - 1\right)" where="
+n = \sqrt{\mu/a^3} :: vận tốc góc trung bình của vệ tinh (rad/s)
+p = a(1-e^2) :: tham số quỹ đạo (bằng a với quỹ đạo tròn)
+R_\oplus :: bán kính xích đạo 6378,137 km
+\cos i :: dấu của cos i quyết định chiều trôi của nút lên
+" />
+
+Với trạm ISS (420 km, 51,6°), nút lên lùi **4,95° mỗi ngày** về phía tây, cận địa tiến 3,70°/ngày. Ở quỹ đạo GPS (20 200 km), J2 yếu đi nhiều: nút lên chỉ trôi 0,039°/ngày.
+
+<Figure
+  title="Hình 2.7 — Tốc độ trôi do J2 theo độ nghiêng"
+  try="Chọn Sentinel-2: chấm tròn nằm đúng trên đường Mặt Trời +0,9856°/ngày. Chọn ISS: nút lên trôi bao nhiêu độ mỗi ngày? Kéo độ cao lên 6000 km: còn giao điểm với đường Mặt Trời không? Chọn Molniya: đường đứt cắt 0 ở đâu?"
+  source="Trôi thế kỷ bậc nhất do J2 (Vallado 2013, mục 9.6), J2 = 1,08263×10⁻³, Re = 6378,137 km, μ = 398 600,4418 km³/s². Thông số mẫu: Sentinel-2 (ESA), ISS (NASA), GPS (GPS.gov), Molniya (chu kỳ nửa ngày sao, e = 0,737)."
+>
+  <J2Drift client:visible lang="vi" />
+</Figure>
+
+### Tuổi thọ quỹ đạo do lực cản
+
+Lực cản tỉ lệ với mật độ khí quyển, vốn giảm gần theo hàm mũ với độ cao nhưng ở cùng một độ cao có thể chênh hàng chục lần giữa lúc Mặt Trời yên và lúc Mặt Trời hoạt động mạnh. Thang dưới đây tính cho một vệ tinh nhỏ không động cơ có hệ số đạn đạo Cd·A/m = 0,02 m²/kg, với mật độ NRLMSIS 2.1 ở hai mức hoạt động Mặt Trời (cùng mô hình với Chương 4):
+
+<Steps title="Vệ tinh tự rơi sau bao lâu? (Cd·A/m = 0,02 m²/kg; Mặt Trời mạnh → yên)" items={[
+  { tag: '300 km', t: '13 → 43 ngày', d: 'Starlink thả vệ tinh mới ở quỹ đạo thấp: nếu hỏng, nó tự rơi nhanh.' },
+  { tag: '400 km', t: '79 ngày → 1,5 năm', d: 'ISS ở độ cao này phải định kỳ đốt động cơ nâng quỹ đạo.' },
+  { tag: '500 km', t: '1,0 → 12 năm', d: 'Nhiều CubeSat ở đây tự rời quỹ đạo trong vài năm.' },
+  { tag: '600 km', t: '4 → 77 năm', d: 'Bắt đầu vượt giới hạn 5 năm sau khi hết nhiệm vụ của FCC (Chương 4).' },
+  { tag: '700–800 km', t: '14 → 930 năm', d: 'Độ cao của vệ tinh đồng bộ Mặt Trời: rác ở đây tồn tại hàng thế kỷ.' },
+]} />
+
+Ví dụ thật: ngày 03/02/2022, SpaceX phóng 49 vệ tinh Starlink lên quỹ đạo cận địa khoảng 210 km. Một cơn bão địa từ làm khí quyển nóng và phồng lên, lực cản tăng tới khoảng 50 % so với các lần phóng trước. SpaceX thông báo tới 40 vệ tinh sẽ rơi hoặc đã rơi trở lại khí quyển (SpaceX, 08/02/2022). Hình 4.4 ở Chương 4 cho bạn tự tính tuổi thọ theo độ cao, kích thước vệ tinh và hoạt động Mặt Trời.
+
+<Note kind="key">
+
+<mark class="key">J2 làm mặt phẳng quỹ đạo quay và cận địa trôi; lực cản làm quỹ đạo dưới ~700 km hạ dần.</mark> Một nhiễu loạn "phiền toái" là J2 lại được dùng để tạo ra quỹ đạo đồng bộ Mặt Trời, mục tiếp theo.
+
+</Note>
+
+## 2.5 Quỹ đạo đồng bộ Mặt Trời (SSO)
+
+Trái Đất đi quanh Mặt Trời 360° trong 365,24 ngày, tức **0,9856° mỗi ngày** về phía đông. Nếu chọn độ nghiêng sao cho dΩ/dt đúng bằng +0,9856°/ngày, mặt phẳng quỹ đạo quay theo Mặt Trời: góc giữa mặt phẳng quỹ đạo và hướng Mặt Trời không đổi quanh năm. Khi đó vệ tinh luôn qua một vĩ độ vào cùng giờ địa phương. Đó là <Term id="sun-synchronous-orbit">quỹ đạo đồng bộ Mặt Trời</Term>.
+
+Muốn dΩ/dt dương thì cos i phải âm, tức **i lớn hơn 90°**: vệ tinh bay hơi ngược chiều Trái Đất quay. Giải công thức J2 với dΩ/dt = +0,9856°/ngày:
+
+<Formula label="Độ nghiêng đồng bộ Mặt Trời" tex="\cos i_{SSO} = -\,\frac{\dot\Omega_{\odot}}{\tfrac{3}{2}\, n J_2 \left(R_\oplus/a\right)^2}, \qquad \dot\Omega_{\odot} = \frac{360^\circ}{365{,}2422\ \text{d}} = 0{,}9856^\circ/\text{d}" where="
+\dot\Omega_{\odot} :: tốc độ Mặt Trời đi quanh bầu trời theo hướng đông
+i_{SSO} :: 97,4° ở 500 km; 98,2° ở 705 km; 98,5° ở 786 km
+" />
+
+<Figure
+  title="Hình 2.8 — Mặt phẳng quỹ đạo trong một năm: đồng bộ Mặt Trời và không đồng bộ"
+  try="Với 'Đồng bộ Mặt Trời', kéo ngày từ 0 tới 365: giờ qua nút xuống có đổi không? Chọn 'Cực, i = 90°': sau 3 tháng giờ qua nút xuống lệch bao nhiêu? Chọn ISS: vì sao giờ bay qua thay đổi nhanh như vậy?"
+  source="Nhìn từ phía trên mặt phẳng hoàng đạo, quỹ đạo Trái Đất tròn. Mặt phẳng quỹ đạo quay với tốc độ J2: +0,9856°/ngày (SSO), 0 (i = 90°), −4,95°/ngày (ISS, 420 km, 51,6°). Giờ địa phương của nút lên = 12 h + (Ω − α☉)/15; ban đầu nút xuống lúc 10:30 như Sentinel-2."
+>
+  <SsoYear client:visible lang="vi" />
+</Figure>
+
+Công thức J2 áp dụng cho các vệ tinh thật (phần tử CelesTrak ở Chương 1):
 
 <div class="table-wrap">
 
@@ -100,20 +378,53 @@ Công thức J2 cho các vệ tinh thật (dùng phần tử CelesTrak ở Chư�
 
 Ba vệ tinh đầu có độ nghiêng gần như trùng giá trị lý thuyết: chúng được điều khiển để giữ quỹ đạo. VNREDSat-1 lệch 0,21°, nên giờ bay qua của nó đang trôi (Chương 1).
 
+**Vì sao viễn thám quang học thích SSO:**
+
+- **Ánh sáng lặp lại.** Cùng giờ địa phương nghĩa là góc Mặt Trời gần giống nhau giữa các lần chụp (chỉ đổi theo mùa), nên so sánh ảnh theo thời gian dễ hơn.
+- **Chọn được giờ chụp.** Giờ qua nút xuống (<Term id="ltdn">LTDN</Term>) khoảng 10:00–10:30 là thỏa hiệp giữa Mặt Trời đủ cao và mây đối lưu buổi chiều chưa phát triển. Landsat 8/9 qua lúc khoảng 10:00, Sentinel-2 lúc 10:30.
+- **Quỹ đạo bình minh – hoàng hôn.** Nút lúc 06:00/18:00 đặt mặt phẳng quỹ đạo gần vuông góc với hướng Mặt Trời, pin mặt trời gần như luôn được chiếu sáng. Rất hợp với radar SAR tốn điện như Sentinel-1 (nút lên 18:00).
+
+<Note kind="myth">
+
+"Vệ tinh đồng bộ Mặt Trời luôn ở trong ánh nắng." Chỉ quỹ đạo bình minh – hoàng hôn mới gần như vậy, và kể cả nó vẫn có một mùa ngắn đi qua bóng Trái Đất quanh một trong hai điểm chí. Một SSO 10:30 như Sentinel-2 vẫn đi vào bóng Trái Đất ở phía đêm mỗi vòng, khoảng một phần ba thời gian (Chương 4 tính phần bóng tối này).
+
+</Note>
+
 <Depth level="advanced" title="Giới hạn độ cao của quỹ đạo đồng bộ Mặt Trời">
 
-Càng lên cao, J2 càng yếu (giảm theo (Re/a)² và theo n). Muốn vẫn quay đủ 0,9856°/ngày, cos i phải càng âm. Gần 6000 km, cần cos i ≈ −1, tức i ≈ 180°. Cao hơn nữa thì không còn độ nghiêng nào đạt được. Hình 2.2 hiện "không có (quá cao)" trong trường hợp này. Trên thực tế, quỹ đạo đồng bộ Mặt Trời gần như chỉ dùng ở dưới 1000 km.
+Càng lên cao, J2 càng yếu (giảm theo (Re/a)² và theo n). Muốn vẫn quay đủ 0,9856°/ngày, cos i phải càng âm. Gần 6000 km, cần cos i ≈ −1, tức i ≈ 180°. Cao hơn nữa thì không còn độ nghiêng nào đạt được: Hình 2.1 và 2.7 hiện "không có". Trên thực tế, quỹ đạo đồng bộ Mặt Trời gần như chỉ dùng ở dưới 1000 km.
 
 </Depth>
 
-## 2.4 Vết bay, dải chụp và thời gian quay lại
+<Note kind="key">
 
-<Term id="ground-track">Vết bay</Term> là đường mà điểm ngay dưới vệ tinh vẽ trên mặt đất. Trong một vòng 100,6 phút, Trái Đất quay được 25,2°, nên vòng sau lệch về phía tây 25,2° (khoảng 2800 km ở xích đạo). Dải chụp của Sentinel-2 rộng 290 km, nhỏ hơn nhiều khoảng lệch đó. Vì thế một vệ tinh phải chờ nhiều ngày, các vết bay mới lấp đầy khoảng trống.
+<mark class="key">SSO dùng chính nhiễu loạn J2: chọn i ≈ 97–99° để mặt phẳng quỹ đạo quay 0,9856°/ngày theo Mặt Trời, giữ giờ chụp cố định quanh năm.</mark>
 
-Sentinel-2 chỉ chụp trên **nhánh đi xuống**, khi vùng bên dưới đang là ban ngày. Nó cắt xích đạo lúc 10:30 giờ địa phương (<Term id="ltdn">LTDN</Term>), và vết bay lặp lại đúng sau <Term id="repeat-cycle">chu kỳ</Term> 10 ngày.
+</Note>
+
+## 2.6 Vết bay, chu kỳ lặp và vùng phủ
+
+<Term id="ground-track">Vết bay</Term> là đường mà điểm ngay dưới vệ tinh (điểm đáy, nadir) vẽ trên mặt đất. Vĩ độ cao nhất vết đạt được bằng i (hoặc 180° − i nếu nghịch hành). Vì Trái Đất quay 360° trong một ngày sao, sau mỗi vòng vết bay lệch về phía tây:
+
+<Formula label="Vết bay lệch tây mỗi vòng" tex="\Delta L = 360^\circ \times \frac{T}{86\,164\ \text{s}}" where="
+T :: chu kỳ quỹ đạo (s)
+\Delta L :: độ lệch kinh độ của vết bay giữa hai vòng liên tiếp (bỏ qua trôi nút)
+" />
+
+Trong một vòng 100,7 phút của Sentinel-2, Trái Đất quay được 25,2°, nên vòng sau lệch tây 25,2° (khoảng 2810 km ở xích đạo). Dải chụp của Sentinel-2 rộng 290 km, nhỏ hơn nhiều khoảng lệch đó. Vì thế một vệ tinh phải chờ nhiều ngày, các vết bay mới lấp đầy khoảng trống.
+
+### Chu kỳ lặp và thời gian quay lại
+
+Quỹ đạo **lặp vết** khi sau đúng k vòng trong d ngày, vệ tinh trở lại đúng vết cũ. Độ cao được tinh chỉnh để thỏa điều kiện đó; đó là <Term id="repeat-cycle">chu kỳ lặp</Term>:
+
+- **Landsat 8/9:** 233 vòng / 16 ngày (chu kỳ 98,9 phút), độ cao 705 km. Dải 185 km × 233 = 43 105 km, vừa đủ phủ chu vi xích đạo 40 075 km. Hai vệ tinh lệch pha 8 ngày nên một điểm được chụp mỗi 8 ngày.
+- **Sentinel-2:** 143 vòng / 10 ngày, 786 km, dải 290 km. Hai vệ tinh lệch nhau 180° cho thời gian quay lại 5 ngày ở xích đạo, ngắn hơn ở vĩ độ trung bình nhờ các dải chồng lấn.
+- **Sentinel-1:** 175 vòng / 12 ngày, 693 km. Lặp vết chính xác rất quan trọng với InSAR (Chương 16).
+
+Sentinel-2 chỉ chụp trên **nhánh đi xuống**, khi vùng bên dưới đang là ban ngày. Nó cắt xích đạo lúc 10:30 giờ địa phương và vết bay lặp lại đúng sau 10 ngày.
 
 <Figure
-  title="Hình 2.3 — Sentinel-2 chụp hết đất liền Việt Nam sau bao nhiêu ngày?"
+  title="Hình 2.9 — Sentinel-2 chụp hết đất liền Việt Nam sau bao nhiêu ngày?"
   try="Đặt 1 vệ tinh, kéo số ngày từ 1 đến 10 và đọc '% đất liền được chụp'. Chuyển sang 2 vệ tinh: cần bao nhiêu ngày? Sau 10 ngày, mỗi điểm được chụp trung bình mấy lần?"
   source="Quỹ đạo tham chiếu Sentinel-2 (ESA): 14 3/10 vòng/ngày, độ nghiêng 98,62°, nút xuống 10:30 giờ địa phương, dải chụp 290 km; chỉ tính nhánh đi xuống trên vĩ độ 6–25°N. Điểm đất liền: lưới 0,1° bên trong đường biên LSIB 2017 (đã đơn giản hóa 2 km), 2778 điểm. Vị trí pha giữa các ngày là mô hình, không phải lịch chụp thật. Ảnh nền © Esri, Maxar, Earthstar Geographics."
 >
@@ -137,32 +448,84 @@ Kết quả mô phỏng:
 
 Việt Nam hẹp và dài theo hướng bắc nam, gần song song với vết bay. Vì vậy một lượt bay có thể phủ tới 40 % đất liền, nhưng cũng có những ngày không lượt nào đi qua. Với hai vệ tinh, sau 10 ngày mỗi điểm được chụp trung bình **2,23 lần**. Đó là lý do ESA nói "Sentinel-2 quay lại sau 5 ngày".
 
-Nhưng được chụp chưa phải là có ảnh dùng được. Chương 4 cho thấy ở Hà Nội năm 2022–2024 chỉ 92 trên 433 ngày có ảnh đủ trong. Ở vĩ độ Hà Nội, vệ tinh bay qua lúc khoảng **10:43** giờ địa phương, đúng lúc mây đối lưu mùa hè bắt đầu phát triển.
+<Note kind="myth">
 
-<Depth level="ref" title="Bảng tra: thông số quỹ đạo các vệ tinh hay dùng">
+"Chu kỳ lặp và thời gian quay lại là một." **Chu kỳ lặp** là số ngày để vết bay trùng lại đúng như cũ, một tính chất của quỹ đạo. **Thời gian quay lại** (<Term id="revisit">revisit</Term>) là khoảng cách giữa hai lần *có thể* chụp một điểm. Nó ngắn hơn nhiều khi có nhiều vệ tinh, khi các dải chồng lấn ở vĩ độ cao, hoặc khi vệ tinh nghiêng thân chụp chéo: WorldView-3 có thể chụp một điểm gần như mỗi ngày với góc nghiêng lớn, đổi lại độ phân giải giảm và hình học méo hơn.
 
-<div class="table-wrap">
+</Note>
 
-| Vệ tinh | Độ cao danh nghĩa | Độ nghiêng | Giờ qua xích đạo | Chu kỳ lặp |
-|---|---|---|---|---|
-| Sentinel-2A/B/C | 786 km | 98,62° | 10:30, nút xuống | 10 ngày (1 vệ tinh), 5 ngày (2 vệ tinh) |
-| Sentinel-1 | 693 km | 98,18° | 18:00, nút lên | 12 ngày (1 vệ tinh) |
-| Landsat 8, 9 | 705 km | 98,2° | ~10:00, nút xuống | 16 ngày (1 vệ tinh), 8 ngày (2 vệ tinh) |
-| MODIS Terra / Aqua | 705 km | 98,2° | 10:30 xuống / 13:30 lên (danh nghĩa) | 1–2 ngày |
+Nhưng được chụp chưa phải là có ảnh dùng được. Chương 9 cho thấy ở Hà Nội năm 2022–2024 chỉ 92 trên 433 ngày có ảnh đủ trong. Ở vĩ độ Hà Nội, vệ tinh bay qua lúc khoảng **10:43** giờ địa phương, đúng lúc mây đối lưu mùa hè bắt đầu phát triển.
+
+### Hình học nhìn thấy: góc ngẩng, góc tâm và khoảng cách nghiêng
+
+Trạm mặt đất hay chảo thu chỉ làm việc khi vệ tinh cao hơn một **góc ngẩng tối thiểu ε** so với chân trời: gần chân trời có nhà cửa, cây, núi chắn, và tín hiệu đi qua nhiều khí quyển hơn. Với vệ tinh ở bán kính r = R + h, ba đại lượng mô tả vùng nhìn thấy là góc tâm λ (nửa vùng phủ, nhìn từ tâm Trái Đất), góc lệch đáy η ở vệ tinh và <Term id="slant-range">khoảng cách nghiêng</Term> d:
+
+<Formula label="Góc tâm, góc lệch đáy và khoảng cách nghiêng" tex="\lambda = \arccos\!\left(\frac{R\cos\varepsilon}{R+h}\right) - \varepsilon, \qquad \sin\eta = \frac{R\cos\varepsilon}{R+h}, \qquad \lambda + \eta + \varepsilon = 90^\circ" where="
+\varepsilon :: góc ngẩng tối thiểu của trạm mặt đất
+\lambda :: góc tâm Trái Đất từ điểm đáy tới rìa vùng phủ; bán kính vùng phủ dọc mặt đất = R·λ (λ tính bằng radian)
+\eta :: góc lệch đáy: vệ tinh phải nhìn lệch bao nhiêu khỏi phương thẳng đứng để thấy rìa
+" />
+
+<Formula label="Khoảng cách nghiêng và phần bề mặt nhìn thấy" tex="d = \sqrt{(R+h)^2 - R^2\cos^2\varepsilon} - R\sin\varepsilon, \qquad f = \frac{1-\cos\lambda}{2}" where="
+d :: khoảng cách từ trạm ở rìa vùng phủ tới vệ tinh (km)
+f :: phần diện tích bề mặt Trái Đất nằm trong vùng phủ (chỏm cầu)
+" />
+
+<Predict client:visible lang="vi"
+  title="Chảo Starlink thấy một vệ tinh được bao lâu?"
+  q="Một vệ tinh Starlink ở 550 km bay ngang đúng đỉnh đầu. Chảo chỉ làm việc khi vệ tinh cao trên 25° so với chân trời. Vệ tinh ở trong tầm nhìn bao lâu?"
+  options={["Khoảng 30 giây", "Khoảng 4–5 phút", "Khoảng 30 phút", "Khoảng 2 giờ"]} answer={1}
+  why="Ở 550 km và ε = 25°, góc tâm λ = 8,45°. Vệ tinh đi qua cung 2λ = 16,9° trong chu kỳ 95,7 phút, tức 16,9/360 × 95,7 ≈ 4,5 phút. Vì vậy chảo phải chuyển sang vệ tinh khác liên tục, và Starlink cần hàng nghìn vệ tinh (Chương 6)." />
+
+<Figure
+  title="Hình 2.10 — Vùng nhìn thấy theo độ cao và góc ngẩng tối thiểu"
+  try="Chọn Starlink rồi hạ góc ngẩng từ 25° xuống 10°: bán kính vùng phủ tăng bao nhiêu? Chọn Sentinel-2 → trạm thu: một trạm ở Hà Nội nhận được dữ liệu trong bao lâu mỗi lượt? Chọn GEO: vì sao ba vệ tinh địa tĩnh gần như phủ cả Trái Đất, trừ vùng cực?"
+  source="Hình học cầu, Trái Đất bán kính 6378,137 km, vẽ đúng tỉ lệ (Wertz và Larson 1999, mục 5.2). Thời gian bay qua tối đa cho lượt bay ngang đỉnh đầu, bỏ qua tự quay của Trái Đất. Góc ngẩng mẫu là giá trị minh họa: Starlink 25° (SpaceX, hồ sơ FCC), trạm thu 5°, GPS 10°."
+>
+  <VisibilityGeometry client:visible lang="vi" />
+</Figure>
+
+<Stats items={[
+  { v: '941', u: 'km', l: 'bán kính vùng phủ Starlink 550 km ở ε = 25°' },
+  { v: '4,5', u: 'phút', l: 'thời gian bay qua tối đa của nó' },
+  { v: '12,6', u: 'phút', l: 'Sentinel-2 trong tầm một trạm thu, ε = 5°' },
+  { v: '42,4', u: '%', l: 'bề mặt Trái Đất một vệ tinh địa tĩnh nhìn thấy (ε = 0°)' },
+]} caption="Tính bằng các công thức trên (scripts/ch02_numbers.ts)." />
+
+<div class="worked">
+
+#### Ví dụ: vệ tinh địa tĩnh nhìn thấy bao nhiêu?
+
+1. ε = 0°, r = 42 164 km: λ = arccos(6378 / 42 164) = **81,3°**.
+2. Phần bề mặt: f = (1 − cos 81,3°)/2 = **42,4 %**. Ba vệ tinh cách nhau 120° phủ gần hết Trái Đất, trừ vùng cực trên khoảng 81° vĩ độ.
+3. Khoảng cách nghiêng ở rìa: d = √(42 164² − 6378²) = 41 679 km, trễ 139 ms một chiều, so với 119 ms ở điểm đáy.
+4. Với góc ngẩng thực tế hơn ε = 5°, phần nhìn thấy giảm còn 38,2 %.
 
 </div>
 
-Nguồn: ESA Sentinel-1 và Sentinel-2 User Handbooks, USGS Landsat Missions, NASA MODIS. Giờ qua xích đạo của Terra đã sớm dần vì không còn được duy trì quỹ đạo (Chương 1).
+<Note kind="key">
 
-</Depth>
+<mark class="key">Vùng nhìn thấy do độ cao và góc ngẩng tối thiểu quyết định: LEO thấy ít và bay qua vài phút, GEO thấy gần nửa Trái Đất và đứng yên.</mark> Chu kỳ lặp là tính chất của quỹ đạo; thời gian quay lại có thể ngắn hơn nhiều nhờ nhiều vệ tinh hoặc chụp nghiêng.
 
-<Depth level="advanced" title="Phần tử quỹ đạo và bộ GP/TLE">
+</Note>
 
-Vị trí một vệ tinh tại một thời điểm cần đúng 6 số. Dạng dễ hình dung là 6 phần tử Kepler: bán trục lớn a, tâm sai e, độ nghiêng i, kinh độ nút lên Ω (RAAN), góc cận địa ω và dị thường trung bình M. CelesTrak phát hành chúng dưới dạng GP (OMM JSON) hoặc TLE, tính cho mô hình truyền quỹ đạo SGP4. Hình 1.2 và 2.2 dùng cách tính đơn giản hơn (quỹ đạo tròn, chỉ có trôi nút J2), đủ để minh họa nhưng sai khoảng chục km sau một ngày. Muốn dự báo lượt bay chính xác, hãy dùng SGP4 (thư viện `sgp4` của Python hoặc `satellite.js`).
+## 2.7 Chòm vệ tinh
 
-</Depth>
+Một vệ tinh LEO chỉ thấy một vùng nhỏ và bay qua trong vài phút. Muốn phủ liên tục hoặc chụp lại thường xuyên phải dùng nhiều vệ tinh phối hợp: một <Term id="walker-constellation">chòm vệ tinh</Term>. Cấu hình phổ biến nhất là **Walker Delta**, ký hiệu i : t/p/f: t vệ tinh chia đều trên p mặt phẳng cách nhau 360°/p về Ω, f là hệ số lệch pha giữa các mặt phẳng kề nhau.
 
-## 2.5 Thực hành
+- **Galileo:** 56° : 24/3/1 (ESA). **GPS** dùng 6 mặt phẳng nghiêng 55°.
+- **Starlink**, lớp 550 km ban đầu: 72 mặt phẳng × 22 vệ tinh, nghiêng 53°.
+- **Sentinel-2** là chòm nhỏ nhất: hai vệ tinh cùng mặt phẳng, lệch nhau 180° (Hình 2.9).
+
+Vệ tinh ở độ nghiêng i dành nhiều thời gian nhất gần vĩ độ ±i, nơi vết bay "quay đầu". Vì vậy lớp 53° của Starlink dày nhất quanh vĩ độ 40–53°; Việt Nam (8–23°N) nằm ở vùng thưa hơn nhưng vẫn được phủ. Chương 6 đi sâu vào thiết kế chòm vệ tinh: Walker, độ trễ, số vệ tinh cần thiết và quả địa cầu Starlink thật.
+
+<Note kind="key">
+
+<mark class="key">Một vệ tinh bị giới hạn bởi vùng nhìn thấy và chu kỳ lặp; muốn phủ liên tục hay chụp lại dày hơn thì phải thêm vệ tinh và mặt phẳng.</mark>
+
+</Note>
+
+## 2.8 Thực hành
 
 Notebook tính chu kỳ, vận tốc và độ nghiêng đồng bộ Mặt Trời theo độ cao, vẽ vết bay Sentinel-2 qua Việt Nam trong 10 ngày, rồi so với số ảnh Sentinel-2 thật chụp một điểm trong Earth Engine. Script GEE hiện khung các ảnh Sentinel-2 trong 10 ngày liên tiếp trên Việt Nam.
 
@@ -173,16 +536,25 @@ Notebook tính chu kỳ, vận tốc và độ nghiêng đồng bộ Mặt Trờ
 1. Tính độ nghiêng đồng bộ Mặt Trời cho độ cao 500 km. Nó lớn hơn hay nhỏ hơn ở 786 km?
 2. Landsat 8 và 9 có dải chụp 185 km, chu kỳ lặp 16 ngày. Hai vệ tinh cần bao nhiêu ngày để chụp hết Việt Nam?
 3. Đếm số ảnh Sentinel-2 thật chụp nơi bạn sống trong tháng 1/2024. Có khớp với "5 ngày một lần" không? Vì sao?
+4. Tải TLE mới nhất của VNREDSat-1 từ CelesTrak, giải mã chuyển động trung bình ra độ cao và so với Hình 2.5. Độ cao thay đổi bao nhiêu?
+5. Một trạm thu ở TP. Hồ Chí Minh làm việc với ε = 5°. Vệ tinh Sentinel-2 ở trong tầm trạm tối đa bao lâu mỗi lượt? Ở ε = 10° thì sao?
 
-## 2.6 Ôn tập
+## 2.9 Ôn tập
 
 <Quiz client:visible lang="vi" items={quiz} />
 
 ## Tài liệu tham khảo
 
+- Arianespace (2016). *Ariane 5 User's Manual*, Issue 5 Revision 2.
 - Drusch, M. và cs. (2012). Sentinel-2: ESA's optical high-resolution mission for GMES operational services. *Remote Sensing of Environment*, 120, 25–36.
 - ESA (2015). *Sentinel-2 User Handbook*. European Space Agency.
-- Kelso, T. S. *CelesTrak*. https://celestrak.org
+- ESA. *Sentinel-1 User Guide* và *Copernicus POD Service*. https://sentinels.copernicus.eu
+- IERS. *Bulletin C* (giây nhuận, TAI − UTC). https://www.iers.org
+- Kelso, T. S. *CelesTrak* và *NORAD Two-Line Element Set Format*. https://celestrak.org
 - Nguyễn Văn Tín. *Sổ tay Vệ tinh & Viễn thám*, chương 2. CC BY 4.0. https://satellite-rs-handbook.netlify.app/
+- Soop, E. M. (1994). *Handbook of Geostationary Orbits*. Kluwer / ESA.
+- SpaceX (08/02/2022). *Geomagnetic storm and recently deployed Starlink satellites*. https://www.spacex.com/updates
+- USGS. *Landsat 8* và *Landsat 9* Data Users Handbooks. https://www.usgs.gov/landsat-missions
 - Vallado, D. A. (2013). *Fundamentals of Astrodynamics and Applications* (4th ed.). Microcosm Press.
+- Vallado, D. A., Crawford, P., Hujsak, R., & Kelso, T. S. (2006). Revisiting Spacetrack Report #3. AIAA 2006-6753.
 - Wertz, J. R., & Larson, W. J. (Eds.) (1999). *Space Mission Analysis and Design* (3rd ed.). Microcosm / Kluwer.

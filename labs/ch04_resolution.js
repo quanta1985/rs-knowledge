@@ -1,5 +1,5 @@
 /**
- * Lab 4 — Bốn loại độ phân giải / The four resolutions · Sổ tay Viễn thám & GIS
+ * Lab 9 — Bốn loại độ phân giải / The four resolutions · Sổ tay Viễn thám & GIS
  * Dán vào https://code.earthengine.google.com và bấm Run.
  * Paste into https://code.earthengine.google.com and press Run.
  *

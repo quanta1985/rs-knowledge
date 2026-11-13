@@ -1,64 +1,145 @@
 ---
-title: Remote sensing & satellite systems overview
+title: Satellite systems & remote sensing overview
 n: 1
-summary: Remote sensing is measuring from a distance. This chapter follows energy from its source to the user, introduces the four segments of a satellite system and the Earth-observation satellites flying overhead, positioned from real orbital elements, with real scene footprints around Hanoi.
+summary: The big picture before the details. Why satellites do not fall, the four segments of a satellite system, mission families and their orbits, the size of the space sector measured from the real satellite catalogue, the life cycle of a mission, and the milestones of the world and of Viet Nam. The chapter ends by following the energy path of remote sensing and measuring real scene footprints around Hanoi.
 objectives:
-  - Define remote sensing; tell passive from active sensors.
-  - Describe the seven stages of the remote-sensing chain and the four segments of a satellite system.
-  - Name the main open-data Earth-observation satellites and read their altitude, inclination and period.
-  - Compare the area of one scene from different sensors with the size of the object you study.
-  - Know the key milestones of remote sensing worldwide and in Viet Nam.
-updated: "2026-11-04"
+  - Explain why a satellite is "always falling without hitting the ground" and compute the circular speed at a given altitude.
+  - Describe the four segments of a satellite system (launch, space, ground, user) with Vietnamese examples.
+  - Tell the mission families apart (communications, navigation, Earth observation, meteorology, science) and their typical orbit regions.
+  - Read the size of the sector from satellite-catalogue counts and space-economy reports.
+  - List the phases of a mission's life cycle and the main historical milestones, including Viet Nam's.
+  - Define remote sensing, tell passive from active sensors, and compare the area of one scene from different sensors.
+updated: "2026-11-05"
 ---
 import Term from '../../../components/Term.astro';
 import Depth from '../../../components/Depth.astro';
 import Figure from '../../../components/Figure.astro';
 import LabLinks from '../../../components/LabLinks.astro';
+import Note from '../../../components/Note.astro';
+import Tiles from '../../../components/Tiles.astro';
+import Stats from '../../../components/Stats.astro';
+import Steps from '../../../components/Steps.astro';
+import Formula from '../../../components/Formula.astro';
+import Predict from '../../../islands/Predict.tsx';
+import SatNow from '../../../islands/SatNow.tsx';
+import FallAround from '../../../islands/FallAround.tsx';
+import SatSegments from '../../../islands/SatSegments.tsx';
+import MissionMix from '../../../islands/MissionMix.tsx';
+import LaunchHistory from '../../../islands/LaunchHistory.tsx';
+import HistoryTimeline from '../../../islands/HistoryTimeline.tsx';
 import RsChain from '../../../islands/RsChain.tsx';
 import EoMissions from '../../../islands/EoMissions.tsx';
 import FootprintMap from '../../../islands/FootprintMap.tsx';
 import Quiz from '../../../islands/Quiz.tsx';
 import quiz from '../../../data/quiz/ch01.json';
 
-<p class="muted" style="font-size:0.9rem">This chapter is adapted from chapters 1 and 8 of <a href="https://satellite-rs-handbook.netlify.app/" rel="noopener"><em>Sổ tay Vệ tinh & Viễn thám</em></a> (Nguyễn Văn Tín, CC BY 4.0). The four segments, the milestones and the remote-sensing chain follow the original. The interactive figures, orbital numbers and real footprints are additions of this handbook.</p>
-
-## 1.1 What remote sensing is
-
-<Term id="remote-sensing">Remote sensing</Term> means gathering information about an object **without touching it**. In this handbook the "object" is land, water, vegetation and cities; "without touching" means measuring electromagnetic energy from a satellite hundreds of kilometres away.
-
-Following the classic presentation of the Canada Centre for Remote Sensing (CCRS), every remote-sensing system has seven stages, from energy source to application. There are two ways to get the energy:
-
-- A <Term id="passive-sensor">passive sensor</Term> measures energy that is already there: reflected sunlight (Sentinel-2, Landsat) or thermal radiation emitted by the surface itself (Landsat's thermal bands).
-- An <Term id="active-sensor">active sensor</Term> emits its own energy and records the echo. Sentinel-1 radar (Chapter 11) is an example: it images at night and through clouds.
-
 <Figure
-  title="Figure 1.1 — The seven-stage remote-sensing chain, with real examples from this handbook"
-  try="Click Optical → Thermal → Radar. In Thermal mode, why are stages 1 and 2 dimmed? Click stage 3 to see a Hanoi number for each kind."
-  source="Diagram after the seven CCRS stages (Natural Resources Canada, Fundamentals of Remote Sensing), adapted from Sổ tay Vệ tinh & Viễn thám (CC BY 4.0). Example numbers from Chapters 3, 6 and 11 of this handbook."
+  title="Figure 1.1 — Nearly 17,000 active satellites around the Earth"
+  try="Colour by 'Orbit region' and press zoom out (−): how much farther than the blue LEO layer is the orange GEO ring? Choose 'Show: MEO' to see the navigation constellations. Switch to 'Mission family': which family fills almost all of LEO?"
+  source="Mean orbital elements (GP/OMM) of every object in CelesTrak's 'active' group, retrieved 5 Nov 2026; mission family from CelesTrak's purpose groups (scripts/data/export_ch01_satnow.py). Propagated as Kepler orbits with J2 drift (src/lib/gnss.ts), off by tens of km after a day: illustrative only. Basemap © Esri, Maxar, Earthstar Geographics."
 >
-  <RsChain client:visible lang="en" />
+  <SatNow client:visible lang="en" />
 </Figure>
 
-Sunlight crosses the atmosphere **twice** (down and up), so optical images always carry atmospheric effects (Chapters 3 and 7). Thermal energy crosses it once, from the surface up. Radar also crosses it twice, but the atmosphere is almost transparent to microwaves.
+<Stats items={[
+  { v: '16,873', l: 'active satellites with orbital elements (CelesTrak, 5 Nov 2026)' },
+  { v: '95.2', u: '%', l: 'of them in low Earth orbit (LEO), below 2,000 km' },
+  { v: '66.4', u: '%', l: 'are Starlink satellites (11,207)' },
+  { v: '315', l: 'orbital launches in 2025, the most ever' },
+]} caption="Counted from the CelesTrak catalogue snapshot (GP and SATCAT) of 5 Nov 2026; these numbers change every week." />
+
+## 1.1 What a satellite is, and why it does not fall
+
+An **artificial satellite** is an object people have put into motion around the Earth and that is kept there by gravity itself. It sounds odd, but a satellite is **always falling** towards the Earth. It never hits the ground because it moves sideways fast enough: while it falls a little, the curved surface below it drops away by exactly as much.
+
+<Predict client:visible lang="en"
+  title="How much gravity is left on the ISS?"
+  q="The International Space Station flies at about 420 km. What percentage of surface gravity is left there?"
+  slider={{ min: 0, max: 100, step: 1, unit: '%' }} answer={88} tol={4}
+  why="Gravity falls with the square of the distance to the Earth's centre: (6371 / 6791)² ≈ 0.88, about 88 %. Astronauts float not because gravity is gone, but because they and the station fall freely with the same acceleration." />
+
+The idea goes back to the thought experiment of "Newton's cannon": fire a cannonball from a mountain top faster and faster and it lands farther and farther away, until at some speed it falls around the Earth for ever. Chapter 3 solves the cannon problem numerically. Here we only look at **one second** of that motion.
+
+<Figure
+  title="Figure 1.2 — One second in orbit: how far it falls, how far the sphere curves away"
+  try="At 6 km/s the satellite falls 4.35 m in one second but the sphere curves away only 2.66 m: it loses height. Press the v = 7.67 km/s button: the two numbers match. Drag up to 9 km/s, then choose 60 s."
+  source="Spherical Earth of radius 6371 km, μ = 398,600.4 km³/s², altitude 400 km; fall = ½·g·t² with g = μ/r², curvature drop = r − √(r² − (v·t)²) (src/lib/overview.ts, fallDrops)."
+>
+  <FallAround client:visible lang="en" />
+</Figure>
+
+At 400 km gravity pulls the satellite down **4.35 m** in the first second. If it moves sideways at **7.67 km/s**, after one second the sphere at that altitude has also curved down by exactly 4.35 m. The satellite keeps falling, but its height does not change: that is a circular orbit. The "fall equals curve" condition gives the circular-speed formula directly:
+
+<Formula label="Circular speed and period" tex="v = \sqrt{\frac{\mu}{r}}, \qquad T = 2\pi\sqrt{\frac{r^{3}}{\mu}}, \qquad r = R_E + h" where="
+v :: horizontal speed needed for a circular orbit (km/s)
+\mu :: Earth's gravitational parameter, 398,600.4 km³/s²
+r :: distance to the Earth's centre: radius 6371 km plus altitude h
+T :: period, the time for one revolution
+" />
+
+<Stats items={[
+  { v: '7.67', u: 'km/s', l: 'circular speed at 400 km, about 27,600 km/h' },
+  { v: '92.4', u: 'min', l: 'one revolution at 400 km' },
+  { v: '88', u: '%', l: 'gravity left at ISS altitude (420 km)' },
+]} />
+
+<Note kind="myth">
+
+"There is no gravity in orbit, so astronauts float." **Wrong.** At ISS altitude gravity is still about 88 % of its surface value. Gravity is exactly what keeps the station in orbit. Everything on board falls freely with the same acceleration, so nothing presses on the floor: that is <Term id="ch01-microgravity">microgravity</Term>.
+
+</Note>
+
+<Note kind="key">
+
+<mark class="key">A satellite does not "hover": it is in continuous free fall, moving sideways fast enough for the ground to curve away beneath it.</mark> The farther from the Earth, the weaker gravity, so the required speed is lower and the period longer. Chapter 2 computes orbits exactly; Chapter 3 computes how much propellant a rocket needs to reach that speed.
+
+</Note>
 
 ## 1.2 The four segments of a satellite system
 
-A satellite does not make maps on its own. It is one link in a four-segment system:
+A satellite does not make maps or phone calls on its own. It is one link in a system of four **segments**:
+
+- **Launch segment**: the rocket that puts the satellite into its initial orbit from a launch site. Many small satellites share one ride (<Term id="rideshare">rideshare</Term>). Chapter 3.
+- **Space segment**: the satellite itself, made of the <Term id="satellite-bus">bus</Term> that keeps it alive (power, attitude, thermal, computer, communications) and the <Term id="payload">payload</Term> that does the job (camera, radar, transponder). Chapter 4.
+- **Ground segment**: the control centre that sends commands and receives health data (<Term id="ttc">TT&C</Term>), the <Term id="ground-station">ground stations</Term> that receive data, and the processing, archiving and distribution systems. Communications systems also have <Term id="gateway-station">gateway stations</Term> linking the satellites to terrestrial networks. Chapter 5.
+- **User segment**: the devices and people that use the service: the GNSS chip in a phone, a TV dish, a Starlink <Term id="user-terminal">user terminal</Term>, and the GIS engineer opening an image in Earth Engine.
+
+<Figure
+  title="Figure 1.3 — The four segments and the flows between them, with Vietnamese examples"
+  try="In 'Earth observation' mode, which flow is missing? Switch to 'Navigation': why does the arrow from ground to user disappear? Click each block in 'Communications' mode to see where VINASAT is controlled from."
+  source="Concept diagram. Examples: VNREDSat-1 from eoPortal (ESA) and Airbus; GPS from gps.gov; VINASAT from Viet Nam's Ministry of Information and Communications and VNPT (2012). Launch dates from CelesTrak's SATCAT."
+>
+  <SatSegments client:visible lang="en" />
+</Figure>
+
+Remote sensing usually follows the path **satellite → ground station → processing → user**: images must come down to a station and be processed before they become products. Navigation and communications differ: users receive signals **directly** from the satellites. A GNSS receiver only listens and never transmits, so one GPS system serves an unlimited number of users.
 
 <div class="table-wrap">
 
-| Segment | What it contains | Sentinel-2 example |
-|---|---|---|
-| Launch | Rockets, launch sites | Sentinel-2A launched on a Vega rocket from Kourou (French Guiana) in 2015 |
-| Space | **Bus** (structure, power, attitude control, thermal, communications) and **payload** (the instrument) | The payload is the MultiSpectral Instrument (MSI), 13 bands |
-| Ground | Control centre, receiving antennas, processing and archiving | ESA's <Term id="ground-segment">ground segment</Term> produces L1C and L2A |
-| User | People and software that use the data | You, opening an image in Earth Engine or QGIS |
+| Segment | What it contains | Sentinel-2 example | Viet Nam example |
+|---|---|---|---|
+| Launch | Rockets, launch sites, rideshare services | Sentinel-2A launched on Vega from Kourou in 2015 | VNREDSat-1 shared Vega flight VV02 with Proba-V (7 May 2013) |
+| Space | Bus + payload | The payload is the MultiSpectral Instrument (MSI), 13 bands | VNREDSat-1, about 130 kg, NAOMI camera 2.5 m / 10 m |
+| Ground | Control (TT&C), receiving stations, processing, archiving | ESA's <Term id="ground-segment">ground segment</Term> produces L1C and L2A | S-band control station at Hoa Lac; Que Duong satellite control station (VINASAT) |
+| User | People and software using the data or service | You, opening an image in Earth Engine or QGIS | Natural-resource, environment and agriculture agencies; satellite-TV subscribers |
 
 </div>
 
+<Note kind="why" label="Why do observation satellites store images before sending them?">
+
+A satellite at 700 km "sees" a given ground station for at most about **12 minutes** per overhead pass (5° minimum elevation), and not every orbit passes near the station. Most of the time it images places with no station in view, so images are stored in on-board memory and "dumped" during a station pass. That is why space agencies build stations near the poles, where polar-orbiting satellites pass on almost every orbit.
+
+</Note>
+
 Users usually see only the last segment, but data quality depends on all four: the orbit is kept by the launcher and thrusters, the sensor is calibrated in orbit, and the ground segment decides which <Term id="data-level">processing level</Term> you download.
 
-<Depth level="ref" title="Reference: processing levels">
+<Note kind="key">
+
+<mark class="key">A failure in any segment breaks the service</mark>: a failed rocket loses the satellite, a failed bus makes the payload useless, and a ground-control fault leaves a healthy satellite with nobody able to command it. From 9 November 2021 to 25 March 2022 VNREDSat-1 stopped imaging for more than four months because of a hardware fault in its operational and control data storage; engineers had to restore the control servers before it could image again (Tuoi Tre, 2025).
+
+</Note>
+
+<Depth level="ref" title="Reference: remote-sensing processing levels">
 
 <div class="table-wrap">
 
@@ -71,16 +152,81 @@ Users usually see only the last segment, but data quality depends on all four: t
 
 </div>
 
-Chapters 4, 6 and 11 use L2A, Collection 2 Level-2 and GRD. Chapter 7 compares L1C with L2A.
+Chapters 9, 11 and 16 use L2A, Collection 2 Level-2 and GRD. Chapter 12 compares L1C with L2A.
 
 </Depth>
 
-## 1.3 The satellites flying overhead
+## 1.3 Mission families and their orbits
 
-Figure 1.2 places 11 Earth-observation satellites on the globe. Positions come from **real orbital elements** published by CelesTrak on 3–4 November 2026, so you see them where they were at that time.
+Satellites are grouped by what they do. Each job needs its own kind of orbit, because altitude decides how much of the Earth a satellite sees, how much detail it resolves and how long a signal takes.
+
+<Tiles
+  items={[
+    { t: 'Communications', d: 'GEO 35,786 km; LEO 340–1,200 km' },
+    { t: 'Navigation (GNSS)', d: 'MEO 19,100–23,200 km' },
+    { t: 'Earth observation', d: 'Sun-synchronous LEO 450–800 km' },
+    { t: 'Meteorology', d: 'GEO and polar LEO' },
+    { t: 'Science, exploration', d: 'All kinds, incl. Lagrange points' },
+    { t: 'Military, technology demos', d: 'Every orbit region' },
+  ]}
+  sum="Four orbit regions: LEO < 2,000 km · MEO 2,000–35,786 km · GEO 35,786 km · HEO strongly elliptical"
+/>
+
+Orbit regions are named by altitude: <Term id="leo">low Earth orbit (LEO)</Term> below 2,000 km, <Term id="ch01-meo">medium Earth orbit (MEO)</Term> from 2,000 km up to GEO, geostationary orbit GEO at 35,786 km, and <Term id="ch01-heo">highly elliptical orbits (HEO)</Term> with a very distant apogee.
+
+<div class="table-wrap">
+
+| Mission family | Typical orbit | Examples | Notable engineering point |
+|---|---|---|---|
+| Communications | GEO; LEO | VINASAT-1/2, Intelsat; Starlink, OneWeb | GEO: 3 satellites cover almost the whole Earth (except the poles) but a signal up and down takes about 239 ms. LEO: low latency but thousands of satellites (Chapter 6) |
+| Navigation | MEO | GPS, GLONASS, Galileo, BeiDou | Broadcast time signals from atomic clocks; receivers only listen (Chapter 7) |
+| Earth observation | Sun-synchronous LEO | Landsat, Sentinel, VNREDSat-1, PlanetScope | Optical, thermal, radar; large data volumes need X- or Ka-band downlinks (Chapter 5) |
+| Meteorology | GEO and polar LEO | Himawari-9, GOES; NOAA-20/21, MetOp | GEO images the full disk continuously to track clouds; LEO measures in more detail and covers the poles |
+| Science | Very varied | ISS, Hubble, GRACE-FO; JWST at L2 | Extreme stability and accuracy |
+
+</div>
+
+The **geostationary** orbit (<Term id="geostationary-orbit">GEO</Term>) is a special case: its period equals one sidereal day (23 h 56 min 4 s) and it lies in the equatorial plane, so the satellite stays fixed above one point on the ground. Put T = 86,164 s into the period formula of section 1.1:
+
+<Formula label="Radius of the geostationary orbit" tex="r_{GEO} = \sqrt[3]{\frac{\mu\,T_{s}^{2}}{4\pi^{2}}} \approx 42\,164\ \text{km}, \qquad h_{GEO} = r_{GEO} - R_{eq} \approx 35\,786\ \text{km}" where="
+T_{s} :: one sidereal day, 86,164.1 s: the time the Earth takes to turn exactly once
+R_{eq} :: equatorial radius, 6378.137 km
+" />
+
+<Note kind="myth">
+
+"A geostationary satellite stands still in space." **Wrong.** It moves at **3.07 km/s** on a circle of radius 42,164 km, exactly in step with the Earth's rotation, so it looks motionless from the ground. That is why TV dishes do not need to track it. VINASAT-1 holds 132° E and VINASAT-2 131.8° E.
+
+</Note>
+
+<Predict client:visible lang="en"
+  title="Which family is largest?"
+  q="Of the nearly 17,000 active satellites, which mission family has the most?"
+  options={['Earth observation', 'Communications', 'Navigation (GNSS)', 'Meteorology']} answer={1}
+  why="Communications dominates: 13,485 satellites, about 80 %, mostly Starlink. A global navigation system needs only about 30 satellites in MEO, so the whole navigation family has 169. CelesTrak puts 470 satellites in its Earth-observation groups; the real number is higher because many commercial imaging satellites are not grouped." />
 
 <Figure
-  title="Figure 1.2 — Open-data Earth-observation satellites and VNREDSat-1"
+  title="Figure 1.4 — Active satellites by mission family and orbit region"
+  try="Click 'Navigation (GNSS)': which region holds most of them? Click 'Meteorology' and 'Earth observation': which has satellites in GEO? Why is the 'Not grouped' bar so long?"
+  source="Same CelesTrak snapshot of 5 Nov 2026 as Figure 1.1. Mission family = the first CelesTrak purpose group listing the satellite (precedence order in scripts/data/export_ch01_satnow.py). Orbit region from perigee and apogee (src/lib/overview.ts, orbitClass)."
+>
+  <MissionMix client:visible lang="en" />
+</Figure>
+
+Figure 1.4 shows something important for remote-sensing people: **Earth-observation satellites are a small part** of today's sky. LEO is crowded by Internet constellations, while each GNSS needs only a few dozen satellites in MEO. The roughly 2,600 "not grouped" satellites include military and technology-demonstration satellites and many commercial ones (including Chinese imaging satellites such as Jilin-1 and Gaofen) that CelesTrak has not put in any purpose group.
+
+<Note kind="key">
+
+<mark class="key">The mission decides the orbit.</mark> Communications needs wide coverage or low latency (GEO, or dense LEO), navigation needs many satellites in view everywhere at once (MEO), Earth observation needs a close look with even lighting (sun-synchronous LEO), meteorology needs both a constant watch (GEO) and detail (polar LEO).
+
+</Note>
+
+### Close-up: open-data Earth-observation satellites
+
+Figure 1.5 places the 11 Earth-observation satellites this handbook uses most on the globe, again from **real orbital elements** published by CelesTrak.
+
+<Figure
+  title="Figure 1.5 — Open-data Earth-observation satellites and VNREDSat-1"
   try="Choose the 'Radar' group, then 'Optical'. Are their inclinations similar or very different? Pick VNREDSat-1 and compare 'Inclination' with 'SSO inclination (J2)'."
   source="Mean orbital elements (GP/OMM) from CelesTrak, retrieved 4 Nov 2026. The handbook propagates them as circular orbits with J2 node drift, accurate to tens of km after a day; illustrative only, not for pass prediction. Basemap © Esri, Maxar, Earthstar Geographics."
 >
@@ -105,7 +251,7 @@ ESA quotes a mean altitude of 786 km for Sentinel-2. The 3 km difference comes f
 </div>
 
 <details>
-<summary>Data table: the 11 satellites in Figure 1.2</summary>
+<summary>Data table: the 11 satellites in Figure 1.5</summary>
 
 <div class="table-wrap">
 
@@ -125,13 +271,167 @@ Altitudes derived from mean motion as in the example. Source: CelesTrak elements
 
 </details>
 
-## 1.4 How large is one scene?
+VNREDSat-1 is operated by the Vietnam National Space Center (VNSC). The November 2026 elements show something interesting: its actual inclination of 97.89° is **below** the sun-synchronous value for its altitude (98.10°). By the J2 formula (Chapter 2) its orbit plane turns 0.961°/day instead of 0.986°/day. The plane lags the Sun, so the overpass time gets **earlier**, by about 36 minutes per year if uncorrected. This is an estimate from one element set; the handbook has no VNSC operations data to confirm it.
+
+<Depth level="advanced" title="Terra is drifting too">
+
+Terra (carrying MODIS) has an inclination of 97.93°, also below the sun-synchronous value (98.14°). NASA stopped maintaining Terra's orbit as the mission entered its final phase, so its overpass time is getting earlier. When you compare long MODIS Terra records, remember that the illumination is no longer as fixed as in the early years.
+
+</Depth>
+
+## 1.4 The value chain and the size of the space sector
+
+The space sector is usually split into two halves, <Term id="ch01-upstream">upstream</Term> and <Term id="ch01-downstream">downstream</Term>:
+
+<Tiles
+  items={[
+    { t: 'Upstream', d: 'Designing and building satellites and components; launch services; building ground infrastructure. Capital-heavy, few companies.' },
+    { t: 'Downstream', d: 'Operating satellites and selling services: bandwidth, broadcasting, navigation signals, imagery and value-added services (analytics, maps, warnings).' },
+  ]}
+  sum="Remote-sensing and GIS people sit at the far end of downstream: turning data into information"
+/>
+
+According to the Space Foundation's *The Space Report 2025 Q2*, the global space economy reached about **US$613 billion** in 2024, up 7.8 % on the year before. The commercial sector accounted for 78 %, government budgets for the remaining 22 %. The figure includes goods and services that use satellites (such as GNSS receivers), so different organisations publish different totals; always read the definition before comparing.
+
+The <Term id="ch01-satcat">satellite catalogue SATCAT</Term> records every object people have put into orbit. Counting the distinct international designators per year gives the number of successful launches:
+
+<Predict client:visible lang="en"
+  title="How many launches in 2025?"
+  q="During the Cold War the record was 129 orbital launches in a year (1984). How many were there in 2025?"
+  slider={{ min: 50, max: 500, step: 5 }} answer={315} tol={25}
+  why="315, up 24 % on 254 in 2024 and six times the low of 52 in 2005. The number of satellites launched grew even faster: 4,495 in 2025, because one Falcon 9 carries a few dozen Starlink satellites." />
+
+<Figure
+  title="Figure 1.6 — Orbital launches and satellites launched per year, 1957–2026"
+  try="Choose 'Launches' and drag the slider from 1984 to 2005: why did the number of launches fall? Switch to 'Satellites (payloads)' and compare 2019 with 2020. Read 'Satellites per launch' for 1990 and for 2025."
+  source="CelesTrak SATCAT, retrieved 5 Nov 2026 (scripts/data/export_ch01_satnow.py). Launches = distinct international designators YYYY-NNN per launch year; failed launches are not catalogued. 2026 runs to the last launch in the catalogue (2 Nov 2026)."
+>
+  <LaunchHistory client:visible lang="en" />
+</Figure>
+
+The curve has three clear parts. From 1957 to the late 1980s the Soviet Union and the US launched steadily, over 100 times a year. After the Soviet Union dissolved, launches declined to a low of **52 in 2005**. From about 2016 reusable rockets and small-satellite constellations sent both curves up steeply: 69 % of all satellites launched up to the end of 2025 went up in the ten years 2016–2025.
+
+<Stats items={[
+  { v: '315', l: 'orbital launches in 2025 (254 in 2024)' },
+  { v: '4,495', l: 'satellites launched in 2025' },
+  { v: '35,167', l: 'objects tracked in orbit, 12,536 of them debris' },
+]} caption="Counted from CelesTrak's SATCAT of 5 Nov 2026. Trackable objects are typically larger than about 10 cm; smaller fragments are not catalogued." />
+
+<Note kind="warn">
+
+In orbit there are 20,321 tracked satellites (working or dead), 2,302 rocket bodies and 12,536 pieces of debris. Each collision creates thousands more fragments, so operators must constantly avoid collisions and remove satellites at end of life. <Term id="space-debris">Space debris</Term> is discussed in Chapter 6.
+
+</Note>
+
+## 1.5 The life cycle of a mission
+
+Space agencies divide a satellite project into <Term id="ch01-mission-phase">phases</Term>, each closed by a review that decides whether to continue. NASA names them Pre-A, A to F; ESA uses 0, A to F with similar content. Knowing the phases helps you read announcements such as "the mission has passed its Critical Design Review" or "the satellite is in commissioning".
+
+<Steps title="The phases of a mission (NASA, ESA)" items={[
+  { tag: 'Pre-A / 0', t: 'Concept', d: 'User needs, mission options. Ends with a mission concept review (MCR at NASA, MDR at ESA).' },
+  { tag: 'A', t: 'Feasibility', d: 'Choose a concept, estimate cost and risk, set system requirements (SRR).' },
+  { tag: 'B', t: 'Preliminary design', d: 'Choose technologies, design each subsystem. Ends with the Preliminary Design Review (PDR).' },
+  { tag: 'C', t: 'Detailed design', d: 'Detailed drawings, building and testing component models. Ends with the Critical Design Review (CDR).' },
+  { tag: 'D', t: 'Build, integrate, test, launch', d: 'Assembly, integration and testing (AIT): vibration, thermal vacuum, electromagnetic compatibility. Flight readiness review, then launch.' },
+  { tag: 'LEOP', t: 'Launch and in-orbit checkout', d: 'The first days after launch (LEOP), then weeks to months of calibration and checks (commissioning). NASA puts this at the end of phase D, ESA at the start of phase E.' },
+  { tag: 'E', t: 'Operations', d: 'Routine operations, delivering data and services. Can be extended many times if the satellite stays healthy.' },
+  { tag: 'F', t: 'Close-out', d: 'Passivation (venting propellant, disconnecting batteries), deorbiting to burn up in the atmosphere, or a boost to a graveyard orbit for GEO satellites.' },
+]} />
+
+<Note kind="key">
+
+<mark class="key">Most of a mission's time and money is spent before launch</mark>; phase E is when users finally get data. "NewSpace" companies such as Planet or SpaceX shorten the cycle by mass-producing identical satellites and accepting more risk per spacecraft.
+
+</Note>
+
+<div class="worked">
+
+#### Example: the life cycle of VNREDSat-1
+
+1. **August 2010**: Viet Nam signs a contract with EADS Astrium (France) to build the satellite and the ground stations (eoPortal).
+2. **7 May 2013**: launch on a Vega rocket, **33 months** after the contract, very fast for a government satellite because it used an existing platform.
+3. **4 September 2013**: in-orbit checkout is over and control is handed over to Viet Nam.
+4. Design life **5 years**, i.e. to 2018. In 2021 and at the end of 2023 the satellite stopped because of control-system faults; by May 2025 it was back to normal operations (Tuoi Tre, 2025).
+5. In November 2026 it has been flying for **13.5 years**, nearly three times its design life: a typical extended phase E.
+
+</div>
+
+<Depth level="ref" title="Reference: the main reviews">
+
+<div class="table-wrap">
+
+| Phase | NASA (NPR 7120.5) | ESA (ECSS-M-ST-10C) |
+|---|---|---|
+| Pre-A / 0 | Mission Concept Review (MCR) | Mission Definition Review (MDR) |
+| A | System Requirements Review (SRR), Mission/System Definition Review (MDR/SDR) | Preliminary Requirements Review (PRR) |
+| B | Preliminary Design Review (PDR) | System Requirements Review (SRR), PDR |
+| C | Critical Design Review (CDR) | CDR |
+| D | System Integration Review, Operational Readiness Review, Flight Readiness Review | Qualification Review, Acceptance Review, Flight/Launch Readiness Review |
+| E | Post-Launch Assessment Review, Decommissioning Review | Commissioning Result Review, End-of-Life Review |
+| F | Disposal Readiness Review | Mission Close-out Review |
+
+</div>
+
+Deadline for removing a LEO satellite from orbit after its mission: the long-standing international guideline is 25 years (IADC); since 2022 the US Federal Communications Commission (FCC) requires 5 years for satellites it licenses.
+
+</Depth>
+
+## 1.6 Milestones, and Viet Nam in orbit
+
+<Figure
+  title="Figure 1.7 — The main milestones of the world and of Viet Nam"
+  try="Click the Viet Nam milestones (right column) one by one. Which Vietnamese satellites are still working? Which world milestone opened the era of free satellite imagery?"
+  source="Launch dates (UTC) from CelesTrak's SATCAT; NanoDragon from Tuoi Tre (9 Nov 2021); PicoDragon from VNSC; free Landsat from Woodcock et al. (2008); VNREDSat-1 status from eoPortal and Tuoi Tre (2025)."
+>
+  <HistoryTimeline client:visible lang="en" />
+</Figure>
+
+Viet Nam had a person in space very early: **Pham Tuan** flew on Soyuz 37 on 23 July 1980, the first Asian in space. Viet Nam's first satellite was the communications satellite **VINASAT-1** (2008), followed by **VINASAT-2** (2012). **VNREDSat-1** (2013) was the first Earth-observation satellite. The Vietnam National Space Center built the small satellites **PicoDragon** (2013), **MicroDragon** (2019) and **NanoDragon** (2021) itself. In 2026 the educational PocketQube **VEGAFLY-1**, built by a Vietnamese team, flew on the Transporter-16 rideshare.
+
+<Note kind="example" label="Viet Nam today">
+
+The SATCAT of 2 November 2026 lists four working Vietnamese satellites: VINASAT-1, VINASAT-2, VNREDSat-1 and VEGAFLY-1. MicroDragon re-entered the atmosphere on 1 October 2024. **LOTUSat-1**, an X-band synthetic-aperture radar satellite built by NEC (Japan) under a 2020 contract, is not yet in the catalogue: its launch has slipped several times, partly because of setbacks in the development of the Epsilon S rocket.
+
+</Note>
+
+## 1.7 From satellites to remote sensing
+
+From here on the handbook focuses on one mission family: **Earth observation**. <Term id="remote-sensing">Remote sensing</Term> means gathering information about an object **without touching it**. In this handbook the "object" is land, water, vegetation and cities; "without touching" means measuring electromagnetic energy from a satellite hundreds of kilometres away.
+
+Following the classic presentation of the Canada Centre for Remote Sensing (CCRS), every remote-sensing system has seven stages, from energy source to application. There are two ways to get the energy:
+
+- A <Term id="passive-sensor">passive sensor</Term> measures energy that is already there: reflected sunlight (Sentinel-2, Landsat) or thermal radiation emitted by the surface itself (Landsat's thermal bands).
+- An <Term id="active-sensor">active sensor</Term> emits its own energy and records the echo. Sentinel-1 radar (Chapter 16) is an example: it images at night and through clouds.
+
+<Predict client:visible lang="en"
+  title="How many times does the energy cross the atmosphere?"
+  q="For a thermal image (such as Landsat's thermal band), how many times does the measured energy cross the atmosphere?"
+  options={['Never', 'Once', 'Twice', 'Three times']} answer={1}
+  why="Once: the surface itself emits the thermal radiation, which travels straight up to the satellite. Sunlight in an optical image crosses it twice, down and up. Radar also crosses twice, but the atmosphere is almost transparent to microwaves." />
+
+<Figure
+  title="Figure 1.8 — The seven-stage remote-sensing chain, with real examples from this handbook"
+  try="Click Optical → Thermal → Radar. In Thermal mode, why are stages 1 and 2 dimmed? Click stage 3 to see a Hanoi number for each kind."
+  source="Diagram after the seven CCRS stages (Natural Resources Canada, Fundamentals of Remote Sensing), adapted from Sổ tay Vệ tinh & Viễn thám (CC BY 4.0). Example numbers from Chapters 8, 11 and 16 of this handbook."
+>
+  <RsChain client:visible lang="en" />
+</Figure>
+
+Sunlight crosses the atmosphere **twice** (down and up), so optical images always carry atmospheric effects (Chapters 8 and 12). Thermal energy crosses it once, from the surface up. Radar also crosses it twice, but the atmosphere is almost transparent to microwaves.
+
+<Note kind="key">
+
+<mark class="key">Passive sensors measure energy that is already there; active sensors send their own and record the echo.</mark> That is why radar images at night and through clouds, which matters a lot in Viet Nam, where the rainy season can go months without a clean cloud-free optical image.
+
+</Note>
+
+## 1.8 How large is one scene?
 
 Each acquisition records a strip as wide as the sensor's <Term id="swath">swath</Term>. Providers cut it into **scenes** or **tiles** for distribution. Scene size decides how many images you need to cover a study area.
 
 <Figure
-  title="Figure 1.3 — Real scene footprints of three sensors around Hanoi"
-  try="Use 'Zoom to' on each footprint. Where does the West Lake frame used in Chapters 4, 6 and 11 sit inside the Sentinel-2 tile? How many times larger is a Landsat scene?"
+  title="Figure 1.9 — Real scene footprints of three sensors around Hanoi"
+  try="Use 'Zoom to' on each footprint. Where does the West Lake frame used in Chapters 9, 11 and 16 sit inside the Sentinel-2 tile? How many times larger is a Landsat scene?"
   source="Footprints (system:footprint) of real scenes in Earth Engine: Sentinel-2 L2A tile T48QWJ, 12 Feb 2024; Landsat 9 path/row 127/45, 22 Dec 2023; Sentinel-1A IW GRD, relative orbit 128, 12 Feb 2024. VNREDSat-1: a 17.5 km square from the nominal swath, not a real scene. Areas on the ellipsoid. Basemap © Esri, Maxar, Earthstar Geographics."
 >
   <FootprintMap client:visible lang="en" />
@@ -149,34 +449,15 @@ Each acquisition records a strip as wide as the sensor's <Term id="swath">swath<
 
 </div>
 
-One Landsat scene stretches about 190 km, from the northern mountains to beyond Hanoi. A VNREDSat-1 image covers only part of the inner city, but with 4 times finer pixels (2.5 m versus 10 m). Chapter 4 discusses the swath–resolution trade-off.
+One Landsat scene stretches about 190 km, from the northern mountains to beyond Hanoi. A VNREDSat-1 image covers only part of the inner city, but with 4 times finer pixels (2.5 m versus 10 m). Chapter 9 discusses the swath–resolution trade-off.
 
-## 1.5 Milestones, and remote sensing in Viet Nam
+<Note kind="key">
 
-<div class="table-wrap">
+<mark class="key">A wide swath covers ground fast but coarsely; a narrow swath sees detail but needs many passes.</mark> Before choosing imagery, compare the scene size with the size of your object: a province needs a few Sentinel-2 tiles, an urban district may need only a small part of one.
 
-| Year | Milestone |
-|---|---|
-| 1957 | Sputnik 1 (USSR), the first artificial satellite |
-| 1972 | Landsat 1, start of the longest continuous land-imaging record |
-| 1978 | Seasat, the first civilian satellite carrying a SAR |
-| 2008 | USGS opens the whole Landsat archive free of charge |
-| 2013 | **VNREDSat-1** launched on 7 May, Viet Nam's first Earth-observation satellite |
-| 2014–2015 | Sentinel-1A (radar) and Sentinel-2A (multispectral), free and open data |
+</Note>
 
-</div>
-
-Source: Sổ tay Vệ tinh & Viễn thám (CC BY 4.0).
-
-VNREDSat-1 is operated by the Vietnam National Space Center (VNSC) and acquires 2.5 m panchromatic and 10 m multispectral images. The November 2026 elements show something interesting: its actual inclination of 97.89° is **below** the sun-synchronous value for its altitude (98.10°). By the J2 formula (Chapter 2) its orbit plane turns 0.961°/day instead of 0.986°/day. The plane lags the Sun, so the overpass time gets **earlier**, by about 36 minutes per year if uncorrected. This is an estimate from one element set; the handbook has no VNSC operations data to confirm it.
-
-<Depth level="advanced" title="Terra is drifting too">
-
-Terra (carrying MODIS) has an inclination of 97.93°, also below the sun-synchronous value (98.14°). NASA stopped maintaining Terra's orbit as the mission entered its final phase, so its overpass time is getting earlier. When you compare long MODIS Terra records, remember that the illumination is no longer as fixed as in the early years.
-
-</Depth>
-
-## 1.6 Lab
+## 1.9 Lab
 
 The notebook reads orbital elements from CelesTrak, computes altitude and period, and counts the Sentinel-2, Landsat 9 and Sentinel-1 images of Hanoi in 2024 in Earth Engine. The GEE script draws the footprints of the scenes covering a point you choose.
 
@@ -187,17 +468,27 @@ The notebook reads orbital elements from CelesTrak, computes altitude and period
 1. Move the point to your province. How many Sentinel-2 tiles cover it?
 2. Find another Earth-observation satellite on CelesTrak (e.g. PlanetScope or ICEYE). Compute its altitude from the mean motion.
 3. Why does a thermal image cross the atmosphere once while an optical image crosses it twice?
+4. With the formula of section 1.1, compute the circular speed and period of a Starlink satellite at 550 km. Compare with the ISS at 420 km.
+5. Describe the four segments of VINASAT-1 and give, for each segment, an example of a failure that could interrupt TV service.
 
-## 1.7 Review
+## 1.10 Review
 
 <Quiz client:visible lang="en" items={quiz} />
 
 ## References
 
+- Airbus Defence and Space. *VNREDSat-1*. https://www.airbus.com
 - CCRS (Canada Centre for Remote Sensing). *Fundamentals of Remote Sensing* (online tutorial). Natural Resources Canada.
 - Drusch, M., et al. (2012). Sentinel-2: ESA's optical high-resolution mission for GMES operational services. *Remote Sensing of Environment*, 120, 25–36.
-- Kelso, T. S. *CelesTrak*: GP orbital element data. https://celestrak.org
+- ECSS (2009). *ECSS-M-ST-10C Rev. 1: Space project management, project planning and implementation*. ESA.
+- eoPortal (ESA). *VNREDSat-1*. https://www.eoportal.org/satellite-missions/vnredsat-1
+- FCC (2022). *Space Innovation; Mitigation of Orbital Debris in the New Space Age*, Second Report and Order (five-year rule).
+- Kelso, T. S. *CelesTrak*: GP orbital element data and the SATCAT catalogue. https://celestrak.org
 - Lillesand, T. M., Kiefer, R. W., & Chipman, J. W. (2015). *Remote Sensing and Image Interpretation* (7th ed.). Wiley.
+- NASA (2016). *NASA Systems Engineering Handbook*, NASA/SP-2016-6105 Rev 2; NPR 7120.5: *NASA Space Flight Program and Project Management Requirements*.
 - Nguyễn Văn Tín. *Sổ tay Vệ tinh & Viễn thám*. CC BY 4.0. https://satellite-rs-handbook.netlify.app/
+- Space Foundation (2025). *The Space Report 2025 Q2* (press release of 22 July 2025).
 - Torres, R., et al. (2012). GMES Sentinel-1 mission. *Remote Sensing of Environment*, 120, 9–24.
+- Tuoi Tre News (2 May 2025). Vietnam's Earth observation satellite VNREDSat-1 resumes normal operations.
+- Woodcock, C. E., et al. (2008). Free access to Landsat imagery. *Science*, 320(5879), 1011.
 - Wulder, M. A., et al. (2019). Current status of Landsat program, science, and applications. *Remote Sensing of Environment*, 225, 127–147.

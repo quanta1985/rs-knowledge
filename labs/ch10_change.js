@@ -1,5 +1,5 @@
 /**
- * Lab 10 — Năm NDVI giảm mạnh nhất / Year of largest NDVI drop · Sổ tay Viễn thám & GIS
+ * Lab 15 — Năm NDVI giảm mạnh nhất / Year of largest NDVI drop · Sổ tay Viễn thám & GIS
  * Dán vào https://code.earthengine.google.com và bấm Run.
  * Paste into https://code.earthengine.google.com and press Run.
  *

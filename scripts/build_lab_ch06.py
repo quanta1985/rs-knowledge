@@ -6,9 +6,9 @@
 from labkit import MD, PY, main
 
 CELLS = [
-    (MD, """# Lab 6 — Chỉ số phổ trên ảnh Sentinel-2 Hà Nội / Spectral indices on a Sentinel-2 image of Hanoi
+    (MD, """# Lab 11 — Chỉ số phổ trên ảnh Sentinel-2 Hà Nội / Spectral indices on a Sentinel-2 image of Hanoi
 
-**Sổ tay Viễn thám & GIS — Chương 6** · [Mở chương / Open chapter](https://quanta1985.github.io/rs-knowledge/vi/ch06-spectral/)
+**Sổ tay Viễn thám & GIS — Chương 11** · [Mở chương / Open chapter](https://quanta1985.github.io/rs-knowledge/vi/ch06-spectral/)
 
 Mục tiêu / Goals:
 1. Tải đúng cảnh Sentinel-2 L2A ngày 12/02/2024 dùng trong sổ tay / Load the exact Sentinel-2 L2A scene used in the handbook.

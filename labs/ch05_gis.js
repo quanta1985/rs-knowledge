@@ -1,5 +1,5 @@
 /**
- * Lab 5 — Múi UTM và vector hóa một hồ / UTM zones and vectorising a lake · Sổ tay Viễn thám & GIS
+ * Lab 10 — Múi UTM và vector hóa một hồ / UTM zones and vectorising a lake · Sổ tay Viễn thám & GIS
  * Dán vào https://code.earthengine.google.com và bấm Run.
  * Paste into https://code.earthengine.google.com and press Run.
  *

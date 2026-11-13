@@ -1,0 +1,524 @@
+[
+ {
+  "q": {
+   "vi": "Máy thu GNSS thực chất đo đại lượng nào?",
+   "en": "What does a GNSS receiver actually measure?"
+  },
+  "options": [
+   {
+    "vi": "Thời gian tín hiệu đi từ vệ tinh tới máy thu, đổi ra khoảng cách",
+    "en": "The signal travel time from satellite to receiver, converted to range"
+   },
+   {
+    "vi": "Góc nhìn tới từng vệ tinh",
+    "en": "The angle to each satellite"
+   },
+   {
+    "vi": "Cường độ tín hiệu, càng mạnh càng gần",
+    "en": "Signal strength: the stronger, the closer"
+   },
+   {
+    "vi": "Vị trí do vệ tinh tính sẵn và gửi xuống",
+    "en": "A position computed on board and sent down"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Khoảng cách = thời gian × tốc độ ánh sáng. Vì đồng hồ máy thu lệch, khoảng cách này gọi là khoảng cách giả.",
+   "en": "Range = travel time × speed of light. Because the receiver clock is off, it is called a pseudorange."
+  }
+ },
+ {
+  "q": {
+   "vi": "Vì sao cần ít nhất 4 vệ tinh để định vị 3D?",
+   "en": "Why are at least 4 satellites needed for a 3D fix?"
+  },
+  "options": [
+   {
+    "vi": "Có 4 ẩn số: x, y, z và sai số đồng hồ máy thu",
+    "en": "There are 4 unknowns: x, y, z and the receiver clock error"
+   },
+   {
+    "vi": "Mỗi hệ GNSS cần một vệ tinh",
+    "en": "Each GNSS system needs one satellite"
+   },
+   {
+    "vi": "Để loại bỏ tầng điện ly",
+    "en": "To remove the ionosphere"
+   },
+   {
+    "vi": "Vì Trái Đất có 4 phần tư",
+    "en": "Because the Earth has 4 quadrants"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Đồng hồ thạch anh của máy thu không đồng bộ với đồng hồ nguyên tử trên vệ tinh, nên độ lệch đồng hồ là ẩn số thứ tư.",
+   "en": "The receiver's quartz clock is not synchronised with the satellites' atomic clocks, so its offset is the fourth unknown."
+  }
+ },
+ {
+  "q": {
+   "vi": "Đồng hồ máy thu lệch 1 micro giây làm khoảng cách giả sai bao nhiêu?",
+   "en": "A 1-microsecond receiver clock error changes the pseudorange by how much?"
+  },
+  "options": [
+   {
+    "vi": "Khoảng 300 m",
+    "en": "About 300 m"
+   },
+   {
+    "vi": "Khoảng 3 m",
+    "en": "About 3 m"
+   },
+   {
+    "vi": "Khoảng 30 cm",
+    "en": "About 30 cm"
+   },
+   {
+    "vi": "Khoảng 3 km",
+    "en": "About 3 km"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "299 792,458 km/s × 10⁻⁶ s = 299,8 m. Một nano giây ứng với 0,30 m.",
+   "en": "299,792.458 km/s × 10⁻⁶ s = 299.8 m. One nanosecond is 0.30 m."
+  }
+ },
+ {
+  "q": {
+   "vi": "Trong ảnh chụp quỹ đạo ngày 04/11/2026, hệ nào bay cao nhất?",
+   "en": "In the 4 Nov 2026 orbit snapshot, which system flies highest?"
+  },
+  "options": [
+   {
+    "vi": "Galileo, khoảng 23 200 km",
+    "en": "Galileo, about 23,200 km"
+   },
+   {
+    "vi": "GPS, khoảng 20 200 km",
+    "en": "GPS, about 20,200 km"
+   },
+   {
+    "vi": "GLONASS, khoảng 19 100 km",
+    "en": "GLONASS, about 19,100 km"
+   },
+   {
+    "vi": "Cả bốn hệ cùng độ cao",
+    "en": "All four at the same altitude"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Độ cao trung vị từ chuyển động trung bình: Galileo 23 222 km, BeiDou MEO 21 528 km, GPS 20 182 km, GLONASS 19 130 km.",
+   "en": "Median altitudes from mean motion: Galileo 23,222 km, BeiDou MEO 21,528 km, GPS 20,182 km, GLONASS 19,130 km."
+  }
+ },
+ {
+  "q": {
+   "vi": "Vì sao ở Hà Nội luôn thấy nhiều vệ tinh BeiDou?",
+   "en": "Why are so many BeiDou satellites always visible from Hanoi?"
+  },
+  "options": [
+   {
+    "vi": "BeiDou có thêm vệ tinh địa tĩnh và quỹ đạo nghiêng đồng bộ địa (IGSO) đặt trên châu Á",
+    "en": "BeiDou adds geostationary and inclined geosynchronous (IGSO) satellites placed over Asia"
+   },
+   {
+    "vi": "Vệ tinh BeiDou bay thấp hơn",
+    "en": "BeiDou satellites fly lower"
+   },
+   {
+    "vi": "Tín hiệu BeiDou xuyên qua Trái Đất",
+    "en": "BeiDou signals pass through the Earth"
+   },
+   {
+    "vi": "Máy thu ở Việt Nam chỉ bắt được BeiDou",
+    "en": "Receivers in Viet Nam only track BeiDou"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Trong ảnh chụp có 21 vệ tinh GEO/IGSO của BeiDou; 13 chiếc ở trên góc cao 10° tại Hà Nội suốt 24 giờ.",
+   "en": "The snapshot has 21 BeiDou GEO/IGSO satellites; 13 stay above 10° elevation at Hanoi for all 24 hours."
+  }
+ },
+ {
+  "q": {
+   "vi": "Nguồn sai số nào được khử gần hết nhờ đo trên hai tần số (L1 + L5)?",
+   "en": "Which error source is almost removed by measuring on two frequencies (L1 + L5)?"
+  },
+  "options": [
+   {
+    "vi": "Trễ tầng điện ly",
+    "en": "Ionospheric delay"
+   },
+   {
+    "vi": "Trễ tầng đối lưu",
+    "en": "Tropospheric delay"
+   },
+   {
+    "vi": "Đa đường",
+    "en": "Multipath"
+   },
+   {
+    "vi": "Sai số đồng hồ máy thu",
+    "en": "Receiver clock error"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Trễ điện ly tỉ lệ với 1/f², khác nhau giữa hai tần số, nên tổ hợp hai tần số loại được nó. Tầng đối lưu không phụ thuộc tần số.",
+   "en": "Ionospheric delay scales with 1/f² and differs between frequencies, so a dual-frequency combination cancels it. The troposphere is not dispersive."
+  }
+ },
+ {
+  "q": {
+   "vi": "PDOP nhỏ nghĩa là gì?",
+   "en": "What does a small PDOP mean?"
+  },
+  "options": [
+   {
+    "vi": "Vệ tinh trải đều trên bầu trời, sai số đo ít bị khuếch đại thành sai số vị trí",
+    "en": "Satellites are well spread over the sky, so range errors are amplified little into position errors"
+   },
+   {
+    "vi": "Tín hiệu mạnh",
+    "en": "The signals are strong"
+   },
+   {
+    "vi": "Tầng điện ly yên tĩnh",
+    "en": "The ionosphere is quiet"
+   },
+   {
+    "vi": "Máy thu ở gần vệ tinh",
+    "en": "The receiver is close to the satellites"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Sai số vị trí ≈ PDOP × sai số khoảng cách. DOP chỉ phụ thuộc hình học vệ tinh.",
+   "en": "Position error ≈ PDOP × range error. DOP depends only on satellite geometry."
+  }
+ },
+ {
+  "q": {
+   "vi": "Tăng góc che từ 10° lên 30° (giống đứng giữa nhà cao tầng) ở Hà Nội, chỉ dùng GPS thì sao?",
+   "en": "Raising the mask from 10° to 30° (like standing between tall buildings) in Hanoi, GPS only: what happens?"
+  },
+  "options": [
+   {
+    "vi": "PDOP trung vị tăng từ 1,81 lên 4,38 và có lúc không đủ 4 vệ tinh",
+    "en": "Median PDOP rises from 1.81 to 4.38 and at times fewer than 4 satellites remain"
+   },
+   {
+    "vi": "Không đổi, vì GPS có 32 vệ tinh",
+    "en": "Nothing, GPS has 32 satellites"
+   },
+   {
+    "vi": "PDOP giảm vì chỉ còn vệ tinh tốt",
+    "en": "PDOP falls because only good satellites remain"
+   },
+   {
+    "vi": "Độ chính xác tăng nhờ ít đa đường",
+    "en": "Accuracy improves thanks to less multipath"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Bỏ các vệ tinh thấp làm hình học xấu đi (Hình 7.3). Dùng cả bốn hệ, PDOP trung vị ở góc che 30° vẫn là 1,37.",
+   "en": "Dropping low satellites worsens the geometry (Figure 7.3). With all four systems the median PDOP at a 30° mask is still 1.37."
+  }
+ },
+ {
+  "q": {
+   "vi": "RTK đạt độ chính xác cỡ centimet nhờ điều gì?",
+   "en": "How does RTK reach centimetre accuracy?"
+  },
+  "options": [
+   {
+    "vi": "Dùng trạm gốc gần đó và đo pha sóng mang, các sai số chung bị triệt tiêu khi lấy hiệu",
+    "en": "A nearby base station and carrier-phase measurements: common errors cancel in the differences"
+   },
+   {
+    "vi": "Dùng vệ tinh bay thấp hơn",
+    "en": "Lower-flying satellites"
+   },
+   {
+    "vi": "Tăng công suất ăng-ten",
+    "en": "More antenna power"
+   },
+   {
+    "vi": "Chỉ dùng vệ tinh ở thiên đỉnh",
+    "en": "Only satellites at the zenith"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Trạm gốc và máy đo (rover) chịu gần cùng sai số đồng hồ vệ tinh, điện ly và đối lưu; lấy hiệu sẽ khử chúng. Pha sóng mang có bước sóng ~19 cm nên đo rất mịn.",
+   "en": "Base and rover share nearly the same satellite clock, ionospheric and tropospheric errors; differencing removes them. Carrier phase (~19 cm wavelength) is very precise."
+  }
+ },
+ {
+  "q": {
+   "vi": "PPP khác RTK ở điểm nào?",
+   "en": "How does PPP differ from RTK?"
+  },
+  "options": [
+   {
+    "vi": "Không cần trạm gốc gần, dùng quỹ đạo và đồng hồ vệ tinh chính xác, nhưng phải chờ hội tụ",
+    "en": "No nearby base: it uses precise orbits and clocks, but needs time to converge"
+   },
+   {
+    "vi": "PPP chỉ dùng một tần số",
+    "en": "PPP uses only one frequency"
+   },
+   {
+    "vi": "PPP chỉ chạy được ban đêm",
+    "en": "PPP only works at night"
+   },
+   {
+    "vi": "PPP không cần pha sóng mang",
+    "en": "PPP needs no carrier phase"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "PPP thay trạm gốc bằng sản phẩm hiệu chỉnh toàn cầu (ví dụ IGS, Galileo HAS); độ chính xác cm–dm sau vài chục phút hội tụ.",
+   "en": "PPP replaces the base with global correction products (e.g. IGS, Galileo HAS); cm–dm accuracy after tens of minutes of convergence."
+  }
+ },
+ {
+  "q": {
+   "vi": "Thành phần nào của trễ tầng đối lưu khó mô hình hóa nhất?",
+   "en": "Which part of the tropospheric delay is hardest to model?"
+  },
+  "options": [
+   {
+    "vi": "Phần khô (thủy tĩnh), khoảng 2,3 m ở thiên đỉnh",
+    "en": "The dry (hydrostatic) part, about 2.3 m at the zenith"
+   },
+   {
+    "vi": "Phần ướt do hơi nước, vài chục centimet",
+    "en": "The wet part from water vapour, a few tens of centimetres"
+   },
+   {
+    "vi": "Phần do điện tử tự do",
+    "en": "The part caused by free electrons"
+   },
+   {
+    "vi": "Cả hai đều dễ như nhau",
+    "en": "Both are equally easy"
+   }
+  ],
+  "answer": 1,
+  "why": {
+   "vi": "Phần khô tính tốt từ áp suất mặt đất (Saastamoinen). Phần ướt nhỏ hơn nhưng biến động theo hơi nước, nhất là mùa mưa, nên là sai số khó nhất còn lại của RTK và PPP.",
+   "en": "The dry part follows from surface pressure (Saastamoinen). The wet part is smaller but follows water vapour, above all in the rainy season, so it is the hardest residual error for RTK and PPP."
+  }
+ },
+ {
+  "q": {
+   "vi": "Máy thu dùng cả GPS và Galileo và giải một sai số đồng hồ riêng cho mỗi hệ. Cần tối thiểu bao nhiêu vệ tinh?",
+   "en": "A receiver uses GPS and Galileo and solves a separate clock error for each system. What is the minimum number of satellites?"
+  },
+  "options": [
+   {
+    "vi": "4",
+    "en": "4"
+   },
+   {
+    "vi": "5",
+    "en": "5"
+   },
+   {
+    "vi": "6",
+    "en": "6"
+   },
+   {
+    "vi": "8",
+    "en": "8"
+   }
+  ],
+  "answer": 1,
+  "why": {
+   "vi": "Ẩn số là x, y, z và hai sai số đồng hồ: 5 ẩn, nên cần ít nhất 5 vệ tinh (và mỗi hệ ít nhất một chiếc).",
+   "en": "The unknowns are x, y, z and two clock errors: 5 unknowns, so at least 5 satellites (with at least one from each system)."
+  }
+ },
+ {
+  "q": {
+   "vi": "Ở góc ngẩng 30°, trễ khô tầng đối lưu tại Hà Nội (2,31 m ở thiên đỉnh) khoảng bao nhiêu với hàm ánh xạ 1/sin E?",
+   "en": "At 30° elevation, what is the dry tropospheric delay at Hanoi (2.31 m at the zenith) with a 1/sin E mapping?"
+  },
+  "options": [
+   {
+    "vi": "1,2 m",
+    "en": "1.2 m"
+   },
+   {
+    "vi": "2,3 m",
+    "en": "2.3 m"
+   },
+   {
+    "vi": "4,6 m",
+    "en": "4.6 m"
+   },
+   {
+    "vi": "26 m",
+    "en": "26 m"
+   }
+  ],
+  "answer": 2,
+  "why": {
+   "vi": "1/sin 30° = 2, nên 2 × 2,31 = 4,62 m. 26 m là ở góc ngẩng 5°.",
+   "en": "1/sin 30° = 2, so 2 × 2.31 = 4.62 m. 26 m is the value at 5° elevation."
+  }
+ },
+ {
+  "q": {
+   "vi": "Trong phố cao tầng, tia trực tiếp bị che và máy thu chỉ nhận tia phản xạ trên tường cách 10 m, vệ tinh ở góc ngẩng 60°. Khoảng cách giả dài thêm bao nhiêu?",
+   "en": "In a high-rise street the direct ray is blocked and only a reflection off a wall 10 m away arrives; the satellite is at 60° elevation. How much longer is the pseudorange?"
+  },
+  "options": [
+   {
+    "vi": "Khoảng 0 m",
+    "en": "About 0 m"
+   },
+   {
+    "vi": "Khoảng 5 m",
+    "en": "About 5 m"
+   },
+   {
+    "vi": "Khoảng 10 m",
+    "en": "About 10 m"
+   },
+   {
+    "vi": "Khoảng 20 m",
+    "en": "About 20 m"
+   }
+  ],
+  "answer": 2,
+  "why": {
+   "vi": "Đường đi thừa Δs = 2·d·cos E = 2 × 10 × 0,5 = 10 m. Đây là NLOS: sai nguyên đường thừa, không có tia trực tiếp để bù.",
+   "en": "Extra path Δs = 2·d·cos E = 2 × 10 × 0.5 = 10 m. This is NLOS: the whole extra path becomes error, with no direct ray to pull it back."
+  }
+ },
+ {
+  "q": {
+   "vi": "UERE là 3 m, HDOP là 1,5. Sai số vị trí ngang 1σ khoảng bao nhiêu?",
+   "en": "UERE is 3 m and HDOP is 1.5. What is the 1σ horizontal position error?"
+  },
+  "options": [
+   {
+    "vi": "1,5 m",
+    "en": "1.5 m"
+   },
+   {
+    "vi": "2 m",
+    "en": "2 m"
+   },
+   {
+    "vi": "4,5 m",
+    "en": "4.5 m"
+   },
+   {
+    "vi": "9 m",
+    "en": "9 m"
+   }
+  ],
+  "answer": 2,
+  "why": {
+   "vi": "σ_H = HDOP × UERE = 1,5 × 3 = 4,5 m.",
+   "en": "σ_H = HDOP × UERE = 1.5 × 3 = 4.5 m."
+  }
+ },
+ {
+  "q": {
+   "vi": "Vì sao ở Việt Nam không nên coi SBAS là dịch vụ chính thức?",
+   "en": "Why should SBAS not be treated as an official service in Viet Nam?"
+  },
+  "options": [
+   {
+    "vi": "Vì SBAS cần Internet",
+    "en": "Because SBAS needs the Internet"
+   },
+   {
+    "vi": "Vì chưa hệ SBAS nào có vùng phục vụ chính thức phủ Việt Nam",
+    "en": "Because no SBAS has an official service area covering Viet Nam"
+   },
+   {
+    "vi": "Vì SBAS chỉ dùng GLONASS",
+    "en": "Because SBAS only uses GLONASS"
+   },
+   {
+    "vi": "Vì vệ tinh địa tĩnh không nhìn thấy từ Việt Nam",
+    "en": "Because geostationary satellites are not visible from Viet Nam"
+   }
+  ],
+  "answer": 1,
+  "why": {
+   "vi": "Tín hiệu GEO của GAGAN hay BDSBAS có thể thu được, nhưng vùng dịch vụ được chứng nhận của các hệ này nằm ở Ấn Độ và Trung Quốc.",
+   "en": "GEO signals from GAGAN or BDSBAS can be received, but the certified service areas of these systems are India and China."
+  }
+ },
+ {
+  "q": {
+   "vi": "Câu nào đúng về GPS trên điện thoại?",
+   "en": "Which statement about GPS on a phone is true?"
+  },
+  "options": [
+   {
+    "vi": "Điện thoại gửi tín hiệu lên vệ tinh để vệ tinh tính vị trí",
+    "en": "The phone transmits to the satellite, which computes the position"
+   },
+   {
+    "vi": "Không có 3G/4G thì không định vị được",
+    "en": "Without 3G/4G it cannot get a fix"
+   },
+   {
+    "vi": "Máy thu chỉ nghe vệ tinh; Internet chỉ giúp có vị trí nhanh hơn (A-GNSS) và tải bản đồ",
+    "en": "The receiver only listens; the Internet only speeds up the first fix (A-GNSS) and loads maps"
+   },
+   {
+    "vi": "Vị trí do trạm phát sóng di động tính",
+    "en": "The position is computed by the cell tower"
+   }
+  ],
+  "answer": 2,
+  "why": {
+   "vi": "GNSS là một chiều, từ vệ tinh xuống. Vị trí tính trong máy, kể cả khi không có mạng.",
+   "en": "GNSS is one-way, from satellite to user. The position is computed in the device, even without a network."
+  }
+ },
+ {
+  "q": {
+   "vi": "Kiểu tấn công nào EASA đánh giá là nguy hiểm hơn cho hàng không?",
+   "en": "Which kind of interference does EASA rate as riskier for aviation?"
+  },
+  "options": [
+   {
+    "vi": "Gây nhiễu (jamming), vì làm mất tín hiệu",
+    "en": "Jamming, because the signal is lost"
+   },
+   {
+    "vi": "Giả mạo (spoofing), vì khó phát hiện và có thể ảnh hưởng nhiều hệ thống",
+    "en": "Spoofing, because it is hard to detect and may affect several systems"
+   },
+   {
+    "vi": "Cả hai như nhau",
+    "en": "Both equally"
+   },
+   {
+    "vi": "Không loại nào ảnh hưởng hàng không",
+    "en": "Neither affects aviation"
+   }
+  ],
+  "answer": 1,
+  "why": {
+   "vi": "Bản tin SIB 2022-02R3 (07/2024) nhấn mạnh giả mạo nguy hiểm hơn: máy thu vẫn báo vị trí nhưng là vị trí sai.",
+   "en": "SIB 2022-02R3 (07/2024) stresses that spoofing is riskier: the receiver still reports a position, but a wrong one."
+  }
+ }
+]

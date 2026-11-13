@@ -11,7 +11,7 @@ const X0 = 150, X1 = 50000, Y0 = 80, Y1 = 2000; // km, minutes (log axes)
 const REAL = data.satellites.filter((s) => !/2B|2C|1C|1D|Landsat 8|Aqua/.test(s.name))
   .map((s) => ({ name: s.name, alt: altFromMeanMotion(s.MEAN_MOTION), per: 1440 / s.MEAN_MOTION, color: s.color, real: true }));
 const NOMINAL = [
-  { name: 'ISS', alt: 420, color: '#94a3b8' }, { name: 'GPS', alt: 20200, color: '#94a3b8' }, { name: 'GEO (Vinasat)', alt: 35786, color: '#94a3b8' },
+  { name: 'ISS', alt: 420, color: 'var(--st-muted)' }, { name: 'GPS', alt: 20200, color: 'var(--st-muted)' }, { name: 'GEO (Vinasat)', alt: 35786, color: 'var(--st-muted)' },
 ].map((s) => ({ ...s, per: periodMin(s.alt), real: false }));
 
 const TXT = {
@@ -47,18 +47,18 @@ export default function KeplerChart({ lang }: { lang: Lang }) {
         {[200, 500, 1000, 2000, 5000, 10000, 20000, 50000].map((a) => <g key={a}><line x1={lx(a)} x2={lx(a)} y1={M.t} y2={H - M.b} opacity={0.15} /><text x={lx(a)} y={H - M.b + 16} textAnchor="middle">{a >= 1000 ? `${a / 1000}k` : a}</text></g>)}
         <text x={(M.l + W - M.r) / 2} y={H - 6} textAnchor="middle">{T.x}</text>
         <text transform={`translate(14 ${(M.t + H - M.b) / 2}) rotate(-90)`} textAnchor="middle">{T.y}</text>
-        <line x1={M.l} x2={W - M.r} y1={ly(1436.07)} y2={ly(1436.07)} stroke="#e3b25a" strokeDasharray="4 4" opacity={0.7} />
-        <text x={M.l + 6} y={ly(1436.07) - 6} style={{ fill: '#e3b25a' }}>{`1 ${T.day} = 1436 min`}</text>
-        <polyline points={curve} fill="none" stroke="#4fc3cd" strokeWidth={2} />
+        <line x1={M.l} x2={W - M.r} y1={ly(1436.07)} y2={ly(1436.07)} stroke="var(--st-warn)" strokeDasharray="4 4" opacity={0.7} />
+        <text x={M.l + 6} y={ly(1436.07) - 6} style={{ fill: 'var(--st-warn)' }}>{`1 ${T.day} = 1436 min`}</text>
+        <polyline points={curve} fill="none" stroke="var(--st-accent)" strokeWidth={2} />
         {[...REAL, ...NOMINAL].map((s) => (
           <g key={s.name}>
-            <circle cx={lx(s.alt)} cy={ly(s.per)} r={5} fill={s.real ? s.color : '#0d1424'} stroke={s.color} strokeWidth={2} />
+            <circle cx={lx(s.alt)} cy={ly(s.per)} r={5} fill={s.real ? s.color : 'var(--st-bg)'} stroke={s.color} strokeWidth={2} />
           </g>
         ))}
-        {NOMINAL.map((s) => <text key={s.name} x={lx(s.alt) - 8} y={ly(s.per) - 9} textAnchor="end" style={{ fill: '#e2e8f0' }}>{s.name}</text>)}
-        <text x={lx(700) - 10} y={ly(98.6) + 22} textAnchor="middle" style={{ fill: '#e2e8f0' }}>{lang === 'vi' ? 'Vệ tinh quan sát Trái Đất' : 'Earth-observation satellites'}</text>
-        <line x1={lx(alt)} x2={lx(alt)} y1={M.t} y2={H - M.b} stroke="#f7867a" />
-        <circle cx={lx(alt)} cy={ly(per)} r={6} fill="#f7867a" />
+        {NOMINAL.map((s) => <text key={s.name} x={lx(s.alt) - 8} y={ly(s.per) - 9} textAnchor="end" style={{ fill: 'var(--st-fg)' }}>{s.name}</text>)}
+        <text x={lx(700) - 10} y={ly(98.6) + 22} textAnchor="middle" style={{ fill: 'var(--st-fg)' }}>{lang === 'vi' ? 'Vệ tinh quan sát Trái Đất' : 'Earth-observation satellites'}</text>
+        <line x1={lx(alt)} x2={lx(alt)} y1={M.t} y2={H - M.b} stroke="var(--st-bad)" />
+        <circle cx={lx(alt)} cy={ly(per)} r={6} fill="var(--st-bad)" />
       </svg>
       <div className="hud-static">
         <StatPanel title={T.title} rows={[

@@ -4,7 +4,7 @@ import cat from '../../public/data/ch14-catalog.json';
 import { Pills, Slider, StatPanel } from './VizUi';
 
 type Code = 'js' | 'py';
-const SAT: Record<string, string> = { 'Sentinel-2A': '#4fc3cd', 'Sentinel-2B': '#e3b25a' };
+const SAT: Record<string, string> = { 'Sentinel-2A': 'var(--st-accent)', 'Sentinel-2B': 'var(--st-warn)' };
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
 const day = (d: string) => (Date.parse(d) - Date.UTC(2024, 0, 1)) / 86_400_000;
 
@@ -56,20 +56,20 @@ export default function CollectionFilter({ lang }: { lang: Lang }) {
       <div>
         <svg className="chart" viewBox={`0 0 ${W} ${H}`} width="100%" role="img" aria-label={T.fig}>
           <title>{T.fig}</title>
-          <rect x={x(start)} y={y(cloud)} width={x(end) - x(start)} height={y(0) - y(cloud)} fill="#4fc3cd" opacity={0.1} />
-          <line x1={x(start)} x2={x(end)} y1={y(cloud)} y2={y(cloud)} stroke="#4fc3cd" strokeDasharray="4 3" />
-          {[0, 25, 50, 75, 100].map((v) => <g key={v}><line x1={L} x2={W - R} y1={y(v)} y2={y(v)} stroke="#94a3b8" opacity={0.15} /><text x={L - 6} y={y(v) + 4} textAnchor="end">{v}</text></g>)}
+          <rect x={x(start)} y={y(cloud)} width={x(end) - x(start)} height={y(0) - y(cloud)} fill="var(--st-accent)" opacity={0.1} />
+          <line x1={x(start)} x2={x(end)} y1={y(cloud)} y2={y(cloud)} stroke="var(--st-accent)" strokeDasharray="4 3" />
+          {[0, 25, 50, 75, 100].map((v) => <g key={v}><line x1={L} x2={W - R} y1={y(v)} y2={y(v)} stroke="var(--st-muted)" opacity={0.15} /><text x={L - 6} y={y(v) + 4} textAnchor="end">{v}</text></g>)}
           {MONTHS.map((m) => { const d = `2024-${String(m).padStart(2, '0')}-01`; return <text key={m} x={x(d) + 12} y={H - 18} textAnchor="middle">{m}</text>; })}
           <text x={(W + L) / 2} y={H - 3} textAnchor="middle">{T.x}</text>
           <text transform={`translate(11 ${(H - B) / 2}) rotate(-90)`} textAnchor="middle">{T.y}</text>
           {cat.dates.map((d) => {
-            const on = keep(d), c = SAT[d.sat] ?? '#94a3b8';
-            return <circle key={d.date} cx={x(d.date)} cy={y(d.cloud)} r={on ? 5 : 3.5} fill={d.clear >= 0.9 ? c : '#0b1220'} stroke={c} strokeWidth={1.6} opacity={on ? 1 : 0.25}>
+            const on = keep(d), c = SAT[d.sat] ?? 'var(--st-muted)';
+            return <circle key={d.date} cx={x(d.date)} cy={y(d.cloud)} r={on ? 5 : 3.5} fill={d.clear >= 0.9 ? c : 'var(--st-bg)'} stroke={c} strokeWidth={1.6} opacity={on ? 1 : 0.25}>
               <title>{`${d.date} · ${d.sat} · ${nf(d.cloud)} % · ${nf(d.clear * 100, 0)} %`}</title></circle>;
           })}
         </svg>
-        <p className="muted" style={{ margin: '4px 0 8px', fontSize: '0.75rem', color: '#94a3b8' }}>{T.note}</p>
-        <pre style={{ margin: 0, background: '#070c17', border: '1px solid rgba(148,163,184,.22)', borderRadius: 8, padding: '10px 12px', fontSize: '0.78rem', color: '#e2e8f0', overflowX: 'auto' }}>
+        <p className="muted" style={{ margin: '4px 0 8px', fontSize: '0.75rem', color: 'var(--st-muted)' }}>{T.note}</p>
+        <pre style={{ margin: 0, background: 'var(--st-panel)', border: '1px solid var(--st-line)', borderRadius: 8, padding: '10px 12px', fontSize: '0.78rem', color: 'var(--st-fg)', overflowX: 'auto' }}>
           <code style={{ background: 'none' }}>{lines.join('\n')}</code>
         </pre>
       </div>

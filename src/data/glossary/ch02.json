@@ -52,5 +52,95 @@
    "vi": "Giờ địa phương khi vệ tinh SSO cắt xích đạo theo chiều đi xuống phía nam. Sentinel-2: 10:30; Landsat 8/9: khoảng 10:00.",
    "en": "Local time when a sun-synchronous satellite crosses the equator southbound. Sentinel-2: 10:30; Landsat 8/9: about 10:00."
   }
+ },
+ {
+  "id": "ch02-vis-viva",
+  "vi": "Phương trình vis-viva",
+  "en": "Vis-viva equation",
+  "def": {
+   "vi": "Liên hệ vận tốc v của vệ tinh với khoảng cách r tới tâm Trái Đất và bán trục lớn a: v² = μ(2/r − 1/a). Dùng để tính vận tốc ở mọi điểm của quỹ đạo elip.",
+   "en": "Relates a satellite's speed v to its distance r from the Earth's centre and the semi-major axis a: v² = μ(2/r − 1/a). Gives the speed anywhere on an elliptical orbit."
+  }
+ },
+ {
+  "id": "ch02-orbital-elements",
+  "vi": "Sáu tham số quỹ đạo Kepler",
+  "en": "Keplerian orbital elements",
+  "def": {
+   "vi": "Sáu số xác định quỹ đạo và vị trí vệ tinh: bán trục lớn a, tâm sai e, độ nghiêng i, kinh độ nút lên Ω, góc cận địa ω và dị thường thực ν (hoặc trung bình M).",
+   "en": "Six numbers that fix an orbit and the satellite's place on it: semi-major axis a, eccentricity e, inclination i, RAAN Ω, argument of perigee ω and true anomaly ν (or mean anomaly M)."
+  }
+ },
+ {
+  "id": "ch02-eccentricity",
+  "vi": "Tâm sai (e)",
+  "en": "Eccentricity (e)",
+  "def": {
+   "vi": "Độ dẹt của quỹ đạo: 0 là tròn, giữa 0 và 1 là elip. Cận địa a(1−e), viễn địa a(1+e).",
+   "en": "How elongated an orbit is: 0 is a circle, between 0 and 1 an ellipse. Perigee a(1−e), apogee a(1+e)."
+  }
+ },
+ {
+  "id": "ch02-inclination",
+  "vi": "Độ nghiêng (i)",
+  "en": "Inclination (i)",
+  "def": {
+   "vi": "Góc giữa mặt phẳng quỹ đạo và mặt phẳng xích đạo, đo tại nút lên. 0° bay trên xích đạo, 90° qua hai cực, trên 90° là nghịch hành.",
+   "en": "Angle between the orbit plane and the equatorial plane, measured at the ascending node. 0° is equatorial, 90° polar, above 90° retrograde."
+  }
+ },
+ {
+  "id": "ch02-raan",
+  "vi": "Kinh độ nút lên (RAAN, Ω)",
+  "en": "Right ascension of the ascending node (RAAN, Ω)",
+  "def": {
+   "vi": "Góc đo trên mặt phẳng xích đạo từ hướng điểm xuân phân tới nút lên, nơi vệ tinh cắt xích đạo đi lên phía bắc. Xác định hướng của mặt phẳng quỹ đạo quanh trục cực.",
+   "en": "Angle in the equatorial plane from the vernal equinox to the ascending node, where the satellite crosses the equator northbound. Sets the orientation of the orbit plane around the polar axis."
+  }
+ },
+ {
+  "id": "ch02-perigee",
+  "vi": "Cận địa và viễn địa",
+  "en": "Perigee and apogee",
+  "def": {
+   "vi": "Điểm gần nhất (cận địa) và xa nhất (viễn địa) của quỹ đạo elip so với tâm Trái Đất. Vệ tinh nhanh nhất ở cận địa, chậm nhất ở viễn địa.",
+   "en": "Closest (perigee) and farthest (apogee) points of an elliptical orbit from the Earth's centre. The satellite is fastest at perigee, slowest at apogee."
+  }
+ },
+ {
+  "id": "ch02-tle",
+  "vi": "Bộ hai dòng phần tử (TLE)",
+  "en": "Two-line element set (TLE)",
+  "def": {
+   "vi": "Định dạng văn bản 2 dòng × 69 cột chứa tham số quỹ đạo trung bình của một vật thể, phát hành bởi Lực lượng Không gian Mỹ (CelesTrak, Space-Track), dùng với mô hình SGP4.",
+   "en": "Text format of two 69-column lines holding an object's mean orbital elements, issued by the US Space Force (CelesTrak, Space-Track) for use with the SGP4 propagator."
+  }
+ },
+ {
+  "id": "ch02-sgp4",
+  "vi": "Mô hình SGP4",
+  "en": "SGP4 propagator",
+  "def": {
+   "vi": "Mô hình giải tích tính vị trí vệ tinh theo thời gian từ một bộ TLE, có tính lực J2–J4, lực cản (BSTAR) và nhiễu loạn chu kỳ. Sai số cỡ km sau một ngày.",
+   "en": "Analytical model that computes a satellite's position over time from a TLE, including J2–J4, drag (BSTAR) and periodic terms. Errors of order km after a day."
+  }
+ },
+ {
+  "id": "ch02-critical-inclination",
+  "vi": "Độ nghiêng tới hạn (63,4°)",
+  "en": "Critical inclination (63.4°)",
+  "def": {
+   "vi": "Độ nghiêng 63,4° (hoặc 116,6°) tại đó lực J2 không làm cận địa trôi, vì 5cos²i − 1 = 0. Quỹ đạo Molniya dùng nó để giữ viễn địa trên Bắc bán cầu.",
+   "en": "Inclination of 63.4° (or 116.6°) at which J2 does not move perigee, because 5cos²i − 1 = 0. Molniya orbits use it to keep apogee over the northern hemisphere."
+  }
+ },
+ {
+  "id": "ch02-molniya",
+  "vi": "Quỹ đạo Molniya",
+  "en": "Molniya orbit",
+  "def": {
+   "vi": "Quỹ đạo elip cao (HEO), chu kỳ nửa ngày sao, cận địa vài trăm km, viễn địa gần 40 000 km, độ nghiêng 63,4°. Vệ tinh chạy chậm và ở lâu trên vùng vĩ độ cao.",
+   "en": "Highly elliptical orbit with a period of half a sidereal day, perigee of a few hundred km, apogee near 40,000 km and 63.4° inclination. The satellite dwells slowly over high latitudes."
+  }
  }
 ]

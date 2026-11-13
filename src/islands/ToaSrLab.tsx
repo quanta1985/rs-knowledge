@@ -85,11 +85,11 @@ export default function ToaSrLab({ lang }: { lang: Lang }) {
     ]}>
       <p className="stat-title" style={{ marginTop: 10 }}>{T.chart}: {p?.label[lang]}</p>
       <svg className="hist" viewBox={`0 0 ${CW} ${CH}`} role="img" aria-label={`${T.chart}: ${diffs.map((x) => `${x.n} ${nf(x.t - x.s)}`).join(', ')}`}>
-        <line x1={0} x2={CW} y1={Y0} y2={Y0} stroke="#94a3b8" opacity={0.5} />
+        <line x1={0} x2={CW} y1={Y0} y2={Y0} stroke="var(--st-muted)" opacity={0.5} />
         {diffs.map((x, i) => {
           const v = x.t - x.s, y = ys(Math.max(0, v)), h = Math.abs(ys(v) - Y0);
           return <g key={x.n}>
-            <rect x={i * bw + 6} width={bw - 12} y={y} height={Math.max(h, 1)} fill={v >= 0 ? '#4fc3cd' : '#e3b25a'} />
+            <rect x={i * bw + 6} width={bw - 12} y={y} height={Math.max(h, 1)} fill={v >= 0 ? 'var(--st-accent)' : 'var(--st-warn)'} />
             <text x={i * bw + bw / 2} y={CH - 16} textAnchor="middle">{x.n}</text>
             <text x={i * bw + bw / 2} y={CH - 4} textAnchor="middle">{Math.round(S2[x.n].c)}</text>
             <text x={i * bw + bw / 2} y={v >= 0 ? y - 3 : Y0 + h + 10} textAnchor="middle">{nf(v, 2)}</text>

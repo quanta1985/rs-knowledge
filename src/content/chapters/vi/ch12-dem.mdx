@@ -1,6 +1,6 @@
 ---
 title: Đo vẽ ảnh & mô hình số độ cao
-n: 12
+n: 17
 summary: Độ cao đo từ không gian bằng thị sai giữa hai ảnh hoặc bằng giao thoa radar. Chương này dùng DEM Copernicus và SRTM thật quanh Fansipan để tính bóng đổ, độ dốc, mặt cắt, so sánh hai DEM và dự đoán chỗ ảnh radar bị méo.
 objectives:
   - Giải thích nguyên lý thị sai lập thể và tính sai số độ cao từ tỷ số B/H và kích thước pixel.
@@ -13,23 +13,33 @@ import Term from '../../../components/Term.astro';
 import Depth from '../../../components/Depth.astro';
 import Figure from '../../../components/Figure.astro';
 import LabLinks from '../../../components/LabLinks.astro';
+import Note from '../../../components/Note.astro';
+import Formula from '../../../components/Formula.astro';
+import Stats from '../../../components/Stats.astro';
 import StereoParallax from '../../../islands/StereoParallax.tsx';
 import DemExplorer from '../../../islands/DemExplorer.tsx';
 import ProfileTool from '../../../islands/ProfileTool.tsx';
 import Quiz from '../../../islands/Quiz.tsx';
 import quiz from '../../../data/quiz/ch12.json';
 
-## 12.1 Đo độ cao từ hai bức ảnh
+## 17.1 Đo độ cao từ hai bức ảnh
 
 Nhìn một ngọn núi lần lượt bằng mắt trái rồi mắt phải: đỉnh núi dịch chỗ nhiều hơn chân núi. Độ dịch chuyển đó gọi là <Term id="stereo-parallax">thị sai</Term>, và nó tỷ lệ với độ cao. Vệ tinh làm y hệt: chụp cùng một vùng từ hai vị trí trên quỹ đạo, cách nhau một **đường đáy B**, ở độ cao bay **H**.
 
 <Figure
-  title="Hình 12.1 — Thị sai trong cặp ảnh lập thể"
+  title="Hình 17.1 — Thị sai trong cặp ảnh lập thể"
   try="Đặt B/H = 0,5, vật cao 100 m, pixel 0,5 m: thị sai bằng bao nhiêu pixel? Đổi pixel thành 30 m (cỡ Landsat): sai số độ cao tăng bao nhiêu lần?"
   source="Hình học hai tia chiếu, H = 694 km (quỹ đạo của các vệ tinh quang học phân giải rất cao như Pléiades). Δp = B·h/(H − h); σh = σp·GSD/(B/H). Sơ đồ không theo tỷ lệ."
 >
   <StereoParallax client:visible lang="vi" />
 </Figure>
+
+<Formula label="Thị sai và sai số độ cao" tex="\begin{gathered} \Delta p = \frac{B\,h}{H - h} \cr \sigma_h = \frac{\sigma_p \cdot \mathrm{GSD}}{B/H} \end{gathered}" where="
+B,\ H :: đường đáy và độ cao bay
+h :: độ cao vật
+\sigma_p :: sai số khớp ảnh (pixel)
+\mathrm{GSD} :: kích thước pixel trên mặt đất
+" />
 
 <div class="worked">
 
@@ -42,9 +52,19 @@ Nhìn một ngọn núi lần lượt bằng mắt trái rồi mắt phải: đ�
 
 </div>
 
-<Term id="dem">DEM</Term> từ ảnh quang học hoặc radar là **DSM**: nó đo bề mặt trên cùng, gồm cả tán cây và mái nhà. Muốn có **DTM** (mặt đất trống) phải lọc bỏ cây và nhà, thường cần thêm LiDAR.
+<Note kind="key">
 
-Hai DEM toàn cầu miễn phí trong sổ tay đều đo bằng **giao thoa radar** (Chương 11), không phải bằng ảnh quang học:
+Sai số độ cao tăng theo kích thước pixel và giảm khi tỷ số B/H lớn. Cùng sai số khớp 0,3 pixel, ảnh 0,5 m cho sai số 0,3 m, ảnh 30 m cho 18 m.
+
+</Note>
+
+<Note kind="myth">
+
+"DEM cho độ cao mặt đất." Thực ra <Term id="dem">DEM</Term> từ ảnh quang học hoặc radar là **DSM**: nó đo bề mặt trên cùng, gồm cả tán cây và mái nhà. Muốn có **DTM** (mặt đất trống) phải lọc bỏ cây và nhà, thường cần thêm LiDAR.
+
+</Note>
+
+Hai DEM toàn cầu miễn phí trong sổ tay đều đo bằng **giao thoa radar** (Chương 16), không phải bằng ảnh quang học:
 
 | | SRTM 1″ | Copernicus DEM GLO-30 |
 |---|---|---|
@@ -53,12 +73,12 @@ Hai DEM toàn cầu miễn phí trong sổ tay đều đo bằng **giao thoa rad
 | Pixel | 1″ (~30 m) | 1″ (~30 m) |
 | Độ cao tính từ | <Term id="geoid">Geoid</Term> EGM96 | Geoid EGM2008 |
 
-## 12.2 DEM quanh Fansipan
+## 17.2 DEM quanh Fansipan
 
 Khung 18 × 18 km bao đỉnh Fansipan và thị trấn Sa Pa, độ cao từ **605 m** đến **3111 m** trên Copernicus DEM. Pixel cao nhất cách tọa độ đỉnh Fansipan 67 m. Nó thấp hơn con số 3143 m thường được công bố, vì mỗi pixel 30 m là độ cao đại diện cho cả ô, nên đỉnh nhọn bị "mài" thấp đi.
 
 <Figure
-  title="Hình 12.2 — Mô hình số độ cao Fansipan – Sa Pa trên bản đồ"
+  title="Hình 17.2 — Mô hình số độ cao Fansipan – Sa Pa trên bản đồ"
   try="Ở lớp Bóng đổ, kéo phương vị Mặt Trời từ 315° sang 135°: núi trông lồi hay lõm? Chọn lớp Độ dốc: vùng nào dốc trên 45°? Chọn Cop − SRTM: chỗ nào hai DEM lệch nhau nhiều nhất?"
   source="Copernicus DEM GLO-30 (bản 2024_1) và SRTM 1″ v3, nội suy song tuyến về lưới 30 m UTM 48N trong Earth Engine, làm tròn tới mét. Độ dốc, hướng dốc: Horn (1981). Bóng đổ tính trong trình duyệt. Copernicus DEM © DLR e.V. 2010–2014 và © Airbus Defence and Space GmbH 2014–2018, cung cấp theo chương trình Copernicus; SRTM: NASA/USGS. Ảnh nền © Esri, Maxar, Earthstar Geographics."
 >
@@ -73,24 +93,42 @@ Khung 18 × 18 km bao đỉnh Fansipan và thị trấn Sa Pa, độ cao từ **
 
 **Hai DEM lệch nhau bao nhiêu?** Copernicus trừ SRTM trung bình **+3,5 m**, độ lệch chuẩn **11,8 m**, và 21,8 % số pixel lệch quá 10 m. Có ít nhất bốn nguyên nhân: hai lần đo cách nhau hơn 10 năm (rừng mọc, đường mới mở); bước sóng khác nhau nên sóng xuyên vào tán cây ở độ sâu khác nhau; mặt geoid khác nhau (EGM96 so với EGM2008); và các khoảng trống của SRTM đã được lấp bằng nguồn khác. Sổ tay không có số đo GNSS thực địa để nói DEM nào đúng hơn ở đây.
 
+<Stats items={[
+  { v: '+3,5', u: 'm', l: 'Copernicus trừ SRTM, trung bình' },
+  { v: '11,8', u: 'm', l: 'độ lệch chuẩn của hiệu hai DEM' },
+  { v: '21,8', u: '%', l: 'số pixel lệch quá 10 m' },
+]} caption="Hai DEM 30 m trên khung Fansipan – Sa Pa." />
+
+<Note kind="key">
+
+Hai DEM cùng pixel 30 m không cho cùng một độ cao: khác thời điểm đo, khác bước sóng, khác geoid. Không có số đo GNSS thực địa thì không nói được DEM nào đúng hơn.
+
+</Note>
+
 <Depth level="advanced" title="Công thức độ dốc và bóng đổ">
 
 Với cửa sổ 3 × 3 quanh pixel (a b c / d e f / g h i), kích thước pixel r:
 
-<p class="formula">∂z/∂x = [(c + 2f + i) − (a + 2d + g)] / 8r     ∂z/∂y = [(a + 2b + c) − (g + 2h + i)] / 8r</p>
+<Formula label="Đạo hàm theo Horn (1981)" tex="\begin{gathered} \frac{\partial z}{\partial x} = \frac{(c + 2f + i) - (a + 2d + g)}{8r} \cr \frac{\partial z}{\partial y} = \frac{(a + 2b + c) - (g + 2h + i)}{8r} \end{gathered}" />
 
-<p class="formula">độ dốc = arctan √((∂z/∂x)² + (∂z/∂y)²)     bóng đổ = cos Z · cos S + sin Z · sin S · cos(A − hướng dốc)</p>
+<Formula label="Độ dốc và bóng đổ" tex="\begin{gathered} S = \arctan\sqrt{\left(\frac{\partial z}{\partial x}\right)^2 + \left(\frac{\partial z}{\partial y}\right)^2} \cr \text{hs} = \cos Z \cos S \cr + \sin Z \sin S \cos(A - \varphi) \end{gathered}" where="
+S :: độ dốc
+\text{hs} :: bóng đổ
+Z :: góc thiên đỉnh của Mặt Trời (90° − độ cao)
+A :: phương vị Mặt Trời
+\varphi :: hướng dốc
+" />
 
-Z là góc thiên đỉnh của Mặt Trời (90° − độ cao), A là phương vị Mặt Trời, S là độ dốc. Giá trị âm (sườn quay lưng với Mặt Trời) được cắt về 0.
+Giá trị âm (sườn quay lưng với Mặt Trời) được cắt về 0.
 
 </Depth>
 
-## 12.3 Mặt cắt địa hình
+## 17.3 Mặt cắt địa hình
 
 Mặt cắt cho thấy hình dạng địa hình dọc một tuyến, rất hữu ích khi thiết kế đường, đường dây điện hay tuyến leo núi.
 
 <Figure
-  title="Hình 12.3 — Mặt cắt từ đỉnh Fansipan về Sa Pa"
+  title="Hình 17.3 — Mặt cắt từ đỉnh Fansipan về Sa Pa"
   try="Bấm hai điểm bất kỳ trên bản đồ để vẽ tuyến mới. Tìm một tuyến dài khoảng 2 km có đoạn dốc trên 45°. Hai đường Copernicus và SRTM lệch nhau nhiều nhất ở đâu: đỉnh, sườn hay đáy thung lũng?"
   source="Lấy mẫu song tuyến 240 điểm dọc tuyến trên Copernicus DEM GLO-30 và SRTM 1″ (lưới 30 m). Đoạn dốc nhất tính trên các khúc 90 m (3 pixel). Vị trí thị trấn Sa Pa là gần đúng."
 >
@@ -99,13 +137,24 @@ Mặt cắt cho thấy hình dạng địa hình dọc một tuyến, rất hữ
 
 Tuyến mẫu từ đỉnh Fansipan (3102 m tại pixel chứa tọa độ đỉnh) về Sa Pa (1504 m) dài **7,98 km**. Tuyến không đi xuống đều: điểm thấp nhất là 1237 m, nằm dưới cả Sa Pa, nên tổng quãng leo dốc vẫn là **654 m**. Đoạn 90 m dốc nhất nghiêng **50°**.
 
-## 12.4 Địa hình và ảnh radar
+<Note kind="key">
 
-Ở Chương 11, hình học chụp nghiêng đã cho thấy sườn dốc hơn góc tới θ bị **chồng lấn**, và sườn khuất dốc hơn 90° − θ rơi vào **bóng radar**. Có DEM, ta tính được cho từng pixel. Chỉ phần độ dốc theo hướng nhìn của radar mới quan trọng:
+Hiệu độ cao hai đầu tuyến không nói hết địa hình. Mặt cắt cho thấy từ Fansipan về Sa Pa vẫn phải leo 654 m, vì tuyến đi xuống dưới cả Sa Pa rồi mới lên lại.
 
-<p class="formula">tan(α_r) = tan(độ dốc) · cos(hướng dốc − hướng về phía radar)</p>
+</Note>
 
-Chọn lớp **Méo radar** trên Hình 12.2. Với Sentinel-1 bay lên, ở vĩ độ Fansipan radar nhìn về phương vị khoảng 78° (Đông Đông Bắc), còn khi bay xuống là khoảng 282°.
+## 17.4 Địa hình và ảnh radar
+
+Ở Chương 16, hình học chụp nghiêng đã cho thấy sườn dốc hơn góc tới θ bị **chồng lấn**, và sườn khuất dốc hơn 90° − θ rơi vào **bóng radar**. Có DEM, ta tính được cho từng pixel. Chỉ phần độ dốc theo hướng nhìn của radar mới quan trọng:
+
+<Formula label="Độ dốc theo hướng nhìn của radar" tex="\tan\alpha_r = \tan S \cdot \cos(\varphi - \varphi_r)" where="
+\alpha_r :: độ dốc theo hướng nhìn của radar
+S :: độ dốc
+\varphi :: hướng dốc
+\varphi_r :: hướng về phía radar
+" />
+
+Chọn lớp **Méo radar** trên Hình 17.2. Với Sentinel-1 bay lên, ở vĩ độ Fansipan radar nhìn về phương vị khoảng 78° (Đông Đông Bắc), còn khi bay xuống là khoảng 282°.
 
 | Chiều bay, góc tới | Chồng lấn | Bóng radar | Co ngắn |
 |---|---|---|---|
@@ -114,15 +163,21 @@ Chọn lớp **Méo radar** trên Hình 12.2. Với Sentinel-1 bay lên, ở vĩ
 | Lên, θ = 45° | 1,5 % | 0,7 % | 47,1 % |
 | Xuống, θ = 37° | 2,7 % | 0,4 % | 49,2 % |
 
-Góc tới càng lớn thì chồng lấn càng ít, nhưng bóng radar tăng. Hai chiều bay nhìn sườn núi từ hai phía, nên ghép ảnh lên và xuống sẽ giảm vùng mất thông tin. Đây là lý do bản đồ ngập ở vùng núi (bài tập Chương 11) cần cả DEM lẫn hai chiều bay.
+Góc tới càng lớn thì chồng lấn càng ít, nhưng bóng radar tăng. Hai chiều bay nhìn sườn núi từ hai phía, nên ghép ảnh lên và xuống sẽ giảm vùng mất thông tin. Đây là lý do bản đồ ngập ở vùng núi (bài tập Chương 16) cần cả DEM lẫn hai chiều bay.
+
+<Note kind="key">
+
+Có DEM, ta biết trước chỗ ảnh radar sẽ bị chồng lấn hay rơi vào bóng. Ghép ảnh bay lên và bay xuống giảm vùng mất thông tin.
+
+</Note>
 
 <Depth level="advanced" title="Vì sao bóng radar hiếm ở đây?">
 
-Bóng radar cần sườn khuất dốc hơn 90° − θ, tức trên 53° khi θ = 37°, và phải đo theo đúng phương nhìn. Trên DEM 30 m, độ dốc như vậy rất hiếm, vì mỗi pixel đã trung bình hóa các vách đá. Trên DEM chi tiết hơn (ví dụ 1–5 m từ ảnh lập thể), tỷ lệ bóng radar sẽ cao hơn. Đây là ví dụ cho thấy kết quả phân tích địa hình phụ thuộc vào độ phân giải (Chương 4).
+Bóng radar cần sườn khuất dốc hơn 90° − θ, tức trên 53° khi θ = 37°, và phải đo theo đúng phương nhìn. Trên DEM 30 m, độ dốc như vậy rất hiếm, vì mỗi pixel đã trung bình hóa các vách đá. Trên DEM chi tiết hơn (ví dụ 1–5 m từ ảnh lập thể), tỷ lệ bóng radar sẽ cao hơn. Đây là ví dụ cho thấy kết quả phân tích địa hình phụ thuộc vào độ phân giải (Chương 9).
 
 </Depth>
 
-## 12.5 Thực hành
+## 17.5 Thực hành
 
 Notebook tải Copernicus DEM và SRTM cho cùng khung Fansipan bằng Earth Engine, tính độ dốc, bóng đổ, hiệu hai DEM, vẽ mặt cắt và bản đồ chồng lấn/bóng radar. Script GEE dùng `ee.Terrain` để làm bản đồ địa hình cho một vùng bất kỳ.
 
@@ -134,7 +189,7 @@ Notebook tải Copernicus DEM và SRTM cho cùng khung Fansipan bằng Earth Eng
 2. Vẽ mặt cắt qua một hồ chứa thủy điện. Mặt nước trên hai DEM có phẳng không?
 3. So sánh độ cao một điểm mốc độ cao quốc gia (nếu bạn có số liệu) với hai DEM.
 
-## 12.6 Ôn tập
+## 17.6 Ôn tập
 
 <Quiz client:visible lang="vi" items={quiz} />
 

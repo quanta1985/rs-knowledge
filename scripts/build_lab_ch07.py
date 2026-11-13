@@ -5,9 +5,9 @@
 from labkit import MD, PY, main
 
 CELLS = [
-    (MD, """# Lab 7 — Tiền xử lý / Pre-processing
+    (MD, """# Lab 12 — Tiền xử lý / Pre-processing
 
-**Sổ tay Viễn thám & GIS — Chương 7** · [Mở chương / Open chapter](https://quanta1985.github.io/rs-knowledge/vi/ch07-preprocessing/)
+**Sổ tay Viễn thám & GIS — Chương 12** · [Mở chương / Open chapter](https://quanta1985.github.io/rs-knowledge/vi/ch07-preprocessing/)
 
 1. DN → phản xạ TOA → bức xạ từ metadata / DN → TOA reflectance → radiance from metadata.
 2. L1C so với L2A / L1C versus L2A.

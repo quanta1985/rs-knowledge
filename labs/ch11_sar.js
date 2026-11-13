@@ -1,5 +1,5 @@
 /**
- * Lab 11 — Bản đồ ngập từ Sentinel-1 / Sentinel-1 flood mapping · Sổ tay Viễn thám & GIS
+ * Lab 16 — Bản đồ ngập từ Sentinel-1 / Sentinel-1 flood mapping · Sổ tay Viễn thám & GIS
  * Dán vào https://code.earthengine.google.com và bấm Run.
  * Paste into https://code.earthengine.google.com and press Run.
  *

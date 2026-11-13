@@ -54,7 +54,7 @@ export default function RadianceCalc({ lang }: { lang: Lang }) {
   const step = (n: number, t: string, f: string, r: string) => (
     <li style={{ marginBottom: 12 }}>
       <span className="ctl-label">{n}. {t}</span>
-      <div style={{ font: '0.9rem var(--font-mono)', color: '#e2e8f0', marginTop: 2 }}>{f} = <b style={{ color: '#4fc3cd' }}>{r}</b></div>
+      <div style={{ font: '0.9rem var(--font-mono)', color: 'var(--st-fg)', marginTop: 2 }}>{f} = <b style={{ color: 'var(--st-accent)' }}>{r}</b></div>
     </li>
   );
 

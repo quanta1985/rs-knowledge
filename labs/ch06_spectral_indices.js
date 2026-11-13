@@ -1,5 +1,5 @@
 /**
- * Lab 6 — Chỉ số phổ / Spectral indices · Sổ tay Viễn thám & GIS
+ * Lab 11 — Chỉ số phổ / Spectral indices · Sổ tay Viễn thám & GIS
  * Dán vào https://code.earthengine.google.com và bấm Run.
  * Paste into https://code.earthengine.google.com and press Run.
  *

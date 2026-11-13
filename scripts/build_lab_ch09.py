@@ -6,9 +6,9 @@
 from labkit import MD, PY, main
 
 CELLS = [
-    (MD, """# Lab 9 — Phân loại & độ chính xác / Classification & accuracy
+    (MD, """# Lab 14 — Phân loại & độ chính xác / Classification & accuracy
 
-**Sổ tay Viễn thám & GIS — Chương 9** · [Mở chương / Open chapter](https://quanta1985.github.io/rs-knowledge/vi/ch09-classification/)
+**Sổ tay Viễn thám & GIS — Chương 14** · [Mở chương / Open chapter](https://quanta1985.github.io/rs-knowledge/vi/ch09-classification/)
 
 1. Huấn luyện Random Forest trong Earth Engine / Train a Random Forest in Earth Engine.
 2. Lấy mẫu kiểm định phân tầng theo bản đồ / Draw a stratified validation sample.
@@ -27,7 +27,7 @@ except Exception:
     ee.Authenticate()
     ee.Initialize(project=PROJECT)"""),
     (MD, "## 1. Ảnh và tham chiếu / Image and reference"),
-    (PY, """X0, Y1, N, RES = 583980, 2331020, 512, 10   # khung Chương 6, 9 / Ch. 6 and 9 frame
+    (PY, """X0, Y1, N, RES = 583980, 2331020, 512, 10   # khung Chương 11, 14 / Ch. 11 and 14 frame
 FRAME = ee.Geometry.Rectangle([X0, Y1 - N * RES, X0 + N * RES, Y1], 'EPSG:32648', False)
 BANDS = ['B2', 'B3', 'B4', 'B8', 'B11', 'B12']
 NAMES = ['Nước/Water', 'Cây gỗ/Trees', 'Thực vật thấp/Low veg.', 'Đô thị/Built-up', 'Đất trống/Bare']

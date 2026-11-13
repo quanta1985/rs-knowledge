@@ -1,0 +1,10 @@
+---
+// A row of big numbers that carry the section's message (value + unit + one-line label).
+interface Stat { v: string; u?: string; l: string }
+interface Props { items: Stat[]; caption?: string }
+const { items, caption } = Astro.props;
+---
+<figure class="stats">
+  <div class="stats-row">{items.map((s) => <div class="stat"><b>{s.v}{s.u && <small>{s.u}</small>}</b><span>{s.l}</span></div>)}</div>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>

@@ -1,6 +1,6 @@
 ---
 title: Pre-processing — radiometry, atmosphere, clouds
-n: 7
+n: 12
 summary: The numbers a satellite records are not the reflectance of the ground. This chapter goes from the digital numbers in the file to radiance, top-of-atmosphere and surface reflectance, then deals with clouds and cloud shadows on real Sentinel-2 images of Hanoi.
 objectives:
   - Convert Sentinel-2 L1C digital numbers into top-of-atmosphere reflectance and radiance using the scene metadata.
@@ -13,6 +13,10 @@ import Term from '../../../components/Term.astro';
 import Depth from '../../../components/Depth.astro';
 import Figure from '../../../components/Figure.astro';
 import LabLinks from '../../../components/LabLinks.astro';
+import Note from '../../../components/Note.astro';
+import Formula from '../../../components/Formula.astro';
+import Stats from '../../../components/Stats.astro';
+import Steps from '../../../components/Steps.astro';
 import RadianceCalc from '../../../islands/RadianceCalc.tsx';
 import ToaSrLab from '../../../islands/ToaSrLab.tsx';
 import CloudMaskLab from '../../../islands/CloudMaskLab.tsx';
@@ -20,7 +24,7 @@ import CompositeLab from '../../../islands/CompositeLab.tsx';
 import Quiz from '../../../islands/Quiz.tsx';
 import quiz from '../../../data/quiz/ch07.json';
 
-## 7.1 From photons to numbers
+## 12.1 From photons to numbers
 
 Sunlight crosses the atmosphere, hits the ground, is reflected and crosses the atmosphere again before reaching the sensor. On the way the atmosphere both **adds** light (scattering into the view) and **removes** light (absorption, scattering out). Satellite data are therefore released at several <Term id="data-level">processing levels</Term>:
 
@@ -29,22 +33,43 @@ Sunlight crosses the atmosphere, hits the ground, is reflected and crosses the a
 | Level-1C | <Term id="toa-reflectance">Top-of-atmosphere (TOA) reflectance</Term> × 10,000 | You need raw data, your own atmospheric correction, or cloud studies |
 | Level-2A | <Term id="surface-reflectance">Surface reflectance</Term> × 10,000, plus the SCL layer | Most applications: indices, classification, time series |
 
-Chapters 4, 6 and 11 use Level-2A. This chapter opens the black box to see how L2A is made.
+Chapters 9, 11 and 16 use Level-2A. This chapter opens the black box to see how L2A is made:
 
-## 7.2 Radiometric calibration: from DN to radiance
+<Steps title="From image file to usable data" items={[
+  { tag: '12.2', t: 'Digital number (DN) → top-of-atmosphere reflectance', d: 'Add RADIO_ADD_OFFSET and divide by 10,000; convert on to radiance with the scene metadata.' },
+  { tag: '12.3', t: 'Top-of-atmosphere → surface reflectance', d: 'Atmospheric correction removes the added scattered light and restores the absorbed part (Level-2A).' },
+  { tag: '12.4', t: 'Mask clouds and shadows', d: 'Cloud Score+ or SCL, where the threshold is a trade-off.' },
+  { tag: '12.5', t: 'Combine dates into a composite', d: 'Median of the cloud-masked acquisitions.' },
+]} />
+
+<Note kind="key">
+
+Level-1C is top-of-atmosphere reflectance, Level-2A is surface reflectance. Most applications (indices, classification, time series) should use L2A.
+
+</Note>
+
+## 12.2 Radiometric calibration: from DN to radiance
 
 Sentinel-2 L1C files store integers (DN). Since processing baseline 04.00 (2022), ESA adds 1000 to every value and records `RADIO_ADD_OFFSET = −1000` in the metadata. To undo it:
 
-<p class="formula">ρ_TOA = (DN + RADIO_ADD_OFFSET) / 10 000</p>
+<Formula label="Digital number → top-of-atmosphere reflectance (Sentinel-2 L1C)" tex="\rho_{TOA} = \frac{DN + \mathrm{OFFSET}}{10\,000}" where="
+DN :: integer value in the L1C file
+\mathrm{OFFSET} :: RADIO_ADD_OFFSET in the metadata, −1000 from processing baseline 04.00
+" />
 
 To get the energy actually reaching the sensor, convert reflectance into <Term id="radiance">radiance</Term> L with the band's solar irradiance E, the solar zenith angle θs and the Earth–Sun distance factor U = 1/d²:
 
-<p class="formula">L = ρ_TOA · U · E · cos θs / π</p>
+<Formula label="Reflectance → radiance" tex="L = \frac{\rho_{TOA} \cdot U \cdot E \cdot \cos\theta_s}{\pi}" where="
+L :: radiance at the sensor (W·m⁻²·sr⁻¹·µm⁻¹)
+U :: Earth–Sun distance factor, 1/d²
+E :: band solar irradiance (W·m⁻²·µm⁻¹)
+\theta_s :: solar zenith angle
+" />
 
 <Figure
-  title="Figure 7.1 — By hand: from digital number to radiance, Sentinel-2B, 12 February 2024"
+  title="Figure 12.1 — By hand: from digital number to radiance, Sentinel-2B, 12 February 2024"
   try="Pick West Lake and band B2, then switch to B8. What share of the signal comes from the atmosphere in each band? Switch to floodplain vegetation: is that share still large?"
-  source="Sentinel-2B Level-1C (COPERNICUS/S2_HARMONIZED) and Level-2A (COPERNICUS/S2_SR_HARMONIZED), scene 20240212T032849_T48QWJ, on the 10 m grid of Chapter 6. E, θs, U and RADIO_ADD_OFFSET come from the scene's own metadata. 3×3 pixel mean. Contains modified Copernicus Sentinel data 2024."
+  source="Sentinel-2B Level-1C (COPERNICUS/S2_HARMONIZED) and Level-2A (COPERNICUS/S2_SR_HARMONIZED), scene 20240212T032849_T48QWJ, on the 10 m grid of Chapter 11. E, θs, U and RADIO_ADD_OFFSET come from the scene's own metadata. 3×3 pixel mean. Contains modified Copernicus Sentinel data 2024."
 >
   <RadianceCalc client:visible lang="en" />
 </Figure>
@@ -57,19 +82,25 @@ Metadata of 12 Feb 2024: θs = 41.43°, U = 1.0280 (in February the Earth is clo
 
 1. DN in the original L1C file: 2210. Subtract 1000: 1210, so ρ_TOA = 0.121.
 2. L = 0.121 × 1.028 × 1959.75 × cos 41.43° / π ≈ **58.2 W·m⁻²·sr⁻¹·µm⁻¹**.
-3. After atmospheric correction (L2A) the surface reflectance is only **0.040**. About **two thirds** of the blue signal over the lake is light scattered by the atmosphere.
+3. After atmospheric correction (L2A) the surface reflectance is only **0.040**. <mark>About **two thirds** of the blue signal over the lake is light scattered by the atmosphere.</mark>
 
 </div>
 
-## 7.3 What the atmosphere does to an image
+<Note kind="key">
+
+The number in the file is not yet surface reflectance. The offset from the metadata must be removed, and over a dark surface such as a lake most of the blue signal comes from the atmosphere, not from the ground.
+
+</Note>
+
+## 12.3 What the atmosphere does to an image
 
 Two main processes:
 
 - **Scattering.** Gas molecules far smaller than the wavelength cause <Term id="rayleigh-scattering">Rayleigh scattering</Term>, whose strength scales with λ⁻⁴. Blue B2 (492 nm) is scattered (833/492)⁴ ≈ **8.2 times** more than near-infrared B8 (833 nm). <Term id="aerosol">Aerosols</Term> (dust, smoke) are larger, scatter with less wavelength dependence and cause haze.
-- **Absorption.** Water vapour, ozone and CO₂ absorb in specific ranges. Sensors place their bands in atmospheric windows (Chapter 3) to avoid most of it, but some remains.
+- **Absorption.** Water vapour, ozone and CO₂ absorb in specific ranges. Sensors place their bands in atmospheric windows (Chapter 8) to avoid most of it, but some remains.
 
 <Figure
-  title="Figure 7.2 — One acquisition: top-of-atmosphere (left) and surface reflectance (right)"
+  title="Figure 12.2 — One acquisition: top-of-atmosphere (left) and surface reflectance (right)"
   try="Drag the divider across West Lake. What does the TOA side look like? Choose 'Blue difference', then pick each point: which band has the tallest bar, and which are negative?"
   source="Sentinel-2B L1C and L2A, 12 Feb 2024, same 10 m UTM 48N grid. Both sides use the same fixed 0–0.25 stretch so the real haze shows. Blue difference: 0–0.15. Contains modified Copernicus Sentinel data 2024. Basemap © Esri, Maxar, Earthstar Geographics."
 >
@@ -84,7 +115,11 @@ Averaged over the 5.12 × 5.12 km frame, TOA minus surface reflectance:
 
 The effect shrinks from blue to red, as Rayleigh scattering predicts. In NIR and SWIR the difference is **negative**: the atmosphere absorbs some light, so correction **raises** the surface reflectance. At the floodplain-vegetation point B8 rises from 0.316 (TOA) to 0.431 (surface).
 
-In practice NDVI from TOA images is lower than from surface reflectance, and the gap changes from day to day with the haze. To compare dates, use L2A.
+<Note kind="key">
+
+The atmosphere brightens the blue band (scattering) and darkens NIR and SWIR (absorption). In practice NDVI from TOA images is lower than from surface reflectance, and the gap changes from day to day with the haze. To compare dates, use L2A.
+
+</Note>
 
 <Depth level="advanced" title="How does atmospheric correction work?">
 
@@ -94,15 +129,15 @@ The simplest method is **dark-object subtraction** (Chavez, 1988): assume the da
 
 </Depth>
 
-## 7.4 Clouds and cloud shadows
+## 12.4 Clouds and cloud shadows
 
-Hanoi is very cloudy (Chapter 4: only 92 of 433 acquisition dates were clear enough). Most images are partly cloudy, so cloud and shadow pixels must be **masked** before any computation. Two common tools for Sentinel-2:
+Hanoi is very cloudy (Chapter 9: only 92 of 433 acquisition dates were clear enough). Most images are partly cloudy, so cloud and shadow pixels must be **masked** before any computation. Two common tools for Sentinel-2:
 
 - <Term id="cloud-score-plus">Cloud Score+</Term>: scores each pixel from 0 (cloud or shadow) to 1 (clear). The `cs_cdf` band is recommended with a threshold around 0.5–0.65.
 - <Term id="scl">SCL</Term>: Sen2Cor's classification. Usually classes 3 (cloud shadow), 8, 9 (cloud) and 10 (thin cirrus) are masked.
 
 <Figure
-  title="Figure 7.3 — Masking clouds on the Hanoi image of 5 October 2023"
+  title="Figure 12.3 — Masking clouds on the Hanoi image of 5 October 2023"
   try="With cs_cdf, move the threshold from 0.4 to 0.8 and read the kept share. Switch to SCL: which areas does SCL mask that Cloud Score+ keeps? Choose 'Cut holes' to see the basemap through the masked pixels."
   source="Sentinel-2A L2A, 5 Oct 2023 (COPERNICUS/S2_SR_HARMONIZED), Cloud Score+ (GOOGLE/CLOUD_SCORE_PLUS/V1/S2_HARMONIZED, cs and cs_cdf bands), Sen2Cor SCL. Fixed 0–0.3 stretch. 'Agreement with SCL' = share of pixels both masks mask or both keep. Contains modified Copernicus Sentinel data 2023. Basemap © Esri, Maxar, Earthstar Geographics."
 >
@@ -116,7 +151,13 @@ Hanoi is very cloudy (Chapter 4: only 92 of 433 acquisition dates were clear eno
 | cs_cdf ≥ 0.8 | 23.4 % | Strict: loses much clear land |
 | SCL (3, 8, 9, 10) | 43.3 % | Masks a wide margin around clouds |
 
-At 0.6, Cloud Score+ and SCL **agree** on 87.4 % of pixels (45.3 % both masked, 42.1 % both kept). Most of the disagreement is the 11.4 % of the frame that SCL masks and Cloud Score+ keeps, around cloud and shadow edges. No mask is perfect: a strict threshold misses fewer clouds but loses data, a loose one does the opposite.
+At 0.6, Cloud Score+ and SCL **agree** on 87.4 % of pixels (45.3 % both masked, 42.1 % both kept). Most of the disagreement is the 11.4 % of the frame that SCL masks and Cloud Score+ keeps, around cloud and shadow edges.
+
+<Note kind="key">
+
+No mask is perfect: a strict threshold misses fewer clouds but loses data, a loose one does the opposite. State the mask and threshold you used.
+
+</Note>
 
 <div class="worked">
 
@@ -131,19 +172,31 @@ This is a rough estimate (cloud and shadow outlines do not match exactly), but i
 
 </div>
 
-## 7.5 Cloud-free composites
+## 12.5 Cloud-free composites
 
 When no single day is clear, combine many. The common choice is a <Term id="median-composite">median composite</Term>: at each pixel, take the median of all acquisitions in a period.
 
 <Figure
-  title="Figure 7.4 — Median composite of 19 acquisitions, 21 August – 19 November 2023"
+  title="Figure 12.4 — Median composite of 19 acquisitions, 21 August – 19 November 2023"
   try="Compare 'Median, no cloud mask' with 'Median after cloud mask'. Choose 'Clear images' and hover: which pixels have only 2 clear looks?"
   source="19 Sentinel-2 L2A images within ±45 days of 5 Oct 2023. Per-band, per-pixel median with or without masking cs_cdf < 0.6. Fixed 0–0.3 stretch. Contains modified Copernicus Sentinel data 2023. Basemap © Esri, Maxar, Earthstar Geographics."
 >
   <CompositeLab client:visible lang="en" />
 </Figure>
 
-A median is often said to "remove clouds by itself", but only when **more than half** of the looks are clear. The 2023 rainy season in Hanoi was not like that: the unmasked median still leaves **66 %** of pixels cloud-bright (mean of the three visible bands > 0.2). Mask first and then take the median, and only **0.8 %** remain. Each pixel keeps between 2 and 11 clear looks (median 7) out of 19.
+<Note kind="myth">
+
+"A median composite removes clouds by itself." Only when **more than half** of the looks at that pixel are clear. In cloudy regions, mask clouds first and take the median afterwards.
+
+</Note>
+
+The 2023 rainy season in Hanoi was not like that: the unmasked median still leaves **66 %** of pixels cloud-bright (mean of the three visible bands > 0.2). Mask first and then take the median, and only **0.8 %** remain. Each pixel keeps between 2 and 11 clear looks (median 7) out of 19.
+
+<Stats items={[
+  { v: '66', u: '%', l: 'cloud-bright pixels: median without cloud mask' },
+  { v: '0.8', u: '%', l: 'cloud-bright pixels: mask first, then median' },
+  { v: '7', u: '/ 19', l: 'median clear looks per pixel (range 2 to 11)' },
+]} caption="Hanoi, 21 August – 19 November 2023 (Figure 12.4)." />
 
 <Depth level="advanced" title="Median, mean or medoid?">
 
@@ -151,11 +204,11 @@ A median is often said to "remove clouds by itself", but only when **more than h
 - The **per-band median** resists outliers, but each band may come from a different date, creating spectra that never existed.
 - The **medoid** (Flood, 2013) picks the whole acquisition closest to the multi-dimensional median, so it keeps the real spectrum of one date.
 
-For time series (Chapter 10), do not composite over too long a period: mixing dry and wet seasons blends two states of rice and water.
+For time series (Chapter 15), do not composite over too long a period: mixing dry and wet seasons blends two states of rice and water.
 
 </Depth>
 
-## 7.6 Lab
+## 12.6 Lab
 
 The notebook converts DN → reflectance → radiance from the metadata, compares L1C with L2A at the six points, masks clouds with Cloud Score+ at several thresholds and builds composites. The GEE script makes a cloud-free composite for any area and period.
 
@@ -167,7 +220,7 @@ The notebook converts DN → reflectance → radiance from the metadata, compare
 2. Build dry-season and wet-season composites of the same area. How many clear looks does each pixel keep?
 3. Apply dark-object subtraction to the Hanoi L1C image. How close does it get to L2A?
 
-## 7.7 Review
+## 12.7 Review
 
 <Quiz client:visible lang="en" items={quiz} />
 

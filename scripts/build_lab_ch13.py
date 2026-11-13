@@ -6,9 +6,9 @@
 from labkit import MD, PY, main
 
 CELLS = [
-    (MD, """# Lab 13 — Case study Việt Nam / Viet Nam case studies
+    (MD, """# Lab 18 — Case study Việt Nam / Viet Nam case studies
 
-**Sổ tay Viễn thám & GIS — Chương 13** · [Mở chương / Open chapter](https://quanta1985.github.io/rs-knowledge/vi/ch13-vietnam/)
+**Sổ tay Viễn thám & GIS — Chương 18** · [Mở chương / Open chapter](https://quanta1985.github.io/rs-knowledge/vi/ch13-vietnam/)
 
 1. Mất tán cây theo tỉnh (Hansen GFC) với ngưỡng tán tùy chọn / Tree-cover loss by province with any canopy threshold.
 2. Nhiệt độ bề mặt theo lớp phủ cho một thành phố / Land surface temperature by land cover for a city.

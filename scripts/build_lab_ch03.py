@@ -5,9 +5,9 @@
 from labkit import MD, PY, main
 
 CELLS = [
-    (MD, """# Lab 3 — Bức xạ điện từ & khí quyển / EM radiation & the atmosphere
+    (MD, """# Lab 8 — Bức xạ điện từ & khí quyển / EM radiation & the atmosphere
 
-**Sổ tay Viễn thám & GIS — Chương 3** · [Mở chương / Open chapter](https://quanta1985.github.io/rs-knowledge/vi/ch03-physics/)
+**Sổ tay Viễn thám & GIS — Chương 8** · [Mở chương / Open chapter](https://quanta1985.github.io/rs-knowledge/vi/ch03-physics/)
 
 1. Đường cong Planck, Wien, Stefan–Boltzmann / Planck curves.
 2. Phổ Mặt Trời ASTM G173 và truyền qua tại các kênh Sentinel-2 / ASTM G173 and band transmittance.
@@ -57,7 +57,7 @@ for b, (lo, hi) in S2.items():
     t = np.trapezoid(direct[m], nm[m]) / np.trapezoid(etr[m], nm[m])
     print(f'{b:4s} {lo:.0f}–{hi:.0f} nm  truyền qua / transmittance = {100 * t:6.2f} %')"""),
     (MD, "## 3. Landsat 9 ST_B10 — Hà Nội 22/12/2023"),
-    (PY, """X0, Y1, RES, N = 583980, 2331020, 30, 171   # cùng góc khung Chương 6 / same corner as Ch. 6 frame
+    (PY, """X0, Y1, RES, N = 583980, 2331020, 30, 171   # cùng góc khung Chương 11 / same corner as Ch. 11 frame
 img = ee.Image('LANDSAT/LC09/C02/T1_L2/LC09_127045_20231222').select('ST_B10')
 arr = ee.data.computePixels({'expression': img, 'fileFormat': 'NUMPY_NDARRAY',
     'grid': {'dimensions': {'width': N, 'height': N}, 'crsCode': 'EPSG:32648',

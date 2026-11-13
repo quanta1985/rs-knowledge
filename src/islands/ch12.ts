@@ -1,4 +1,4 @@
-// Shared helpers for the Chapter 12 DEM figures.
+// Shared helpers for the Chapter 17 DEM figures.
 import { useMemo } from 'react';
 import { slopeAspect } from '../lib/dem';
 import { orbitEcef, subPoint } from '../lib/orbit';
@@ -28,7 +28,7 @@ export const useDem = () => {
 export const elevationColor = (z: number, lo: number, hi: number) => colormap(TERRAIN, (z - lo) / (hi - lo));
 
 /**
- * Sentinel-1 ground-track heading over a latitude (deg clockwise from north), from the Chapter 11 orbit model;
+ * Sentinel-1 ground-track heading over a latitude (deg clockwise from north), from the Chapter 16 orbit model;
  * the radar looks 90 deg to the right of it.
  */
 export const s1LookAzimuth = (lat: number, lon: number, ascending: boolean): number => {

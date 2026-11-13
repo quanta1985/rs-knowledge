@@ -5,9 +5,9 @@
 from labkit import MD, PY, main
 
 CELLS = [
-    (MD, """# Lab 8 — Tổ hợp màu & giải đoán / Composites & interpretation
+    (MD, """# Lab 13 — Tổ hợp màu & giải đoán / Composites & interpretation
 
-**Sổ tay Viễn thám & GIS — Chương 8** · [Mở chương / Open chapter](https://quanta1985.github.io/rs-knowledge/vi/ch08-interpretation/)
+**Sổ tay Viễn thám & GIS — Chương 13** · [Mở chương / Open chapter](https://quanta1985.github.io/rs-knowledge/vi/ch08-interpretation/)
 
 1. Tải bốn cảnh Việt Nam / Load four Vietnamese scenes.
 2. Bốn tổ hợp màu, hai kiểu kéo giãn / Four composites, two stretches.

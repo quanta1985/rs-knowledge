@@ -1,6 +1,6 @@
 ---
 title: Radar SAR & ứng dụng
-n: 11
+n: 16
 summary: Radar tự phát sóng và nhìn xuyên mây. Chương này dùng ảnh Sentinel-1 thật trên Hà Nội và An Giang để giải thích hình học chụp nghiêng, tán xạ ngược, nhiễu speckle, cách lập bản đồ ngập sau bão Yagi và theo dõi lúa khi ảnh quang học bị mây che.
 objectives:
   - Giải thích vì sao radar chụp được qua mây và vì sao nó phải nhìn nghiêng.
@@ -14,6 +14,9 @@ import Term from '../../../components/Term.astro';
 import Depth from '../../../components/Depth.astro';
 import Figure from '../../../components/Figure.astro';
 import LabLinks from '../../../components/LabLinks.astro';
+import Note from '../../../components/Note.astro';
+import Formula from '../../../components/Formula.astro';
+import Stats from '../../../components/Stats.astro';
 import SarAcquisition from '../../../islands/SarAcquisition.tsx';
 import SarGeometry from '../../../islands/SarGeometry.tsx';
 import SarExplorer from '../../../islands/SarExplorer.tsx';
@@ -22,11 +25,17 @@ import RiceSar from '../../../islands/RiceSar.tsx';
 import Quiz from '../../../islands/Quiz.tsx';
 import quiz from '../../../data/quiz/ch11.json';
 
-## 11.1 Vì sao cần radar
+## 16.1 Vì sao cần radar
 
-Ở Chương 4, trong ba năm 2022–2024 chỉ **92 trên 433 ngày** Sentinel-2 chụp Hồ Tây là có ảnh đủ trong. Cảm biến quang học đo ánh sáng Mặt Trời phản xạ, nên mây che là mất dữ liệu.
+Ở Chương 9, trong ba năm 2022–2024 chỉ **92 trên 433 ngày** Sentinel-2 chụp Hồ Tây là có ảnh đủ trong. Cảm biến quang học đo ánh sáng Mặt Trời phản xạ, nên mây che là mất dữ liệu.
 
 <Term id="sar">Radar khẩu độ tổng hợp (SAR)</Term> là cảm biến **chủ động**: vệ tinh tự phát xung vi ba rồi thu lại phần dội về. Sóng băng C của Sentinel-1 dài khoảng 5,5 cm, dài hơn nhiều so với kích thước giọt nước trong mây, nên đi qua mây gần như không suy hao. Radar chụp được cả ban đêm. Đổi lại, ảnh radar không cho màu và khó đọc hơn ảnh quang học.
+
+<Note kind="key">
+
+Radar tự phát sóng và dùng bước sóng dài hơn nhiều so với giọt nước trong mây, nên chụp được qua mây, cả ngày lẫn đêm. Cái giá phải trả: ảnh không có màu và khó đọc hơn ảnh quang học.
+
+</Note>
 
 <Depth level="ref" title="Bảng tra: các băng radar thường gặp">
 
@@ -45,12 +54,12 @@ Sentinel-1: tần số 5,405 GHz (λ ≈ 5,55 cm), chế độ IW quét dải r�
 
 </Depth>
 
-## 11.2 Hình học chụp nghiêng
+## 16.2 Hình học chụp nghiêng
 
 Radar không thể nhìn thẳng xuống: hai điểm đối xứng hai bên vết bay sẽ dội về cùng lúc và không tách được. Vì thế Sentinel-1 **nhìn sang phải** so với hướng bay. Góc giữa tia radar và phương thẳng đứng tại mặt đất là <Term id="incidence-angle">góc tới θ</Term>.
 
 <Figure
-  title="Hình 11.1 — Sentinel-1 bay qua Hà Nội: vết bay, dải quét IW và tia radar"
+  title="Hình 16.1 — Sentinel-1 bay qua Hà Nội: vết bay, dải quét IW và tia radar"
   try="Kéo góc tới từ 29° lên 46° (hai mép dải IW). Khoảng cách nghiêng R và độ phân giải mặt đất thay đổi thế nào? Đổi chiều bay Lên/Xuống: Hà Nội được nhìn từ phía nào?"
   source="Quỹ đạo tròn h = 693 km, độ nghiêng 98,18° (ESA Sentinel-1 User Guide), Trái Đất cầu R = 6371 km, chuyển động hai vật; vị trí chỉ mang tính minh họa, không phải quỹ đạo thật của một ngày cụ thể. Độ phân giải cự ly nghiêng IW 2,65 m. Ảnh nền © Esri, Maxar, Earthstar Geographics."
 >
@@ -59,7 +68,11 @@ Radar không thể nhìn thẳng xuống: hai điểm đối xứng hai bên v�
 
 Với θ = 37°, góc lệch khỏi phương thẳng đứng tại vệ tinh chỉ 32,9° vì Trái Đất cong. Tia radar đi **845 km** tới mặt đất, trong khi điểm chụp cách vết bay **459 km**. Radar đo thời gian sóng đi về, tức là đo theo khoảng cách nghiêng. Muốn ra khoảng cách trên mặt đất phải chia cho sin θ:
 
-<p class="formula">độ phân giải mặt đất = độ phân giải nghiêng / sin θ = 2,65 m / sin 37° ≈ 4,4 m</p>
+<Formula label="Độ phân giải cự ly mặt đất" tex="r_g = \frac{r_s}{\sin\theta} = \frac{2{,}65\ \text{m}}{\sin 37^\circ} \approx 4{,}4\ \text{m}" where="
+r_g :: độ phân giải trên mặt đất
+r_s :: độ phân giải cự ly nghiêng (IW: 2,65 m)
+\theta :: góc tới
+" />
 
 Góc tới càng nhỏ (gần vết bay), sin θ càng nhỏ, pixel trên mặt đất càng to.
 
@@ -72,16 +85,22 @@ Khi mặt đất dốc, góc tới cục bộ thay đổi theo sườn. Ba hiệ
 - **Bóng radar (shadow):** sườn khuất dốc hơn 90° − θ không nhận được sóng, ảnh đen hoàn toàn và không có thông tin.
 
 <Figure
-  title="Hình 11.2 — Co ngắn, chồng lấn và bóng radar trên một quả đồi"
+  title="Hình 16.2 — Co ngắn, chồng lấn và bóng radar trên một quả đồi"
   try="Đặt góc tới 37°, rồi tăng độ dốc sườn trước từ 25° lên 45°: thứ tự các điểm màu trên dải ảnh đảo ngược khi nào? Tăng sườn sau lên 60°: điểm nào thành rỗng?"
   source="Sơ đồ, xấp xỉ sóng phẳng. Vị trí trong ảnh = x·sin θ − z·cos θ."
 >
   <SarGeometry client:visible lang="vi" />
 </Figure>
 
-Khung Hồ Tây gần như bằng phẳng, nên ở đây không thấy các hiệu ứng này. Ở vùng núi, ảnh Sentinel-1 cần hiệu chỉnh địa hình bằng DEM (Chương 12). Earth Engine đã làm bước này cho bộ `COPERNICUS/S1_GRD` bằng SRTM 30 m, nhưng **không thể** khôi phục thông tin ở vùng bóng và vùng chồng lấn.
+Khung Hồ Tây gần như bằng phẳng, nên ở đây không thấy các hiệu ứng này. Ở vùng núi, ảnh Sentinel-1 cần hiệu chỉnh địa hình bằng DEM (Chương 17). Earth Engine đã làm bước này cho bộ `COPERNICUS/S1_GRD` bằng SRTM 30 m, nhưng **không thể** khôi phục thông tin ở vùng bóng và vùng chồng lấn.
 
-## 11.3 Tán xạ ngược và phân cực
+<Note kind="key">
+
+Radar đo theo khoảng cách nghiêng, nên pixel trên mặt đất to hơn ở gần vết bay. Ở vùng núi, co ngắn có thể hiệu chỉnh bằng DEM, còn vùng bóng và vùng chồng lấn thì mất thông tin hẳn.
+
+</Note>
+
+## 16.3 Tán xạ ngược và phân cực
 
 Giá trị của pixel radar là <Term id="backscatter">hệ số tán xạ ngược σ⁰</Term>: tỷ lệ năng lượng dội ngược về vệ tinh, thường viết theo <Term id="decibel">decibel</Term>, σ⁰(dB) = 10·log₁₀ σ⁰. Cứ giảm 10 dB là năng lượng giảm 10 lần. Bốn cơ chế quyết định σ⁰:
 
@@ -93,14 +112,14 @@ Giá trị của pixel radar là <Term id="backscatter">hệ số tán xạ ngư
 <Term id="polarization">Phân cực</Term> cho biết hướng dao động của sóng. Sentinel-1 phát sóng phân cực đứng (V) và thu cả đứng (VV) lẫn ngang (VH). Kênh VH chỉ có tín hiệu khi sóng bị đổi hướng dao động, chủ yếu do tán xạ khối trong thực vật.
 
 <Figure
-  title="Hình 11.3 — Ảnh Sentinel-1 khu Hồ Tây – sông Hồng trên bản đồ, ngày 12/02/2024"
+  title="Hình 16.3 — Ảnh Sentinel-1 khu Hồ Tây – sông Hồng trên bản đồ, ngày 12/02/2024"
   try="Bật VV rồi VH: lớp nào tối đi nhiều nhất? Di chuột lên Hồ Tây, khu phố cổ và bãi bồi để đọc σ⁰. Chọn RGB: vùng đô thị và vùng cây có màu gì?"
-  source="Sentinel-1A IW GRD, quỹ đạo 128 lên, 12/02/2024 (cùng ngày với ảnh Sentinel-2 của Chương 6), σ⁰ đã hiệu chỉnh địa hình trong Earth Engine, lấy mẫu láng giềng gần nhất về lưới 10 m UTM 48N. Kéo giãn cố định: VV −25…+5 dB, VH −32…−2 dB, VV−VH 0…15 dB. Điểm tham chiếu: trung bình 3×3 pixel theo công suất tuyến tính, chưa lọc speckle. Contains modified Copernicus Sentinel data 2024."
+  source="Sentinel-1A IW GRD, quỹ đạo 128 lên, 12/02/2024 (cùng ngày với ảnh Sentinel-2 của Chương 11), σ⁰ đã hiệu chỉnh địa hình trong Earth Engine, lấy mẫu láng giềng gần nhất về lưới 10 m UTM 48N. Kéo giãn cố định: VV −25…+5 dB, VH −32…−2 dB, VV−VH 0…15 dB. Điểm tham chiếu: trung bình 3×3 pixel theo công suất tuyến tính, chưa lọc speckle. Contains modified Copernicus Sentinel data 2024."
 >
   <SarExplorer client:visible lang="vi" />
 </Figure>
 
-Đọc sáu điểm tham chiếu của Chương 6 (Hình 11.3, bảng số liệu):
+Đọc sáu điểm tham chiếu của Chương 11 (Hình 16.3, bảng số liệu):
 
 <div class="table-wrap">
 
@@ -115,21 +134,27 @@ Giá trị của pixel radar là <Term id="backscatter">hệ số tán xạ ngư
 
 </div>
 
-Sông Hồng và đô thị cách nhau 17,4 dB, tức công suất chênh khoảng 55 lần. Vì vậy nước là đối tượng dễ tách nhất trên ảnh radar. Thực vật bãi bồi và cây xanh đô thị có VV gần như bằng nhau nhưng khác VH khoảng 1,6 dB. Khoảng cách nhỏ đó cho thấy chỉ một ảnh radar khó phân biệt các loại cây; cần chuỗi thời gian (mục 11.6).
+Sông Hồng và đô thị cách nhau 17,4 dB, tức công suất chênh khoảng 55 lần. Vì vậy nước là đối tượng dễ tách nhất trên ảnh radar. Thực vật bãi bồi và cây xanh đô thị có VV gần như bằng nhau nhưng khác VH khoảng 1,6 dB. Khoảng cách nhỏ đó cho thấy chỉ một ảnh radar khó phân biệt các loại cây; cần chuỗi thời gian (mục 16.6).
+
+<Note kind="key">
+
+Nước tối vì phản xạ gương, đô thị rất sáng vì dội hai lần. Hai lớp này cách nhau tới 17,4 dB (khoảng 55 lần công suất), nên nước là đối tượng dễ tách nhất trên ảnh radar. Kênh VH nhạy với thực vật vì tán xạ khối làm đổi phân cực.
+
+</Note>
 
 <Depth level="advanced" title="Vì sao Hồ Tây (−16,9 dB) sáng hơn sông Hồng (−20,4 dB)?">
 
-Mặt nước chỉ tối khi đủ phẳng so với bước sóng. Gió làm mặt hồ rộng gợn sóng vài centimet, và những gợn này dội một phần năng lượng về vệ tinh. Trong cửa sổ 20 × 20 pixel giữa hồ, VV trung bình là −18,3 dB, thấp hơn điểm 3 × 3 pixel ở trên vì speckle (mục 11.4). Ngưỡng nước dùng ở mục 11.5 (−15 dB) phải chừa chỗ cho hiện tượng này. Đây là cách giải thích theo vật lý; sổ tay không có số liệu gió đo tại hồ ngày 12/02/2024.
+Mặt nước chỉ tối khi đủ phẳng so với bước sóng. Gió làm mặt hồ rộng gợn sóng vài centimet, và những gợn này dội một phần năng lượng về vệ tinh. Trong cửa sổ 20 × 20 pixel giữa hồ, VV trung bình là −18,3 dB, thấp hơn điểm 3 × 3 pixel ở trên vì speckle (mục 16.4). Ngưỡng nước dùng ở mục 16.5 (−15 dB) phải chừa chỗ cho hiện tượng này. Đây là cách giải thích theo vật lý; sổ tay không có số liệu gió đo tại hồ ngày 12/02/2024.
 
 Ở góc trên bên trái ảnh có một hình chữ thập sáng. Đó là đặc trưng **búp sóng phụ** của một vật phản xạ rất mạnh (thường là kết cấu kim loại): năng lượng của nó lan ra theo hai hướng cự ly và phương vị. Đây là đặc điểm của cách tạo ảnh SAR, không phải vật thể thật có hình chữ thập.
 
 </Depth>
 
-## 11.4 Nhiễu speckle
+## 16.4 Nhiễu speckle
 
 Mỗi pixel radar là tổng sóng dội từ rất nhiều vật nhỏ bên trong nó. Các sóng này cộng hoặc triệt tiêu nhau tùy pha, nên hai pixel cạnh nhau trên cùng một mặt hồ có thể chênh nhau vài dB. Hiện tượng "muối tiêu" đó gọi là <Term id="speckle">speckle</Term>. Speckle là nhiễu **nhân**: nó tỷ lệ với cường độ tín hiệu, không cộng thêm như nhiễu điện tử.
 
-Trên Hình 11.3, chọn bộ lọc và đọc dòng "Độ lệch chuẩn VV, Hồ Tây" trong bảng thông số:
+Trên Hình 16.3, chọn bộ lọc và đọc dòng "Độ lệch chuẩn VV, Hồ Tây" trong bảng thông số:
 
 | Bộ lọc | Độ lệch chuẩn VV trong cửa sổ 20 × 20 px giữa Hồ Tây |
 |---|---|
@@ -140,20 +165,30 @@ Trên Hình 11.3, chọn bộ lọc và đọc dòng "Độ lệch chuẩn VV, H
 
 Cửa sổ càng to, ảnh càng mịn nhưng **bờ hồ và đường phố càng nhòe**. Bộ lọc Lee (1980) khắc phục điều này: ở vùng đồng nhất nó lấy trung bình như boxcar, còn ở nơi phương sai lớn hơn mức speckle cho phép (thường là biên của đối tượng) nó giữ gần giá trị gốc. Hai bộ lọc giảm speckle gần như bằng nhau trong lòng hồ, nhưng hãy phóng to bờ Hồ Tây để thấy chỗ chúng khác nhau.
 
+<Note kind="key">
+
+Speckle sinh ra từ chính cách tạo ảnh radar và là nhiễu nhân. Lọc càng mạnh ảnh càng mịn nhưng biên càng nhòe; bộ lọc Lee làm mịn vùng đồng nhất mà giữ biên tốt hơn boxcar.
+
+</Note>
+
 <Depth level="advanced" title="Lấy trung bình theo công suất, không theo dB">
 
 dB là thang logarit. Trung bình của các giá trị dB luôn **nhỏ hơn** dB của công suất trung bình (bất đẳng thức Jensen). Mọi bộ lọc và mọi phép thống kê vùng trong sổ tay đều đổi về công suất tuyến tính 10^(dB/10), tính toán, rồi mới đổi lại dB. Bộ lọc Lee dùng số look tương đương ENL = 4,4 của sản phẩm IW GRDH:
 
-<p class="formula">I' = m + W (I − m),  W = max(0, 1 − Cu² / Ci²),  Cu² = 1/ENL,  Ci² = var / m²</p>
+<Formula label="Bộ lọc Lee" tex="\begin{gathered} I' = m + W\,(I - m) \cr W = \max\!\left(0,\ 1 - \frac{C_u^2}{C_i^2}\right) \cr C_u^2 = \frac{1}{\mathrm{ENL}}, \qquad C_i^2 = \frac{\mathrm{var}}{m^2} \end{gathered}" where="
+I,\ I' :: công suất tuyến tính của pixel trước và sau khi lọc
+m,\ \mathrm{var} :: trung bình và phương sai trong cửa sổ lọc
+\mathrm{ENL} :: số look tương đương (4,4 với IW GRDH)
+" />
 
 </Depth>
 
-## 11.5 Ví dụ: lập bản đồ ngập sau bão Yagi
+## 16.5 Ví dụ: lập bản đồ ngập sau bão Yagi
 
 Bão Yagi đổ bộ vào Quảng Ninh – Hải Phòng ngày 7/9/2024. Mưa lớn sau bão làm nước sông Hồng qua Hà Nội dâng cao và ngập nhiều bãi ven sông. Những ngày đó trời nhiều mây, nên ảnh quang học gần như không dùng được. Sentinel-1 có hai ảnh cùng quỹ đạo 91 (xuống) ngày 31/8 (trước bão) và 12/9 (sau bão), cách nhau đúng một chu kỳ 12 ngày.
 
 <Figure
-  title="Hình 11.4 — Nước trước và sau bão Yagi trên bản đồ Hà Nội"
+  title="Hình 16.4 — Nước trước và sau bão Yagi trên bản đồ Hà Nội"
   try="Ở chế độ 'Ngưỡng', thử −15 dB rồi bấm Otsu: diện tích nước mới thay đổi bao nhiêu? Chuyển sang 'Phát hiện thay đổi' với mức giảm −3 dB: những vùng mới nào xuất hiện dọc sông Hồng? Đặt độ mờ 50 % để so với ảnh nền."
   source="Sentinel-1A IW GRD, VV, quỹ đạo 91 xuống, 31/08/2024 và 12/09/2024, lọc Lee 5×5 trong trình duyệt. 'Nước' = VV < ngưỡng trên ảnh trước; 'nước mới' = không phải nước trước bão và (VV sau < ngưỡng) hoặc (VV sau − VV trước < mức giảm). Chưa đối chiếu với dữ liệu thực địa. Contains modified Copernicus Sentinel data 2024. Ảnh nền © Esri, Maxar, Earthstar Geographics."
 >
@@ -168,20 +203,33 @@ Ba cách cho ba kết quả khác nhau:
 | Ngưỡng Otsu trên ảnh sau (−11 dB) | 7,47 km² | 1,57 km² |
 | Phát hiện thay đổi, VV giảm hơn 3 dB | 6,75 km² | 2,41 km² |
 
-Phát hiện thay đổi tìm thấy diện tích **gấp 2,5 lần** ngưỡng −15 dB, chủ yếu trên bãi bồi phía đông sông Hồng. Ví dụ ở điểm thực vật bãi bồi của Chương 6: VV giảm từ −7,9 dB xuống −16,3 dB. Khi cây trồng bị ngập một phần, tán lá vẫn nhô lên khỏi mặt nước nên σ⁰ giảm mạnh nhưng có khi chưa xuống dưới ngưỡng của mặt nước trống. Ngược lại, Otsu chọn ngưỡng −11 dB vì khung ảnh chủ yếu là đô thị, histogram không có hai đỉnh rõ, nên ngưỡng tự động này dễ tính cả đất ẩm và bóng tối vào "nước".
+Phát hiện thay đổi tìm thấy diện tích **gấp 2,5 lần** ngưỡng −15 dB, chủ yếu trên bãi bồi phía đông sông Hồng. Ví dụ ở điểm thực vật bãi bồi của Chương 11: VV giảm từ −7,9 dB xuống −16,3 dB. Khi cây trồng bị ngập một phần, tán lá vẫn nhô lên khỏi mặt nước nên σ⁰ giảm mạnh nhưng có khi chưa xuống dưới ngưỡng của mặt nước trống. Ngược lại, Otsu chọn ngưỡng −11 dB vì khung ảnh chủ yếu là đô thị, histogram không có hai đỉnh rõ, nên ngưỡng tự động này dễ tính cả đất ẩm và bóng tối vào "nước".
 
-**Lưu ý khi dùng kết quả:**
+<Note kind="key">
+
+Một ngưỡng cố định chỉ bắt được mặt nước trống. Phát hiện thay đổi (so với ảnh trước bão) bắt thêm ruộng, bãi ngập một phần, nơi σ⁰ giảm mạnh nhưng chưa xuống dưới ngưỡng nước.
+
+</Note>
+
+<Note kind="warn" label="Lưu ý khi dùng kết quả">
 
 - Đây là bản đồ **nghi ngập**, chưa kiểm chứng bằng thực địa hoặc ảnh máy bay. Không nên dùng làm số liệu thiệt hại.
 - Nhà cửa bị ngập thường **sáng lên** (tường và mặt nước tạo dội hai lần), nên cả hai cách đều bỏ sót ngập trong khu dân cư.
 - Ảnh 12/9 chỉ là một thời điểm; đỉnh lũ có thể rơi vào ngày khác.
 
-## 11.6 Ví dụ: theo dõi lúa khi mây che
+</Note>
 
-Chuỗi NDVI ruộng lúa An Giang ở Chương 6 có một khoảng trống dài: **từ 18/6 đến 16/9/2024 không có ảnh Sentinel-2 nào đủ trong**, đúng giữa mùa mưa. Trong cùng thời gian, Sentinel-1 quỹ đạo 26 vẫn chụp đủ 6 lần.
+## 16.6 Ví dụ: theo dõi lúa khi mây che
+
+Chuỗi NDVI ruộng lúa An Giang ở Chương 11 có một khoảng trống dài: **từ 18/6 đến 16/9/2024 không có ảnh Sentinel-2 nào đủ trong**, đúng giữa mùa mưa. Trong cùng thời gian, Sentinel-1 quỹ đạo 26 vẫn chụp đủ 6 lần.
+
+<Stats items={[
+  { v: '0', l: 'ảnh Sentinel-2 đủ trong từ 18/6 đến 16/9/2024' },
+  { v: '6', l: 'lần Sentinel-1 (quỹ đạo 26) chụp trong cùng thời gian' },
+]} caption="Ruộng lúa An Giang giữa mùa mưa 2024." />
 
 <Figure
-  title="Hình 11.5 — NDVI (Sentinel-2) và σ⁰ (Sentinel-1) của cùng một khu ruộng lúa"
+  title="Hình 16.5 — NDVI (Sentinel-2) và σ⁰ (Sentinel-1) của cùng một khu ruộng lúa"
   try="Di chuột vào khoảng tháng 7–9/2024 trên biểu đồ dưới: VH xuống thấp nhất ngày nào? Khi NDVI xuất hiện trở lại ngày 16/9, giá trị của nó có hợp với xu hướng VH không?"
   source="Sentinel-2 L2A: trung vị NDVI ruộng (ESA WorldCover lớp 40) trong ô 2 × 2 km quanh 105,08°E 10,45°N, chỉ giữ lần chụp có ≥ 60 % pixel không mây. Sentinel-1A IW GRD: một quỹ đạo (26) để giữ nguyên góc nhìn, trung bình σ⁰ theo công suất trên cùng các pixel ruộng. Không nối điểm qua khoảng trống > 40 ngày. Contains modified Copernicus Sentinel data 2023–2024."
 >
@@ -190,8 +238,19 @@ Chuỗi NDVI ruộng lúa An Giang ở Chương 6 có một khoảng trống dà
 
 VH xuống thấp ngày 15/8 (−21,0 dB) và 27/8/2024 (−23,4 dB), rồi tăng lại lên −17,4 dB ngày 8/9 và −16,1 dB ngày 20/9. NDVI khi xuất hiện trở lại là 0,60 (16/9) rồi 0,79 (26/9). Cách giải thích phù hợp: cuối tháng 8 ruộng vừa gặt và được cho nước vào để làm đất, gieo sạ (mặt nước, nên VH thấp). Sau đó lúa lớn lên, tán xạ khối trong cây tăng, nên VH tăng. Đây là **diễn giải chưa kiểm chứng bằng lịch thời vụ thực địa**, nhưng khớp với mô hình hai đến ba vụ lúa mỗi năm ở An Giang.
 
-## 11.7 Giao thoa radar (InSAR) và sụt lún
+<Note kind="key">
 
+Khi mây che ảnh quang học suốt mùa mưa, chuỗi Sentinel-1 vẫn đều đặn. VH thấp khi ruộng ngập nước và tăng khi lúa lớn, nên radar lấp được khoảng trống của chuỗi NDVI.
+
+</Note>
+
+## 16.7 Giao thoa radar (InSAR) và sụt lún
+
+<Note kind="key">
+
+Ngoài cường độ, radar còn ghi **pha**. So pha nhiều ảnh (InSAR) đo được chuyển dịch mặt đất cỡ milimét mỗi năm. Ở đồng bằng sông Cửu Long, tốc độ lún đo được cỡ 1–2 cm/năm, nhanh hơn nhiều lần mực nước biển dâng.
+
+</Note>
 <Depth level="advanced" title="Đo chuyển dịch mặt đất bằng pha sóng">
 
 Ngoài cường độ, radar còn ghi **pha** của sóng dội về. So pha của hai ảnh chụp từ gần cùng một vị trí vào hai thời điểm khác nhau sẽ ra <Term id="insar">giao thoa đồ (interferogram)</Term>. Nếu mặt đất lún xuống nửa bước sóng (λ/2 ≈ 2,8 cm với Sentinel-1) theo hướng nhìn, pha quay đủ một vòng và tạo một vân màu. Ghép hàng chục đến hàng trăm ảnh (kỹ thuật PS-InSAR, SBAS), người ta đo được tốc độ lún cỡ milimét mỗi năm.
@@ -202,7 +261,7 @@ Sổ tay chưa có hình tương tác cho InSAR, vì dữ liệu pha (SLC) khôn
 
 </Depth>
 
-## 11.8 Thực hành
+## 16.8 Thực hành
 
 Notebook Python tải ảnh Sentinel-1 cùng khung Hồ Tây, so sánh VV và VH, lọc speckle, lập bản đồ ngập Yagi bằng hai cách và vẽ chuỗi VH ruộng lúa An Giang. Script GEE làm bản đồ ngập cho một khu vực và hai ngày bất kỳ.
 
@@ -214,7 +273,7 @@ Notebook Python tải ảnh Sentinel-1 cùng khung Hồ Tây, so sánh VV và VH
 2. Lấy chuỗi VH của một khu ruộng ở nơi bạn sống. Đếm số vụ lúa trong năm 2024.
 3. So sánh bản đồ ngập Sentinel-1 với ảnh Sentinel-2 đầu tiên không mây sau bão. Hai bản đồ khác nhau ở đâu?
 
-## 11.9 Ôn tập
+## 16.9 Ôn tập
 
 <Quiz client:visible lang="vi" items={quiz} />
 

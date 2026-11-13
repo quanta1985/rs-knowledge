@@ -9,7 +9,7 @@ import { Key, Slider, StatPanel } from './VizUi';
 
 type P = { lon: number; lat: number };
 const NPTS = 240;
-const CYAN = '#4fc3cd', AMBER = '#E69F00';
+const CYAN = 'var(--st-accent)', AMBER = '#E69F00';
 
 const TXT = {
   vi: { loading: 'Đang tải DEM…', title: 'Mặt cắt địa hình', len: 'Chiều dài', ends: 'Độ cao A → B', range: 'Thấp / cao nhất', climb: 'Tổng leo dốc',
@@ -83,7 +83,7 @@ export default function ProfileTool({ lang }: { lang: Lang }) {
     const path = (v: number[]) => v.map((z, i) => `${i ? 'L' : 'M'}${sx(i).toFixed(1)},${sy(z).toFixed(1)}`).join('');
     chart = (
       <svg className="hist" viewBox={`0 0 ${CW} ${CH}`} role="img" aria-label={`${T.title}: ${nf(prof.lenM / 1000, 2)} km`}>
-        {[y0, (y0 + y1) / 2, y1].map((z) => <g key={z}><line x1={L} x2={CW - 4} y1={sy(z)} y2={sy(z)} stroke="#94a3b8" opacity={0.2} />
+        {[y0, (y0 + y1) / 2, y1].map((z) => <g key={z}><line x1={L} x2={CW - 4} y1={sy(z)} y2={sy(z)} stroke="var(--st-muted)" opacity={0.2} />
           <text x={L - 4} y={sy(z) + 3} textAnchor="end">{nf(z)}</text></g>)}
         <path d={`${path(prof.cop)}L${sx(NPTS - 1)},${CH - B}L${sx(0)},${CH - B}Z`} fill={CYAN} opacity={0.15} />
         <path d={path(prof.srtm)} stroke={AMBER} strokeWidth={1.5} strokeDasharray="4 3" fill="none" />

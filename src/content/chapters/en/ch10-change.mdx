@@ -1,6 +1,6 @@
 ---
 title: Time series & change detection
-n: 10
+n: 15
 summary: The Landsat archive reaches back to 1984, so we can look back a quarter of a century. This chapter compares west Hanoi in 2000 and 2024, follows single pixels through 25 years to find the year of change, and measures accretion and erosion at Ca Mau cape, each with the traps of comparing images from different dates.
 objectives:
   - State the conditions for comparing two images of different dates (same season, same processing, sensor normalisation).
@@ -13,28 +13,36 @@ import Term from '../../../components/Term.astro';
 import Depth from '../../../components/Depth.astro';
 import Figure from '../../../components/Figure.astro';
 import LabLinks from '../../../components/LabLinks.astro';
+import Note from '../../../components/Note.astro';
+import Stats from '../../../components/Stats.astro';
 import UrbanChange from '../../../islands/UrbanChange.tsx';
 import PixelSeries from '../../../islands/PixelSeries.tsx';
 import CoastChange from '../../../islands/CoastChange.tsx';
 import Quiz from '../../../islands/Quiz.tsx';
 import quiz from '../../../data/quiz/ch10.json';
 
-## 10.1 Comparing two dates: what it takes
+## 15.1 Comparing two dates: what it takes
 
 <Term id="change-detection">Change detection</Term> answers: where did things change, from what to what, and when? The Landsat archive starts with Landsat 5 in 1984 and has been free since 2008 (Woodcock et al. 2008), so we can look back about 40 years anywhere in Viet Nam.
 
 Two images are comparable only if they differ **mainly** because the ground changed. Every other difference is noise:
 
 - **Season:** newly transplanted and ripe rice give very different NDVI on unchanged land. Compare the same season, or use multi-month composites.
-- **Clouds and shadows:** mask them first (Chapter 7).
+- **Clouds and shadows:** mask them first (Chapter 12).
 - **Sensor:** Landsat 5/7 (TM/ETM+) and Landsat 8/9 (OLI) have slightly different bands. The same surface gives slightly different indices (Roy et al. 2016).
 
 This chapter uses **median composites**: for each pixel, the median of all clear observations over about 19 months. The median removes leftover clouds and dampens seasonal swings.
 
-## 10.2 West Hanoi 2000 → 2024
+<Note kind="key">
+
+Before comparing two images, remove differences that do not come from the ground: **season**, **clouds** and **sensor**. Use the same season (or multi-month composites), mask clouds carefully, and take care when the sensor changes.
+
+</Note>
+
+## 15.2 West Hanoi 2000 → 2024
 
 <Figure
-  title="Figure 10.1 — West Hanoi (My Dinh – Ha Dong) in 2000 and 2024 on the map"
+  title="Figure 15.1 — West Hanoi (My Dinh – Ha Dong) in 2000 and 2024 on the map"
   try="In Compare mode, drag 'Blend' from 0 to 100 %: which areas turn from green to pink-purple? Switch to 'Change map', choose 'NDBI difference' and toggle 'Normalise': how much does the area change?"
   source="Landsat Collection 2 Level-2. 2000: Landsat 5 TM and Landsat 7 ETM+, Oct 1999–Apr 2001 (66 scenes, median of 11 clear observations per pixel). 2024: Landsat 8/9 OLI, Oct 2023–Apr 2025 (98 scenes, median 31). Median composites after QA_PIXEL masking (cloud, shadow, dilated cloud). SWIR1–NIR–Red composite, fixed stretch 0–0.30 / 0–0.40 / 0–0.25. 15 × 15 km frame, 30 m pixels, UTM 48N. Landsat courtesy of USGS. Basemap © Esri, Maxar, Earthstar Geographics."
 >
@@ -47,20 +55,32 @@ In the SWIR1–NIR–Red composite, vegetation is green while buildings and bare
 
 **2. Index differencing:** NDBI 2024 minus NDBI 2000, threshold 0.15. Subtracting directly flags **73.25 km²** of "built-up gain", a third of the frame, against only 5.14 km² of decrease. Why? The median NDBI difference over the **whole frame** is +0.094: almost every pixel "increased". That is mostly the difference between the two sensors and periods, not real construction. Subtracting the median (a simple relative normalisation) leaves 27.34 km² up and 23.37 km² down. NDVI differences are much less biased: their median is only −0.014.
 
+<Stats items={[
+  { v: '73.25', u: 'km²', l: '"built-up gain" from plain NDBI 2024 − 2000' },
+  { v: '+0.094', l: 'median NDBI difference over the whole frame' },
+  { v: '27.34', u: 'km²', l: '"built-up gain" after subtracting the median' },
+]} caption="Index differencing across two sensors: most of the first 'gain' is a sensor and period offset." />
+
+<Note kind="key">
+
+Two images from different sensors can be offset over the **whole frame**. Before thresholding an index difference, look at the median difference of the whole frame: if it is clearly not zero, most of the "change" comes from the sensors, not the ground.
+
+</Note>
+
 <Depth level="advanced" title="Why index differences break across sensors">
 
 The OLI NIR band (845–885 nm) is narrower than the TM/ETM+ NIR band (about 770–900 nm), and SWIR1 shifts slightly too. Roy et al. (2016) derived ETM+–OLI transformation coefficients per band and for NDVI. Here the handbook only uses relative normalisation (subtracting the frame median). That assumes most of the frame did **not** change, which is not true for a fast-urbanising area like west Hanoi, so the normalised result is illustrative only. Better: apply cross-sensor coefficients, or use "invariant" pixels (deep water, old roofs) as anchors.
 
 </Depth>
 
-## 10.3 Following each pixel for 25 years
+## 15.3 Following each pixel for 25 years
 
-Two dates only tell you **that** something changed. To know **when**, you need a <Term id="time-series">time series</Term>. Figure 10.2 takes the median NDVI of **each year** 2000–2024 in the central part of the frame (7.5 × 7.5 km) and looks for the year NDVI dropped abruptly.
+<mark class="key">Two dates only tell you **that** something changed. To know **when**, you need a <Term id="time-series">time series</Term>.</mark> Figure 15.2 takes the median NDVI of **each year** 2000–2024 in the central part of the frame (7.5 × 7.5 km) and looks for the year NDVI dropped abruptly.
 
 <Figure
-  title="Figure 10.2 — Year of abrupt NDVI loss and the NDVI series of one pixel"
+  title="Figure 15.2 — Year of abrupt NDVI loss and the NDVI series of one pixel"
   try="Click a few yellow (late break) and purple (early break) points to see their series. Drag 'Minimum F' from 20 to 60: which pixels disappear? Read the 2012 value in the data table and explain it."
-  source="Landsat 5, 7, 8, 9 Collection 2 Level-2; median NDVI of all clear observations in each calendar year, 250 × 250 pixels of 30 m in the centre of Figure 10.1. Points are not joined across missing years. Break year: split the series into two segments with different means (≥ 4 years each) that minimise the sum of squared errors; F compares with a straight line. Landsat courtesy of USGS. Basemap © Esri, Maxar, Earthstar Geographics."
+  source="Landsat 5, 7, 8, 9 Collection 2 Level-2; median NDVI of all clear observations in each calendar year, 250 × 250 pixels of 30 m in the centre of Figure 15.1. Points are not joined across missing years. Break year: split the series into two segments with different means (≥ 4 years each) that minimise the sum of squared errors; F compares with a straight line. Landsat courtesy of USGS. Basemap © Esri, Maxar, Earthstar Geographics."
 >
   <PixelSeries client:visible lang="en" />
 </Figure>
@@ -86,6 +106,12 @@ In the whole 56.25 km² frame, **6008 pixels (5.41 km²)** show an NDVI drop of 
 - **2004** has the most pixels (1311). Partly because 2004 is the **earliest** year the algorithm may choose (it needs at least 4 years before the split). Partly because from May 2003 Landsat 7's scan line corrector failed (SLC-off), leaving stripes without data.
 - **2012** has almost only Landsat 7 SLC-off (Landsat 5 stopped imaging at the end of 2011, Landsat 8 launched in 2013). The median number of clear observations in 2012 is just **1**, so that year's NDVI is very noisy.
 
+<Note kind="key">
+
+A break-year map reflects the data and the algorithm as well as the ground. Pixels piling up in the earliest allowed year (2004) or in a data-poor year (2012) need a careful look before they count as real change.
+
+</Note>
+
 <Depth level="advanced" title="Theil–Sen, breakpoints and real algorithms">
 
 **Theil–Sen** (Sen 1968): the slope is the median of the slopes of all point pairs. One noisy year (like 2012) barely moves it, whereas least squares is pulled off.
@@ -94,12 +120,12 @@ The **breakpoint** here is the simplest model: two constant levels. Research alg
 
 </Depth>
 
-## 10.4 Accretion and erosion at Ca Mau cape
+## 15.4 Accretion and erosion at Ca Mau cape
 
-Ca Mau cape is where Viet Nam's land is still changing fast. Figure 10.3 uses <Term id="mndwi">MNDWI</Term> (Chapter 6) to separate water from land at two dates, then compares them.
+Ca Mau cape is where Viet Nam's land is still changing fast. Figure 15.3 uses <Term id="mndwi">MNDWI</Term> (Chapter 11) to separate water from land at two dates, then compares them.
 
 <Figure
-  title="Figure 10.3 — Coastal accretion and erosion at Ca Mau cape, 2000 → 2024"
+  title="Figure 15.3 — Coastal accretion and erosion at Ca Mau cape, 2000 → 2024"
   try="Switch between 2000 and 2024: how did the western (Gulf of Thailand) and south-eastern shores change? In 'Accretion / erosion', switch 'Sea only' to 'All water': where does the extra area come from? Drag the MNDWI threshold from 0 to −0.1."
   source="Landsat Collection 2 Level-2 median composites: 2000 = Landsat 5/7, Oct 1999–Apr 2001 (63 scenes, median 22 clear observations); 2024 = Landsat 8/9, Oct 2023–Apr 2025 (123 scenes, median 31). MNDWI = (Green − SWIR1)/(Green + SWIR1). 'Sea' = water connected to the frame edge and at least 18 km² large. SWIR1–NIR–Green composite. 15 × 15 km frame, 30 m pixels. Landsat courtesy of USGS. Basemap © Esri, Maxar, Earthstar Geographics."
 >
@@ -123,19 +149,30 @@ The result is very sensitive to the method:
 
 "All water" also counts shrimp ponds dug or filled inland, which is not the coastline. A threshold of −0.1 puts wet mudflats into "water" in 2000, so when mangroves colonise them the "accretion" doubles. One more source of error is the **tide**: images at low tide expose more mudflat. Median composites reduce this but do not remove it.
 
-## 10.5 Reporting change properly
+<Note kind="key">
 
+Accretion and erosion figures depend on the MNDWI threshold, on counting "sea only" or "all water", and on the tide at acquisition. In this frame, moving the threshold from 0 to −0.1 more than doubles the accretion (21.09 → 45.83 km²).
+
+</Note>
+
+## 15.5 Reporting change properly
+
+<Note kind="key">
+
+Change is usually a rare class. Report change areas from a stratified validation sample with confidence intervals, together with the rule used (index, threshold), never by counting pixels.
+
+</Note>
 <Depth level="ref" title="Checklist">
 
 1. Same season or multi-month composites; mask clouds carefully.
 2. Across sensors: cross-calibrate (Roy et al. 2016) or compare after classification.
 3. State the rule (index, threshold) and test its sensitivity.
-4. Never report change area by counting pixels. Draw a stratified validation sample over the change classes and estimate areas with confidence intervals (Olofsson et al. 2014, Chapter 9). Change is usually a rare class and easily mis-estimated.
+4. Never report change area by counting pixels. Draw a stratified validation sample over the change classes and estimate areas with confidence intervals (Olofsson et al. 2014, Chapter 14). Change is usually a rare class and easily mis-estimated.
 5. In time series: do not join points across long gaps, flag data-poor years (such as 2012), and distrust breaks piled up at the start or end of the series.
 
 </Depth>
 
-## 10.6 Lab
+## 15.6 Lab
 
 The Python notebook builds 2000 and 2024 Landsat composites for an area, computes the NDVI difference, finds each pixel's year of largest NDVI drop in Earth Engine and measures accretion and erosion with MNDWI. The GEE script maps the year of largest NDVI drop for an area of your choice, a stepping stone to LandTrendr.
 
@@ -143,11 +180,11 @@ The Python notebook builds 2000 and 2024 Landsat composites for an area, compute
 
 **Suggested exercises**
 
-1. In Figure 10.1, choose NDVI thresholds so that the "vegetation loss" area roughly matches what you count on the basemap in a ward you know.
-2. In Figure 10.2, find a pixel whose NDVI **increased** (a new park?). What is its break year?
-3. In the GEE script, move the Figure 10.3 frame to the Tien River mouth or the Go Cong coast. Is that shore accreting or eroding?
+1. In Figure 15.1, choose NDVI thresholds so that the "vegetation loss" area roughly matches what you count on the basemap in a ward you know.
+2. In Figure 15.2, find a pixel whose NDVI **increased** (a new park?). What is its break year?
+3. In the GEE script, move the Figure 15.3 frame to the Tien River mouth or the Go Cong coast. Is that shore accreting or eroding?
 
-## 10.7 Review
+## 15.7 Review
 
 <Quiz client:visible lang="en" items={quiz} />
 

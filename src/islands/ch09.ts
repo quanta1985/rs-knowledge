@@ -1,4 +1,4 @@
-// Chapter 9 helpers shared by its islands: class scheme, features, training and per-pixel classification.
+// Chapter 14 helpers shared by its islands: class scheme, features, training and per-pixel classification.
 import { useEffect, useState } from 'react';
 import { classStats, minDistance, mlClassify, mlPrepare } from '../lib/classify';
 import { band, type Cube } from '../lib/raster';

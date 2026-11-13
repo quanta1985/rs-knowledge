@@ -87,9 +87,9 @@ export default function CloudMaskLab({ lang }: { lang: Lang }) {
       {method !== 'scl' && <svg className="hist" viewBox={`-4 -4 ${HW + 8} ${HH + 20}`} role="img" aria-label={T.hist}>
         {hist.map((c, i) => {
           const x0 = i / BINS, h = (c / maxC) * HH, hit = x0 < t;
-          return <rect key={i} x={x0 * HW} width={HW / BINS - 0.6} y={HH - h} height={h} fill={hit ? `rgb(${MASK})` : '#94a3b8'} opacity={hit ? 0.95 : 0.5} />;
+          return <rect key={i} x={x0 * HW} width={HW / BINS - 0.6} y={HH - h} height={h} fill={hit ? `rgb(${MASK})` : 'var(--st-muted)'} opacity={hit ? 0.95 : 0.5} />;
         })}
-        <line x1={t * HW} x2={t * HW} y1={-4} y2={HH} stroke="#4fc3cd" strokeWidth={1.5} />
+        <line x1={t * HW} x2={t * HW} y1={-4} y2={HH} stroke="var(--st-accent)" strokeWidth={1.5} />
         <text x={0} y={HH + 13}>0</text><text x={HW} y={HH + 13} textAnchor="end">1</text>
         <text x={HW / 2} y={HH + 13} textAnchor="middle">{method}</text>
       </svg>}

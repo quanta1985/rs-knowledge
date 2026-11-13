@@ -1,0 +1,582 @@
+[
+ {
+  "q": {
+   "vi": "Phần nào của vệ tinh được gọi là nền tảng (bus)?",
+   "en": "Which part of a satellite is called the bus?"
+  },
+  "options": [
+   {
+    "vi": "Mọi thứ giữ cho tải hữu ích hoạt động: kết cấu, điện, tư thế, nhiệt, đẩy, máy tính, liên lạc",
+    "en": "Everything that keeps the payload working: structure, power, attitude, thermal, propulsion, computer, communications"
+   },
+   {
+    "vi": "Chỉ riêng camera hoặc radar",
+    "en": "Only the camera or radar"
+   },
+   {
+    "vi": "Tầng trên của tên lửa đẩy",
+    "en": "The upper stage of the launch vehicle"
+   },
+   {
+    "vi": "Trạm mặt đất điều khiển vệ tinh",
+    "en": "The ground station that controls the satellite"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Tải hữu ích là lý do phóng vệ tinh; nền tảng là phần còn lại phục vụ nó. VNREDSat-1 dùng nền tảng AstroSat-100 mang camera NAOMI.",
+   "en": "The payload is the reason for the launch; the bus is the rest that serves it. VNREDSat-1 uses the AstroSat-100 bus carrying the NAOMI camera."
+  }
+ },
+ {
+  "q": {
+   "vi": "Ở 700 km với góc beta 0°, khoảng bao nhiêu phần mỗi vòng quỹ đạo nằm trong bóng Trái Đất?",
+   "en": "At 700 km with beta angle 0°, roughly what share of each orbit is in Earth's shadow?"
+  },
+  "options": [
+   {
+    "vi": "Khoảng 36 %",
+    "en": "About 36 %"
+   },
+   {
+    "vi": "Khoảng 5 %",
+    "en": "About 5 %"
+   },
+   {
+    "vi": "Đúng 50 %",
+    "en": "Exactly 50 %"
+   },
+   {
+    "vi": "Không có bóng tối ở LEO",
+    "en": "There is no shadow in LEO"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "35,7 %, tức khoảng 35 phút trên chu kỳ 98,8 phút. Không phải 50 % vì vệ tinh ở trên cao nhìn thấy Mặt Trời cả khi đã qua đường ranh ngày đêm trên mặt đất.",
+   "en": "35.7 %, about 35 minutes of a 98.8-minute period. Not 50 %, because from altitude the satellite still sees the Sun after crossing the day–night line on the ground."
+  }
+ },
+ {
+  "q": {
+   "vi": "Vì sao Sentinel-1 bay quỹ đạo bình minh – hoàng hôn (nút tăng lúc 18:00)?",
+   "en": "Why does Sentinel-1 fly a dawn–dusk orbit (ascending node at 18:00)?"
+  },
+  "options": [
+   {
+    "vi": "Mặt phẳng quỹ đạo gần vuông góc với tia nắng nên gần như luôn có nắng, nhiều điện cho radar",
+    "en": "Its orbit plane is nearly perpendicular to sunlight, so it is almost always in sunlight with plenty of power for the radar"
+   },
+   {
+    "vi": "Để chụp ảnh quang học có bóng đổ dài",
+    "en": "To take optical images with long shadows"
+   },
+   {
+    "vi": "Vì radar chỉ hoạt động lúc chạng vạng",
+    "en": "Because radar only works at twilight"
+   },
+   {
+    "vi": "Để tránh lực cản khí quyển",
+    "en": "To avoid atmospheric drag"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Góc beta từ khoảng 58° tới 90°, bóng tối nhiều nhất 19,2 % một vòng ở 693 km. Radar tự phát sóng nên không cần mặt đất được chiếu sáng.",
+   "en": "Beta ranges from about 58° to 90° and shadow never exceeds 19.2 % of an orbit at 693 km. Radar makes its own illumination, so it does not need a sunlit ground."
+  }
+ },
+ {
+  "q": {
+   "vi": "Độ xả sâu (DoD) của ắc quy là gì, và vì sao vệ tinh LEO giữ nó thấp?",
+   "en": "What is a battery's depth of discharge (DoD), and why do LEO satellites keep it low?"
+  },
+  "options": [
+   {
+    "vi": "Phần dung lượng dùng mỗi lần qua bóng; ắc quy LEO sạc xả hơn 5000 lần mỗi năm, xả sâu thì mau hỏng",
+    "en": "The share of capacity used in each eclipse; LEO batteries cycle over 5000 times a year and deep discharges wear them out"
+   },
+   {
+    "vi": "Độ sâu vệ tinh chìm vào khí quyển",
+    "en": "How deep the satellite sinks into the atmosphere"
+   },
+   {
+    "vi": "Lượng điện pin mặt trời phát lúc có nắng",
+    "en": "The power the array produces in sunlight"
+   },
+   {
+    "vi": "Thời gian sạc đầy ắc quy",
+    "en": "The time to fully charge the battery"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Khoảng 15 vòng mỗi ngày nghĩa là khoảng 15 lần sạc xả mỗi ngày. Thiết kế LEO thường giữ DoD ở vài chục phần trăm.",
+   "en": "About 15 orbits a day means about 15 charge cycles a day. LEO designs usually keep DoD at a few tens of percent."
+  }
+ },
+ {
+  "q": {
+   "vi": "Nhìn thẳng xuống từ 786 km, sai số hướng 1 giây cung làm điểm chụp lệch khoảng bao nhiêu?",
+   "en": "Looking straight down from 786 km, how far does a 1-arcsecond pointing error move the imaged point?"
+  },
+  "options": [
+   {
+    "vi": "Khoảng 3,8 m",
+    "en": "About 3.8 m"
+   },
+   {
+    "vi": "Khoảng 0,04 m",
+    "en": "About 0.04 m"
+   },
+   {
+    "vi": "Khoảng 380 m",
+    "en": "About 380 m"
+   },
+   {
+    "vi": "Không lệch vì 1 giây cung quá nhỏ",
+    "en": "Not at all, 1 arcsecond is too small"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "786 000 m × 4,85·10⁻⁶ rad ≈ 3,81 m, khoảng 0,4 pixel Sentinel-2. Nghiêng 30° khỏi thiên đế thì thành 5,4 m.",
+   "en": "786,000 m × 4.85·10⁻⁶ rad ≈ 3.81 m, about 0.4 of a Sentinel-2 pixel. At 30° off nadir it becomes 5.4 m."
+  }
+ },
+ {
+  "q": {
+   "vi": "Bánh xe phản lực (reaction wheel) xoay vệ tinh bằng cách nào?",
+   "en": "How does a reaction wheel turn a satellite?"
+  },
+  "options": [
+   {
+    "vi": "Tăng hay giảm tốc độ quay của bánh xe để vệ tinh quay ngược chiều (bảo toàn mômen động lượng)",
+    "en": "It speeds up or slows down so the satellite turns the other way (conservation of angular momentum)"
+   },
+   {
+    "vi": "Phụt khí ra ngoài như động cơ",
+    "en": "It expels gas like a thruster"
+   },
+   {
+    "vi": "Đẩy vào từ trường Trái Đất",
+    "en": "It pushes against Earth's magnetic field"
+   },
+   {
+    "vi": "Dùng áp suất ánh sáng Mặt Trời",
+    "en": "It uses solar radiation pressure"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Không tốn nhiên liệu, chỉ tốn điện. Cuộn từ (magnetorquer) mới là thiết bị đẩy vào từ trường Trái Đất, dùng để xả bớt mômen thừa của bánh xe.",
+   "en": "It uses electricity, not propellant. The magnetorquer is the device that pushes against Earth's field, used to dump the wheels' excess momentum."
+  }
+ },
+ {
+  "q": {
+   "vi": "Vì sao cùng một vệ tinh, khi Mặt Trời hoạt động mạnh thì rơi khỏi quỹ đạo nhanh hơn?",
+   "en": "Why does the same satellite fall out of orbit faster when the Sun is active?"
+  },
+  "options": [
+   {
+    "vi": "Tia cực tím nung nóng và làm phồng tầng nhiệt quyển, mật độ không khí ở độ cao vệ tinh tăng nhiều lần",
+    "en": "Ultraviolet light heats and inflates the thermosphere, multiplying the air density at satellite altitudes"
+   },
+   {
+    "vi": "Lực hấp dẫn của Mặt Trời kéo vệ tinh xuống",
+    "en": "The Sun's gravity pulls the satellite down"
+   },
+   {
+    "vi": "Pin mặt trời phát nhiều điện hơn làm vệ tinh nặng hơn",
+    "en": "The array produces more power, making the satellite heavier"
+   },
+   {
+    "vi": "Gió Mặt Trời đẩy thẳng vào vệ tinh",
+    "en": "The solar wind pushes directly on the satellite"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Theo NRLMSIS 2.1, ở 400 km mật độ lúc F10.7 = 200 gấp 9,3 lần lúc F10.7 = 70; ở 600 km gấp 24,5 lần.",
+   "en": "In NRLMSIS 2.1, density at 400 km is 9.3 times higher at F10.7 = 200 than at F10.7 = 70; at 600 km, 24.5 times."
+  }
+ },
+ {
+  "q": {
+   "vi": "Quy tắc 5 năm của FCC (2022) yêu cầu gì?",
+   "en": "What does the FCC five-year rule (2022) require?"
+  },
+  "options": [
+   {
+    "vi": "Vệ tinh kết thúc nhiệm vụ dưới 2000 km phải rời quỹ đạo sớm nhất có thể, không quá 5 năm sau khi hết nhiệm vụ",
+    "en": "Satellites ending their mission below 2000 km must leave orbit as soon as practicable and within 5 years of mission end"
+   },
+   {
+    "vi": "Mọi vệ tinh chỉ được hoạt động tối đa 5 năm",
+    "en": "Every satellite may operate for at most 5 years"
+   },
+   {
+    "vi": "Vệ tinh phải được thay mới sau 5 năm",
+    "en": "Satellites must be replaced every 5 years"
+   },
+   {
+    "vi": "Chỉ áp dụng cho vệ tinh địa tĩnh",
+    "en": "It applies only to geostationary satellites"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Quyết định FCC 22-74 ngày 29/09/2022 rút ngắn mốc 25 năm của các hướng dẫn trước đó xuống 5 năm, cho vệ tinh được FCC cấp phép hoặc vào thị trường Mỹ.",
+   "en": "FCC order 22-74 of 29 Sep 2022 shortened the earlier 25-year benchmark to 5 years for satellites licensed by the FCC or granted US market access."
+  }
+ },
+ {
+  "q": {
+   "vi": "Tuổi thọ quỹ đạo thay đổi theo độ cao như thế nào?",
+   "en": "How does orbital lifetime change with altitude?"
+  },
+  "options": [
+   {
+    "vi": "Tăng gần theo hàm mũ: CubeSat 3U ở 400 km sống dưới 1,5 năm, ở 700 km sống 13–300 năm",
+    "en": "Almost exponentially: a 3U CubeSat lasts under 1.5 years at 400 km but 13–300 years at 700 km"
+   },
+   {
+    "vi": "Tăng tỉ lệ thuận với độ cao",
+    "en": "In proportion to altitude"
+   },
+   {
+    "vi": "Không phụ thuộc độ cao",
+    "en": "It does not depend on altitude"
+   },
+   {
+    "vi": "Giảm khi lên cao",
+    "en": "It decreases with altitude"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Mật độ không khí giảm gần theo hàm mũ với độ cao, nên tốc độ hạ độ cao giảm theo, và tuổi thọ tăng theo hàm mũ.",
+   "en": "Air density falls almost exponentially with height, so the decay rate falls too and the lifetime grows exponentially."
+  }
+ },
+ {
+  "q": {
+   "vi": "Theo bản đặc tả CubeSat rev. 14.1, một đơn vị 1U có kích thước và khối lượng tối đa bao nhiêu?",
+   "en": "Under CubeSat Design Specification rev. 14.1, what are the size and maximum mass of one 1U unit?"
+  },
+  "options": [
+   {
+    "vi": "10 × 10 × 11,35 cm, tối đa 2,00 kg",
+    "en": "10 × 10 × 11.35 cm, at most 2.00 kg"
+   },
+   {
+    "vi": "1 × 1 × 1 m, tối đa 100 kg",
+    "en": "1 × 1 × 1 m, at most 100 kg"
+   },
+   {
+    "vi": "10 × 10 × 10 cm, tối đa 0,5 kg",
+    "en": "10 × 10 × 10 cm, at most 0.5 kg"
+   },
+   {
+    "vi": "Không có kích thước chuẩn",
+    "en": "There is no standard size"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Các bản cũ giới hạn 1,33 kg. PicoDragon (2013) là CubeSat 1U nặng khoảng 1 kg.",
+   "en": "Earlier revisions set 1.33 kg. PicoDragon (2013) is a 1U CubeSat of about 1 kg."
+  }
+ },
+ {
+  "q": {
+   "vi": "Điều gì quyết định nhiệt độ cân bằng của một tấm phẳng dưới nắng (không có nhiệt bên trong)?",
+   "en": "What sets the equilibrium temperature of a sunlit flat plate with no internal heat?"
+  },
+  "options": [
+   {
+    "vi": "Tỉ số hấp thụ trên phát xạ α/ε",
+    "en": "The ratio of absorptance to emittance α/ε"
+   },
+   {
+    "vi": "Màu sắc mắt người thấy",
+    "en": "The colour the eye sees"
+   },
+   {
+    "vi": "Khối lượng của tấm",
+    "en": "The plate's mass"
+   },
+   {
+    "vi": "Độ cao quỹ đạo",
+    "en": "The orbit altitude"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "T = (αS/εσ)^¼. Nhôm bóng (α/ε = 3) lên 245 °C, sơn trắng (0,22) chỉ −3 °C. Khối lượng chỉ ảnh hưởng tốc độ nóng lên, nguội đi.",
+   "en": "T = (αS/εσ)^¼. Polished aluminium (α/ε = 3) reaches 245 °C, white paint (0.22) only −3 °C. Mass only changes how fast it heats and cools."
+  }
+ },
+ {
+  "q": {
+   "vi": "Vì sao động cơ Hall dùng rất ít nhiên liệu nhưng không dùng để hạ quỹ đạo khẩn cấp?",
+   "en": "Why does a Hall thruster use little propellant yet is not used for an emergency deorbit?"
+  },
+  "options": [
+   {
+    "vi": "Isp cao nhưng lực đẩy chỉ cỡ mN, bị giới hạn bởi công suất điện",
+    "en": "High Isp but only millinewton thrust, limited by electric power"
+   },
+   {
+    "vi": "Vì nó chỉ chạy được trong bóng Trái Đất",
+    "en": "Because it only works in eclipse"
+   },
+   {
+    "vi": "Vì Isp của nó thấp hơn hydrazine",
+    "en": "Because its Isp is lower than hydrazine"
+   },
+   {
+    "vi": "Vì nó cần oxy từ khí quyển",
+    "en": "Because it needs atmospheric oxygen"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "F = 2ηP/(g₀·Isp): Starlink V2 Mini cho 0,17 N ở 4,2 kW. Muốn đổi vận tốc nhiều thì phải đốt nhiều giờ, nhiều ngày.",
+   "en": "F = 2ηP/(g₀·Isp): Starlink V2 Mini gets 0.17 N from 4.2 kW. A large velocity change takes hours to days of firing."
+  }
+ },
+ {
+  "q": {
+   "vi": "Cùng một vệ tinh, Δv bù lực cản mỗi năm thay đổi thế nào khi hạ từ 786 km xuống 500 km (Mặt Trời mạnh)?",
+   "en": "For the same satellite, how does the yearly drag make-up Δv change from 786 km down to 500 km (active Sun)?"
+  },
+  "options": [
+   {
+    "vi": "Tăng khoảng 30 lần (0,6 → 19 m/s)",
+    "en": "Grows about 30-fold (0.6 → 19 m/s)"
+   },
+   {
+    "vi": "Gần như không đổi",
+    "en": "Hardly changes"
+   },
+   {
+    "vi": "Giảm một nửa",
+    "en": "Halves"
+   },
+   {
+    "vi": "Tăng đúng gấp đôi",
+    "en": "Exactly doubles"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Mật độ khí quyển giảm gần theo hàm mũ với độ cao, nên lực cản và nhiên liệu bù lực cản tăng vọt khi xuống thấp (B = 0,01 m²/kg, NRLMSIS 2.1).",
+   "en": "Air density falls roughly exponentially with altitude, so drag and its propellant bill soar lower down (B = 0.01 m²/kg, NRLMSIS 2.1)."
+  }
+ },
+ {
+  "q": {
+   "vi": "Dị thường Nam Đại Tây Dương (SAA) là gì?",
+   "en": "What is the South Atlantic Anomaly (SAA)?"
+  },
+  "options": [
+   {
+    "vi": "Vùng từ trường yếu nhất, nơi vành đai bức xạ trong xuống thấp tới độ cao LEO",
+    "en": "The weakest-field region, where the inner radiation belt dips to LEO altitudes"
+   },
+   {
+    "vi": "Vùng khí quyển dày nhất, nơi lực cản lớn nhất",
+    "en": "The densest atmosphere, where drag is highest"
+   },
+   {
+    "vi": "Vùng không có tín hiệu GNSS",
+    "en": "A region without GNSS signals"
+   },
+   {
+    "vi": "Vùng mây dày quanh năm",
+    "en": "A region of year-round thick cloud"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Theo IGRF-14, ở 500 km từ trường yếu nhất khoảng 18 300 nT gần 22° Nam, 60° Tây, chỉ bằng nửa trên Hà Nội. Lỗi SEU dồn vào lúc vệ tinh bay qua đây.",
+   "en": "Per IGRF-14, at 500 km the field is weakest, about 18,300 nT near 22°S 60°W, half the value over Hanoi. SEUs cluster during passes over it."
+  }
+ },
+ {
+  "q": {
+   "vi": "EDAC và TMR chống loại lỗi bức xạ nào?",
+   "en": "Which radiation effect do EDAC and TMR counter?"
+  },
+  "options": [
+   {
+    "vi": "Lỗi đơn lẻ như lật bit (SEU)",
+    "en": "Single-event effects such as bit flips (SEU)"
+   },
+   {
+    "vi": "Lão hóa do liều tích lũy (TID)",
+    "en": "Ageing from total dose (TID)"
+   },
+   {
+    "vi": "Lực cản khí quyển",
+    "en": "Atmospheric drag"
+   },
+   {
+    "vi": "Nhật thực",
+    "en": "Eclipses"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "EDAC sửa bit bị lật trong bộ nhớ, TMR bỏ phiếu đa số giữa ba mạch. TID thì cần linh kiện chịu bức xạ hoặc che chắn.",
+   "en": "EDAC corrects flipped memory bits, TMR takes a majority vote of three circuits. TID needs rad-hard parts or shielding."
+  }
+ },
+ {
+  "q": {
+   "vi": "Vì sao nhiều nhà vận hành vệ tinh đồng bộ Mặt Trời đặt trạm thu ở Svalbard (78° Bắc)?",
+   "en": "Why do many sun-synchronous operators put receiving stations on Svalbard (78°N)?"
+  },
+  "options": [
+   {
+    "vi": "Quỹ đạo gần cực đi qua vùng cực mỗi vòng, nên trạm ở đó thấy gần như mọi vòng bay",
+    "en": "Near-polar orbits pass over the pole every revolution, so the station sees almost every orbit"
+   },
+   {
+    "vi": "Vì ở đó không có mây",
+    "en": "Because there are no clouds there"
+   },
+   {
+    "vi": "Vì ăng-ten lạnh hoạt động tốt hơn",
+    "en": "Because cold antennas work better"
+   },
+   {
+    "vi": "Vì luật quốc tế bắt buộc",
+    "en": "Because international law requires it"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Mô phỏng từ phần tử quỹ đạo thật: VNREDSat-1 qua SvalSat 15 lần mỗi ngày, qua Hòa Lạc khoảng 3 lần.",
+   "en": "From real orbital elements: VNREDSat-1 passes SvalSat 15 times a day and Hoa Lac about 3."
+  }
+ },
+ {
+  "q": {
+   "vi": "Thứ tự đúng của các pha vận hành là gì?",
+   "en": "What is the correct order of mission phases?"
+  },
+  "options": [
+   {
+    "vi": "LEOP → chạy thử → vận hành thường xuyên → kết thúc",
+    "en": "LEOP → commissioning → routine operations → end of life"
+   },
+   {
+    "vi": "Chạy thử → LEOP → kết thúc → vận hành",
+    "en": "Commissioning → LEOP → end of life → operations"
+   },
+   {
+    "vi": "Vận hành → LEOP → chạy thử → kết thúc",
+    "en": "Operations → LEOP → commissioning → end of life"
+   },
+   {
+    "vi": "LEOP → kết thúc → chạy thử → vận hành",
+    "en": "LEOP → end of life → commissioning → operations"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Sentinel-2A: LEOP 3 ngày (23–26/06/2015), rồi chạy thử dự kiến ba tháng trước khi vận hành thường xuyên.",
+   "en": "Sentinel-2A: LEOP took 3 days (23–26 June 2015), then a planned three-month commissioning before routine operations."
+  }
+ },
+ {
+  "q": {
+   "vi": "NASA CARA và ESA thường dùng ngưỡng xác suất va chạm nào để phải cơ động hoặc giảm thiểu?",
+   "en": "Which collision-probability threshold do NASA CARA and ESA typically use for a manoeuvre or mitigation?"
+  },
+  "options": [
+   {
+    "vi": "Khoảng 1 trên 10 000 (10⁻⁴)",
+    "en": "About 1 in 10,000 (10⁻⁴)"
+   },
+   {
+    "vi": "1 trên 2 (50 %)",
+    "en": "1 in 2 (50 %)"
+   },
+   {
+    "vi": "1 trên 100",
+    "en": "1 in 100"
+   },
+   {
+    "vi": "1 trên một tỉ",
+    "en": "1 in a billion"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "NASA CARA: trên 10⁻⁷ cần theo dõi, trên 10⁻⁴ phải giảm thiểu. ESA bắt đầu lập kế hoạch cơ động khi Pc vượt khoảng 1/10 000.",
+   "en": "NASA CARA: above 10⁻⁷ merits attention, above 10⁻⁴ requires mitigation. ESA starts planning a manoeuvre above about 1 in 10,000."
+  }
+ },
+ {
+  "q": {
+   "vi": "Vệ tinh địa tĩnh hết đời thường được xử lý thế nào?",
+   "en": "How is a geostationary satellite usually retired?"
+  },
+  "options": [
+   {
+    "vi": "Đẩy lên quỹ đạo nghĩa địa cao hơn vành đai GEO vài trăm km rồi thụ động hóa",
+    "en": "Raised to a graveyard orbit a few hundred km above GEO, then passivated"
+   },
+   {
+    "vi": "Đưa về Mặt Trăng",
+    "en": "Sent to the Moon"
+   },
+   {
+    "vi": "Để nguyên tại vị trí",
+    "en": "Left in its slot"
+   },
+   {
+    "vi": "Cho rơi về Trái Đất trong 5 năm",
+    "en": "Brought down to Earth within 5 years"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Hạ một vệ tinh GEO xuống khí quyển tốn quá nhiều Δv; nâng nó lên vài trăm km (IADC: tối thiểu 235 km cộng số hạng áp suất bức xạ) rẻ hơn nhiều.",
+   "en": "Bringing a GEO satellite down costs far too much Δv; raising it a few hundred km (IADC: at least 235 km plus a radiation-pressure term) is much cheaper."
+  }
+ },
+ {
+  "q": {
+   "vi": "Vì sao vệ tinh thường lắp 4 bánh xe phản lực dù 3 bánh đủ điều khiển 3 trục?",
+   "en": "Why do satellites usually carry 4 reaction wheels when 3 can control 3 axes?"
+  },
+  "options": [
+   {
+    "vi": "Để dự phòng: hỏng một bánh, 3 bánh còn lại vẫn đủ 3 trục",
+    "en": "Redundancy: if one fails the other three still cover all axes"
+   },
+   {
+    "vi": "Bánh thứ tư dùng để đo tư thế",
+    "en": "The fourth wheel measures attitude"
+   },
+   {
+    "vi": "Để tăng công suất điện",
+    "en": "To raise electrical power"
+   },
+   {
+    "vi": "Mỗi bánh chỉ điều khiển nửa trục",
+    "en": "Each wheel only controls half an axis"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Bốn bánh đặt nghiêng (hình chóp) cho phép mất một bánh mà vẫn điều khiển đủ ba trục.",
+   "en": "Four skewed wheels (pyramid) let the satellite lose one and still control all three axes."
+  }
+ }
+]

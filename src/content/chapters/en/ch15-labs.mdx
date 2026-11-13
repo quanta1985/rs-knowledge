@@ -1,6 +1,6 @@
 ---
 title: Python / GEE labs
-n: 15
+n: 20
 summary: Index of every lab in the handbook, with setup instructions for Earth Engine, running notebooks on Google Colab and scripts in the Code Editor.
 objectives:
   - Register and configure a Google Cloud project for Earth Engine.
@@ -9,35 +9,42 @@ objectives:
 updated: "2026-11-04"
 ---
 import Depth from '../../../components/Depth.astro';
+import Note from '../../../components/Note.astro';
 import LabIndex from '../../../components/LabIndex.astro';
 
-## 15.1 Lab index
+## 20.1 Lab index
 
 Each chapter has two versions of the same lab: a **Python notebook** for Google Colab and a **JavaScript script** to paste into the Earth Engine Code Editor. The list below is generated from the `labs/` folder every time the site is built, so it is always complete.
 
 <LabIndex />
 
-## 15.2 One-time setup: an Earth Engine account
+## 20.2 One-time setup: an Earth Engine account
 
 1. Use a Google account (Gmail or your institution's account).
 2. Open https://code.earthengine.google.com/register and choose **non-commercial** use (research, teaching, learning).
 3. Create or select a **Google Cloud project** and enable the Earth Engine API for it. Note the **Project ID**, e.g. `my-rs-course-2026`.
 4. Open https://code.earthengine.google.com: if you see the Code Editor and a map, you are done.
 
-## 15.3 Running a Python notebook on Colab
+<Note kind="key">
+
+Note your **Project ID**: every notebook asks for it in the first code cell.
+
+</Note>
+
+## 20.3 Running a Python notebook on Colab
 
 1. Click "Open" in the Python column of the lab. The notebook opens in Google Colab.
 2. In the first code cell, change `PROJECT = 'YOUR-CLOUD-PROJECT-ID'` to your Project ID.
 3. Choose **Runtime → Run all**. The first time, `ee.Authenticate()` opens a Google sign-in window; grant access.
 4. To keep your work, choose **File → Save a copy in Drive**.
 
-## 15.4 Running a script in the Code Editor
+## 20.4 Running a script in the Code Editor
 
 1. Click "View script" in the GEE column and copy the whole file.
 2. In the Code Editor, create a new script (**New → File**), paste it and press **Run**.
 3. Numbers appear in the **Console** tab; map layers in the **Layers** panel at the top right of the map.
 
-## 15.5 Running on your own computer
+## 20.5 Running on your own computer
 
 ```bash
 pip install earthengine-api numpy scipy matplotlib
@@ -48,14 +55,22 @@ Then open the notebook in Jupyter and set `PROJECT` as on Colab.
 
 <Depth level="advanced" title="Common errors">
 
+<div class="table-wrap">
+
 | Error message | Usual cause | Fix |
 |---|---|---|
-| Project … is not registered / not found | Project not registered for Earth Engine, or a typo in the Project ID | Redo section 15.2, check `PROJECT` |
+| Project … is not registered / not found | Project not registered for Earth Engine, or a typo in the Project ID | Redo section 20.2, check `PROJECT` |
 | Earth Engine API has not been used in project … | The Earth Engine API is not enabled | Enable the API in the project's Google Cloud Console |
 | User memory limit exceeded / Computation timed out | Request too large for `getInfo()` | Shrink the area, increase `scale`, or use `Export` |
 | Collection query aborted after accumulating over 5000 elements | Printing a very large collection | Filter harder; print `size()` instead of the collection |
 | Dictionary does not contain key | A band name changed after an operation (e.g. `ee.Image(10).pow(…)` is named `constant`) | Rename it with `rename()` |
 
+</div>
+
 </Depth>
 
+<Note kind="tip">
+
 Every lab was run end to end in Python before publication. If one fails, the Earth Engine dataset has most likely changed version; check the Earth Engine Data Catalog.
+
+</Note>

@@ -1,0 +1,601 @@
+---
+title: Satellite design & operations
+n: 4
+summary: The camera or radar is only part of a satellite. The rest, the bus, has to provide power, pointing, temperature control, propellant, a radiation-tolerant computer, links to the ground and even a way to leave orbit when the mission ends. This chapter works out each of those "budgets" with real data, from VNREDSat-1 to PicoDragon, then walks through the operations phases and the space-debris problem.
+objectives:
+  - Tell the bus apart from the payload, name the eight subsystems and place satellites in mass classes.
+  - Compute the time a satellite spends in Earth's shadow from altitude and beta angle, then estimate the solar array and battery depth of discharge.
+  - Convert pointing error into metres on the ground; name the sensors and actuators of an ADCS.
+  - Use radiative balance to explain why surface temperature depends on α/ε, not on colour.
+  - Build a Δv budget for drag make-up and deorbit, and turn it into propellant mass for chemical and electric thrusters.
+  - Explain SEU, latch-up, TID and the South Atlantic Anomaly, and how they are mitigated.
+  - "Trace an image from tasking request to user, the mission phases from LEOP to end of life, and how operators avoid collisions."
+updated: "2026-11-06"
+---
+import Term from '../../../components/Term.astro';
+import Depth from '../../../components/Depth.astro';
+import Figure from '../../../components/Figure.astro';
+import Formula from '../../../components/Formula.astro';
+import Stats from '../../../components/Stats.astro';
+import Steps from '../../../components/Steps.astro';
+import LabLinks from '../../../components/LabLinks.astro';
+import Note from '../../../components/Note.astro';
+import Tiles from '../../../components/Tiles.astro';
+import Predict from '../../../islands/Predict.tsx';
+import BusDiagram from '../../../islands/BusDiagram.tsx';
+import BusPower from '../../../islands/BusPower.tsx';
+import BusPointing from '../../../islands/BusPointing.tsx';
+import BusThermal from '../../../islands/BusThermal.tsx';
+import BusPropulsion from '../../../islands/BusPropulsion.tsx';
+import BusRadiation from '../../../islands/BusRadiation.tsx';
+import BusLatency from '../../../islands/BusLatency.tsx';
+import BusDecay from '../../../islands/BusDecay.tsx';
+import BusDebris from '../../../islands/BusDebris.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/satellite-bus.json';
+
+<Figure
+  title="Figure 4.1 — Anatomy of an Earth-observation satellite"
+  try="Click the solar array, then Play: the battery drops as the satellite enters Earth's shadow. Set beta to 60°: is there still an eclipse? Click propulsion and drag the altitude down to 400 km: how much Δv does drag take per year? Click comms: how many times a day does a station in Hanoi see the satellite?"
+  source="Illustrative ~130 kg satellite (1.2 m² GaAs 28 % array, 150 W load, 400 Wh battery, white-painted radiator, B = 0.01 m²/kg, 220 s hydrazine); mass shares are illustrative. Every number in the readout is computed live with src/lib/bus.ts: cylindrical Earth shadow, NRLMSIS 2.1 air density, a circular sun-synchronous orbit over the Hoa Lac station with elevation ≥ 5°. The orbit sketch is not to scale."
+>
+  <BusDiagram client:visible lang="en" />
+</Figure>
+
+## 4.1 Bus and payload
+
+An Earth-observation satellite has two parts. The **<Term id="payload">payload</Term>** is the reason for launching it: a camera, a radar, a GNSS receiver or a communications transponder. The **<Term id="satellite-bus">bus</Term>** is everything else that keeps the payload alive and working:
+
+<Tiles
+  items={[
+    { t: 'EPS', d: 'Solar arrays, battery, power distribution' },
+    { t: 'ADCS', d: 'Star trackers, gyros, reaction wheels' },
+    { t: 'Thermal', d: 'MLI blankets, radiators, heaters' },
+    { t: 'Propulsion', d: 'Hydrazine or electric thrusters' },
+    { t: 'OBC', d: 'Computer, flight software, image memory' },
+    { t: 'TT&C', d: 'Commands up, telemetry down, S-band' },
+  ]}
+  sum="Add the structure: seven bus subsystems, plus the payload makes eight"
+  note="Each subsystem has its own budget: mass, power, heat, data, Δv"
+/>
+
+Many manufacturers sell ready-made buses and fit the customer's payload. VNREDSat-1, Viet Nam's first optical Earth-observation satellite (2013), was built by Astrium (now Airbus) on the AstroSat-100 bus and carries the NAOMI camera with 2.5 m panchromatic and 10 m multispectral imagery.
+
+<Note kind="key">
+
+A good image is not only the camera's doing. Without enough power there is no image, a pointing error shifts it, a temperature drift moves the focus, and without a ground station the image never leaves memory. <mark class="key">A payload is only as good as the bus that carries it.</mark>
+
+</Note>
+
+### How big Viet Nam's satellites are
+
+Satellite sizes span a factor of thousands. NASA groups small satellites by mass: **mini** 100–180 kg, **micro** 10–100 kg, **nano** 1–10 kg, **pico** 0.01–1 kg. The table lists Viet Nam's observation satellites next to Sentinel-2.
+
+<div class="table-wrap">
+
+| Satellite | Mass | Class | Form / payload | Status |
+|---|---|---|---|---|
+| PicoDragon (2013) | about 1 kg | pico/nano | 1U CubeSat, 10 × 10 × 11.35 cm; camera, comms test | released from the ISS 19 Nov 2013, re-entered 28 Feb 2014 |
+| NanoDragon (2021) | about 3.8 kg | nano | CubeSat; ship identification (AIS) receiver | launched 9 Nov 2021, never contacted |
+| MicroDragon (2019) | about 50 kg | micro | 50 × 50 × 50 cm cube; camera | launched 18 Jan 2019, re-entered 1 Oct 2024 |
+| VNREDSat-1 (2013) | about 120 kg (sources give 115–130 kg) | mini | AstroSat-100; NAOMI 2.5 m / 10 m, 17.5 km swath | launched 7 May 2013, still operating |
+| LOTUSat-1 | about 600 kg | medium | built by NEC (Japan); radar | not launched; 2027 target (news of May 2026) |
+| Sentinel-2A (for comparison) | 1140 kg, incl. 123 kg propellant | large | MSI camera, 13 bands | launched 2015 |
+
+</div>
+
+The smaller the satellite, the cheaper and faster it is to build, but it has less power, less room for antennas and optics, poorer pointing and often no propulsion. The next sections take these limits one by one.
+
+## 4.2 Power: solar arrays, batteries and Earth's shadow
+
+In space, each square metre facing the Sun receives **1361 W** (the solar constant). Triple-junction GaAs cells convert about 28 % of it into electricity, silicon cells about 15 %. But on every orbit the satellite passes through **Earth's shadow** and must live on its battery.
+
+<Predict client:visible lang="en"
+  title="How much of each orbit is in darkness?"
+  q="A satellite flies a circular orbit at 700 km, with the orbit plane containing the Sun direction (beta angle = 0). What percentage of each orbit is spent in Earth's shadow?"
+  slider={{ min: 0, max: 60, step: 1, unit: '%' }} answer={35.7} tol={3}
+  why="35.7 %, i.e. 35.3 minutes of a 98.8-minute period. In low orbit Earth blocks a large part of the sky seen from the satellite. Higher up the dark share shrinks slowly: 34.9 % at 786 km." />
+
+<Note kind="myth">
+
+"Every orbit is half day, half night." No: at 700 km the dark share is at most 35.7 %, because from altitude the satellite still sees the Sun after the ground below has entered night. And at large beta angles some orbits are almost never in shadow.
+
+</Note>
+
+The shadow share depends on the **<Term id="beta-angle">beta angle</Term>**, the angle between the Sun direction and the orbit plane. At beta 0 the satellite crosses the middle of the shadow. The larger beta, the closer it skims the shadow's edge, and above a critical value there is no eclipse at all (about 64° at 700 km).
+
+<Formula label="Share of the orbit in shadow (cylindrical shadow)" tex="f_e = \frac{1}{\pi}\arccos\!\left(\frac{\sqrt{h^2 + 2R_\oplus h}}{(R_\oplus + h)\cos\beta}\right), \qquad f_e = 0 \ \text{if}\ |\sin\beta| \ge \frac{R_\oplus}{R_\oplus + h}" where="
+f_e :: share of the period in Earth's shadow
+h :: altitude of the circular orbit
+R_\oplus :: Earth radius, 6378 km
+\beta :: beta angle
+" />
+
+A sun-synchronous orbit keeps beta nearly constant through the year. Sentinel-2 crosses the equator at 10:30 a.m. (descending node), with beta about 22° at the equinox, so it still spends 33.8 minutes in shadow per orbit. Sentinel-1 flies a **dawn–dusk** orbit (ascending node at 18:00): the orbit plane is nearly perpendicular to sunlight, beta ranges from about 58° to 90° with the seasons, and eclipse never exceeds 19.2 % of an orbit. A radar makes its own illumination, so it picks the orbit with the most power.
+
+<Figure
+  title="Figure 4.2 — Power budget: battery charge over three orbits"
+  try="Start from the defaults (786 km, 10:30 SSO, 2.5 m² GaAs, 300 W load). Shrink the array until the curve turns red. Switch to the dawn–dusk orbit: how much smaller can the array be? What about silicon cells?"
+  source="Circular orbit, cylindrical Earth shadow (penumbra ignored), sun-tracking array. Solar constant 1361 W/m² (Kopp & Lean 2011); inherent degradation 0.77 and path efficiencies 0.6 (eclipse) / 0.8 (sunlight) after SMAD §11.4; 90 % charge efficiency is an assumption (src/lib/bus.ts)."
+>
+  <BusPower client:visible lang="en" />
+</Figure>
+
+The array must do two jobs: feed the loads in sunlight and recharge what the battery gave up in shadow. Energy routed through the battery loses more, so the eclipse share is divided by a lower efficiency:
+
+<Formula label="Required array power (SMAD)" tex="P_{sa} = \frac{P_e T_e / X_e + P_d T_d / X_d}{T_d}" where="
+P_e,\ P_d :: load in eclipse and in sunlight (W)
+T_e,\ T_d :: time in eclipse and in sunlight per orbit
+X_e,\ X_d :: path efficiency through the battery (0.6) and direct (0.8)
+" />
+
+<div class="worked">
+
+#### Example: an array for a 300 W load at 786 km
+
+1. Period 100.6 min; with beta 22.2° the satellite is in shadow for T<sub>e</sub> = 33.8 min and in sunlight for T<sub>d</sub> = 66.8 min.
+2. P<sub>sa</sub> = (300 × 33.8 / 0.6 + 300 × 66.8 / 0.8) / 66.8 ≈ **628 W**.
+3. One square metre of 28 % GaAs gives 1361 × 0.28 × 0.77 ≈ 293 W, so about **2.14 m²** at beginning of life. Cells also degrade under radiation, so real designs add margin for end of life.
+
+</div>
+
+The battery has limits too. **<Term id="depth-of-discharge">Depth of discharge</Term>** (DoD) is the share of capacity used on each pass through the shadow. At 700 km a satellite cycles its battery 14.6 times a day, 5325 times a year; deeper discharges wear the battery out faster, so LEO designs usually keep DoD low, a few tens of percent.
+
+<Stats items={[
+  { v: '35.3', u: 'min', l: 'dark per orbit at 700 km, beta 0°' },
+  { v: '5325', l: 'charge–discharge cycles a year at 700 km' },
+  { v: '69', u: 'min', l: 'longest daily eclipse in GEO' },
+  { v: '44', u: 'days', l: 'per GEO eclipse season, around each equinox' },
+]} caption="A geostationary satellite only enters the shadow when the Sun is near the equatorial plane (beta below 8.7°), about 88 days a year, so GEO batteries see far fewer cycles and can be discharged deeper. Cylindrical-shadow model; the penumbra adds a few minutes in reality." />
+
+<Depth level="advanced" title="Beta angle of a sun-synchronous orbit">
+
+Beta follows from the inclination i, the right-ascension difference Ω − α☉ between the ascending node and the Sun, and the Sun's declination δ☉:
+
+<Formula tex="\sin\beta = \cos\delta_\odot \sin i \,\sin(\Omega - \alpha_\odot) + \sin\delta_\odot \cos i" />
+
+For a sun-synchronous orbit Ω − α☉ is fixed by the node's local time: a 10:30 descending node means a 22:30 ascending node, so Ω − α☉ = 157.5°.
+
+</Depth>
+
+## 4.3 Attitude control: looking at the right place
+
+A satellite has nothing to push against, so to turn the camera it must turn the whole spacecraft. The **<Term id="adcs">attitude determination and control system</Term>** (ADCS) does two jobs: **determine** where the satellite points, and **control** it to turn where it must look.
+
+<div class="table-wrap">
+
+| Sensor | Measures | Typical accuracy |
+|---|---|---|
+| Sun sensor | Sun direction | 0.005° to 3° |
+| Horizon sensor (infrared) | direction to Earth's centre | 0.1° to 1° in LEO |
+| Magnetometer | Earth's magnetic field, against a model | 1° to 5° |
+| <Term id="star-tracker">Star tracker</Term> | images star fields, matches a catalogue | 1 arcsecond to 1 arcminute |
+| Gyroscope | rotation rate, between star fixes | drift 0.003 °/h to 1 °/h |
+| GNSS receiver | position, velocity, time | a few metres |
+
+</div>
+
+The actuators are: **<Term id="reaction-wheel">reaction wheels</Term>**, which speed up or slow down so the body turns the other way (conservation of angular momentum), usually four so that three axes remain if one fails; **<Term id="bus-cmg">control moment gyroscopes</Term>** (CMG), which keep a wheel spinning and tilt its axis to produce large torques, used on agile satellites such as Pléiades and on the International Space Station; **<Term id="magnetorquer">magnetorquers</Term>**, which push against Earth's field to dump the momentum that disturbances (drag, radiation pressure, gravity gradient) store in the wheels; and small thrusters for large torques or when the wheels saturate.
+
+When something goes wrong, the software puts the satellite into **<Term id="bus-safe-mode">safe mode</Term>**: payload off, arrays pointed at the Sun, battery kept warm, waiting for commands from the ground.
+
+How small must the pointing error be? Compare it with the pixel. At nadir a small angle Δθ (radians) moves the ground point by about h · Δθ:
+
+<Formula label="Pointing error in metres on the ground (nadir)" tex="\Delta x \approx h\,\Delta\theta, \qquad 1'' = 4.85\ \mu\text{rad}" where="
+\Delta x :: offset on the ground
+h :: satellite altitude
+\Delta\theta :: angular error in radians
+" />
+
+<Predict client:visible lang="en"
+  title="One arcsecond off: how many metres?"
+  q="Sentinel-2 flies at 786 km. If its nadir pointing is off by 1 arcsecond (1/3600 of a degree), how far does the imaged point move on the ground?"
+  options={['about 0.4 m', 'about 4 m', 'about 40 m', 'about 400 m']} answer={1}
+  why="786 km × (1/3600 · π/180) ≈ 3.81 m. A Sentinel-2 pixel is 10 m, so a few arcseconds already make half a pixel. An error of 0.01° (36 arcseconds) is 137 m, almost 14 pixels." />
+
+<Figure
+  title="Figure 4.3 — Pointing error turned into metres on the ground"
+  try="Pick VNREDSat-1 (2.5 m pixel): how many arcseconds shift the image by exactly one pixel? Tilt the camera 30° off nadir: for the same angular error, how much larger is the ground offset?"
+  source="Spherical Earth of radius 6378.137 km. Sentinel-2: nominal altitude 786 km (ESA). VNREDSat-1: altitude from CelesTrak orbital elements of 4 Nov 2026 (src/lib/bus.ts, groundError)."
+>
+  <BusPointing client:visible lang="en" />
+</Figure>
+
+For VNREDSat-1 at about 678 km, 1 arcsecond is 3.29 m on the ground, so one 2.5 m panchromatic pixel is only 0.76 arcseconds. No satellite holds its pointing that well by hardware alone; images are corrected on the ground with control points and a terrain model (Chapter 17). Sentinel-2's geolocation requirement is under 20 m (2σ) without ground control, equivalent to 5.2 arcseconds from 786 km; ESA's quality reports show about 12 m in practice.
+
+<Note kind="key">
+
+Star trackers know the direction to a few arcseconds, reaction wheels turn the satellite, magnetorquers dump excess momentum. The residual error, a few to a few tens of metres on the ground, is fixed with control points during processing.
+
+</Note>
+
+<Note kind="why" label="Why do small satellites struggle to take sharp images?">
+
+Reaction wheels, good star trackers and large optics are heavy and power-hungry. A 50 kg satellite such as MicroDragon cannot carry the ADCS of a one-tonne spacecraft, so it is hard both to point accurately and to stay steady (free of "jitter") during an exposure.
+
+</Note>
+
+## 4.4 Thermal control
+
+There is no convection in a vacuum. Heat moves only by conduction inside the satellite and by **radiation** to the outside. Each surface takes in sunlight according to its **solar absorptance** α and sheds heat according to its infrared **<Term id="emissivity">emittance</Term>** ε. When heat in equals heat out, the surface reaches its equilibrium temperature:
+
+<Formula label="Radiative balance of a Sun-facing flat plate (Stefan–Boltzmann law)" tex="\alpha S + q = \varepsilon \sigma T^4 \quad\Rightarrow\quad T = \left(\frac{\alpha S + q}{\varepsilon\sigma}\right)^{1/4}" where="
+\alpha :: solar absorptance
+\varepsilon :: infrared emittance
+S :: solar constant, 1361 W/m²
+q :: heat from equipment inside (W/m²)
+\sigma :: Stefan–Boltzmann constant, 5.67 × 10⁻⁸ W/(m²·K⁴)
+" />
+
+With no internal heat, the temperature depends only on **the ratio α/ε**. An ideal black plate (α = ε = 1) reaches 120 °C. White paint (α/ε = 0.22) stays at −3 °C, an OSR mirror at −52 °C. Conversely, polished aluminium (α/ε = 3) reaches 245 °C and gold 349 °C: shiny metal absorbs little sunlight but sheds heat even worse.
+
+<Predict client:visible lang="en"
+  title="Polished aluminium or black paint: which runs hotter?"
+  q="Two flat plates face the Sun with insulated backs. One is black paint (α 0.95, ε 0.88), the other polished aluminium (α 0.15, ε 0.05). Which is hotter at equilibrium?"
+  options={['Black paint, because black absorbs sunlight', 'Polished aluminium, because it can hardly shed heat', 'They are equal', 'It cannot be determined']} answer={1}
+  why="Polished aluminium has α/ε = 3 and settles at 245 °C; black paint, α/ε ≈ 1.08, at 128 °C. What matters is absorptance over emittance, not the colour the eye sees." />
+
+<Figure
+  title="Figure 4.4 — Equilibrium temperature by coating, and the swing over orbits"
+  try="Pick white paint at 700 km, beta 0°: between which temperatures does the plate swing? Add 100 W/m² of internal heat to move it into the green band. Make the aluminium plate thicker: what happens to the swing? Set beta to 70° (no eclipse)."
+  source="Flat plate always facing the Sun, radiating from one face to cold space; Earth infrared and albedo ignored. Aluminium plate (2700 kg/m³, 900 J/(kg·K)); Euler integration with 10 s steps; cylindrical Earth shadow (src/lib/bus.ts, thermalSim). α and ε are rounded typical values, right only in order of magnitude; real coatings vary with thickness and ageing. The 0–40 °C green band is illustrative."
+>
+  <BusThermal client:visible lang="en" />
+</Figure>
+
+On every orbit a surface heats up in sunlight and cools in shadow. For a 2 mm white-painted aluminium plate at 700 km, beta 0°, the temperature swings from −70 °C to −7 °C; with 100 W/m² of heat from equipment inside, the range becomes −37 °C to 18 °C. Thermal engineers use:
+
+- **<Term id="bus-mli">Multi-layer insulation</Term>** (MLI): tens of thin metallised films separated by netting, which almost stop radiation. The familiar "gold foil" is usually amber Kapton film aluminised on the back.
+- **<Term id="bus-radiator">Radiators</Term>** coated with OSR mirrors or white paint (low α, high ε), placed on faces that see little sunlight.
+- **Heat pipes** that carry heat from hot units to the radiators, and thermostatic **heaters** that keep batteries and optics warm in shadow.
+- **Active cooling** with cryocoolers for thermal-infrared detectors (Chapter 8).
+
+<Note kind="myth">
+
+"Space is cold, so satellites are always cold." Not really: a vacuum is an excellent insulator, so the usual problem is **getting rid of** equipment heat. A polished aluminium plate in sunlight can exceed 200 °C, while the same plate in shadow slowly cools towards hundreds of degrees below zero.
+
+</Note>
+
+<Note kind="key">
+
+<mark>Surface temperature is set by α/ε, not by colour.</mark> Thermal design means choosing coatings, insulation and radiators so that every unit stays within its allowed range in full sunlight and in eclipse.
+
+</Note>
+
+## 4.5 Spacecraft propulsion
+
+A satellite needs propulsion to raise its orbit after separation, for **<Term id="station-keeping">station keeping</Term>** inside a narrow corridor (so the ground track repeats exactly, Chapter 2), to make up drag, to dodge debris and to deorbit at the end. There are two main families.
+
+<div class="table-wrap">
+
+| Type | Principle | Typical <Term id="specific-impulse">Isp</Term> | Thrust | Used for |
+|---|---|---|---|---|
+| Cold gas | expels compressed gas (nitrogen, butane) | 50–75 s | mN | CubeSats, attitude trim |
+| <Term id="bus-hydrazine">Hydrazine monopropellant</Term> | catalytic decomposition | 150–225 s | 0.1 to tens of N | most LEO observation satellites |
+| Bipropellant (MMH/NTO) | burns fuel with an oxidiser | 300–340 s | a few N to hundreds of N | GEO satellites, orbit raising |
+| <Term id="bus-electric-propulsion">Hall thruster</Term> | ionises an inert gas, accelerates it electrically | about 1500–2000 s | tens to hundreds of mN | Starlink, all-electric GEO |
+| Gridded ion thruster | accelerates ions through electrode grids | 2000–5000 s | tens of mN | deep-space probes, GEO |
+
+</div>
+
+The higher the Isp, the less propellant for the same Δv, exactly as the <Term id="rocket-equation">rocket equation</Term> of Chapter 3 says, rewritten for propellant mass:
+
+<Formula label="Propellant for a given Δv" tex="m_p = m_{dry}\left(e^{\Delta v / (I_{sp} g_0)} - 1\right)" where="
+m_p :: propellant mass
+m_{dry} :: satellite mass with empty tanks
+\Delta v :: total velocity change needed (m/s)
+I_{sp} :: specific impulse (s)
+g_0 :: 9.80665 m/s²
+" />
+
+Electric thrusters buy their high Isp with tiny thrust, because thrust is limited by the electric power the arrays can supply:
+
+<Formula label="Thrust of an electric thruster" tex="F = \frac{2\eta P}{g_0 I_{sp}}" where="
+F :: thrust (N)
+\eta :: overall thruster efficiency
+P :: electric power to the thruster (W)
+" />
+
+<div class="worked">
+
+#### Example: the argon Hall thruster of Starlink V2 Mini
+
+SpaceX quotes 170 mN at an Isp of 2500 s and 4.2 kW. With η = 0.5: F = 2 × 0.5 × 4200 / (9.80665 × 2500) = **0.171 N**, matching the published value. That is roughly the weight of a small egg; in return the thruster runs for hours a day on very little gas.
+
+</div>
+
+The Δv for **drag make-up** equals the velocity the atmosphere removes each year, and it soars at lower altitude or when the Sun is active. For a ballistic coefficient of 0.01 m²/kg, at 500 km it is 1.1 m/s a year with a quiet Sun but 19 m/s with an active Sun; at 786 km only 0.03–0.6 m/s. A **controlled re-entry** (one burn that drops the perigee to 50 km so the satellite falls into a chosen ocean area) costs about 205 m/s from 786 km, far more than the drag make-up.
+
+<Formula label="Yearly drag make-up Δv (circular orbit)" tex="\Delta v_{yr} = \tfrac{1}{2}\rho v^2 B \cdot t_{yr}, \qquad B = \frac{C_d A}{m}" where="
+\rho :: air density at the orbit altitude
+v :: orbital velocity
+B :: ballistic coefficient (m²/kg)
+t_{yr} :: seconds in a year
+" />
+
+<Figure
+  title="Figure 4.5 — Δv and propellant budget for a whole mission"
+  try="Defaults: 700 km, 7 years, active Sun, controlled re-entry. Switch to 'Let it decay': how much propellant is left? Drag the altitude down to 400 km: how large is the drag make-up? Compare the hydrazine bar with the Hall bar."
+  source="Air density from NRLMSIS 2.1 (global mean, F10.7 = 70 or 200, held constant through the mission). Drag make-up = ½ ρ v² B per year; controlled re-entry = one tangential burn to a 50 km perigee; '5-year decay orbit' = Hohmann transfer to the altitude whose natural lifetime is 5 years. Isp values are mid-range typical values (Wertz & Larson 1999). Collision avoidance and inclination control are ignored (src/lib/bus.ts)."
+>
+  <BusPropulsion client:visible lang="en" />
+</Figure>
+
+<div class="worked">
+
+#### Example: a one-tonne satellite, 7 years at 786 km
+
+1. Drag make-up with an active Sun for 7 years (B = 0.01 m²/kg): 7 × 0.59 ≈ 4 m/s.
+2. Controlled re-entry to a 50 km perigee: 205 m/s. Total **209 m/s**.
+3. With a dry mass of 1000 kg: hydrazine (220 s) needs **102 kg**, bipropellant (310 s) 71 kg, Hall (1600 s) 13 kg, cold gas (70 s) as much as 356 kg.
+
+Sentinel-2, at the same altitude, carries 123 kg of propellant out of 1140 kg: the same order of magnitude as this rough estimate.
+
+</div>
+
+<Note kind="key">
+
+Chemical thrusters give large thrust and fast response; electric thrusters save propellant many times over but push very slowly. In low LEO drag eats the propellant; in high LEO most of the Δv is reserved for the satellite's own deorbit.
+
+</Note>
+
+## 4.6 Computer, flight software and the radiation environment
+
+The on-board computer (OBC, or the C&DH subsystem) runs the **flight software**: it executes the uploaded command schedule, collects telemetry, drives the ADCS, manages image memory, and compresses and formats data. Most important is **<Term id="bus-fdir">FDIR</Term>** (fault detection, isolation and recovery): the satellite is out of station contact most of the time, so it must handle faults itself, falling back to safe mode if needed.
+
+Electronics in space are bombarded by energetic particles: protons and electrons trapped in the Van Allen belts, particles from solar storms and cosmic rays. They cause three kinds of damage:
+
+<Tiles
+  items={[
+    { t: 'SEU', d: 'A particle flips one bit in memory or a register. Soft, recoverable' },
+    { t: 'Latch-up', d: 'A particle triggers a parasitic path and current surges; power must be cut at once or the chip burns' },
+    { t: 'TID', d: 'Accumulated dose drifts component characteristics until they fail over the years' },
+  ]}
+  sum="The first two are single events; the third is ageing"
+/>
+
+Of these, the **<Term id="bus-seu">SEU</Term>** and **<Term id="bus-latch-up">latch-up</Term>** happen one event at a time, while the **<Term id="bus-tid">TID</Term>** builds up over the mission.
+
+In LEO most of these events are concentrated in the **<Term id="bus-saa">South Atlantic Anomaly</Term>** (SAA). Earth's magnetic axis is tilted and offset from the centre, so the field is weakest over South America and the South Atlantic; the inner radiation belt therefore dips lowest there, down to LEO altitudes.
+
+<Figure
+  title="Figure 4.6 — Where the field is weakest: the South Atlantic Anomaly at 500 km"
+  try="Hover over South America, then over Viet Nam: how many times stronger is the field? Pull the threshold down to 21,000 nT to see the SAA core, then up to 30,000 nT: how far does the weak region reach?"
+  source="Total magnetic field intensity |B| at 500 km altitude, epoch 2026.0, IGRF-14 model (IAGA, coefficients from NOAA NCEI), 2° grid, computed with scripts/data/export_bus_data.py. This is field intensity, NOT a particle-flux map: the SAA is where the inner radiation belt reaches lowest because the field is weakest. Reversed viridis palette (bright = weak)."
+>
+  <BusRadiation client:visible lang="en" />
+</Figure>
+
+According to IGRF-14, at 500 km the field is weakest, about 18,300 nT, near 22° S, 60° W; over Hanoi it is about 35,300 nT, 1.93 times stronger. At the surface the SAA minimum is about 22,100 nT. Many sensitive instruments (optical detectors, particle counters) pause or flag their data while crossing it.
+
+Mitigations:
+
+- **Radiation-hardened parts**, for example the RAD750 processor family: generations slower than commercial chips but very robust.
+- **<Term id="bus-edac">EDAC</Term>**: error-correcting memory, "scrubbed" regularly so flipped bits are fixed before errors pile up.
+- **TMR** (triple modular redundancy): three circuits compute the same thing and the majority wins.
+- **Watchdogs**: timers that reboot the computer if the software hangs; current limiters that cut power on latch-up.
+- **Hot/cold redundancy**: spare computers, wheels and transmitters to switch to after a failure.
+
+NewSpace smallsats often use commercial (COTS) parts, cheaper and faster, compensating with the measures above and accepting more risk. More powerful computers also allow **on-board processing**: discarding cloudy images, compressing, detecting ships in orbit and sending down only what is useful.
+
+<Note kind="key">
+
+Radiation in LEO is not uniform: most bit flips happen while crossing the SAA. Fault-tolerant design (EDAC, TMR, watchdogs, FDIR) matters as much as radiation-hardened parts.
+
+</Note>
+
+## 4.7 Ground segment and data flow
+
+A satellite talks to the ground over two links (details in Chapter 5). The **<Term id="ttc">TT&C</Term>** link (telemetry, tracking and command) is slow but very reliable, usually in S-band (2025–2110 MHz up, 2200–2290 MHz down), following <Term id="ccsds">CCSDS</Term> standards; ranging and Doppler on this link help determine the orbit. Images travel on a separate high-rate link in X-band (8025–8400 MHz, allocated to Earth observation), Ka-band or laser.
+
+A LEO satellite can only communicate while in view of a <Term id="ground-station">ground station</Term>. A sun-synchronous orbit passes close to both poles on every revolution, so a high-latitude station sees almost every orbit, while a station near the equator sees only a few passes a day.
+
+<Predict client:visible lang="en"
+  title="How often does the Hoa Lac station see VNREDSat-1?"
+  q="VNREDSat-1 flies a sun-synchronous orbit at about 680 km, about 14.6 revolutions a day. How many times a day can a station at Hoa Lac (21° N) contact it (elevation ≥ 5°)?"
+  slider={{ min: 0, max: 15, step: 0.5 }} answer={3} tol={1}
+  why="About 3 times, around 29 minutes a day in total (simulated from real orbital elements). The SvalSat station on Svalbard (78° N) sees the same satellite 15 times a day, over 2 hours of contact. A 2013 press report also gives 2–4 contacts a day for Hoa Lac." />
+
+<Figure
+  title="Figure 4.7 — One day of contacts, and how long an image waits in memory"
+  try="With Hoa Lac only: how long does an image taken at a random time wait, on average, before it reaches the ground? Add SvalSat, then TrollSat. Raise the minimum elevation to 15° (hills, buildings): how many passes are lost?"
+  source="Real GP elements of VNREDSat-1 and Sentinel-2A (CelesTrak, 4 Nov 2026), propagated with Kepler + J2 for 48 h in 20 s steps (src/lib/gnss.ts). Approximate station coordinates: Hoa Lac 21.01° N 105.52° E; SvalSat 78.23° N 15.39° E; TrollSat 72.01° S 2.53° E. Waiting time is for an image taken at a random moment of the first day, until the next station pass (src/lib/bus.ts, waitStats). Relay satellites not included."
+>
+  <BusLatency client:visible lang="en" />
+</Figure>
+
+<Stats items={[
+  { v: '3', u: 'per day', l: 'VNREDSat-1 passes over Hoa Lac (29 min)' },
+  { v: '15', u: 'per day', l: 'the same satellite over SvalSat on Svalbard' },
+  { v: '4.7', u: 'h', l: 'mean image wait with the Hoa Lac station only' },
+  { v: '20', u: 'min', l: 'mean wait with Hoa Lac + Svalbard + Troll' },
+]} caption="48-hour simulation from CelesTrak orbital elements of 4 Nov 2026, elevation ≥ 5°. With Hoa Lac alone, some images wait up to 10.7 hours." />
+
+That is why operators rent time on global station networks (KSAT, SSC, AWS Ground Station…) by the minute, build polar stations, or use **relay satellites** in GEO: Europe's EDRS receives Sentinel-1 and Sentinel-2 data over a 1.8 Gbit/s laser link and forwards it to European stations almost immediately.
+
+In Viet Nam, the VNREDSat-1 ground segment comprises an operations centre under the Vietnam Academy of Science and Technology, a control station at Hoa Lac Hi-Tech Park, and an image receiving station of the Ministry of Natural Resources and Environment. The Center for Small Satellite Control and Exploitation of the Space Technology Institute (STI) adjusts the satellite's orbit from the Hoa Lac station. When the satellite images Viet Nam itself, the data can be downlinked during the same pass.
+
+<Steps title="From tasking request to image in the user's hands" items={[
+  { tag: 'Request', t: 'Tasking', d: 'The user gives the area of interest, time window, maximum off-nadir angle and acceptable cloud cover.' },
+  { tag: 'Feasibility', t: 'Find imaging opportunities', d: 'Compute the passes over the area from the orbit, schedule against other requests, check the cloud forecast.' },
+  { tag: 'Uplink', t: 'Send the plan over TT&C', d: 'The imaging plan is uploaded during an earlier pass over the control station; Hoa Lac alone offers about 3 chances a day.' },
+  { tag: 'Acquire', t: 'Turn and image', d: 'The ADCS turns the satellite to the target and the camera writes the image to mass memory.' },
+  { tag: 'Wait', t: 'Image sits in memory', d: 'Until the next pass over a receiving station: on average 4.7 h with Hoa Lac alone, 38 min with Svalbard added (Figure 4.7).' },
+  { tag: 'Downlink', t: 'Send it down in X-band', d: 'During the few minutes of a station pass, or through a relay satellite in GEO.' },
+  { tag: 'Process', t: 'Build product levels', d: 'Decompress, correct radiometry and geometry, produce Level 0 to Level 2 products (Chapter 12).' },
+  { tag: 'Deliver', t: 'To the user', d: 'Via web portal, API or pushed straight into the customer\'s cloud.' },
+]} />
+
+<Note kind="example" label="Viet Nam">
+
+In cloudy tropical regions such as Viet Nam, especially in the rainy season, an optical tasking request often needs many passes before a cloud-free image arrives (Chapter 9 counts the usable days in Hanoi and An Giang). Radar, which sees through cloud (Chapter 16), is therefore especially valuable here.
+
+</Note>
+
+<Note kind="key">
+
+An image is only worth something once it reaches the ground. The delay between acquisition and use depends more on the station network than on the satellite: a low-latitude station sees an SSO satellite a few times a day, a polar station almost every orbit.
+
+</Note>
+
+## 4.8 Mission phases
+
+A mission passes through a sequence of phases. The durations below come from Sentinel-2A and the observation satellites in this chapter.
+
+<Steps title="Life of an Earth-observation satellite" items={[
+  { tag: 'Hours – days', t: 'LEOP: launch and early orbit', d: 'Separation, detumbling, array deployment, Sun acquisition, first contact, health checks. Sentinel-2A: launched 23 June 2015, LEOP ended 26 June 2015.' },
+  { tag: 'Weeks – months', t: 'Commissioning', d: 'Raise the orbit to its slot, test each subsystem, calibrate the camera, validate data quality. Planned at three months for Sentinel-2A.' },
+  { tag: 'Years', t: 'Routine operations', d: 'Acquisition planning, orbit determination, station keeping, collision risk assessment, software updates, anomaly handling.' },
+  { tag: 'Varies', t: 'Mission extension', d: 'VNREDSat-1 was designed for 5 years and has flown more than 10. Landsat 5 was designed for 3 years and operated almost 29 (1984–2013).' },
+  { tag: 'Weeks – months', t: 'End of life', d: 'Deorbit (LEO) or boost to a graveyard orbit (GEO), vent propellant and discharge batteries, switch off the transmitters.' },
+]} />
+
+The last step is **<Term id="bus-passivation">passivation</Term>**: venting all stored energy (propellant, pressurant, batteries) so a dead satellite cannot explode into fragments. A retired GEO satellite is raised to a **<Term id="bus-graveyard-orbit">graveyard orbit</Term>** a few hundred kilometres above the geostationary belt; the IADC guidelines set a minimum of 235 km plus a term for solar radiation pressure.
+
+<Note kind="key">
+
+LEOP and commissioning carry the highest risk; routine operations fill almost the whole life of the satellite, with FDIR and safe mode as the safety net. End of life is not "switch off": the satellite must leave useful orbits and be passivated.
+
+</Note>
+
+## 4.9 Drag, collision avoidance and space debris
+
+Low orbits still contain a trace of air. It slows the satellite and lowers the orbit (**<Term id="orbital-decay">orbital decay</Term>**) until, at about 150 km, the satellite re-enters within days. The air density there varies strongly with **solar activity**: an active Sun heats and inflates the thermosphere with ultraviolet light. According to NRLMSIS 2.1, at 400 km the density for an active Sun (F10.7 = 200) is 9.3 times that of a quiet Sun (F10.7 = 70); at 600 km it is 24.5 times.
+
+<Predict client:visible lang="en"
+  title="When does a 3U CubeSat at 500 km come down?"
+  q="A 4 kg 3U CubeSat without propulsion is released at 500 km. Roughly how long until it re-enters by itself?"
+  options={['A few weeks', 'About 1 to 11 years, depending on the Sun', 'About 100 years', 'Never']} answer={1}
+  why="With the model of Figure 4.8: 0.94 years if the Sun stays active, 11.4 years if it stays quiet. In reality the Sun follows an 11-year cycle, so the answer lies between. At 400 km only 0.2–1.4 years remain; at 600 km it is 3.7–72 years." />
+
+<Figure
+  title="Figure 4.8 — Orbital lifetime versus starting altitude and solar activity"
+  try="Pick PicoDragon and set 415 km (around the ISS altitude when it was released). How many days does the model give? In reality it came down after 101 days. For a 3U CubeSat, below what altitude must it be released to be sure it re-enters within 5 years?"
+  source="Circular orbit, da/dt = −√(μa) · ρ(a) · Cd·A/m, integrated over altitude down to 150 km. Density ρ: NRLMSIS 2.1 (Emmert et al. 2021, via pymsis), averaged over latitudes −60…60° and 12 local times, Ap = 15, solar activity held constant. Cd = 2.2; area is the mean projected area of a tumbling box. A simple model: errors of a factor of two are normal."
+>
+  <BusDecay client:visible lang="en" />
+</Figure>
+
+The model can be checked against two Vietnamese satellites that have re-entered, using the CelesTrak object catalogue. PicoDragon was released at about 415 km on 19 Nov 2013 and re-entered on 28 Feb 2014, after **101 days**; the model gives 55 days (active Sun) to 407 days (quiet Sun), and 2014 was near the peak of solar cycle 24. MicroDragon, starting at about 500 km, lasted **5.7 years** (Jan 2019 – Oct 2024); the model gives 1.2 to 14.8 years. Both fall between the limits: the model gets the order of magnitude right, no more.
+
+<Formula label="Decay equation of a circular orbit" tex="\frac{da}{dt} = -\sqrt{\mu a}\;\rho(a)\,B, \qquad B = \frac{C_d A}{m}" where="
+a :: orbit radius
+\mu :: Earth's gravitational parameter
+\rho(a) :: air density at that radius
+B :: ballistic coefficient; a large B decays faster
+" />
+
+### Space debris and the Kessler syndrome
+
+Low orbit is getting crowded. CelesTrak's public catalogue (5 Nov 2026) lists 34,344 objects in Earth orbit with orbital elements; 28,936 of them are between 200 and 2000 km. The catalogue only holds objects large enough for radar to track (about 10 cm and up in LEO); smaller fragments are far more numerous.
+
+<Figure
+  title="Figure 4.9 — Tracked objects by altitude"
+  try="Move the altitude band to 550 km: what dominates? Then to 800 km: what share is debris, and how long would a fragment there take to come down? Switch off 'Active satellites' to see only the junk."
+  source="CelesTrak SATCAT (celestrak.org/pub/satcat.csv), retrieved 5 Nov 2026: objects not decayed, orbiting Earth, with orbital elements; mean altitude = (apogee + perigee)/2, 20 km bins. 'Active' follows CelesTrak status codes (+, P, B, S, X); objects of unknown type count as debris. Lifetime: model of Figure 4.8 with B = 0.01 m²/kg. ISS, Starlink, Sentinel-2 and OneWeb positions are approximate."
+>
+  <BusDebris client:visible lang="en" />
+</Figure>
+
+<Stats items={[
+  { v: '16,078', l: 'active satellites between 200 and 2000 km' },
+  { v: '10,141', l: 'tracked debris fragments in the same region' },
+  { v: '83', u: '%', l: 'of objects at 700–900 km are debris (4693 / 5655)' },
+]} caption="CelesTrak SATCAT, 5 Nov 2026. The 450–600 km band holds 12,041 objects but only 389 debris fragments: it is crowded by broadband constellations, and drag clears fragments within a few years." />
+
+The 700–900 km band is thick with debris because of two events: China's anti-satellite test against the Fengyun-1C weather satellite on 11 Jan 2007, which created more than 3000 tracked fragments, and the collision between Iridium 33 and the defunct Kosmos 2251 on 10 Feb 2009. On 15 Nov 2021 Russia's anti-satellite test against Kosmos 1408 created more than 1500 fragments. At those altitudes fragments survive for decades to centuries (Figure 4.8).
+
+In 1978 Donald Kessler and Burton Cour-Palais warned of a dangerous threshold, now called the **<Term id="kessler-syndrome">Kessler syndrome</Term>**: once objects are dense enough, each collision creates fragments that cause more collisions, in a chain reaction, until an orbital band becomes unusable.
+
+<Note kind="myth">
+
+"Space is vast, two objects cannot hit each other." In one altitude band thousands of objects cross each other's orbits at relative speeds above 10 km/s; a 1 cm fragment carries the energy of a small explosion. The 2009 Iridium–Kosmos event was a real collision between two intact satellites.
+
+</Note>
+
+### Collision avoidance
+
+Space surveillance centres (such as the US Space Force, publishing through Space-Track) screen every pair of objects and issue **<Term id="conjunction">conjunction</Term>** warnings (Conjunction Data Messages) when two objects are predicted to pass close. The operator then computes the **<Term id="bus-collision-probability">probability of collision</Term>** P<sub>c</sub> from the miss distance, the position uncertainty of both objects and their size:
+
+<Steps title="Deciding on an avoidance manoeuvre" items={[
+  { tag: 'T − 7 days', t: 'Screening', d: 'Propagate the orbits of all objects and find pairs that will pass through a safety "box" around each other.' },
+  { tag: 'T − days', t: 'Compute Pc', d: 'Combine the miss distance with the position-uncertainty ellipses of both objects. The larger the uncertainty, the less trustworthy the Pc.' },
+  { tag: 'Threshold', t: 'Compare with a threshold', d: 'NASA CARA: Pc above 10⁻⁷ merits attention, above 10⁻⁴ requires mitigation. ESA starts planning a manoeuvre above about 1 in 10,000.' },
+  { tag: 'T − 1 day', t: 'Plan and burn', d: 'A small burn a few orbits before the encounter, usually along the flight direction, then a check that it creates no new conjunction.' },
+]} />
+
+ESA reports that it has to perform more than one collision-avoidance manoeuvre per satellite per year on average, mostly to avoid debris. Large constellations such as Starlink avoid collisions autonomously (Chapter 6). A satellite without propulsion, like most CubeSats, cannot dodge anything.
+
+### End-of-life rules
+
+The IADC space debris mitigation guidelines have long recommended that LEO satellites leave orbit within **25 years** of the end of their mission. On 29 Sep 2022 the US Federal Communications Commission (FCC, order 22-74) tightened this to **5 years** for satellites licensed by the FCC or granted US market access that end their missions in or pass through the region below 2000 km, after a two-year transition (to 29 Sep 2024). ESA pursues a "Zero Debris" approach by 2030.
+
+On Figure 4.8, with a ballistic coefficient of 0.02 m²/kg, the natural lifetime exceeds 5 years above a starting altitude of about 460 km (quiet Sun) or 620 km (active Sun). Higher than that, the satellite needs propulsion to deorbit itself (Figure 4.5).
+
+<Note kind="key">
+
+<mark class="key">Orbital lifetime grows exponentially with altitude.</mark> The same CubeSat comes down within months to a little over a year from 400 km, but lasts decades to centuries at 700 km. That is why debris at 700–900 km is the most persistent worry, and why collision avoidance and the 5-year rule are now a core part of operations.
+
+</Note>
+
+## 4.10 CubeSats: satellites built to a standard
+
+The **<Term id="cubesat">CubeSat</Term>** was born at California Polytechnic State University (Cal Poly) and Stanford in 1999 from a simple idea: standardise the outer shell so that every small satellite can use the same deployer. One **1U** unit is 10 × 10 cm and 11.35 cm tall. The CubeSat Design Specification (CDS) rev. 14.1 of 2022 allows a 1U to weigh up to 2.00 kg; older revisions capped it at 1.33 kg. Units combine into 2U, 3U, 6U and 12U to make room for larger cameras and arrays.
+
+PicoDragon was a 1U CubeSat built by the Vietnam National Space Center, about 1 kg, released from the ISS Kibo module in 2013. The price of cheap and fast is little power, limited pointing and usually no propulsion: released low, it lives briefly (like PicoDragon); released high, it can become debris for decades.
+
+<Note kind="key">
+
+CubeSats have made space many times cheaper through standardisation, but every budget in this chapter (power, pointing, heat, radiation, communications, end of life) still applies, only tighter.
+
+</Note>
+
+## 4.11 Practice
+
+The notebook computes the eclipse share over a year as a function of altitude and beta angle for Sentinel-2 and for a dawn–dusk orbit, builds a power budget and simulates the battery charge, then computes orbital lifetime with the NRLMSIS density table. This chapter does not need Earth Engine.
+
+<LabLinks notebook="labs/satellite_power.ipynb" />
+
+**Suggested exercises**
+
+1. A 3U CubeSat has body-mounted cells of 0.03 m² per face and a 5 W average load. At 500 km with beta 0°, does it have enough power?
+2. For VNREDSat-1, what pointing error in degrees shifts the image by 1 km? Why are ground control points still needed?
+3. A radiator must shed 200 W at 20 °C. With white paint (ε = 0.9) and no sunlight, how many square metres does it need?
+4. A 100 kg satellite at 500 km, active Sun, 5 years: compare hydrazine with a Hall thruster (use Figure 4.5).
+5. Why does the Starlink constellation (Chapter 6) release its satellites low and then raise them?
+
+## 4.12 Review
+
+<Quiz client:visible lang="en" items={quiz} />
+
+## References
+
+- Cal Poly CubeSat Program (2022). *CubeSat Design Specification*, Rev. 14.1. https://www.nasa.gov/wp-content/uploads/2018/01/cubesatdesignspecificationrev14_12022-02-09.pdf
+- CelesTrak. SATCAT (satcat.csv), retrieved 5 Nov 2026; records PICODRAGON (39413), MICRODRAGON (43935); GP elements retrieved 4 Nov 2026. https://celestrak.org/satcat/search.php
+- DTiNews (2013). Report on the VNREDSat-1 ground segment (operations centre, Hoa Lac station, image receiving station). https://dtinews.dantri.com.vn/print/20130504143804400.htm
+- Emmert, J. T., Drob, D. P., Picone, J. M., et al. (2021). NRLMSIS 2.0: A whole-atmosphere empirical model of temperature and neutral species densities. *Earth and Space Science*, 8, e2020EA001321. https://doi.org/10.1029/2020EA001321
+- eoPortal. VNREDSat-1. https://www.eoportal.org/satellite-missions/vnredsat-1
+- eoPortal. Pico Dragon. https://www.eoportal.org/satellite-missions/pico-dragon
+- ESA. Sentinel-2: Facts and figures. https://www.esa.int/Applications/Observing_the_Earth/Copernicus/Sentinel-2/Facts_and_figures
+- ESA (2015). Sentinel-2A completes critical first days in space. https://www.esa.int/Applications/Observing_the_Earth/Copernicus/Sentinel-2/Sentinel-2A_completes_critical_first_days_in_space
+- ESA. Sentinel-2 Data Quality Report. https://sentinel.esa.int/documents/247904/685211/Sentinel-2+Data+Quality+Report
+- ESA. Sentinel-1 orbit. https://sentinels.copernicus.eu/web/sentinel/missions/sentinel-1/satellite-description/orbit
+- ESA. Automating collision avoidance. https://www.esa.int/Space_Safety/Space_Debris/Automating_collision_avoidance
+- ESA. European Data Relay System (EDRS). https://www.esa.int/Applications/Connectivity_and_Secure_Communications/European_Data_Relay_System_EDRS_Overview
+- FCC (2022). *Space Innovation; Mitigation of Orbital Debris in the New Space Age*, Second Report and Order, FCC 22-74. https://docs.fcc.gov/public/attachments/FCC-22-74A1.pdf
+- Gilmore, D. G. (Ed.) (2002). *Spacecraft Thermal Control Handbook*, Vol. I (2nd ed.). The Aerospace Press.
+- Gunter's Space Page. MicroDragon. https://space.skyrocket.de/doc_sdat/microdragon.htm
+- IADC. *IADC Space Debris Mitigation Guidelines*. Inter-Agency Space Debris Coordination Committee. https://www.iadc-home.org/documents_public
+- IAGA (2024). International Geomagnetic Reference Field, 14th generation (IGRF-14), coefficients at NOAA NCEI. https://www.ngdc.noaa.gov/IAGA/vmod/coeffs/igrf14coeffs.txt
+- Kessler, D. J., & Cour-Palais, B. G. (1978). Collision frequency of artificial satellites: The creation of a debris belt. *Journal of Geophysical Research*, 83(A6), 2637–2646. https://doi.org/10.1029/JA083iA06p02637
+- Kopp, G., & Lean, J. L. (2011). A new, lower value of total solar irradiance: Evidence and climate significance. *Geophysical Research Letters*, 38, L01706. https://doi.org/10.1029/2010GL045777
+- NASA. Small Spacecraft Technology State of the Art, ch. 1 (small-satellite mass classes). https://www.nasa.gov/smallsat-institute/sst-soa/
+- NASA CARA. Close approach risk assessment. https://www.nasa.gov/cara/close-approach-risk-assessment
+- NASA Orbital Debris Program Office. *Orbital Debris Quarterly News* (2007 ASAT test, 2009 Iridium 33 – Kosmos 2251 collision, 2021 Kosmos 1408 ASAT test). https://orbitaldebris.jsc.nasa.gov/quarterly-news/
+- Nhan Dan (2024). Making efficient use of VNREDSat-1 satellite. https://en.nhandan.vn/making-efficient-use-of-vnredsat-1-satellite-post12759.html
+- Nguyễn Văn Tín. *Sổ tay Vệ tinh & Viễn thám* (Satellite & Remote Sensing Handbook), chapter 4. CC BY 4.0. https://satellite-rs-handbook.netlify.app/
+- SpaceNews (2023). SpaceX launches first upgraded Starlink satellites (argon Hall thruster 170 mN, 2500 s, 4.2 kW). https://spacenews.com/?p=145860
+- Tuổi Trẻ News (2026). Japan aims for 2027 launch of Vietnam's LOTUSat-1 Earth observation satellite. https://news.tuoitre.vn/japan-aims-for-2027-launch-of-vietnams-lotusat-1-earth-observation-satellite-103260504134743019.htm
+- USGS. Landsat 5. https://www.usgs.gov/landsat-missions/landsat-5
+- VOV (2021). Vietnam's NanoDragon satellite passes final tests before launch in Japan. https://amp.vov.vn/en/society/vietnams-nanodragon-satellite-pass-final-tests-before-launch-in-japan-883489.vov
+- Wertz, J. R., & Larson, W. J. (Eds.) (1999). *Space Mission Analysis and Design* (3rd ed.), ch. 11 Spacecraft subsystems, ch. 17 Space propulsion systems. Microcosm / Kluwer.

@@ -1,6 +1,6 @@
 ---
 title: Classification & accuracy assessment
-n: 9
+n: 14
 summary: Turn a satellite image into a land-cover map, then ask how right the map is. In this chapter you click your own training samples on the West Lake Sentinel-2 image, compare two classifiers, try k-means, and assess accuracy the recommended way (Olofsson et al. 2014), with area estimates and confidence intervals.
 objectives:
   - Tell supervised from unsupervised classification and explain the role of training samples.
@@ -14,6 +14,10 @@ import Term from '../../../components/Term.astro';
 import Depth from '../../../components/Depth.astro';
 import Figure from '../../../components/Figure.astro';
 import LabLinks from '../../../components/LabLinks.astro';
+import Note from '../../../components/Note.astro';
+import Formula from '../../../components/Formula.astro';
+import Stats from '../../../components/Stats.astro';
+import Steps from '../../../components/Steps.astro';
 import ClassifyLab from '../../../islands/ClassifyLab.tsx';
 import FeatureSpace from '../../../islands/FeatureSpace.tsx';
 import KMeansLab from '../../../islands/KMeansLab.tsx';
@@ -21,14 +25,20 @@ import AccuracyLab from '../../../islands/AccuracyLab.tsx';
 import Quiz from '../../../islands/Quiz.tsx';
 import quiz from '../../../data/quiz/ch09.json';
 
-## 9.1 From image to map
+## 14.1 From image to map
 
 A satellite image gives each pixel a list of reflectances. A land manager needs answers like "this is water, that is housing". <Term id="classification">Classification</Term> assigns every pixel to a class. There are two main approaches:
 
 - **Supervised:** you show the computer a few example pixels of each class (<Term id="training-sample">training samples</Term>). It learns each class's spectral signature and labels the remaining pixels.
 - **Unsupervised:** the computer groups similar pixels into clusters by itself. You name the clusters afterwards.
 
-This chapter reuses the 12 February 2024 Sentinel-2 image of West Lake – Red River (Chapter 6) with 5 classes: water, trees, low vegetation (crops, grass, shrubs), built-up and bare. As a yardstick it uses the <Term id="worldcover">ESA WorldCover</Term> 2021 map of the same frame as "reference".
+<Note kind="key">
+
+Supervised: you teach the computer first with samples, then it classifies. Unsupervised: the computer clusters first, then you name the clusters.
+
+</Note>
+
+This chapter reuses the 12 February 2024 Sentinel-2 image of West Lake – Red River (Chapter 11) with 5 classes: water, trees, low vegetation (crops, grass, shrubs), built-up and bare. As a yardstick it uses the <Term id="worldcover">ESA WorldCover</Term> 2021 map of the same frame as "reference".
 
 <Depth level="ref" title="Reference: mapping WorldCover onto the chapter's 5 classes">
 
@@ -48,12 +58,16 @@ Frame of 512 × 512 pixels of 10 m = 26.2 km². WorldCover v200 resampled by nea
 
 </Depth>
 
-**Important:** WorldCover is itself an automatic classification, not ground truth. Every "correct" number in this chapter is strictly **agreement with WorldCover**. A real assessment needs reference data of higher quality than the map being checked, such as interpretation of very-high-resolution imagery or field visits (section 9.5).
+<Note kind="warn" label="Important">
 
-## 9.2 Supervised classification
+WorldCover is itself an automatic classification, not ground truth. Every "correct" number in this chapter is strictly **agreement with WorldCover**. A real assessment needs reference data of higher quality than the map being checked, such as interpretation of very-high-resolution imagery or field visits (section 14.5).
+
+</Note>
+
+## 14.2 Supervised classification
 
 <Figure
-  title="Figure 9.1 — Click your own samples and classify the Sentinel-2 image on the map"
+  title="Figure 14.1 — Click your own samples and classify the Sentinel-2 image on the map"
   try="Press 'Clear', select Water and click 3 points on West Lake, then 3 Built-up points in the streets. With only 2 classes, what does the map look like? Add Trees, Low vegetation and Bare. Switch classifiers and read 'Agrees with WorldCover'."
   source="Sentinel-2B L2A 12 Feb 2024, 6 bands B2, B3, B4, B8, B11, B12 (10 and 20 m resampled to 10 m). Each sample point takes a 3 × 3 pixel window. Reference: ESA WorldCover v200 (2021), © ESA WorldCover project. Suggested samples: 8 points per class (5 for bare) where WorldCover is homogeneous over 5 × 5 pixels and the spectra are uniform, chosen by scripts/data/export_ch09_training.py. Contains modified Copernicus Sentinel data 2024. Basemap © Esri, Maxar, Earthstar Geographics."
 >
@@ -72,14 +86,14 @@ With the suggested samples (37 points of 9 pixels each):
 
 </div>
 
-Units: km². Both classifiers find **too few trees and too much low vegetation**. Street trees in Hanoi have small crowns, so a 10 m pixel often mixes a tree with roofs and roads (mixed pixels, Chapter 4); its spectrum looks more like low vegetation than like closed canopy. Bare is overestimated almost ninefold: metal roofs, construction sites and wet sand have spectra close to the river sandbars.
+Units: km². Both classifiers find **too few trees and too much low vegetation**. Street trees in Hanoi have small crowns, so a 10 m pixel often mixes a tree with roofs and roads (mixed pixels, Chapter 9); its spectrum looks more like low vegetation than like closed canopy. Bare is overestimated almost ninefold: metal roofs, construction sites and wet sand have spectra close to the river sandbars.
 
 ### Where do the two classifiers differ?
 
 <Figure
-  title="Figure 9.2 — Red – NIR feature space: the boundaries of two classifiers"
+  title="Figure 14.2 — Red – NIR feature space: the boundaries of two classifiers"
   try="Switch between 'Minimum distance' and 'Maximum likelihood'. How does the boundary between trees (green) and low vegetation (yellow) move? Why is the Built-up ellipse long and tilted?"
-  source="2500 random pixels of the 12 Feb 2024 Sentinel-2 image, coloured by WorldCover. Means and 2σ ellipses from the suggested samples (3 × 3 pixels per point). Background: classifiers trained on the 2 bands B4 and B8 only (the Figure 9.1 map uses 6 bands)."
+  source="2500 random pixels of the 12 Feb 2024 Sentinel-2 image, coloured by WorldCover. Means and 2σ ellipses from the suggested samples (3 × 3 pixels per point). Background: classifiers trained on the 2 bands B4 and B8 only (the Figure 14.1 map uses 6 bands)."
 >
   <FeatureSpace client:visible lang="en" />
 </Figure>
@@ -87,30 +101,46 @@ Units: km². Both classifiers find **too few trees and too much low vegetation**
 - <Term id="minimum-distance">Minimum distance</Term> remembers only the **centre** of each class. A pixel goes to the nearest centre, so the boundaries are straight perpendicular bisectors.
 - <Term id="maximum-likelihood">Maximum likelihood</Term> remembers the centre and the **spread** (covariance matrix) of each class. A widely spread class like Built-up (bright metal roofs, tiles, dark asphalt) claims a larger region; a tight class like Water accepts only very similar pixels. The boundaries curve.
 
+<Note kind="key">
+
+A classifier sees only the spectrum. Small street-tree crowns give mixed pixels whose spectrum looks like low vegetation, so both classifiers miss trees. Maximum likelihood differs from minimum distance by also using each class's spread.
+
+</Note>
+
 <Depth level="advanced" title="Formulas">
 
-For a spectral vector **x**, class mean **μₖ** and covariance **Σₖ** (from the training samples):
+<Formula label="Minimum distance" tex="k^{*} = \arg\min_k \lVert \mathbf{x} - \boldsymbol{\mu}_k \rVert^2" where="
+\mathbf{x} :: spectral vector of the pixel
+\boldsymbol{\mu}_k :: mean of class k (from the training samples)
+" />
 
-<p class="formula">Minimum distance: k* = argminₖ ‖x − μₖ‖²</p>
-<p class="formula">Maximum likelihood: k* = argmaxₖ [ −½ ln|Σₖ| − ½ (x − μₖ)ᵀ Σₖ⁻¹ (x − μₖ) ]</p>
+<Formula label="Maximum likelihood" tex="\begin{gathered} k^{*} = \arg\max_k \big[ -\tfrac{1}{2} \ln\lvert\Sigma_k\rvert \cr - \tfrac{1}{2} (\mathbf{x} - \boldsymbol{\mu}_k)^{\mathsf{T}}\, \Sigma_k^{-1} (\mathbf{x} - \boldsymbol{\mu}_k) \big] \end{gathered}" where="
+\Sigma_k :: covariance matrix of class k (from the training samples)
+" />
 
 Maximum likelihood needs at least d + 1 sample pixels per class (d = number of bands, here 6) for Σₖ to be invertible. The Bare class has only 5 points × 9 pixels, so the handbook adds a small ridge (0.1 % of the mean variance) to the diagonal of Σₖ. Random Forest (Breiman 2001) makes no normality assumption and usually beats both, but it cannot be drawn as simply in feature space; you will try it in the Earth Engine lab.
 
 </Depth>
 
-## 9.3 Unsupervised classification: k-means
+## 14.3 Unsupervised classification: k-means
 
 <Figure
-  title="Figure 9.3 — k-means groups pixels into clusters; you name them"
+  title="Figure 14.3 — k-means groups pixels into clusters; you name them"
   try="With k = 5, which cluster is surely water? Does any cluster match a WorldCover class exactly? Raise k to 8: how do the built-up clusters split? Press 'Restart' a few times: does the result change?"
-  source="Sentinel-2B L2A 12 Feb 2024, the 6 bands of Figure 9.1. Cluster centres fitted on 20 000 random pixels (k-means++ with fixed seeds), then every pixel assigned to the nearest centre. The panel's last column is the most frequent WorldCover class in each cluster."
+  source="Sentinel-2B L2A 12 Feb 2024, the 6 bands of Figure 14.1. Cluster centres fitted on 20 000 random pixels (k-means++ with fixed seeds), then every pixel assigned to the nearest centre. The panel's last column is the most frequent WorldCover class in each cluster."
 >
   <KMeansLab client:visible lang="en" />
 </Figure>
 
-With k = 5 (run 1), one cluster covers 29 % of the frame, has a centre NDVI of −0.13 and is 94 % water in WorldCover: easy to name. But **three of the five clusters** are mostly built-up (88 %, 74 % and 59 %), differing in roof brightness. Trees get one cluster (NDVI 0.63, 74 % trees). Low vegetation and bare get none. The lesson: k-means groups by **spectrum**; people's classes group by **function**, and the two need not coincide.
+With k = 5 (run 1), one cluster covers 29 % of the frame, has a centre NDVI of −0.13 and is 94 % water in WorldCover: easy to name. But **three of the five clusters** are mostly built-up (88 %, 74 % and 59 %), differing in roof brightness. Trees get one cluster (NDVI 0.63, 74 % trees). Low vegetation and bare get none.
 
-## 9.4 Confusion matrix and the kinds of accuracy
+<Note kind="key" label="The lesson">
+
+k-means groups by **spectrum**; people's classes group by **function**, and the two need not coincide.
+
+</Note>
+
+## 14.4 Confusion matrix and the kinds of accuracy
 
 To know how right a map is, take a **validation sample** of random pixels, **separate from the training samples**, and compare the map label with the reference label at each one. The counts form a <Term id="confusion-matrix">confusion matrix</Term>: rows are map classes, columns are reference classes.
 
@@ -120,9 +150,9 @@ To know how right a map is, take a **validation sample** of random pixels, **sep
 - **F1** is the harmonic mean of UA and PA.
 
 <Figure
-  title="Figure 9.4 — Validation sampling, confusion matrix and areas with confidence intervals"
+  title="Figure 14.4 — Validation sampling, confusion matrix and areas with confidence intervals"
   try="Keep the stratified design and drag the sample size from 5 to 200 per class: how does the confidence interval of the tree area shrink? Switch to 'Simple random' with 250 points in total: how many points does Bare get? Press 'Resample' many times and count how often a ✓ disappears."
-  source="Map: maximum likelihood with the suggested samples (Figure 9.1). Reference: ESA WorldCover v200, available for every pixel, so the cyan triangle is the 'true' area of this exercise. Seeded random validation samples; white squares agree, black squares disagree. Estimators of Olofsson et al. (2014); 95 % confidence interval = ±1.96 standard errors."
+  source="Map: maximum likelihood with the suggested samples (Figure 14.1). Reference: ESA WorldCover v200, available for every pixel, so the cyan triangle is the 'true' area of this exercise. Seeded random validation samples; white squares agree, black squares disagree. Estimators of Olofsson et al. (2014); 95 % confidence interval = ±1.96 standard errors."
 >
   <AccuracyLab client:visible lang="en" />
 </Figure>
@@ -131,7 +161,12 @@ With a stratified design of 50 points per class (sample 1):
 
 - The raw OA (plain count over 250 points) is 60.8 %. The OA **weighted** by each class's map area is **72.5 ± 3.7 %**. Only the latter applies to the whole map: a plain count is biased because every class got 50 points whatever its size. The true agreement over all pixels is 70.5 %, inside the interval.
 - UA of Water = 100 %, but UA of Bare is only 4 %: most pixels the map calls bare are really built-up (30/50) or water (13/50).
-- Kappa = 0.51. Pontius & Millones (2011) showed that kappa's comparison with "random agreement" has no practical meaning; report OA, UA, PA and estimated areas instead.
+
+<Note kind="key">
+
+With a stratified sample, OA, UA, PA and areas must be **weighted** by each class's map area. A plain count of the sample points is biased.
+
+</Note>
 
 <div class="worked">
 
@@ -148,28 +183,50 @@ The WorldCover area, 6.19 km², lies inside 4.89–6.93 km². Pixel counting (2.
 
 </div>
 
+<Stats items={[
+  { v: '2.54', u: 'km²', l: 'trees by counting map pixels' },
+  { v: '5.91', u: '± 1.02 km²', l: 'estimated from 250 sample points (Olofsson et al. 2014)' },
+  { v: '6.19', u: 'km²', l: 'trees in WorldCover (reference)' },
+]} caption="One map, two ways to compute the tree area." />
+
+<Note kind="myth">
+
+"Reporting kappa is enough." Here kappa = 0.51. Pontius & Millones (2011) showed that kappa's comparison with "random agreement" has no practical meaning; report OA, UA, PA and estimated areas instead.
+
+</Note>
+
 <Depth level="advanced" title="Olofsson et al. (2014) estimators">
 
-With nᵢⱼ sample points of map class i and reference class j, nᵢ. points of map class i, Wᵢ the map area share of class i and A the total area:
+<Formula label="Area proportions and standard error" tex="\begin{gathered} \hat p_{ij} = W_i\,\frac{n_{ij}}{n_{i\cdot}} \qquad \hat A_j = A \sum_i \hat p_{ij} \cr SE(\hat p_{\cdot j}) = \cr \sqrt{\sum_i W_i^2\,\frac{(n_{ij}/n_{i\cdot})\,(1 - n_{ij}/n_{i\cdot})}{n_{i\cdot} - 1}} \end{gathered}" where="
+n_{ij} :: sample points of map class i and reference class j
+n_{i\cdot} :: sample points of map class i
+W_i :: map area share of class i
+A :: total area
+" />
 
-<p class="formula">p̂ᵢⱼ = Wᵢ nᵢⱼ / nᵢ.     Â_j = A Σᵢ p̂ᵢⱼ     SE(p̂.ⱼ) = √ Σᵢ Wᵢ² (nᵢⱼ/nᵢ.)(1 − nᵢⱼ/nᵢ.) / (nᵢ. − 1)</p>
-<p class="formula">OA = Σⱼ p̂ⱼⱼ     UAᵢ = p̂ᵢᵢ / p̂ᵢ.     PAⱼ = p̂ⱼⱼ / p̂.ⱼ     95 % CI = ± 1.96 A · SE</p>
+<Formula label="Accuracy and confidence interval" tex="\begin{gathered} \mathrm{OA} = \sum_j \hat p_{jj} \cr \mathrm{UA}_i = \frac{\hat p_{ii}}{\hat p_{i\cdot}} \qquad \mathrm{PA}_j = \frac{\hat p_{jj}}{\hat p_{\cdot j}} \cr \mathrm{CI}_{95\%} = \pm\, 1.96\, A \cdot SE \end{gathered}" />
 
 A stratified design with a minimum number of points per class (often 50–100) gives rare classes like Bare enough samples. With a simple random sample of 250 points, Bare gets only about 15, so its UA and PA swing widely from sample to sample.
 
 </Depth>
 
-## 9.5 Reference data: the weakest link
+## 14.5 Reference data: the weakest link
 
-An assessment is only as good as its reference data. ESA's validation report gives WorldCover v200 a global overall accuracy of about 77 %, so roughly one pixel in four may be wrong. When your map "disagrees with WorldCover", your map may be wrong, WorldCover may be wrong, or both. Moreover WorldCover is from 2021 and the image from 2024: land built on in those three years counts as an "error".
+<mark>An assessment is only as good as its reference data.</mark> ESA's validation report gives WorldCover v200 a global overall accuracy of about 77 %, so roughly one pixel in four may be wrong. When your map "disagrees with WorldCover", your map may be wrong, WorldCover may be wrong, or both. Moreover WorldCover is from 2021 and the image from 2024: land built on in those three years counts as an "error".
 
-In real work:
+<Note kind="key">
 
-1. Draw a stratified validation sample from your own map.
-2. Interpret each point on very-high-resolution imagery of the same date (Google Earth, drone imagery) or in the field, and record your confidence.
-3. Report the area-weighted confusion matrix, OA, UA, PA and areas with confidence intervals.
+Reference data must be **better** than the map being checked and from the **same date** as the image. WorldCover meets neither condition here, so this chapter measures agreement, not true accuracy.
 
-## 9.6 Lab
+</Note>
+
+<Steps title="In real work" items={[
+  { t: 'Draw a stratified validation sample from your own map' },
+  { t: 'Interpret each point', d: 'On very-high-resolution imagery of the same date (Google Earth, drone imagery) or in the field, and record your confidence.' },
+  { t: 'Report', d: 'The area-weighted confusion matrix, OA, UA, PA and areas with confidence intervals.' },
+]} />
+
+## 14.6 Lab
 
 The Python notebook loads the same Sentinel-2 frame, trains a Random Forest in Earth Engine on sample points, draws a stratified validation sample and computes areas with confidence intervals. The GEE script does the same for an area of your choice.
 
@@ -177,11 +234,11 @@ The Python notebook loads the same Sentinel-2 frame, trains a Random Forest in E
 
 **Suggested exercises**
 
-1. Add 10 Tree samples in the big parks (Thu Le, Botanical Garden) in Figure 9.1. How much do the tree area and the agreement with WorldCover change?
-2. In Figure 9.4, with 250 points in total, which design gives a narrower confidence interval for the Bare area? Why?
+1. Add 10 Tree samples in the big parks (Thu Le, Botanical Garden) in Figure 14.1. How much do the tree area and the agreement with WorldCover change?
+2. In Figure 14.4, with 250 points in total, which design gives a narrower confidence interval for the Bare area? Why?
 3. Pick 30 random points, interpret them yourself on the imagery basemap and compare with WorldCover. On how many points do you and WorldCover disagree?
 
-## 9.7 Review
+## 14.7 Review
 
 <Quiz client:visible lang="en" items={quiz} />
 

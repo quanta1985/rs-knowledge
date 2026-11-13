@@ -6,9 +6,9 @@
 from labkit import MD, PY, main
 
 CELLS = [
-    (MD, """# Lab 14 — Google Earth Engine: lọc, map, reduce / filter, map, reduce
+    (MD, """# Lab 19 — Google Earth Engine: lọc, map, reduce / filter, map, reduce
 
-**Sổ tay Viễn thám & GIS — Chương 14** · [Mở chương / Open chapter](https://quanta1985.github.io/rs-knowledge/vi/ch14-platforms/)
+**Sổ tay Viễn thám & GIS — Chương 19** · [Mở chương / Open chapter](https://quanta1985.github.io/rs-knowledge/vi/ch14-platforms/)
 
 1. Lọc ImageCollection / Filter an ImageCollection.
 2. So sánh lọc theo mây của tile và theo độ trong của khung / Tile cloud vs frame-clear filtering.

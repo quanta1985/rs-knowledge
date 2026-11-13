@@ -1,0 +1,720 @@
+---
+title: Signals & ground stations
+n: 5
+summary: An Earth-observation satellite images all day, yet it can talk to a station in Hanoi on only a few passes of about ten minutes each. This chapter goes from bands, decibels, antennas and noise to the link budget, tropical rain, modulation and the Shannon limit, multiple access, Doppler, how a ground station downloads image data, and why a GNSS signal weaker than the noise still reaches your phone.
+objectives:
+  - Know what the L, S, C, X, Ku and Ka bands are used for, why, and who allocates frequencies (ITU, Viet Nam's Authority of Radio Frequency Management).
+  - Convert between ratios, dB, dBW and dBm; compute dish gain, beamwidth and EIRP; explain phased arrays and polarisation.
+  - Compute free-space path loss, noise temperature and G/T and add them into a link budget; read C/N0, Eb/N0, Es/N0 and link margin.
+  - Estimate rain attenuation in Viet Nam with the ITU-R method; understand modulation, coding, the Shannon limit and adaptive coding and modulation (ACM).
+  - Tell FDMA, TDMA, CDMA and OFDMA apart, and explain frequency reuse with spot beams.
+  - Work out passes, Doppler, delay and daily data volume for a ground station; know the role of the EDRS laser relay.
+updated: "2026-11-06"
+---
+import Term from '../../../components/Term.astro';
+import Depth from '../../../components/Depth.astro';
+import Figure from '../../../components/Figure.astro';
+import Formula from '../../../components/Formula.astro';
+import Stats from '../../../components/Stats.astro';
+import Steps from '../../../components/Steps.astro';
+import LabLinks from '../../../components/LabLinks.astro';
+import Note from '../../../components/Note.astro';
+import Tiles from '../../../components/Tiles.astro';
+import Predict from '../../../islands/Predict.tsx';
+import SignalHero from '../../../islands/SignalHero.tsx';
+import SignalBands from '../../../islands/SignalBands.tsx';
+import SignalDb from '../../../islands/SignalDb.tsx';
+import SignalArray from '../../../islands/SignalArray.tsx';
+import SignalLink from '../../../islands/SignalLink.tsx';
+import SignalRain from '../../../islands/SignalRain.tsx';
+import SignalConstellation from '../../../islands/SignalConstellation.tsx';
+import SignalShannon from '../../../islands/SignalShannon.tsx';
+import SignalAccess from '../../../islands/SignalAccess.tsx';
+import SignalBeams from '../../../islands/SignalBeams.tsx';
+import SignalPasses from '../../../islands/SignalPasses.tsx';
+import SignalDoppler from '../../../islands/SignalDoppler.tsx';
+import SignalVolume from '../../../islands/SignalVolume.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/signals.json';
+
+<Figure
+  title="Figure 5.1 — One satellite link end to end: power, loss, rain and margin"
+  try="With 'LEO X-band', drag the elevation from 90° down to 5°: how many dB does free-space loss grow? Pick 'GEO Ka-band' and turn on 0.01 % rain: is there any margin left? Shrink the dish to 0.3 m, or raise the data rate, and watch which bar of the waterfall changes."
+  source="Schematic, not to scale. Budget: FSPL, dish gain, C/N0, rain noise ΔT = 275 K·(1 − 10^(−A/10)) (src/lib/signals.ts). Rain: ITU-R P.618-13 for Hanoi, computed with ITU-Rpy 0.4 (scripts/data/export_signals.py); rain height ITU-R P.839-4. The four scenarios are typical illustrative values, not the published parameters of a particular satellite. Required Eb/N0: DVB-S2 QPSK 3/4, 2.3 dB (ETSI EN 302 307-1, Table 13)."
+>
+  <SignalHero client:visible lang="en" />
+</Figure>
+
+The figure above is the whole chapter on one screen: a satellite transmits, the signal crosses empty space, the ionosphere and the rain layer, and lands in a receiving dish that has noise of its own. Each stage adds or subtracts some decibels. If the total is still positive, the link closes. The sections below open each bar of that waterfall.
+
+## 5.1 Radio waves and frequency bands
+
+All communication with satellites travels as electromagnetic waves at the speed of light. Wavelength and frequency are linked by:
+
+<Formula label="Wavelength" tex="\lambda = \frac{c}{f}, \qquad c = 299\,792\,458\ \text{m/s}" where="
+\lambda :: wavelength (m)
+f :: frequency (Hz)
+" />
+
+At 437 MHz (a CubeSat UHF radio) λ = 68.6 cm; at 1.575 GHz (GPS L1) 19.0 cm; at 2.2 GHz 13.6 cm; at 8.1 GHz 3.7 cm; at 12 GHz 2.5 cm; at 30 GHz only 1.0 cm. Engineers name frequency ranges with letters (<Term id="frequency-band">bands</Term>, per IEEE Std 521), and each band has its own "personality":
+
+| Band | Frequency (GHz) | Wavelength | Used for | In rain |
+|---|---|---|---|---|
+| UHF, L | 0.3–2 | 15–100 cm | Small satellites, GNSS (Chapter 7), mobile satellite, L-band SAR | Almost unaffected |
+| S | 2–4 | 7.5–15 cm | Satellite control (TT&C), S-band SAR | Negligible |
+| C | 4–8 | 3.8–7.5 cm | TV and trunking via geostationary satellites in rainy regions; Sentinel-1 radar | Very small |
+| X | 8–12 | 2.5–3.8 cm | Earth-observation image downlink (8025–8400 MHz), X-band radar | Small |
+| Ku | 12–18 | 1.7–2.5 cm | Direct-to-home TV, VSAT, satellite-internet terminals | A few dB to over 10 dB in the tropics |
+| Ka | 27–40 | 0.75–1.1 cm | High-throughput satellites, gateways | Very large |
+| V, W | 40–110 | 2.7–7.5 mm | Next-generation gateways (E-band 71–86 GHz), inter-satellite links | Very large, water vapour too |
+| Optical | ≈ 194,000 (1550 nm) | µm | Inter-satellite lasers (EDRS), optical downlink | Blocked completely by cloud |
+
+<Figure
+  title="Figure 5.2 — The bands on a frequency axis, and the slots satellites actually use"
+  try="Click each band: in which bands does Hanoi rain cost more than 1 dB? Find 'EO X-band' and 'Ku TV': why are images not downlinked in Ku-band? Note the two absorption lines of water vapour (22 GHz) and oxygen (60 GHz)."
+  source="Band names: IEEE Std 521-2019. Allocations: ITU Radio Regulations (EESS 8025–8400 MHz; space operation S-band 2025–2110 / 2200–2290 MHz); GPS L1 1575.42 MHz (IS-GPS-200); Sentinel-1 5.405 GHz (ESA). Rain attenuation: ITU-R P.618-13, Hanoi, 0.1 % of the year, 45° elevation, band centre (scripts/data/export_signals.py)."
+>
+  <SignalBands client:visible lang="en" />
+</Figure>
+
+The general rule: **the higher the frequency, the more bandwidth** (so the more Mbit/s), the more a given antenna concentrates, but **the more it fears rain**. Viet Nam's VINASAT-1 (geostationary at 132°E) carries 8 C-band and 12 Ku-band transponders; VINASAT-2 (131.8°E) carries Ku-band.
+
+In satellite communications people talk about specific sub-bands rather than IEEE boundaries. Commercial "Ku" is a 10.7–12.75 GHz downlink and a 13.75–14.5 GHz uplink; commercial "Ka" is a 17.7–20.2 GHz downlink and a 27.5–30 GHz uplink. **The uplink usually takes the higher band.** The satellite is short of power, so it gets the lower band, where rain and gases attenuate less and on-board amplifiers are more efficient; the ground station has power to spare and takes the higher band.
+
+### Who allocates frequencies: the ITU and Viet Nam
+
+Radio waves ignore borders, so spectrum is divided by international law:
+
+<Tiles
+  items={[
+    { t: 'ITU-R', d: 'Radio Regulations: the table allocating bands to each service (fixed-satellite, Earth exploration, navigation…)' },
+    { t: '3 ITU Regions', d: 'The world is split into three regions; Viet Nam is in Region 3 (Asia–Pacific)' },
+    { t: 'Filing and coordination', d: 'Every system files, coordinates with earlier systems to avoid interference, then is recorded in the Master International Frequency Register' },
+    { t: 'GEO slots', d: 'Geostationary slots and their frequencies are scarce; VINASAT-1 at 132°E took years of coordination' },
+    { t: 'EPFD limits', d: 'Article 22: non-geostationary constellations (Starlink) must not interfere excessively with GEO satellites' },
+    { t: 'In Viet Nam', d: 'The Authority of Radio Frequency Management (Ministry of Science and Technology) licenses frequency use' },
+  ]}
+  caption="The chain of spectrum management, from international to national."
+/>
+
+A recent example: on 13 February 2026 the Authority of Radio Frequency Management licensed Starlink's frequencies in Viet Nam, a first phase of 4 gateway stations and up to 600,000 user terminals (VnEconomy, 15 Feb 2026).
+
+<Note kind="key">
+
+<mark class="key">Choosing a band trades bandwidth against weather robustness.</mark> Low bands (L, S, C) are robust but narrow; high bands (Ku, Ka, V, optical) are wide but fear rain and cloud. And nobody may transmit at will: every frequency needs ITU and national authorisation.
+
+</Note>
+
+## 5.2 The language of decibels
+
+Satellite signals meet huge and tiny factors: an antenna amplifies by tens of thousands, the path weakens the signal by 10²⁰. Written in <Term id="decibel">decibels</Term>, multiplication becomes addition:
+
+<Formula label="Decibels" tex="x_{\text{dB}} = 10\log_{10}\frac{P_2}{P_1}, \qquad P_{\text{dBW}} = 10\log_{10}\frac{P}{1\ \text{W}}, \qquad P_{\text{dBm}} = P_{\text{dBW}} + 30" where="
+P_1,\ P_2 :: the two powers being compared
+P_{\text{dBW}} :: power relative to 1 W
+P_{\text{dBm}} :: power relative to 1 mW
+" />
+
+| Unit | Meaning | Example |
+|---|---|---|
+| dB | Power ratio | +3 dB ≈ ×2; +10 dB = ×10; −20 dB = ×1/100 |
+| dBW, dBm | Power relative to 1 W or 1 mW | 100 W = 20 dBW = 50 dBm; 1 mW = −30 dBW |
+| dBi | Antenna gain relative to an isotropic antenna | 0.6 m dish at 12 GHz: 35.3 dBi |
+| dBK, dB/K | Noise temperature; the G/T ratio | 150 K = 21.8 dBK |
+| dB·Hz | Bandwidth or C/N0 | 1 MHz = 60.0 dB·Hz; 36 MHz = 75.6 dB·Hz |
+
+Mental trick: split a dB value into **tens** (each 10 dB is one zero) and a **remainder** (3 dB ≈ ×2, 6 dB ≈ ×4, 7 dB ≈ ×5). 33 dB = 30 + 3 dB = ×1000 × 2 = ×2000.
+
+<Predict client:visible lang="en"
+  title="How many dBW is 2000 W?"
+  q="A ground station transmits 2000 W to a satellite. Write that power in dBW."
+  slider={{ min: 0, max: 60, step: 0.5, unit: 'dBW' }} answer={33} tol={1}
+  why="2000 = 1000 × 2, so 30 dB + 3 dB = 33 dBW (exactly 33.01 dBW), i.e. 63 dBm. Converting to dB is what turns the later steps into additions." />
+
+<Figure
+  title="Figure 5.3 — The decibel scale of a satellite link"
+  try="Drag to +33 dB and read the mental trick. Press −205.5: what is the ratio? Compare the 'GPS at ground' mark with '1 mW': how many times weaker than 1 mW is a GPS signal?"
+  source="Marks computed with the chapter's own formulas (src/lib/signals.ts): dish gain with η = 0.6; LEO FSPL at 786 km zenith, 8.1 GHz; Hanoi–VINASAT-1 FSPL (36,975 km), 12 GHz; k = 1.380649 × 10⁻²³ J/K. Minimum GPS L1 C/A power at the ground, −158.5 dBW: IS-GPS-200."
+>
+  <SignalDb client:visible lang="en" />
+</Figure>
+
+<Note kind="myth">
+
+"Two 10 dBW transmitters add up to 20 dBW." Wrong: adding dB **multiplies** powers. Two 10 W transmitters give 20 W, which is 13 dBW (3 dB more). Add dB only when one quantity passes through a chain of gains or losses in series.
+
+</Note>
+
+<Note kind="key">
+
+A radio link is **one sum in dB**: transmit power + antenna gain − losses + receive antenna gain − noise. Remember this sentence and you can read any link-budget table.
+
+</Note>
+
+## 5.3 Antennas: pushing energy one way
+
+An isotropic (ideal) antenna radiates equally in all directions. Real antennas squeeze the energy into a narrow beam. A parabolic dish collects waves like a concave mirror collects light. The <Term id="antenna-gain">gain</Term> and half-power beamwidth of a dish of diameter D:
+
+<Formula label="Gain and beamwidth of a parabolic dish" tex="G = \eta\left(\frac{\pi D}{\lambda}\right)^2, \qquad \theta_{3\text{dB}} \approx 70\,\frac{\lambda}{D}\ (^\circ)" where="
+G :: gain (linear); in dBi it is 10 log10 G
+\eta :: aperture efficiency, typically 0.55–0.7
+D :: dish diameter (m)
+\theta_{3\text{dB}} :: beamwidth at which power falls to half
+" />
+
+For a given dish, gain grows with the square of frequency and the beam narrows accordingly. That is why a Ku-band dish is smaller than a C-band dish for the same performance, but must be pointed more precisely. A 0.6 m home TV dish at 12 GHz gives 35.3 dBi with a 2.9° beam; a 5.4 m image-reception dish at 8.1 GHz gives 51.0 dBi with a beam of only 0.48°; a 13 m dish gives 58.6 dBi.
+
+<div class="worked">
+
+#### Example: a 1.2 m Ku-band dish
+
+1. λ at 12 GHz = 2.5 cm. G = 0.6 × (π × 1.2 / 0.025)² ≈ 13,700, i.e. **41.4 dBi**.
+2. Beamwidth ≈ 70 × 0.025 / 1.2 = **1.46°**.
+3. If the dish is off by 0.73° (half the beam), the signal has already dropped **3 dB**, half the power. Wind shaking the dish by a few tenths of a degree is enough to notice.
+
+</div>
+
+<Predict client:visible lang="en"
+  title="How many dB from doubling the dish diameter?"
+  q="A 1.2 m dish is replaced by a 2.4 m dish at the same frequency and efficiency. How much does the gain grow?"
+  options={['+3 dB', '+6 dB', '+12 dB', 'The dBi value doubles']} answer={1}
+  why="Gain scales with dish area, i.e. D². Doubling D quadruples the area: 10·log10(4) = +6.02 dB. The price: the beam is half as wide, so the bigger dish must track the satellite more precisely." />
+
+On the transmit side the key quantity is <Term id="eirp">EIRP</Term> (equivalent isotropically radiated power), the "brightness" of the transmitter towards the receiver:
+
+<Formula label="EIRP" tex="\mathrm{EIRP}_{\text{dBW}} = P_t\,[\text{dBW}] + G_t\,[\text{dBi}]" where="
+P_t :: power fed to the transmit antenna
+G_t :: transmit antenna gain
+" />
+
+A 10 W satellite with a 6 dBi antenna has an EIRP of 16 dBW, like an isotropic antenna radiating 40 W in the main direction. The Ku-band TV scenario of Figure 5.1 uses an EIRP of 52 dBW (illustrative value).
+
+### Phased arrays
+
+Instead of a mechanically steered dish, a <Term id="signals-phased-array">phased-array antenna</Term> has hundreds to thousands of small elements radiating the same signal with slightly different phases. The waves add up in the wanted direction and cancel elsewhere. To steer the beam by θ₀ from broadside, two neighbouring elements spaced d apart need a phase step:
+
+<Formula label="Steering a phased array" tex="\Delta\varphi = \frac{2\pi d \sin\theta_0}{\lambda}" where="
+d :: spacing between two elements
+\theta_0 :: steering angle from the panel normal
+" />
+
+<Figure
+  title="Figure 5.4 — Steering a phased-array beam, and grating lobes"
+  try="With 16 elements λ/2 apart, steer from 0° to 60°: how much wider is the beam, how much gain is lost? Raise the spacing to 1 λ and steer to 30°: where does the grating lobe appear? Raise the element count from 8 to 32."
+  source="Array factor of a uniform linear array of isotropic elements with equal amplitudes (src/lib/signals.ts: arrayFactorDb, gratingLobesDeg); beamwidth ≈ 0.886·λ/(N·d·cos θ₀). One-dimensional sketch; real antennas are 2-D arrays."
+>
+  <SignalArray client:visible lang="en" />
+</Figure>
+
+- **Element spacing is usually ≤ λ/2.** Wider, and other directions also see the elements in phase: <Term id="signals-grating-lobe">grating lobes</Term> as strong as the main beam send energy to the wrong place. At 12 GHz, λ/2 = 1.25 cm.
+- **The beam moves electronically in microseconds**, with no moving parts, and several beams can be formed at once.
+- **Drawbacks:** the further from broadside, the more the effective area shrinks with cos θ₀ (3.0 dB lost at 60°) and the beam doubles in width (with 16 elements: 6.3° at broadside, 12.7° at 60°). Phased arrays are also power-hungry and expensive; cheap integrated beamformer chips are what brought them to consumer terminals.
+
+### Polarisation
+
+A wave can be **linearly polarised** (horizontal or vertical) or **circularly polarised** (right-hand RHCP, left-hand LHCP). Two orthogonal polarisations let the same frequency be used twice. At low frequencies (L, S) the ionosphere rotates the plane of a linear wave (Faraday rotation), so GNSS uses RHCP: the receiver does not need to know how far the wave turned. Ku-band TV usually uses linear polarisation, and the installer must rotate the receiver head (LNB) to match. At Ku and Ka, large raindrops flatten as they fall and **depolarise** the wave: some energy leaks into the other polarisation and interferes with the channel sharing that frequency.
+
+<Note kind="key">
+
+An antenna creates no energy; it only **pushes energy in one direction**. A larger dish or a higher frequency gives a narrower beam and more gain, at the price of more precise pointing; a phased array steers that beam with phase instead of motors.
+
+</Note>
+
+## 5.4 Free-space path loss
+
+Leaving the antenna, energy spreads over ever larger spheres and its density falls as 1/d². Computed for an isotropic receive antenna (effective area λ²/4π), this gives the <Term id="fspl">free-space path loss</Term>:
+
+<Formula label="Free-space path loss (FSPL)" tex="L_{fs} = \left(\frac{4\pi d}{\lambda}\right)^2 \;\Rightarrow\; L_{fs}\,[\text{dB}] = 20\log_{10} d_{\text{km}} + 20\log_{10} f_{\text{GHz}} + 92.45" where="
+d :: satellite–station distance
+f :: frequency
+" />
+
+<Predict client:visible lang="en"
+  title="How many dB does the path to a geostationary satellite cost?"
+  q="From Hanoi to VINASAT-1 (about 37,000 km) at 12 GHz, roughly how large is the free-space path loss?"
+  slider={{ min: 150, max: 240, step: 1, unit: 'dB' }} answer={205} tol={3}
+  why="FSPL = 20·log10(4π × 36,975 km × 12 GHz / c) = 205.4 dB: the signal weakens about 3.5 × 10²⁰ times. That is why a TV satellite needs an EIRP around 50 dBW while home dishes stay small." />
+
+For a low-orbit satellite, distance changes throughout a pass. Sentinel-2 flies at 786 km: at zenith the X-band (8.1 GHz) FSPL is 168.5 dB; at 5° elevation the <Term id="slant-range">slant range</Term> is 2,754 km and FSPL 179.4 dB. Almost 11 dB of difference within minutes, so Earth-observation satellites often use "isoflux" antennas that radiate more towards the edge of coverage, or change the data rate with elevation.
+
+<Note kind="myth">
+
+"Higher frequencies lose more in vacuum." FSPL grows with f² only because of the convention of an isotropic receive antenna, whose collecting area shrinks at higher frequency. Keep **the dish sizes fixed** at both ends and each dish gains 6 dB when the frequency doubles, more than offsetting the 6 dB of extra loss. In vacuum, high-frequency waves do not "lose" more energy; the real drawback of high frequencies is rain and the atmosphere.
+
+</Note>
+
+<Note kind="key">
+
+Doubling the distance or doubling the frequency each adds **6 dB** of loss. The path to a geostationary satellite costs about 200 dB, the path to a low-orbit satellite about 170–180 dB.
+
+</Note>
+
+## 5.5 Thermal noise and G/T
+
+Everything at temperature T radiates thermal noise. The noise power a receiver "hears" in bandwidth B:
+
+<Formula label="Thermal noise" tex="N = k\,T_{sys}\,B, \qquad k = 1.380649\times10^{-23}\ \text{J/K} = -228.6\ \text{dBW/(K}\cdot\text{Hz)}" where="
+k :: Boltzmann's constant
+T_{sys} :: system noise temperature (K)
+B :: bandwidth (Hz)
+" />
+
+The <Term id="system-noise-temperature">system noise temperature</Term> has several parts: sky noise seen by the antenna (a clear Ku-band sky is only a few tens of K, but the warm ground at about 290 K leaks into the sidelobes), cable losses, and the noise of the low-noise amplifier (LNA, or the LNB of a TV dish). By the Friis formula, the first amplifier stage dominates:
+
+<Formula label="Friis formula for a receiver chain" tex="T_{sys} = T_{ant} + T_1 + \frac{T_2}{G_1} + \frac{T_3}{G_1 G_2} + \cdots" where="
+T_{ant} :: antenna noise temperature (sky, ground, rain)
+T_1,\ G_1 :: noise temperature and gain of the first stage (LNA)
+T_2,\ T_3 :: later stages: divided by the gain in front of them
+" />
+
+That is why the LNB sits right at the dish focus: a long cable before the LNA would add its loss and noise straight into T_sys. The quality of a receiving station boils down to one number, <Term id="g-over-t">G/T</Term>:
+
+<Formula label="Receiving-station figure of merit" tex="\frac{G}{T}\,[\text{dB/K}] = G_r\,[\text{dBi}] - 10\log_{10} T_{sys}" where="
+G_r :: receive antenna gain
+T_{sys} :: system noise temperature
+" />
+
+<Stats items={[
+  { v: '14.9', u: 'dB/K', l: '0.6 m Ku-band dish, 120 K' },
+  { v: '28.0', u: 'dB/K', l: '5.4 m X-band dish, 200 K' },
+  { v: '−228.6', u: 'dBW/(K·Hz)', l: "Boltzmann's constant in dB" },
+]} caption="G/T of the two stations in this chapter (efficiency 0.65 and 0.6). To raise G/T: a bigger dish or a quieter LNA." />
+
+<Note kind="key">
+
+A weak signal is less of a problem than a **signal weak compared with the noise**. A good station has a high G/T: a big dish to collect the signal, a cold LNA right at the focus to keep the noise down.
+
+</Note>
+
+## 5.6 The link budget
+
+Putting it all together, the carrier-to-noise-density ratio at the receiver is:
+
+<Formula label="The link equation" tex="\frac{C}{N_0}\,[\text{dB}\cdot\text{Hz}] = \mathrm{EIRP} - L_{fs} - L_{rain} - L_{other} + \frac{G}{T} + 228.6" where="
+L_{rain} :: rain attenuation
+L_{other} :: gases, pointing, polarisation mismatch, equipment
+" />
+
+<Formula label="From C/N0 to link margin" tex="\frac{E_b}{N_0} = \frac{C}{N_0} - 10\log_{10} R_b, \qquad \frac{E_s}{N_0} = \frac{C}{N_0} - 10\log_{10} R_s, \qquad M = \left(\frac{E_b}{N_0}\right)_{have} - \left(\frac{E_b}{N_0}\right)_{need}" where="
+R_b :: bit rate (bit/s)
+R_s :: symbol rate (symbol/s); occupied bandwidth B = R_s(1 + α), α = 0.05–0.35
+M :: link margin (dB)
+" />
+
+<Term id="cn0">C/N0</Term> says how strong the signal is relative to noise. <Term id="ebn0">Eb/N0</Term> divides that energy among the bits: sending 10 times faster leaves each bit 10 dB weaker. Every modulation and coding scheme needs a minimum Eb/N0 (section 5.7). What is left over is the <Term id="link-margin">link margin</Term>, kept for rain, equipment ageing, and dish mispointing.
+
+<Tiles
+  items={[
+    { t: 'EIRP', d: 'Transmit power + transmit antenna gain' },
+    { t: 'Losses', d: 'Free space + rain + atmosphere, pointing' },
+    { t: 'G/T', d: 'Receive dish gain − noise temperature' },
+    { t: 'Bit rate', d: '−10·log10(Rb): the faster, the costlier' },
+  ]}
+  sum="Margin = EIRP − losses + G/T + 228.6 − 10·log10(Rb) − required Eb/N0"
+  note="Positive: the link closes · keep a few dB for rain, ageing, mispointing"
+  caption="The four groups of terms in a link budget. Every term is in dB, so it is all additions and subtractions."
+/>
+
+<Figure
+  title="Figure 5.5 — Link-budget waterfall: from transmit power to margin"
+  try="Pick 'LEO X-band': lower the elevation from 90° to 5°, how much margin is left? Swap the 5.4 m dish for 13 m. Pick 'GEO Ku-band' and turn on 0.01 % rain: note that the system temperature rises too. Lower the frequency to 4 GHz (C-band) and turn the rain on again."
+  source="FSPL, dish gain, C/N0 and rain-noise formulas above (src/lib/signals.ts). Rain attenuation: ITU-R P.618-13 for Hanoi, computed with ITU-Rpy 0.4 (scripts/data/export_signals.py). The four scenarios are typical illustrative values, not the published parameters of a particular satellite. Required Eb/N0: uncoded QPSK 9.6 dB at BER 10⁻⁵; DVB-S2 QPSK 3/4 2.3 dB (ETSI EN 302 307-1, Table 13)."
+>
+  <SignalLink client:visible lang="en" />
+</Figure>
+
+<div class="worked">
+
+#### Example: X-band image downlink to a 5.4 m dish
+
+Illustrative scenario: satellite at 786 km, 10° elevation, 10 W into a 6 dBi antenna; station with a 5.4 m dish (η = 0.6) and 200 K system temperature; 560 Mbit/s; 3 dB other losses; required Eb/N0 2.3 dB.
+
+1. Slant range 2,338 km → FSPL at 8.1 GHz = **178.0 dB**.
+2. EIRP = 10 dBW + 6 dBi = **16.0 dBW**. G/T = 51.0 dBi − 10·log10(200) = **28.0 dB/K**.
+3. C/N0 = 16.0 − 178.0 − 3 + 28.0 + 228.6 = **91.6 dB·Hz**.
+4. Eb/N0 = 91.6 − 10·log10(560 × 10⁶) = **4.1 dB** → margin 4.1 − 2.3 = **1.8 dB**.
+
+With the same C/N0 the Shannon limit allows at most about 2.1 Gbit/s; DVB-S2 QPSK 3/4 reaches about 0.85 Gbit/s. The gap between the two is the price of practical coding.
+
+</div>
+
+<div class="worked">
+
+#### Example: Ku-band TV from VINASAT to Hanoi
+
+Illustrative scenario: EIRP 52 dBW; distance 36,975 km; 12 GHz; 0.6 m dish (η = 0.65), T_sys 120 K; 1 dB other clear-sky losses; symbol rate 30 Msym/s.
+
+1. FSPL = **205.4 dB**. Dish gain 35.7 dBi; G/T = 35.7 − 20.8 = **14.9 dB/K**.
+2. C/N0 = 52 − 205.4 − 1 + 14.9 + 228.6 = **89.1 dB·Hz**.
+3. Es/N0 = 89.1 − 10·log10(30 × 10⁶) = **14.3 dB**. DVB-S2 8PSK 3/4 needs 7.91 dB, leaving **6.4 dB** of margin for rain.
+
+</div>
+
+### Rain, atmosphere and availability
+
+Above about 10 GHz, raindrops (a few mm across, comparable to the wavelength) absorb and scatter the wave. ITU-R P.838 gives the specific attenuation γ = k·R^α (dB/km) for rain rate R (mm/h); P.618 integrates it along the slant path through the rain layer, as the value exceeded for p % of an average year. From the ITU-R P.837-7 map, the rain rate exceeded 0.01 % of the time (R0.01, about 53 minutes per year) is **88.8 mm/h in Hanoi** and 89.5 mm/h in Ho Chi Minh City, against 9.4 mm/h at Svalbard. At 12 GHz Hanoi's R0.01 gives γ = 4.2 dB/km, and the rain layer is about 5 km thick.
+
+<Stats items={[
+  { v: '88.8', u: 'mm/h', l: 'rain rate exceeded 0.01 % of the time in Hanoi (ITU-R P.837-7)' },
+  { v: '13.0', u: 'dB', l: 'Ku-band fade 0.01 % of the year, Hanoi → VINASAT-1' },
+  { v: '0.29', u: 'dB', l: 'same conditions in C-band, 4 GHz' },
+]} caption="In the same storm, Ku-band loses almost 45 times as many dB as C-band." />
+
+<Figure
+  title="Figure 5.6 — Rain attenuation versus frequency in Hanoi, Ho Chi Minh City and Svalbard"
+  try="Set 0.01 % and 45° elevation: how many dB does Hanoi lose at 12 GHz, and Svalbard? Drag the frequency from 4 to 30 GHz. Switch to 1 %: why does Ka-band internet still work most of the time?"
+  source="ITU-R P.618-13 (slant-path attenuation), P.837-7 (rain rate), P.838-3 (k, α, circular polarisation), P.839-4 (rain height), computed with ITU-Rpy 0.4 for the city centres of Hanoi (21.03°N, 105.85°E), Ho Chi Minh City (10.78°N, 106.70°E) and Svalbard (78.23°N, 15.39°E). scripts/data/export_signals.py."
+>
+  <SignalRain client:visible lang="en" />
+</Figure>
+
+On the Hanoi–VINASAT-1 path (51.5° elevation), the attenuation exceeded is:
+
+| Frequency | 1 % of year (≈ 3.7 days) | 0.1 % (≈ 8.8 h) | 0.01 % (≈ 53 min) |
+|---|---|---|---|
+| 4 GHz (C) | 0.01 dB | 0.08 dB | 0.29 dB |
+| 12 GHz (Ku) | 1.1 dB | 5.1 dB | 13.0 dB |
+| 20 GHz (Ka) | 3.7 dB | 15.4 dB | 35.7 dB |
+| 30 GHz (Ka) | 8.3 dB | 32.3 dB | 69.9 dB |
+
+Rain hurts a second time: the warm water the antenna looks through **radiates noise** and raises the system temperature:
+
+<Formula label="Rain noise" tex="\Delta T = T_m\left(1 - 10^{-A/10}\right), \qquad T_m \approx 275\ \text{K}" where="
+A :: rain attenuation (dB)
+T_m :: mean temperature of the rain layer
+" />
+
+A 3 dB fade adds 137 K to T_sys; with a 120 K dish the noise almost doubles. That is why a storm pulls Es/N0 down by more than the fade itself.
+
+Other effects:
+
+- **Gases:** water vapour absorbs near 22 GHz, oxygen near 60 GHz (ITU-R P.676). That makes 60 GHz good for links between satellites: the ground cannot hear them, and they cannot be jammed from below.
+- **Ionosphere:** delay and scintillation at L and S band, strongest near the magnetic equator after sunset in solar-maximum years. Viet Nam lies in this zone; Chapter 7 covers the effect on GNSS.
+- **Availability:** a link designed for 99.9 % of the year may be down about 8.8 hours a year; 99.99 % allows only about 53 minutes. At Ku-band in Hanoi that step costs about 8 dB more margin (5.1 → 13.0 dB).
+- **Remedies:** power margin; adaptive coding and modulation (ACM, section 5.7); gateway site diversity (two stations tens of km apart rarely see heavy rain together); uplink power control.
+
+<Note kind="key">
+
+In Viet Nam **C-band is almost immune to rain**, Ku-band needs about 5 dB of margin for 99.9 % of the time, and Ka-band can lose the signal completely in a downpour. That is why C-band is still widely used for trunking and professional TV, while Ku/Ka systems rely on ACM and several gateways.
+
+</Note>
+
+## 5.7 Modulation, coding and the Shannon limit
+
+<Term id="signals-modulation">Digital modulation</Term> maps each group of bits onto a "point" (symbol) in the phase–amplitude plane, called a constellation:
+
+| Modulation | Bits/symbol | Character | Used in |
+|---|---|---|---|
+| BPSK | 1 | Two phases 0°/180°, the most robust | GNSS, TT&C, very weak links |
+| QPSK | 2 | Four phases; same bit error rate as BPSK at the same Eb/N0 but twice the spectral efficiency | The workhorse of satellites |
+| 8PSK | 3 | Eight phases, constant amplitude | DVB-S2 TV |
+| 16APSK, 32APSK | 4, 5 | Concentric rings, less sensitive than QAM to satellite amplifier distortion | DVB-S2 on good links |
+| 16–256QAM | 4–8 | Square grid, most efficient but needs high SNR and a linear amplifier | Terrestrial; some satellite links |
+
+<Figure
+  title="Figure 5.7 — Modulation constellations with noise"
+  try="Keep QPSK and lower Es/N0 from 14 dB to 4 dB, counting the red dots. At 12 dB, compare 8PSK with 32APSK. For each modulation, find the Es/N0 where red dots almost vanish and compare with the DVB-S2 threshold on the right."
+  source="Simulation of 1,500 random symbols through additive white Gaussian noise, nearest-point decisions (src/lib/signals.ts: simulate). APSK ring radii per ETSI EN 302 307-1 §5.4 (code rate 3/4). QPSK theory: Q(√(2Eb/N0)); 8PSK: approximately 2Q(√(2Es/N0)·sin(π/8)). DVB-S2 thresholds: Table 13 of the same standard."
+>
+  <SignalConstellation client:visible lang="en" />
+</Figure>
+
+Without coding, QPSK needs Eb/N0 = 9.6 dB to make only 1 bit error in 100,000. <Term id="signals-fec">Forward error correction</Term> (FEC) adds structured redundant bits so the receiver can fix errors: code rate 3/4 means 3 data bits in every 4 bits sent. Generations of codes: convolutional + Reed–Solomon (DVB-S, older CCSDS), turbo (CCSDS, 3G), LDPC (DVB-S2, 5G, newer CCSDS). With LDPC, DVB-S2 QPSK 3/4 needs only Eb/N0 = 2.31 dB, 7 dB less than uncoded.
+
+The ceiling for any code is the <Term id="shannon-limit">Shannon limit</Term>:
+
+<Formula label="Shannon channel capacity" tex="C = B\log_2\!\left(1 + \frac{S}{N}\right), \qquad \frac{E_b}{N_0} \ge \frac{2^{\eta} - 1}{\eta} \;\xrightarrow{\;\eta\to 0\;}\; \ln 2 = -1.59\ \text{dB}" where="
+C :: highest rate that can be sent reliably (bit/s)
+B :: bandwidth (Hz)
+S/N :: signal-to-noise ratio
+\eta :: spectral efficiency C/B (bit/s/Hz)
+" />
+
+Two ways to grow capacity: more bandwidth B (linear gain) or more S/N (only logarithmic). That is why new systems race up to Ka, V, E-band and lasers for bandwidth, while using narrow beams for high S/N and reusing frequencies many times.
+
+<Figure
+  title="Figure 5.8 — The Shannon limit, 28 DVB-S2 modes and adaptive coding under rain"
+  try="Start at a clear-sky Es/N0 of 14.4 dB: which mode does ACM pick? Raise the rain fade to 3 dB then 6 dB and watch the throughput fall. Note that every DVB-S2 point sits below the Shannon curve, about 1–3 dB away."
+  source="Ideal Es/N0 and spectral efficiency: ETSI EN 302 307-1 V1.4.1, Table 13 (PER 10⁻⁷, AWGN, 64,800-bit frames, no pilots). The mode chosen has threshold + 1 dB ≤ Es/N0. Rain noise ΔT = 275 K·(1 − 10^(−A/10)) with a clear-sky T_sys of 120 K. Illustrative scenario."
+>
+  <SignalShannon client:visible lang="en" />
+</Figure>
+
+<Predict client:visible lang="en"
+  title="How many Mbit/s survive a 3 dB rain fade?"
+  q="The TV link of the example in section 5.6 has a clear-sky Es/N0 of 14.3 dB and runs 32APSK 3/4 at 111 Mbit/s (30 Msym/s). A storm causes a 3 dB fade. With ACM, roughly what throughput remains?"
+  slider={{ min: 0, max: 120, step: 1, unit: 'Mbit/s' }} answer={59} tol={8}
+  why="Rain both removes 3 dB of signal and lifts T_sys from 120 K to 257 K (3.3 dB more noise), so Es/N0 falls 6.3 dB to 8.0 dB. The best mode with 1 dB to spare is 8PSK 2/3 (1.98 bit/s/Hz): about 59 Mbit/s. A 6 dB fade drops it to QPSK 3/5, about 36 Mbit/s. The signal is not lost, only slower." />
+
+<Note kind="myth">
+
+"Double the power, double the speed." By Shannon, on a link that is already strong, doubling the power (+3 dB) adds only about 1 bit/s/Hz. Doubling the **bandwidth** is what nearly doubles capacity. Only on very weak links (Eb/N0 near −1.6 dB) is rate roughly proportional to power.
+
+</Note>
+
+<Depth level="advanced" title="The −228.6 constant, the −1.59 dB limit and ACM">
+
+N0 = k·T with k = 1.380649 × 10⁻²³ J/K, so 10·log10(k) = −228.6 dBW/(K·Hz). That is why "+228.6" appears in every link budget.
+
+Capacity of a white-noise channel of bandwidth B: C = B·log2(1 + C/(N0·B)). Let B → ∞: C → (C/N0)/ln 2. Setting the rate Rb to that capacity gives Eb/N0 = (C/N0)/Rb = ln 2 = 0.693, i.e. −1.59 dB. Below this no code transmits reliably, however slowly. At 1 bit/s/Hz the limit is 0.00 dB, at 2 bit/s/Hz 1.76 dB, at 4 bit/s/Hz 5.74 dB.
+
+Measured on DVB-S2 Table 13: QPSK 1/2 sits 1.07 dB from the Shannon limit, QPSK 3/4 1.47 dB, 8PSK 3/4 2.25 dB, 32APSK 9/10 2.85 dB. LDPC brings the low-efficiency modes very close to the theoretical ceiling.
+
+**ACM in DVB-S2:** each data frame can carry a different MODCOD. The receiver reports its SNR; the gateway picks the mode for each terminal. When one customer is under rain, only that customer's frames switch to a more robust mode; everyone else keeps the fast mode.
+
+</Depth>
+
+<Note kind="key">
+
+Denser modulations carry more bits per symbol but need a stronger signal. Modern LDPC codes bring systems within 1–3 dB of the Shannon limit; the rest of the capacity race is about **more bandwidth**.
+
+</Note>
+
+## 5.8 Multiple access and frequency reuse
+
+One satellite transponder serves many users at once. <Term id="signals-multiple-access">Multiple access</Term> is how they share the time–frequency plane:
+
+- **FDMA:** one frequency slot per user, transmitting continuously. Simple, but guard bands between slots are wasted.
+- **TDMA:** the whole band, taking turns in time slots. **MF-TDMA** combines both and is common in VSAT networks.
+- **CDMA:** everyone on the same frequency at the same time, each with its own spreading code. GNSS works this way: every GPS satellite has its own code (section 5.13).
+- **OFDMA:** the band is split into many orthogonal subcarriers, assigned to users in blocks (4G, 5G). Humphreys' group (University of Texas) showed in 2023 that the Starlink downlink uses OFDM in channels about 240 MHz wide.
+
+<Figure
+  title="Figure 5.9 — Five ways to share a satellite channel among users"
+  try="Switch FDMA → TDMA → MF-TDMA → CDMA → OFDMA. Which leaves unused gaps? Which forces every user to keep precise time?"
+  source="Conceptual diagram; the assignments are illustrative. Starlink OFDM: Humphreys, T. E. et al. (2023), Signal Structure of the Starlink Ku-Band Downlink, IEEE TAES."
+>
+  <SignalAccess client:visible lang="en" />
+</Figure>
+
+Instead of one beam covering a whole country, modern satellites form tens to hundreds of <Term id="signals-spot-beam">spot beams</Term>. Beams that do not touch reuse the same frequencies: that is <Term id="signals-frequency-reuse">frequency reuse</Term>. The common "4-colour" scheme is 2 sub-bands × 2 polarisations. High-throughput satellites (HTS) use hundreds of such Ka-band beams. A few more techniques:
+
+- **Beam hopping:** beams jump between cells on demand, concentrating capacity where the users are.
+- **Bent-pipe and regenerative:** a bent-pipe satellite only shifts frequency and amplifies (ground → satellite → ground). A regenerative satellite demodulates, routes packets and remodulates; that is required to forward packets over inter-satellite lasers (Chapter 6).
+
+<Figure
+  title="Figure 5.10 — Spot beams and frequency-reuse patterns"
+  try="Choose K = 4 then K = 7: how many MHz per beam, how many GHz in total? Choose K = 1: why is the total largest yet nobody uses it? Add rows of beams."
+  source="Illustrative hexagonal grid; 500 MHz of downlink spectrum on 2 polarisations is an assumption for comparison. Co-channel distance D/R = √(3K) from hexagonal-grid geometry."
+>
+  <SignalBeams client:visible lang="en" />
+</Figure>
+
+<Note kind="key">
+
+A modern satellite's capacity comes not from one strong beam but from **many narrow beams reusing the same spectrum**. With 63 beams and a 4-colour scheme, the same 1 GHz of spectrum is used about 16 times over.
+
+</Note>
+
+## 5.9 Ground stations and passes
+
+A geostationary satellite stands still in the sky, so a fixed dish is enough. A low-orbit satellite is different: a <Term id="ground-station">ground station</Term> can only talk to it while it is above the <Term id="elevation-mask">elevation mask</Term> (usually 5–10° because of buildings, trees and interference near the horizon). The visibility area is a circle around the station: for 786 km altitude and a 5° mask its ground radius is 2,506 km; a 10° mask shrinks it to 2,087 km.
+
+<Steps title="One image-reception pass at a ground station" items={[
+  { tag: 'T−1 day', t: 'Scheduling', d: 'From the latest orbital elements, compute rise and set times and the tracking path; uplink commands to the satellite over TT&C.' },
+  { tag: 'AOS', t: 'Satellite rises above the mask', d: 'The dish already waits at the rise azimuth; the receiver sweeps around the predicted frequency to catch the Doppler.' },
+  { tag: '+30 s', t: 'Lock', d: 'Carrier lock, symbol lock, CCSDS frame sync; the satellite starts dumping data from memory.' },
+  { tag: '≈ 10 min', t: 'Track and download', d: 'The dish follows the satellite; Doppler and range change all the time; LDPC decoding, raw data written to disk.' },
+  { tag: 'LOS', t: 'Satellite sets', d: 'Signal lost below the mask; the dish returns to wait for the next pass.' },
+  { tag: 'After', t: 'Send to the processing centre', d: 'Raw data goes over fibre to the processing centre to become level-1 and level-2 products.' },
+]} />
+
+<Predict client:visible lang="en"
+  title="How long can Hanoi talk to Sentinel-2A per day?"
+  q="A station in Hanoi with a 5° mask. What is its total contact time with Sentinel-2A in 24 hours, roughly?"
+  options={['About 4 minutes', 'About 40 minutes', 'About 4 hours', 'All day']} answer={1}
+  why="From CelesTrak elements of 4 Nov 2026: 4 passes, 9.5 minutes on average, 37.9 minutes in total. The rest of the day the satellite is outside Hanoi's visibility circle." />
+
+<Figure
+  title="Figure 5.11 — Ground-station passes of Earth-observation satellites"
+  try="Pick Sentinel-2A at Hanoi and click a pass in the list to jump to it and see the link ray. Switch the station to Svalbard: how do the pass count and total minutes change? Raise the mask from 5° to 15°."
+  source="CelesTrak mean elements (GP/OMM), retrieved 4 Nov 2026 (public/data/ch01-missions.json); Kepler propagation with J2 drift (src/lib/gnss.ts), sampled every 20 s over 24 h from 00:00 UTC 4 Nov 2026 (src/lib/signals.ts, passes). Station coordinates are city centres, not the real location of a receiving station. Default downlink rates: Sentinel-2 560 Mbit/s (ESA eoPortal), Landsat 384 Mbit/s (USGS); VNREDSat-1 100 Mbit/s is illustrative."
+>
+  <SignalPasses client:visible lang="en" />
+</Figure>
+
+Three things to read from Figure 5.11:
+
+- **A few short passes per day.** From Hanoi, Sentinel-2A has 4 passes (37.9 min), Landsat 9 has 4 (35.6 min), VNREDSat-1 has 3 (30.1 min). The longest pass is about 12 minutes, when the satellite crosses near the zenith.
+- **High latitude wins outright.** Every Sun-synchronous orbit (inclination about 98°) passes near both poles, so Svalbard (78°N) sees Sentinel-2A on 15 passes, 156 minutes a day. That is why ESA receives Sentinel-2 at Svalbard, Matera and Maspalomas, and USGS uses Svalbard for Landsat.
+- **Data is limited by contact minutes** (section 5.11).
+
+<Depth level="advanced" title="Visibility geometry">
+
+For a satellite at altitude h seen at elevation ε, the Earth central angle between the station and the sub-satellite point is
+
+<Formula label="Visibility radius" tex="\lambda_c = \arccos\!\left(\frac{R_E\cos\varepsilon}{R_E + h}\right) - \varepsilon, \qquad d = \sqrt{(R_E + h)^2 - (R_E\cos\varepsilon)^2} - R_E\sin\varepsilon" where="
+R_E :: Earth radius, 6378.137 km
+\varepsilon :: elevation (mask)
+d :: slant range
+" />
+
+With h = 786 km and ε = 5°: λ_c = 22.5° (2,506 km on the ground). The longest pass is about (2λ_c / 360°) × orbital period, minus the Earth's rotation; with a 100.6-minute period, about 12–13 minutes, matching Figure 5.11.
+
+</Depth>
+
+<Note kind="key">
+
+For low-orbit satellites, **the station's location decides the contact minutes**: Hanoi gets about 38 minutes a day with Sentinel-2A, Svalbard four times as much.
+
+</Note>
+
+## 5.10 Doppler and delay
+
+As a satellite approaches, the received frequency is higher than the transmitted one; as it recedes, lower. The <Term id="signals-doppler">Doppler shift</Term> is proportional to the rate of change of range:
+
+<Formula label="Doppler shift" tex="f_D = -\frac{\dot d}{c}\,f" where="
+\dot d :: rate of change of range (negative while approaching)
+f :: carrier frequency
+" />
+
+<Predict client:visible lang="en"
+  title="How large is the X-band Doppler?"
+  q="Sentinel-2A passes almost overhead Hanoi. At 8.1 GHz, what is the largest Doppler shift, in kHz?"
+  slider={{ min: 0, max: 400, step: 5, unit: 'kHz' }} answer={180} tol={25}
+  why="Range changes at up to 6.68 km/s just after rise, so f_D = 6.68 / 299,792 × 8.1 GHz ≈ ±180 kHz. At 437 MHz it is only ±9.7 kHz: Doppler is proportional to frequency." />
+
+<Figure
+  title="Figure 5.12 — The Doppler S-curve over a real pass"
+  try="Pick the highest Sentinel-2A pass over Hanoi and switch UHF → S → X: the shape stays, only the scale changes. Compare a low pass (small maximum elevation) with a high one: which changes frequency faster in the middle?"
+  source="CelesTrak elements of 4 Nov 2026 (public/data/ch01-missions.json), Kepler + J2 propagation (src/lib/gnss.ts). Range rate by central difference in the ECEF frame, so the Earth's rotation is included (src/lib/signals.ts: passProfile). 437 MHz is an assumed CubeSat-style carrier, not a frequency used by these satellites."
+>
+  <SignalDoppler client:visible lang="en" />
+</Figure>
+
+On the highest Sentinel-2A pass over Hanoi (22:12 Viet Nam time, maximum elevation 78.8°), the Doppler at 8.1 GHz spans ±180.4 kHz and changes fastest, at 1,698 Hz per second, as the satellite passes near the zenith. At 2.2 GHz it is ±49.0 kHz, at 437 MHz ±9.7 kHz. The receiver must track frequency in real time, usually predicting it from the orbit. For a geostationary satellite the Doppler is almost zero.
+
+Propagation delay is t = d/c. Light covers 300 km per millisecond:
+
+<Stats items={[
+  { v: '2.62', u: 'ms', l: 'to Sentinel-2 at zenith (786 km)' },
+  { v: '123.3', u: 'ms', l: 'one way Hanoi → VINASAT-1' },
+  { v: '≥ 238.7', u: 'ms', l: 'ground → geostationary satellite → ground' },
+]} caption="Minimum delay from distance alone, before any processing." />
+
+At 5° elevation, reaching Sentinel-2 takes 9.19 ms. A call through a geostationary satellite is delayed at least 238.7 ms each way, so a question and its answer lag by almost half a second. That is why internet through low-orbit constellations (Chapter 6) feels like fibre and internet through geostationary satellites does not.
+
+<Note kind="key">
+
+Low orbits trade **small delay** for **large Doppler and short passes**; geostationary orbit does the opposite. Doppler scales with frequency: hundreds of kHz at X-band, only a few kHz at UHF.
+
+</Note>
+
+## 5.11 Earth-observation downlink and optical communication
+
+Images are downlinked at X-band 8025–8400 MHz, the ITU band for the Earth exploration-satellite service. Landsat 8 packs 384 Mbit/s into 375 MHz of X-band with a rate-7/8 LDPC code (USGS). Sentinel-2 transmits around 560 Mbit/s at X-band according to ESA's eoPortal (some secondary sources give 520 Mbit/s), and also relays data by laser to the geostationary nodes of the **European Data Relay System** (<Term id="signals-edrs">EDRS</Term>), which send it down to Ka-band stations (ESA). Ways to go faster: higher-order modulation (8PSK, 16APSK), both polarisations, parallel channels, moving to the 25.5–27 GHz Ka-band, and image compression (CCSDS 122).
+
+<Steps title="From pixel to user" items={[
+  { tag: '1', t: 'Acquire', d: 'The sensor scans and digitises each pixel to 12 bits.' },
+  { tag: '2', t: 'Compress and store', d: 'Compression (CCSDS 122), written to the on-board mass memory while waiting for a station.' },
+  { tag: '3', t: 'Downlink', d: 'X-band to a ground station during a pass, or laser up to EDRS and Ka-band down to the ground.' },
+  { tag: '4', t: 'Receive and decode', d: 'Demodulation, LDPC error correction, CCSDS frames split into level-0 raw data.' },
+  { tag: '5', t: 'Process', d: 'Radiometric and geometric correction to level 1 (Sentinel-2 L1C), atmospheric correction to level 2 (L2A).' },
+  { tag: '6', t: 'Distribute', d: 'Published to archives (Copernicus, USGS EarthExplorer, Google Earth Engine) for users to download.' },
+]} />
+
+<Figure
+  title="Figure 5.13 — One day of downloads: contact minutes times data rate"
+  try="For Sentinel-2A, turn on Hanoi and Ho Chi Minh City: why is the total less than the two added? Turn on Svalbard. Then turn every station off and drag the EDRS time to 10 minutes: how many X-band minutes is that worth?"
+  source="Passes from CelesTrak elements of 4 Nov 2026, 5° mask, 24 h from 00:00 UTC (src/lib/signals.ts: passes, unionMinutes). Overlapping minutes (satellite seen by two stations at once) are counted once. Rates: Sentinel-2 560 Mbit/s (ESA eoPortal), Landsat 384 Mbit/s (USGS), VNREDSat-1 100 Mbit/s illustrative. EDRS 1.8 Gbit/s (Airbus, 2016); EDRS minutes per day are an assumption."
+>
+  <SignalVolume client:visible lang="en" />
+</Figure>
+
+For Sentinel-2A at 560 Mbit/s: Hanoi alone has 37.9 minutes, at most about **159 GB** a day. Adding Ho Chi Minh City raises the total only to 46.3 minutes, not 71.5, because the satellite usually sees both stations at once: two stations about 1,140 km apart sit well inside a visibility circle of 2,500 km radius. Svalbard alone gets 156.3 minutes, about **656 GB**. Ten minutes of EDRS laser at 1.8 Gbit/s already equal 135 GB.
+
+**Optical communication** gives very high rates without a spectrum licence. In 2023 NASA's TBIRD experiment downlinked 200 Gbit/s from a CubeSat to an optical ground station. The catch: clouds block it completely, so several optical stations are needed in different climates; in Viet Nam's cloudy rainy season, space-to-ground optical links are less reliable than laser links between satellites.
+
+<Note kind="key">
+
+<mark>The volume of imagery a satellite sends home each day equals its contact minutes times its downlink rate.</mark> To get more, raise one of the two: high-latitude stations, more stations, relay satellites (EDRS), or faster links (Ka-band, laser).
+
+</Note>
+
+## 5.12 TT&C, CCSDS and security
+
+An Earth-observation satellite has two very different kinds of link:
+
+- <Term id="ttc">TT&C</Term> (telemetry, tracking and command): commands up, housekeeping data down, ranging to determine the orbit. Low rates (a few kbit/s to a few Mbit/s), usually at S-band (2025–2110 MHz up, 2200–2290 MHz down), with near-omnidirectional antennas so the link works whatever the satellite's attitude. The 'LEO S-band' scenario of Figure 5.5 has 18.6 dB of margin: TT&C is designed with plenty to spare, because losing commands can mean losing the satellite.
+- **Payload data**: bulk imagery at hundreds of Mbit/s, at X-band (section 5.11).
+
+So that one station can receive satellites of many nations, space agencies share the <Term id="ccsds">CCSDS</Term> standards: data framing (TM, AOS), error-correcting codes (convolutional, Reed–Solomon, turbo, LDPC), file transfer and ranging protocols. Sentinel-2 packs its images in CCSDS AOS frames; that lets commercial stations receive many missions with one modem.
+
+**Security.** The uplink is the weak point: anyone who can transmit on the right frequency in the right format can send commands. So commands are **authenticated** (the CCSDS SDLS standard at the link layer), and military and high-end commercial data are **encrypted** (AES) on board. Two other threats: **jamming** (high power drowning the signal) and **spoofing** (transmitting fake signals that look real). GNSS signals are weak and vulnerable to both (section 5.13, Chapter 7).
+
+<Note kind="warn">
+
+Losing the TT&C link means losing control of the satellite. Every serious system has backup stations, an automatic safe mode on board, and command authentication.
+
+</Note>
+
+## 5.13 GNSS signals: it is all about time
+
+A GNSS satellite carries atomic clocks and keeps broadcasting "my time is t, my position is (x, y, z)". The receiver measures the travel time, from 67.4 ms (satellite at zenith, 20,200 km) to 86.1 ms (at the horizon, 25,801 km), to infer the distance. 1 ns of timing error is 30 cm of range error. Because the receiver clock is not accurate, at least 4 satellites are needed to solve 4 unknowns: x, y, z and the receiver clock error. Chapter 7 covers the solution, the error sources and the relativistic corrections.
+
+The surprise is in the link budget: a GPS signal at the ground is **weaker than the noise**.
+
+<Stats items={[
+  { v: '−158.5', u: 'dBW', l: 'minimum GPS L1 C/A power at the ground (IS-GPS-200)' },
+  { v: '−144.4', u: 'dBW', l: 'thermal noise at 130 K in 2.046 MHz' },
+  { v: '43.1', u: 'dB', l: 'processing gain from spreading' },
+]} caption="The signal sits 14 dB below the noise, but correlating with the known code recovers 43 dB." />
+
+<Formula label="Processing gain of a spread-spectrum signal" tex="G_p = 10\log_{10}\frac{R_c}{R_b} = 10\log_{10}\frac{1.023\times10^6}{50} = 43.1\ \text{dB}" where="
+R_c :: chip rate of the C/A code (1.023 Mchip/s)
+R_b :: navigation data rate (50 bit/s)
+" />
+
+The 50 bit/s data are multiplied by a 1.023 Mchip/s pseudo-random code unique to each satellite (this is CDMA, section 5.8). The receiver knows the code in advance and correlates to gather the energy back. As a density: C/N0 = −158.5 − (−228.6 + 10·log10 130) = 49.0 dB·Hz, enough for the receiver to track. Because the signal is that weak, a jammer of a few watts can knock out GNSS over many kilometres.
+
+<Note kind="key">
+
+GNSS is a **timing** problem, and its signal lies below the noise. Spread spectrum (CDMA) turns what looks impossible into positioning in your pocket.
+
+</Note>
+
+## 5.14 Hands-on
+
+The notebook recomputes the whole chapter: wavelengths, FSPL, dish gain, the link budgets of the scenarios; ITU-R rain attenuation for Hanoi and Ho Chi Minh City with ITU-Rpy; Sentinel-2 propagated with SGP4 to list passes over Hanoi and compare with Svalbard; then lets you design the link for a small satellite.
+
+<LabLinks notebook="labs/signals_linkbudget.ipynb" />
+
+**Suggested exercises**
+
+1. In Figure 5.5 pick 'LEO S-band' (786 km) and turn it into a CubeSat: 2 W into a 3 dBi antenna, a 3 m station dish. At 10° elevation, what is the highest rate with uncoded QPSK? The notebook also lets you change the altitude.
+2. Why does satellite TV in the tropics often use C-band with large dishes, while Europe uses Ku-band with small ones? Answer with numbers from Figure 5.6.
+3. A CubeSat transmits at 437 MHz. Use Figure 5.12 to find how many kHz the receiver must track. What if the same satellite moved to X-band?
+4. In Figure 5.13, Viet Nam needs same-day images from its own satellite: how many minutes does a Ho Chi Minh City station add to Hanoi? What would a high-latitude station add?
+5. Explain to a customer why a Ka-band service slows sharply in heavy rain while a broadcaster's C-band trunk does not. Use Figure 5.8 to talk about ACM.
+
+## 5.15 Review
+
+<Quiz client:visible lang="en" items={quiz} />
+
+## References
+
+- Airbus (2016). *Launch of the first satellite in the "SpaceDataHighway" programme* (EDRS-A, 1.8 Gbit/s laser). https://www.airbus.com/en/newsroom/press-releases/2016-01-launch-of-the-first-satellite-in-the-spacedatahighway-programme
+- CCSDS. *TM Synchronization and Channel Coding* (CCSDS 131.0-B), *AOS Space Data Link Protocol* (CCSDS 732.0-B), *Image Data Compression* (CCSDS 122.0-B), *Space Data Link Security Protocol* (CCSDS 355.0-B), Blue Books. https://public.ccsds.org
+- ESA. *Sentinel-2 data flow* (X-band stations Matera, Maspalomas, Svalbard; laser via EDRS to Ka-band stations). https://www.esa.int/Applications/Observing_the_Earth/Copernicus/Sentinel-2/Data_flow
+- ESA eoPortal. *Copernicus: Sentinel-2* (X-band downlink 560 Mbit/s). https://www.eoportal.org/satellite-missions/copernicus-sentinel-2
+- ETSI EN 302 307-1 V1.4.1 (2014). *Digital Video Broadcasting (DVB); Second generation framing structure, channel coding and modulation systems (DVB-S2)*, Tables 9, 10, 13. https://www.etsi.org
+- Humphreys, T. E., Iannucci, P. A., Komodromos, Z. M., & Graff, A. M. (2023). Signal structure of the Starlink Ku-band downlink. *IEEE Transactions on Aerospace and Electronic Systems*.
+- IEEE Std 521-2019. *IEEE Standard Letter Designations for Radar-Frequency Bands*.
+- IS-GPS-200. *Navstar GPS Space Segment/Navigation User Interfaces*. https://www.gps.gov/technical/icwg/
+- ITU. *Radio Regulations* (Article 5: frequency allocations; Article 22: EPFD limits). https://www.itu.int/pub/R-REG-RR
+- ITU-R P.618-13 (2017). *Propagation data and prediction methods required for the design of Earth-space telecommunication systems*. https://www.itu.int/rec/R-REC-P.618
+- ITU-R P.676. *Attenuation by atmospheric gases and related effects*. https://www.itu.int/rec/R-REC-P.676
+- ITU-R P.837-7 (2017). *Characteristics of precipitation for propagation modelling*. https://www.itu.int/rec/R-REC-P.837
+- ITU-R P.838-3 (2005). *Specific attenuation model for rain for use in prediction methods*. https://www.itu.int/rec/R-REC-P.838
+- ITU-R P.839-4 (2013). *Rain height model for prediction methods*. https://www.itu.int/rec/R-REC-P.839
+- del Portillo, I. *ITU-Rpy: A Python implementation of the ITU-R P. Recommendations*, version 0.4. https://github.com/inigodelportillo/ITU-Rpy
+- Kelso, T. S. *CelesTrak*. https://celestrak.org
+- Maral, G., Bousquet, M., & Sun, Z. (2020). *Satellite Communications Systems: Systems, Techniques and Technology* (6th ed.). Wiley.
+- NASA (2023). *TBIRD sets record: 200 Gbps laser link from a CubeSat*. https://www.nasa.gov
+- Nguyễn Văn Tín. *Sổ tay Vệ tinh & Viễn thám* (Satellite & Remote Sensing Handbook), chapter 5. CC BY 4.0. https://satellite-rs-handbook.netlify.app/
+- Pratt, T., & Allnutt, J. E. (2019). *Satellite Communications* (3rd ed.). Wiley.
+- Sklar, B. (2001). *Digital Communications: Fundamentals and Applications* (2nd ed.). Prentice Hall.
+- USGS. *Landsat ground stations*. https://www.usgs.gov/landsat-missions/usgs-landsat-ground-stations
+- USGS Publications Warehouse. *Design and implementation of the next generation Landsat satellite communications system* (publication 70193004). https://pubs.usgs.gov/publication/70193004
+- VnEconomy (15 Feb 2026). *Chính thức cấp phép cho Internet Starlink vào Việt Nam* (Starlink officially licensed in Viet Nam). https://vneconomy.vn/chinh-thuc-cap-phep-cho-internet-starlink-vao-viet-nam.htm
+- Lockheed Martin (2008). *Lockheed Martin-built VINASAT-1 satellite launched successfully for Vietnam Posts and Telecommunications Group*. https://news.lockheedmartin.com

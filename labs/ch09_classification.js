@@ -1,5 +1,5 @@
 /**
- * Lab 9 — Phân loại Random Forest & đánh giá độ chính xác / Random Forest classification & accuracy
+ * Lab 14 — Phân loại Random Forest & đánh giá độ chính xác / Random Forest classification & accuracy
  * Sổ tay Viễn thám & GIS. Dán vào https://code.earthengine.google.com và bấm Run.
  * Paste into https://code.earthengine.google.com and press Run.
  *

@@ -12,7 +12,7 @@ export const url = (path: string): string =>
   `${import.meta.env.BASE_URL.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
 
 export const UI = {
-  siteTitle: { vi: 'Sổ tay Viễn thám & GIS', en: 'Remote Sensing & GIS Handbook' },
+  siteTitle: { vi: 'GIS and Remote Sensing Knowledge', en: 'GIS and Remote Sensing Knowledge' },
   tagline: {
     vi: 'Tra cứu và giảng dạy — mỗi khái niệm kèm ví dụ trên ảnh vệ tinh thật của Việt Nam.',
     en: 'For reference and teaching — every concept comes with a worked example on real satellite imagery of Viet Nam.',
@@ -35,12 +35,12 @@ export const UI = {
   search: { vi: 'Tìm kiếm', en: 'Search' },
   glossary: { vi: 'Thuật ngữ', en: 'Glossary' },
   otherLang: { vi: 'English', en: 'Tiếng Việt' },
-  partA: { vi: 'Phần A — Nền tảng', en: 'Part A — Foundations' },
-  partB: { vi: 'Phần B — Xử lý & phân tích ảnh', en: 'Part B — Image processing & analysis' },
-  partC: { vi: 'Phần C — Ứng dụng & tra cứu', en: 'Part C — Applications & reference' },
+  partA: { vi: 'Phần A · Vệ tinh & định vị', en: 'Part A · Satellites & positioning' },
+  partB: { vi: 'Phần B · Viễn thám & xử lý ảnh', en: 'Part B · Remote sensing & image analysis' },
+  partC: { vi: 'Phần C · Ứng dụng & tra cứu', en: 'Part C · Applications & reference' },
   footer: {
-    vi: 'Nội dung: CC BY 4.0. Dữ liệu ảnh: chứa dữ liệu Copernicus Sentinel đã xử lý; Landsat: USGS; MODIS: NASA LP DAAC.',
-    en: 'Content: CC BY 4.0. Imagery: contains modified Copernicus Sentinel data; Landsat courtesy of USGS; MODIS courtesy of NASA LP DAAC.',
+    vi: 'Nội dung: CC BY 4.0; Phần A và một số mục Phần B phát triển từ Sổ tay Vệ tinh & Viễn thám (Nguyễn Văn Tín, CC BY 4.0). Dữ liệu ảnh: chứa dữ liệu Copernicus Sentinel đã xử lý; Landsat: USGS; MODIS: NASA LP DAAC.',
+    en: 'Content: CC BY 4.0; Part A and parts of Part B build on Sổ tay Vệ tinh & Viễn thám (Nguyễn Văn Tín, CC BY 4.0). Imagery: contains modified Copernicus Sentinel data; Landsat courtesy of USGS; MODIS courtesy of NASA LP DAAC.',
   },
   glossaryMore: { vi: 'Xem trong bảng thuật ngữ', en: 'See glossary' },
 } satisfies Record<string, Bi>;

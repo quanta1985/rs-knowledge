@@ -1,6 +1,6 @@
 ---
 title: "Vật lý: bức xạ điện từ & khí quyển"
-n: 3
+n: 8
 summary: Mọi ảnh vệ tinh đều là phép đo bức xạ điện từ. Chương này giải thích phổ điện từ, bức xạ vật đen, cách khí quyển hấp thụ và tán xạ ánh sáng (với phổ Mặt Trời chuẩn ASTM G173), và đo nhiệt độ bề mặt Hà Nội từ kênh nhiệt Landsat 9.
 objectives:
   - Đổi qua lại bước sóng và tần số; kể tên các vùng phổ dùng trong viễn thám.
@@ -14,19 +14,25 @@ import Term from '../../../components/Term.astro';
 import Depth from '../../../components/Depth.astro';
 import Figure from '../../../components/Figure.astro';
 import LabLinks from '../../../components/LabLinks.astro';
+import Note from '../../../components/Note.astro';
+import Formula from '../../../components/Formula.astro';
+import Stats from '../../../components/Stats.astro';
 import PlanckLab from '../../../islands/PlanckLab.tsx';
 import SolarSpectrum from '../../../islands/SolarSpectrum.tsx';
 import LstMap from '../../../islands/LstMap.tsx';
 import Quiz from '../../../islands/Quiz.tsx';
 import quiz from '../../../data/quiz/ch03.json';
 
-<p class="muted" style="font-size:0.9rem">Chương này phỏng theo mục 8.1–8.3 và 8.5 của <a href="https://satellite-rs-handbook.netlify.app/" rel="noopener"><em>Sổ tay Vệ tinh & Viễn thám</em></a> (Nguyễn Văn Tín, CC BY 4.0). Bảng vùng phổ và danh sách vùng hấp thụ dựa trên bản gốc. Các hình dùng phổ chuẩn ASTM G173 và ảnh Landsat 9 thật.</p>
 
-## 3.1 Phổ điện từ
+## 8.1 Phổ điện từ
 
 Ánh sáng, tia hồng ngoại và sóng radar đều là **sóng điện từ**, chỉ khác bước sóng. Bước sóng λ và tần số f liên hệ qua tốc độ ánh sáng c = 299 792 458 m/s:
 
-<p class="formula">c = λ · f</p>
+<Formula label="Bước sóng và tần số" tex="c = \lambda \cdot f" where="
+c :: tốc độ ánh sáng, 299 792 458 m/s
+\lambda :: bước sóng (m)
+f :: tần số (Hz)
+" />
 
 Ví dụ: radar Sentinel-1 phát ở f = 5,405 GHz, nên λ = c / f = **5,55 cm**. Ánh sáng đỏ λ = 0,665 µm có tần số khoảng 451 THz.
 
@@ -47,45 +53,67 @@ Ví dụ: radar Sentinel-1 phát ở f = 5,405 GHz, nên λ = c / f = **5,55 cm*
 
 Nguồn: Sổ tay Vệ tinh & Viễn thám (CC BY 4.0).
 
-## 3.2 Bức xạ vật đen
+<Note kind="key">
+
+Mọi vùng phổ là cùng một loại sóng, chỉ khác bước sóng. Bước sóng quyết định nguồn năng lượng (Mặt Trời phản xạ, bề mặt tự phát, hay radar tự phát) và loại thông tin ảnh mang lại.
+
+</Note>
+
+## 8.2 Bức xạ vật đen
 
 Mọi vật có nhiệt độ trên 0 K đều phát bức xạ. Một <Term id="black-body">vật đen</Term> lý tưởng phát xạ theo **định luật Planck**: lượng bức xạ ở mỗi bước sóng chỉ phụ thuộc nhiệt độ. Hai hệ quả quan trọng:
 
-<p class="formula">λmax = 2898 µm·K / T  (Wien),     M = σ T⁴  (Stefan–Boltzmann, σ = 5,67×10⁻⁸ W·m⁻²·K⁻⁴)</p>
+<Formula label="Định luật Wien" tex="\lambda_{max} = \frac{2898\ \mu\text{m}\cdot\text{K}}{T}" where="
+\lambda_{max} :: bước sóng phát xạ cực đại
+T :: nhiệt độ tuyệt đối (K)
+" />
+
+<Formula label="Định luật Stefan–Boltzmann" tex="M = \sigma T^4" where="
+M :: tổng năng lượng phát ra trên một mét vuông bề mặt (W/m²)
+\sigma :: hằng số Stefan–Boltzmann, 5,67 × 10⁻⁸ W·m⁻²·K⁻⁴
+" />
 
 <Figure
-  title="Hình 3.1 — Đường cong Planck: Mặt Trời, đám cháy và bề mặt Hà Nội"
+  title="Hình 8.1 — Đường cong Planck: Mặt Trời, đám cháy và bề mặt Hà Nội"
   try="Bấm 'Mặt Trời': cực đại nằm trong dải màu khả kiến. Bấm 'Hồ Tây' và 'Đất trống HN': cực đại dịch tới đâu so với hai kênh nhiệt Landsat (vạch đỏ)? Kéo nhiệt độ lên 1000 K: phần năng lượng trong cửa sổ 8–14 µm thay đổi thế nào?"
-  source="Định luật Planck với hằng số CODATA 2018; tỷ lệ năng lượng trong một dải tính bằng tích phân số (400 điểm trên lưới log). Nhiệt độ hiệu dụng Mặt Trời 5772 K (IAU 2015). Nhiệt độ Hồ Tây và đất trống: Landsat 9 ngày 22/12/2023 (mục 3.5). Kênh TIRS: USGS."
+  source="Định luật Planck với hằng số CODATA 2018; tỷ lệ năng lượng trong một dải tính bằng tích phân số (400 điểm trên lưới log). Nhiệt độ hiệu dụng Mặt Trời 5772 K (IAU 2015). Nhiệt độ Hồ Tây và đất trống: Landsat 9 ngày 22/12/2023 (mục 8.5). Kênh TIRS: USGS."
 >
   <PlanckLab client:visible lang="vi" />
 </Figure>
 
-Ba con số đáng nhớ, đọc từ Hình 3.1:
+Ba con số đáng nhớ, đọc từ Hình 8.1:
 
-- **Mặt Trời 5772 K** phát cực đại ở **0,50 µm**, đúng vùng mắt người nhạy nhất. 36,6 % năng lượng của nó nằm trong dải 0,4–0,7 µm.
-- **Bề mặt 300 K** phát cực đại ở **9,66 µm**. 37,6 % năng lượng nằm trong cửa sổ 8–14 µm. Vì thế cảm biến nhiệt đặt kênh ở 10–12 µm.
-- **Đám cháy 1000 K** phát cực đại ở **2,90 µm**, nên kênh SWIR và hồng ngoại trung rất nhạy với điểm cháy.
+<Stats items={[
+  { v: '0,50', u: 'µm', l: 'cực đại của Mặt Trời 5772 K; 36,6 % năng lượng nằm trong 0,4–0,7 µm' },
+  { v: '9,66', u: 'µm', l: 'cực đại của bề mặt 300 K; 37,6 % năng lượng nằm trong cửa sổ 8–14 µm' },
+  { v: '2,90', u: 'µm', l: 'cực đại của đám cháy 1000 K' },
+]} caption="Mặt Trời phát mạnh nhất đúng vùng mắt người nhạy nhất. Bề mặt Trái Đất phát mạnh nhất trong cửa sổ 8–14 µm, nên cảm biến nhiệt đặt kênh ở 10–12 µm. Đám cháy dịch cực đại về SWIR và hồng ngoại trung, nên các kênh này rất nhạy với điểm cháy." />
 
 Đường cong của Mặt Trời cao hơn đường của Trái Đất ở mọi bước sóng. Nhưng ánh sáng Mặt Trời tới Trái Đất bị pha loãng rất nhiều theo khoảng cách. Kết quả là ở dưới khoảng 4 µm, cảm biến đo chủ yếu ánh sáng Mặt Trời **phản xạ**; ở trên khoảng 5 µm, nó đo chủ yếu bức xạ **phát ra** từ chính bề mặt.
 
+<Note kind="key">
+
+Dưới khoảng 4 µm, vệ tinh đo ánh sáng Mặt Trời phản xạ; trên khoảng 5 µm, nó đo bức xạ do chính bề mặt phát ra. Đó là ranh giới giữa ảnh quang học và ảnh nhiệt.
+
+</Note>
+
 <Depth level="advanced" title="Vật thật không phải vật đen: độ phát xạ">
 
-Vật thật phát xạ ít hơn vật đen cùng nhiệt độ. Tỷ lệ đó là <Term id="emissivity">độ phát xạ ε</Term>, từ 0 đến 1. Nước khoảng 0,99, thực vật 0,96–0,99, kim loại bóng rất thấp. Nhiệt độ tính thẳng từ bức xạ đo được, coi như vật đen, gọi là **nhiệt độ sáng** (brightness temperature). Nó thấp hơn nhiệt độ thật. Muốn ra <Term id="lst">nhiệt độ bề mặt đất (LST)</Term>, phải biết ε và hiệu chỉnh hơi nước trong khí quyển. Sản phẩm Landsat Collection 2 Level-2 ở mục 3.5 đã làm cả hai bước, dùng độ phát xạ từ cơ sở dữ liệu ASTER GED.
+Vật thật phát xạ ít hơn vật đen cùng nhiệt độ. Tỷ lệ đó là <Term id="emissivity">độ phát xạ ε</Term>, từ 0 đến 1. Nước khoảng 0,99, thực vật 0,96–0,99, kim loại bóng rất thấp. Nhiệt độ tính thẳng từ bức xạ đo được, coi như vật đen, gọi là **nhiệt độ sáng** (brightness temperature). Nó thấp hơn nhiệt độ thật. Muốn ra <Term id="lst">nhiệt độ bề mặt đất (LST)</Term>, phải biết ε và hiệu chỉnh hơi nước trong khí quyển. Sản phẩm Landsat Collection 2 Level-2 ở mục 8.5 đã làm cả hai bước, dùng độ phát xạ từ cơ sở dữ liệu ASTER GED.
 
 </Depth>
 
-## 3.3 Khí quyển: tán xạ, hấp thụ và cửa sổ
+## 8.3 Khí quyển: tán xạ, hấp thụ và cửa sổ
 
 Trên đường xuống mặt đất rồi lên vệ tinh, ánh sáng gặp hai hiện tượng:
 
 - **Tán xạ**: phân tử khí và hạt bụi làm ánh sáng đổi hướng. Tán xạ Rayleigh do phân tử khí tỷ lệ với λ⁻⁴. Ánh sáng lam (0,492 µm, kênh B2) tán xạ mạnh gấp (0,665/0,492)⁴ = **3,3 lần** ánh sáng đỏ (0,665 µm, kênh B4). Vì vậy bầu trời có màu xanh và kênh lam luôn "mờ" nhất trên ảnh.
 - **Hấp thụ**: hơi nước, CO₂ và ozone nuốt năng lượng ở những bước sóng nhất định. Phần còn lại là các <Term id="atmospheric-window">cửa sổ khí quyển</Term>.
 
-Hình 3.2 dùng phổ chuẩn **ASTM G173**: phổ Mặt Trời ngoài khí quyển và tại mặt đất khi ánh sáng đi qua 1,5 lần bề dày khí quyển chuẩn. Phần tô đỏ giữa hai đường là năng lượng mà khí quyển đã hấp thụ hoặc tán xạ đi.
+Hình 8.2 dùng phổ chuẩn **ASTM G173**: phổ Mặt Trời ngoài khí quyển và tại mặt đất khi ánh sáng đi qua 1,5 lần bề dày khí quyển chuẩn. Phần tô đỏ giữa hai đường là năng lượng mà khí quyển đã hấp thụ hoặc tán xạ đi.
 
 <Figure
-  title="Hình 3.2 — Phổ Mặt Trời trước và sau khi qua khí quyển, cùng các kênh Sentinel-2 và Landsat"
+  title="Hình 8.2 — Phổ Mặt Trời trước và sau khi qua khí quyển, cùng các kênh Sentinel-2 và Landsat"
   try="Di chuột tới 1375 nm (kênh B10 của Sentinel-2): bao nhiêu phần trăm ánh sáng đi xuyên được khí quyển? So với kênh B11 (1610 nm). Chọn dải 280–4000 nm và tìm vùng hấp thụ của hơi nước quanh 1900 và 2700 nm."
   source="ASTM G173-03 (mô hình SMARTS 2.9.2, khí quyển chuẩn Hoa Kỳ, khối khí 1,5), bản sao của dữ liệu NREL trong thư viện pvlib; lấy trung bình theo bin 5 nm (dưới 1700 nm) và 10 nm. 'Truyền qua' = trực xạ AM1.5 / ngoài khí quyển: là kết quả mô hình cho khí quyển chuẩn, không phải đo tại Việt Nam. Kênh Sentinel-2: tâm và độ rộng theo hàm đáp ứng phổ của ESA; kênh OLI: USGS."
 >
@@ -106,41 +134,58 @@ Hình 3.2 dùng phổ chuẩn **ASTM G173**: phổ Mặt Trời ngoài khí quy�
 
 </div>
 
-Giá trị trong bảng là tích phân trực xạ chia tích phân phổ ngoài khí quyển trên toàn độ rộng kênh, tính trên dữ liệu G173 gốc (bước 0,5–5 nm). Hình 3.2 hiện giá trị tại từng bước sóng nên có thể lệch vài phần trăm ở mép kênh.
+Giá trị trong bảng là tích phân trực xạ chia tích phân phổ ngoài khí quyển trên toàn độ rộng kênh, tính trên dữ liệu G173 gốc (bước 0,5–5 nm). Hình 8.2 hiện giá trị tại từng bước sóng nên có thể lệch vài phần trăm ở mép kênh.
 
-Tổng năng lượng Mặt Trời từ 280 đến 4000 nm là 1347,9 W/m² ngoài khí quyển, còn 1000,4 W/m² tại mặt đất (tổng trực xạ và tán xạ, tính trên mặt nghiêng 37° theo chuẩn). Khoảng một phần tư bị mất trên đường xuống.
+Tổng năng lượng Mặt Trời từ 280 đến 4000 nm là 1347,9 W/m² ngoài khí quyển, còn 1000,4 W/m² tại mặt đất (tổng trực xạ và tán xạ, tính trên mặt nghiêng 37° theo chuẩn). <mark>Khoảng một phần tư bị mất trên đường xuống.</mark>
+
+<Note kind="key">
+
+Vệ tinh chỉ nhìn thấy mặt đất qua các cửa sổ khí quyển. Kênh đặt trong vùng hấp thụ, như B9 và B10 của Sentinel-2, không dùng để nhìn mặt đất mà để đo chính khí quyển: hơi nước và mây ti.
+
+</Note>
 
 <Depth level="advanced" title="Từ số đếm của cảm biến đến phản xạ">
 
 Cảm biến ghi **số đếm DN**. Hiệu chuẩn đổi DN thành **bức xạ** L (W·m⁻²·sr⁻¹·µm⁻¹). Chia cho năng lượng Mặt Trời tới ra **phản xạ đỉnh khí quyển** (TOA):
 
-<p class="formula">ρTOA = π · L · d² / (ESUN · cos θs)</p>
+<Formula label="Phản xạ đỉnh khí quyển" tex="\rho_{TOA} = \frac{\pi \cdot L \cdot d^2}{E_{SUN} \cdot \cos\theta_s}" where="
+L :: bức xạ đo được (W·m⁻²·sr⁻¹·µm⁻¹)
+d :: khoảng cách Trái Đất – Mặt Trời (đơn vị thiên văn)
+E_{SUN} :: bức xạ Mặt Trời ngoài khí quyển trong kênh
+\theta_s :: góc thiên đỉnh Mặt Trời
+" />
 
-với d là khoảng cách Trái Đất – Mặt Trời (đơn vị thiên văn), ESUN bức xạ Mặt Trời ngoài khí quyển trong kênh, θs góc thiên đỉnh Mặt Trời. Hiệu chỉnh khí quyển loại bỏ phần tán xạ cộng thêm và phần bị hấp thụ, cho ra **phản xạ bề mặt** (Sentinel-2 L2A). Chương 7 so sánh hai đại lượng này trên ảnh Hà Nội.
+Hiệu chỉnh khí quyển loại bỏ phần tán xạ cộng thêm và phần bị hấp thụ, cho ra **phản xạ bề mặt** (Sentinel-2 L2A). Chương 12 so sánh hai đại lượng này trên ảnh Hà Nội.
 
 </Depth>
 
-## 3.4 Phản xạ, hấp thụ và truyền qua tại bề mặt
+## 8.4 Phản xạ, hấp thụ và truyền qua tại bề mặt
 
-Năng lượng tới một bề mặt chia làm ba phần: **phản xạ**, **hấp thụ** và **truyền qua**. Tổng ba phần luôn bằng 100 %. Tỷ lệ phản xạ thay đổi theo bước sóng và là "chữ ký" của từng loại bề mặt. Lá cây hấp thụ mạnh ánh sáng đỏ để quang hợp nhưng phản xạ mạnh cận hồng ngoại, còn nước hấp thụ gần hết cận hồng ngoại. Chương 6 đo các chữ ký này trên ảnh Sentinel-2 Hà Nội: NDVI của ruộng bãi bồi là 0,86, của Hồ Tây là −0,10.
+Năng lượng tới một bề mặt chia làm ba phần: **phản xạ**, **hấp thụ** và **truyền qua**. Tổng ba phần luôn bằng 100 %. Tỷ lệ phản xạ thay đổi theo bước sóng và là "chữ ký" của từng loại bề mặt. Lá cây hấp thụ mạnh ánh sáng đỏ để quang hợp nhưng phản xạ mạnh cận hồng ngoại, còn nước hấp thụ gần hết cận hồng ngoại. Chương 11 đo các chữ ký này trên ảnh Sentinel-2 Hà Nội: NDVI của ruộng bãi bồi là 0,86, của Hồ Tây là −0,10.
 
 Phần năng lượng bị hấp thụ làm bề mặt nóng lên, rồi được phát ra dưới dạng bức xạ nhiệt. Mục tiếp theo đo chính phần này.
 
-## 3.5 Ví dụ: nhiệt độ bề mặt Hà Nội từ Landsat 9
+<Note kind="key">
+
+Phản xạ + hấp thụ + truyền qua = 100 %. Phần phản xạ thay đổi theo bước sóng là chữ ký của bề mặt, nền tảng của các chỉ số phổ ở Chương 11; phần hấp thụ làm bề mặt nóng lên và trở thành tín hiệu của ảnh nhiệt.
+
+</Note>
+
+## 8.5 Ví dụ: nhiệt độ bề mặt Hà Nội từ Landsat 9
 
 Ngày 22/12/2023, Landsat 9 chụp Hà Nội lúc **10:23** sáng. Cảm biến TIRS-2 đo bức xạ ở 10,6–11,2 µm, đúng gần đỉnh Planck của bề mặt Trái Đất. USGS đã đổi bức xạ đó thành nhiệt độ bề mặt (ST_B10).
 
 <Figure
-  title="Hình 3.3 — Nhiệt độ bề mặt khu Hồ Tây – sông Hồng sáng 22/12/2023"
+  title="Hình 8.3 — Nhiệt độ bề mặt khu Hồ Tây – sông Hồng sáng 22/12/2023"
   try="Di chuột từ Hồ Tây sang khu phố cũ phía nam hồ: nhiệt độ tăng bao nhiêu độ? Dòng 'Cực đại phát xạ (Wien)' thay đổi bao nhiêu? Đặt độ mờ 40 % để so với ảnh nền."
-  source="Landsat 9 Collection 2 Level-2, cảnh LC09_127045_20231222, ST_B10 × 0,00341802 + 149 (K), độ phân giải gốc TIRS 100 m, giao ở 30 m; lấy mẫu láng giềng gần nhất về lưới 30 m UTM 48N cùng góc với khung Sentinel-2 của Chương 6. Thang màu cố định 14–24 °C (viridis). Điểm tham chiếu: trung bình 3×3 pixel 30 m. Landsat courtesy of USGS. Ảnh nền © Esri, Maxar, Earthstar Geographics."
+  source="Landsat 9 Collection 2 Level-2, cảnh LC09_127045_20231222, ST_B10 × 0,00341802 + 149 (K), độ phân giải gốc TIRS 100 m, giao ở 30 m; lấy mẫu láng giềng gần nhất về lưới 30 m UTM 48N cùng góc với khung Sentinel-2 của Chương 11. Thang màu cố định 14–24 °C (viridis). Điểm tham chiếu: trung bình 3×3 pixel 30 m. Landsat courtesy of USGS. Ảnh nền © Esri, Maxar, Earthstar Geographics."
 >
   <LstMap client:visible lang="vi" />
 </Figure>
 
 <div class="table-wrap">
 
-| Điểm (cùng 6 điểm của Chương 6) | Nhiệt độ bề mặt | λmax theo Wien |
+| Điểm (cùng 6 điểm của Chương 11) | Nhiệt độ bề mặt | λmax theo Wien |
 |---|---|---|
 | Nước Hồ Tây | 15,8 °C | 10,03 µm |
 | Cây xanh đô thị | 18,6 °C | 9,93 µm |
@@ -151,11 +196,21 @@ Ngày 22/12/2023, Landsat 9 chụp Hà Nội lúc **10:23** sáng. Cảm biến 
 
 </div>
 
+<Stats items={[
+  { v: '15,7–22,4', u: '°C', l: 'nhiệt độ bề mặt trong khung 5,12 km (phân vị 2–98 %)' },
+  { v: '19,9', u: '°C', l: 'trung vị' },
+  { v: '≈ 5', u: '°C', l: 'Hồ Tây lạnh hơn khu phố xung quanh' },
+]} />
+
 Trong khung 5,12 × 5,12 km, nhiệt độ bề mặt trải từ 15,7 °C (phân vị 2 %) đến 22,4 °C (phân vị 98 %), trung vị 19,9 °C. Hồ Tây lạnh hơn khu phố xung quanh khoảng 5 °C. Một cách giải thích: nước có nhiệt dung lớn nên ấm lên chậm sau đêm mùa đông, còn mái tôn, bê tông và đất khô nóng lên nhanh dưới nắng sáng. Đây là diễn giải theo vật lý, sổ tay chưa có số liệu nhiệt độ nước đo tại hồ để kiểm chứng.
 
-Cần nhớ: đây là nhiệt độ **bề mặt** (mái nhà, mặt nước, tán lá), không phải nhiệt độ **không khí** mà trạm khí tượng đo ở độ cao 2 m. Vào buổi trưa hè, bề mặt mái tôn có thể nóng hơn không khí hàng chục độ.
+<Note kind="myth">
 
-## 3.6 Thực hành
+"Ảnh nhiệt Landsat cho biết trời nóng bao nhiêu." Không đúng: đây là nhiệt độ **bề mặt** (mái nhà, mặt nước, tán lá), không phải nhiệt độ **không khí** mà trạm khí tượng đo ở độ cao 2 m. Vào buổi trưa hè, bề mặt mái tôn có thể nóng hơn không khí hàng chục độ.
+
+</Note>
+
+## 8.6 Thực hành
 
 Notebook vẽ đường cong Planck, tính λmax và tỷ lệ năng lượng trong các cửa sổ, đọc phổ ASTM G173 để tìm truyền qua tại từng kênh Sentinel-2, rồi tải nhiệt độ bề mặt Landsat 9 cùng khung Hồ Tây trong Earth Engine. Script GEE vẽ bản đồ nhiệt độ bề mặt cho một ngày và một vùng bất kỳ.
 
@@ -165,9 +220,9 @@ Notebook vẽ đường cong Planck, tính λmax và tỷ lệ năng lượng tr
 
 1. Tính λmax của một mái tôn nóng 60 °C. Nó vẫn nằm trong cửa sổ 8–14 µm không?
 2. Lấy một cảnh Landsat 9 mùa hè của Hà Nội. Hồ Tây còn lạnh hơn khu phố xung quanh không? Chênh bao nhiêu độ?
-3. Vì sao kênh B10 của Sentinel-2 không có trong sản phẩm L2A? (Gợi ý: Hình 3.2.)
+3. Vì sao kênh B10 của Sentinel-2 không có trong sản phẩm L2A? (Gợi ý: Hình 8.2.)
 
-## 3.7 Ôn tập
+## 8.7 Ôn tập
 
 <Quiz client:visible lang="vi" items={quiz} />
 

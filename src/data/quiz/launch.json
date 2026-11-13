@@ -1,0 +1,466 @@
+[
+ {
+  "q": {
+   "vi": "Điều gì quyết định một vật có ở lại quỹ đạo thấp hay không?",
+   "en": "What decides whether an object stays in low orbit?"
+  },
+  "options": [
+   {
+    "vi": "Vận tốc ngang đủ lớn (khoảng 7,7–7,8 km/s)",
+    "en": "Enough horizontal speed (about 7.7–7.8 km/s)"
+   },
+   {
+    "vi": "Bay cao hơn 100 km là đủ",
+    "en": "Being above 100 km is enough"
+   },
+   {
+    "vi": "Thoát khỏi lực hấp dẫn của Trái Đất",
+    "en": "Escaping Earth's gravity"
+   },
+   {
+    "vi": "Động cơ chạy liên tục để giữ độ cao",
+    "en": "Engines running all the time to hold altitude"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Ở 400 km trọng lực vẫn còn gần 90 %. Vệ tinh rơi liên tục nhưng bay ngang đủ nhanh để mặt đất cong đi kịp.",
+   "en": "Gravity is still close to 90 % at 400 km. The satellite keeps falling but moves sideways fast enough for the ground to curve away."
+  }
+ },
+ {
+  "q": {
+   "vi": "Theo phương trình tên lửa, muốn gấp đôi Δv với cùng động cơ thì tỉ số khối lượng m₀/m_f phải…",
+   "en": "By the rocket equation, doubling Δv with the same engine needs a mass ratio m₀/m_f that is…"
+  },
+  "options": [
+   {
+    "vi": "Bình phương lên",
+    "en": "Squared"
+   },
+   {
+    "vi": "Gấp đôi",
+    "en": "Doubled"
+   },
+   {
+    "vi": "Tăng thêm 50 %",
+    "en": "Increased by 50 %"
+   },
+   {
+    "vi": "Không đổi, chỉ cần đốt lâu hơn",
+    "en": "Unchanged, just burn longer"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Δv tỉ lệ với ln(m₀/m_f); ln(R²) = 2 ln R. Tỉ số 10 cho 6,8 km/s ở Isp 300 s, tỉ số 100 mới cho 13,5 km/s.",
+   "en": "Δv is proportional to ln(m₀/m_f), and ln(R²) = 2 ln R. A ratio of 10 gives 6.8 km/s at Isp 300 s; it takes 100 for 13.5 km/s."
+  }
+ },
+ {
+  "q": {
+   "vi": "Vì sao tên lửa lên quỹ đạo gần như luôn có nhiều tầng?",
+   "en": "Why do orbital launchers almost always have several stages?"
+  },
+  "options": [
+   {
+    "vi": "Để không phải tiếp tục tăng tốc thùng rỗng và động cơ đã dùng xong",
+    "en": "So empty tanks and spent engines are not accelerated any further"
+   },
+   {
+    "vi": "Vì một động cơ không đủ lực đẩy để rời bệ",
+    "en": "Because one engine cannot lift off the pad"
+   },
+   {
+    "vi": "Để tầng dưới rơi xuống làm vệ tinh khác",
+    "en": "So the lower stages can become other satellites"
+   },
+   {
+    "vi": "Vì luật quốc tế yêu cầu",
+    "en": "Because international law requires it"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Với Isp 300 s và kết cấu 10 % khối lượng tầng, một tầng duy nhất không đạt Δv lên quỹ đạo dù không chở gì; hai tầng mang được khoảng 1,7 %, ba tầng khoảng 2,4 % khối lượng cất cánh.",
+   "en": "With Isp 300 s and structure 10 % of each stage, a single stage cannot reach orbital Δv even with no payload; two stages carry about 1.7 % and three about 2.4 % of the lift-off mass."
+  }
+ },
+ {
+  "q": {
+   "vi": "Tên lửa Vega nặng khoảng 137 t lúc cất cánh. Ba vệ tinh của chuyến VV02 (Proba-V, VNREDSat-1, ESTCube-1) chiếm khoảng bao nhiêu khối lượng đó?",
+   "en": "Vega weighs about 137 t at lift-off. What share of that were the three VV02 satellites (Proba-V, VNREDSat-1, ESTCube-1)?"
+  },
+  "options": [
+   {
+    "vi": "≈ 0,2 %",
+    "en": "≈ 0.2 %"
+   },
+   {
+    "vi": "≈ 2 %",
+    "en": "≈ 2 %"
+   },
+   {
+    "vi": "≈ 10 %",
+    "en": "≈ 10 %"
+   },
+   {
+    "vi": "≈ 25 %",
+    "en": "≈ 25 %"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "140 + 120 + 1 = 261 kg trên 137 000 kg, khoảng 0,19 %. Cả sức chở tối đa 1500 kg của Vega cũng chỉ khoảng 1,1 %.",
+   "en": "140 + 120 + 1 = 261 kg out of 137,000 kg, about 0.19 %. Even Vega's full 1500 kg capacity is only about 1.1 %."
+  }
+ },
+ {
+  "q": {
+   "vi": "Phóng về hướng đông từ Kourou (5,2° B), Trái Đất tự quay \"tặng\" tên lửa khoảng bao nhiêu?",
+   "en": "Launching east from Kourou (5.2° N), how much does Earth's rotation give the rocket?"
+  },
+  "options": [
+   {
+    "vi": "≈ 460 m/s",
+    "en": "≈ 460 m/s"
+   },
+   {
+    "vi": "≈ 46 m/s",
+    "en": "≈ 46 m/s"
+   },
+   {
+    "vi": "≈ 4,6 km/s",
+    "en": "≈ 4.6 km/s"
+   },
+   {
+    "vi": "Không gì cả, tên lửa bay trong không khí",
+    "en": "Nothing, the rocket flies through air"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Mặt đất ở xích đạo chạy về đông 465 m/s; ở 5,2° B còn 463 m/s, ở Baikonur (46° B) chỉ còn 323 m/s.",
+   "en": "The ground at the equator moves east at 465 m/s; at 5.2° N it is 463 m/s, at Baikonur (46° N) only 323 m/s."
+  }
+ },
+ {
+  "q": {
+   "vi": "Từ Baikonur (46° B), tên lửa có thể phóng thẳng vào quỹ đạo có độ nghiêng nhỏ nhất là bao nhiêu?",
+   "en": "From Baikonur (46° N), what is the lowest inclination a rocket can reach directly?"
+  },
+  "options": [
+   {
+    "vi": "46°",
+    "en": "46°"
+   },
+   {
+    "vi": "0°",
+    "en": "0°"
+   },
+   {
+    "vi": "23,4°",
+    "en": "23.4°"
+   },
+   {
+    "vi": "90°",
+    "en": "90°"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Mặt phẳng quỹ đạo đi qua tâm Trái Đất và qua bãi phóng, nên độ nghiêng không thể nhỏ hơn vĩ độ bãi phóng. Muốn nhỏ hơn phải đổi mặt phẳng sau đó, rất tốn Δv.",
+   "en": "The orbit plane passes through Earth's centre and the launch site, so its inclination cannot be below the site latitude. Going lower needs a later plane change, which costs a lot of Δv."
+  }
+ },
+ {
+  "q": {
+   "vi": "Với vệ tinh địa tĩnh, vì sao Kourou có lợi hơn Baikonur nhiều hơn mức chênh tốc độ tự quay (140 m/s)?",
+   "en": "For geostationary satellites, why does Kourou beat Baikonur by much more than the 140 m/s rotation difference?"
+  },
+  "options": [
+   {
+    "vi": "Vì vệ tinh còn phải bỏ độ nghiêng của GTO khi vào GEO; từ 46° tốn hơn từ 5,2° khoảng 0,8 km/s",
+    "en": "Because the satellite must also remove the GTO inclination at GEO; from 46° that costs about 0.8 km/s more than from 5.2°"
+   },
+   {
+    "vi": "Vì ở Kourou không khí loãng hơn",
+    "en": "Because the air is thinner at Kourou"
+   },
+   {
+    "vi": "Vì Kourou gần Mặt Trời hơn",
+    "en": "Because Kourou is closer to the Sun"
+   },
+   {
+    "vi": "Vì Baikonur chỉ phóng được tên lửa nhiên liệu rắn",
+    "en": "Because Baikonur can only launch solid rockets"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Đốt ở viễn điểm để vào GEO tốn 1,49 km/s nếu GTO nghiêng 5,2°, nhưng 2,28 km/s nếu nghiêng 46°.",
+   "en": "The apogee burn into GEO costs 1.49 km/s from a 5.2° GTO but 2.28 km/s from a 46° GTO."
+  }
+ },
+ {
+  "q": {
+   "vi": "Quỹ đạo đồng bộ Mặt Trời (khoảng 98°) đi ngược chiều quay Trái Đất một chút. Điều đó có nghĩa là…",
+   "en": "A Sun-synchronous orbit (about 98°) runs slightly against Earth's rotation. That means…"
+  },
+  "options": [
+   {
+    "vi": "Tự quay của Trái Đất làm tốn thêm một ít Δv thay vì giúp",
+    "en": "Earth's rotation costs a little extra Δv instead of helping"
+   },
+   {
+    "vi": "Tên lửa được giúp nhiều nhất",
+    "en": "The rocket gets the most help"
+   },
+   {
+    "vi": "Không thể phóng từ Bắc bán cầu",
+    "en": "It cannot be launched from the northern hemisphere"
+   },
+   {
+    "vi": "Cần bay qua xích đạo trước khi tách tầng",
+    "en": "The rocket must cross the equator before staging"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Hướng phóng lệch về tây so với hướng bắc khoảng 8–12°, nên thành phần tốc độ mặt đất theo hướng bay bị trừ đi khoảng 70–80 m/s.",
+   "en": "The azimuth points about 8–12° west of north, so roughly 70–80 m/s of ground speed works against the climb."
+  }
+ },
+ {
+  "q": {
+   "vi": "PicoDragon (2013) lên quỹ đạo bằng cách nào?",
+   "en": "How did PicoDragon (2013) reach orbit?"
+  },
+  "options": [
+   {
+    "vi": "Lên Trạm Vũ trụ Quốc tế bằng tàu hàng HTV-4 rồi được bộ J-SSOD trên module Kibo thả ra",
+    "en": "It rode to the International Space Station on the HTV-4 cargo ship and was released by the J-SSOD deployer on Kibo"
+   },
+   {
+    "vi": "Phóng riêng bằng tên lửa Vega",
+    "en": "On its own Vega rocket"
+   },
+   {
+    "vi": "Đi chung với VINASAT-2 trên Ariane 5",
+    "en": "Together with VINASAT-2 on Ariane 5"
+   },
+   {
+    "vi": "Bằng tên lửa Epsilon từ Uchinoura",
+    "en": "On an Epsilon rocket from Uchinoura"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "CubeSat thả từ ISS có quỹ đạo của trạm (khoảng 400 km, 51,6°) nên chỉ tồn tại vài tháng trước khi rơi vào khí quyển.",
+   "en": "CubeSats released from the ISS share the station's orbit (about 400 km, 51.6°) and re-enter after a few months."
+  }
+ },
+ {
+  "q": {
+   "vi": "NanoDragon được phóng bằng Epsilon-5 ngày 9/11/2021. Kết quả là gì?",
+   "en": "NanoDragon launched on Epsilon-5 on 9 Nov 2021. What happened?"
+  },
+  "options": [
+   {
+    "vi": "Tên lửa thành công và vệ tinh được tách, nhưng trạm mặt đất không liên lạc được",
+    "en": "The rocket succeeded and the satellite separated, but ground stations never made contact"
+   },
+   {
+    "vi": "Tên lửa nổ khi cất cánh",
+    "en": "The rocket exploded at lift-off"
+   },
+   {
+    "vi": "Vệ tinh hoạt động 10 năm",
+    "en": "The satellite worked for 10 years"
+   },
+   {
+    "vi": "Chuyến bay bị hủy",
+    "en": "The flight was cancelled"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "JAXA xác nhận NanoDragon đã tách khỏi tên lửa. Lên quỹ đạo chỉ là bước đầu: vệ tinh còn phải mở nguồn, ổn định tư thế và liên lạc được với mặt đất.",
+   "en": "JAXA confirmed NanoDragon separated from the rocket. Reaching orbit is only the first step: the satellite must still power up, stabilise and talk to the ground."
+  }
+ },
+ {
+  "q": {
+   "vi": "Max-Q của một chuyến Falcon 9 thường xảy ra khi nào?",
+   "en": "When does Max-Q usually occur on a Falcon 9 flight?"
+  },
+  "options": [
+   {
+    "vi": "Khoảng T+1:10, ở độ cao 10–15 km",
+    "en": "Around T+1:10, at 10–15 km"
+   },
+   {
+    "vi": "Ngay lúc cất cánh",
+    "en": "Right at lift-off"
+   },
+   {
+    "vi": "Lúc tách tầng, khoảng 70 km",
+    "en": "At staging, about 70 km"
+   },
+   {
+    "vi": "Lúc tầng 2 tắt máy",
+    "en": "At second-stage cutoff"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "q = ½ρv²: lúc cất cánh v nhỏ, trên cao ρ gần bằng 0. Đỉnh nằm ở giữa, khoảng một phút sau cất cánh (T+1:10 trong lịch trình SpaceX công bố cho chuyến Starlink ngày 2/4/2026).",
+   "en": "q = ½ρv²: at lift-off v is small, high up ρ is almost zero. The peak lies in between, about a minute after lift-off (T+1:10 in SpaceX's published timeline for a 2 April 2026 Starlink flight)."
+  }
+ },
+ {
+  "q": {
+   "vi": "Vì sao chuyến phóng tới ISS có cửa sổ gần như tức thời mỗi ngày?",
+   "en": "Why does a launch to the ISS have an almost instantaneous window each day?"
+  },
+  "options": [
+   {
+    "vi": "Bãi phóng chỉ nằm trong mặt phẳng quỹ đạo của ISS trong khoảnh khắc khi Trái Đất quay",
+    "en": "The site lies in the ISS orbital plane only for a moment as the Earth turns"
+   },
+   {
+    "vi": "ISS chỉ mở cửa đón tàu vài giây",
+    "en": "The ISS opens its hatch for only a few seconds"
+   },
+   {
+    "vi": "Thời tiết thay đổi nhanh",
+    "en": "The weather changes quickly"
+   },
+   {
+    "vi": "Tên lửa không thể chờ trên bệ phóng",
+    "en": "A rocket cannot wait on the pad"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Mặt phẳng quỹ đạo gần như cố định trong không gian, còn bãi phóng quay cùng Trái Đất và chỉ cắt mặt phẳng đó hai lần mỗi ngày. Trễ vài phút là lệch mặt phẳng, mà đổi mặt phẳng rất tốn Δv.",
+   "en": "The orbital plane is nearly fixed in space while the site turns with the Earth and crosses it only twice a day. A few minutes late means the wrong plane, and plane changes cost a lot of Δv."
+  }
+ },
+ {
+  "q": {
+   "vi": "Ngày hôm sau, cửa sổ phóng lên quỹ đạo đồng bộ Mặt Trời mở lúc nào so với hôm nay?",
+   "en": "Next day, when does a Sun-synchronous launch window open compared with today?"
+  },
+  "options": [
+   {
+    "vi": "Gần như cùng giờ đồng hồ",
+    "en": "At almost the same clock time"
+   },
+   {
+    "vi": "Sớm hơn khoảng 23 phút",
+    "en": "About 23 minutes earlier"
+   },
+   {
+    "vi": "Muộn hơn khoảng 1 giờ",
+    "en": "About an hour later"
+   },
+   {
+    "vi": "Không có cửa sổ ngày hôm sau",
+    "en": "There is no window the next day"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Mặt phẳng SSO quay 0,9856° mỗi ngày theo Mặt Trời, nên bãi phóng gặp lại nó vào cùng giờ. Mặt phẳng ISS lùi khoảng 5° mỗi ngày nên cửa sổ đến sớm hơn khoảng 23 phút.",
+   "en": "An SSO plane turns 0.9856° a day with the Sun, so the site meets it again at the same time. The ISS plane drifts back about 5° a day, so its window comes about 23 minutes earlier."
+  }
+ },
+ {
+  "q": {
+   "vi": "Đưa vệ tinh từ LEO 200 km nghiêng 28,5° lên GEO, nên đổi mặt phẳng ở đâu?",
+   "en": "Going from a 200 km LEO inclined 28.5° to GEO, where should the plane change be done?"
+  },
+  "options": [
+   {
+    "vi": "Ở viễn điểm, gộp vào lần đốt tròn hóa",
+    "en": "At apogee, folded into the circularisation burn"
+   },
+   {
+    "vi": "Ở LEO, trước khi đi",
+    "en": "In LEO, before leaving"
+   },
+   {
+    "vi": "Ở giữa đường chuyển",
+    "en": "Halfway along the transfer"
+   },
+   {
+    "vi": "Không cần đổi, GEO nghiêng sẵn 28,5°",
+    "en": "None needed, GEO is already inclined 28.5°"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Δv đổi mặt phẳng tỉ lệ với vận tốc. Ở viễn điểm vệ tinh chỉ chạy 1,6 km/s: gộp vào lần đốt cuối thì tổng cả hành trình là 4,29 km/s, còn bẻ riêng 28,5° ở LEO đã tốn 3,83 km/s, tổng lên 7,76 km/s.",
+   "en": "Plane-change Δv scales with speed. At apogee the satellite moves at only 1.6 km/s: folded into the last burn, the whole trip costs 4.29 km/s, whereas turning 28.5° alone in LEO costs 3.83 km/s, for 7.76 km/s in total."
+  }
+ },
+ {
+  "q": {
+   "vi": "Theo Jones (2018), chi phí mỗi kg lên LEO của Falcon 9 rẻ hơn tàu con thoi khoảng bao nhiêu lần?",
+   "en": "According to Jones (2018), how many times cheaper per kg to LEO is Falcon 9 than the Space Shuttle?"
+  },
+  "options": [
+   {
+    "vi": "Khoảng 23 lần",
+    "en": "About 23 times"
+   },
+   {
+    "vi": "Khoảng 2 lần",
+    "en": "About 2 times"
+   },
+   {
+    "vi": "Khoảng 200 lần",
+    "en": "About 200 times"
+   },
+   {
+    "vi": "Bằng nhau",
+    "en": "The same"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Bảng A1 của Jones: tàu con thoi 61,7 nghìn USD/kg, Falcon 9 2,7 nghìn USD/kg (USD năm 2018, tính khi chở đầy), tức khoảng 23 lần.",
+   "en": "Jones's Table A1: Shuttle 61.7 thousand US$/kg, Falcon 9 2.7 thousand US$/kg (2018 dollars, full payload), about 23 times."
+  }
+ },
+ {
+  "q": {
+   "vi": "Thử nghiệm nào mô phỏng môi trường quỹ đạo (chân không, nóng lạnh luân phiên) chứ không phải lúc phóng?",
+   "en": "Which test simulates the orbital environment (vacuum, hot–cold cycles) rather than the launch?"
+  },
+  "options": [
+   {
+    "vi": "Nhiệt chân không (TVAC)",
+    "en": "Thermal vacuum (TVAC)"
+   },
+   {
+    "vi": "Thử rung",
+    "en": "Vibration"
+   },
+   {
+    "vi": "Thử âm học",
+    "en": "Acoustic"
+   },
+   {
+    "vi": "Thử sốc tách",
+    "en": "Separation shock"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Rung, âm học và sốc tái tạo vài phút phóng; TVAC kiểm tra vệ tinh chịu được chân không và chu kỳ nhiệt trên quỹ đạo.",
+   "en": "Vibration, acoustic and shock tests reproduce the minutes of launch; TVAC checks that the satellite survives vacuum and thermal cycling in orbit."
+  }
+ }
+]

@@ -1,0 +1,146 @@
+[
+ {
+  "id": "delta-v",
+  "vi": "Độ thay đổi vận tốc (Δv)",
+  "en": "Delta-v (Δv)",
+  "def": {
+   "vi": "Tổng lượng thay đổi vận tốc một tên lửa hay vệ tinh tạo ra bằng động cơ, tính bằng km/s. Mọi nhiệm vụ đều có một \"ngân sách Δv\".",
+   "en": "Total change of velocity an engine can produce, in km/s. Every mission has a \"Δv budget\"."
+  }
+ },
+ {
+  "id": "rocket-equation",
+  "vi": "Phương trình tên lửa Tsiolkovsky",
+  "en": "Tsiolkovsky rocket equation",
+  "def": {
+   "vi": "Δv = Isp · g₀ · ln(m₀ / m_f): Δv chỉ tăng theo logarit của tỉ số khối lượng lúc đầu và lúc hết nhiên liệu.",
+   "en": "Δv = Isp · g₀ · ln(m₀ / m_f): Δv grows only with the logarithm of the initial-to-final mass ratio."
+  }
+ },
+ {
+  "id": "specific-impulse",
+  "vi": "Xung lực riêng (Isp)",
+  "en": "Specific impulse (Isp)",
+  "def": {
+   "vi": "Hiệu suất nhiên liệu của động cơ, tính bằng giây: Isp · g₀ là vận tốc khí phụt hiệu dụng. Nhiên liệu rắn khoảng 250–300 s, hydro–oxy lỏng khoảng 450 s.",
+   "en": "Propellant efficiency of an engine in seconds: Isp · g₀ is the effective exhaust velocity. Solid motors are about 250–300 s, liquid hydrogen–oxygen about 450 s."
+  }
+ },
+ {
+  "id": "staging",
+  "vi": "Tách tầng",
+  "en": "Staging",
+  "def": {
+   "vi": "Bỏ lại thùng chứa và động cơ đã hết nhiên liệu để tầng sau không phải tăng tốc khối lượng chết.",
+   "en": "Dropping empty tanks and engines so the next stage does not have to accelerate dead mass."
+  }
+ },
+ {
+  "id": "gravity-loss",
+  "vi": "Tổn thất trọng lực",
+  "en": "Gravity loss",
+  "def": {
+   "vi": "Phần Δv mất đi vì động cơ phải đẩy ngược trọng lực trong lúc tên lửa còn bay lên gần thẳng đứng. Cùng với lực cản không khí, tổn thất thường 1,5–2 km/s.",
+   "en": "The Δv spent holding the rocket up against gravity while it still climbs steeply. With air drag, losses are typically 1.5–2 km/s."
+  }
+ },
+ {
+  "id": "launch-azimuth",
+  "vi": "Hướng phóng (azimuth)",
+  "en": "Launch azimuth",
+  "def": {
+   "vi": "Hướng bay của tên lửa so với phương bắc. Với vĩ độ φ và độ nghiêng i: sin(hướng) = cos i / cos φ, nên không thể phóng thẳng vào quỹ đạo có i nhỏ hơn φ.",
+   "en": "Flight direction measured from north. From latitude φ to inclination i: sin(azimuth) = cos i / cos φ, so an orbit with i below φ cannot be reached directly."
+  }
+ },
+ {
+  "id": "gto",
+  "vi": "Quỹ đạo chuyển tiếp địa tĩnh (GTO)",
+  "en": "Geostationary transfer orbit (GTO)",
+  "def": {
+   "vi": "Quỹ đạo elip có cận điểm vài trăm km và viễn điểm ở độ cao địa tĩnh; vệ tinh tự đốt động cơ ở viễn điểm để vào quỹ đạo địa tĩnh.",
+   "en": "Ellipse with a perigee of a few hundred km and apogee at geostationary height; the satellite fires its own engine at apogee to reach GEO."
+  }
+ },
+ {
+  "id": "rideshare",
+  "vi": "Phóng đi chung (rideshare)",
+  "en": "Rideshare launch",
+  "def": {
+   "vi": "Nhiều vệ tinh của nhiều chủ sở hữu cùng một chuyến tên lửa để chia chi phí; vệ tinh phụ phải chấp nhận quỹ đạo gần với quỹ đạo của tải chính.",
+   "en": "Several owners' satellites share one launcher to split the cost; secondary payloads accept an orbit close to the primary's."
+  }
+ },
+ {
+  "id": "cubesat",
+  "vi": "CubeSat",
+  "en": "CubeSat",
+  "def": {
+   "vi": "Vệ tinh nhỏ chuẩn hóa theo khối 10 × 10 × 10 cm (1U, khoảng 1–1,3 kg); 3U là ba khối nối nhau. Thường được thả từ bộ phóng như J-SSOD trên ISS.",
+   "en": "Small satellite standardised in 10 × 10 × 10 cm units (1U, about 1–1.3 kg); 3U is three units in a row. Often released from deployers such as J-SSOD on the ISS."
+  }
+ },
+ {
+  "id": "launch-window",
+  "vi": "Cửa sổ phóng",
+  "en": "Launch window",
+  "def": {
+   "vi": "Khoảng thời gian bãi phóng nằm đúng dưới mặt phẳng quỹ đạo cần đạt. Với quỹ đạo đồng bộ Mặt Trời, cửa sổ lặp lại mỗi ngày vào cùng một giờ.",
+   "en": "The time span when the launch site lies under the target orbit plane. For a Sun-synchronous orbit it recurs daily at the same time."
+  }
+ },
+ {
+  "id": "launch-max-q",
+  "vi": "Max-Q (áp suất động cực đại)",
+  "en": "Max-Q (maximum dynamic pressure)",
+  "def": {
+   "vi": "Thời điểm áp suất động q = ½ρv² lên thân tên lửa lớn nhất, thường khoảng một phút sau cất cánh ở độ cao 10–15 km: không khí còn đặc mà tên lửa đã nhanh. Tải kết cấu lớn nhất nên nhiều tên lửa giảm ga quanh lúc này.",
+   "en": "The moment the dynamic pressure q = ½ρv² on the vehicle peaks, usually about a minute after lift-off at 10–15 km: the air is still dense and the rocket is already fast. Structural loads peak, so many rockets throttle down around it."
+  }
+ },
+ {
+  "id": "launch-gravity-turn",
+  "vi": "Quay theo trọng lực (gravity turn)",
+  "en": "Gravity turn",
+  "def": {
+   "vi": "Cách bay lên: cất cánh thẳng đứng, nghiêng một góc nhỏ rồi giữ lực đẩy dọc theo vận tốc để trọng lực tự bẻ cong đường bay về phương ngang. Góc tấn gần 0 nên tải ngang nhỏ khi khí quyển còn đặc.",
+   "en": "Ascent technique: rise vertically, pitch over by a small angle, then keep thrust along the velocity so gravity bends the path towards horizontal. The angle of attack stays near zero, keeping side loads small in the dense lower air."
+  }
+ },
+ {
+  "id": "launch-hohmann",
+  "vi": "Chuyển quỹ đạo Hohmann",
+  "en": "Hohmann transfer",
+  "def": {
+   "vi": "Cách chuyển giữa hai quỹ đạo tròn đồng phẳng tốn ít Δv nhất (khi tỉ số bán kính dưới khoảng 11,9): nửa elip tiếp xúc cả hai quỹ đạo, một lần đốt ở cận điểm và một lần ở viễn điểm.",
+   "en": "The lowest-Δv way between two coplanar circular orbits (for radius ratios below about 11.9): half an ellipse tangent to both, one burn at perigee and one at apogee."
+  }
+ },
+ {
+  "id": "launch-plane-change",
+  "vi": "Đổi mặt phẳng quỹ đạo",
+  "en": "Orbital plane change",
+  "def": {
+   "vi": "Xoay vectơ vận tốc một góc Δi để đổi độ nghiêng; riêng phần xoay tốn 2v·sin(Δi/2). Vì tỉ lệ với v, nên làm ở nơi vệ tinh chậm nhất (viễn điểm GTO) và gộp với lần đốt tròn hóa.",
+   "en": "Turning the velocity vector by Δi to change inclination; the turn alone costs 2v·sin(Δi/2). Being proportional to v, it is done where the satellite is slowest (GTO apogee) and combined with the circularisation burn."
+  }
+ },
+ {
+  "id": "launch-tvac",
+  "vi": "Thử nghiệm nhiệt chân không (TVAC)",
+  "en": "Thermal-vacuum test (TVAC)",
+  "def": {
+   "vi": "Đặt vệ tinh trong buồng chân không và cho nhiệt độ lên xuống nhiều chu kỳ giữa giới hạn nóng và lạnh, để kiểm tra nó hoạt động đúng trong môi trường quỹ đạo trước khi phóng.",
+   "en": "Cycling the satellite between hot and cold limits inside a vacuum chamber to check that it works in the orbital environment before launch."
+  }
+ },
+ {
+  "id": "launch-reusable",
+  "vi": "Thu hồi và tái sử dụng tầng 1",
+  "en": "First-stage recovery and reuse",
+  "def": {
+   "vi": "Tầng 1 giữ lại một phần nhiên liệu để quay đầu, đốt hãm khi vào lại khí quyển và hạ cánh trên bãi đáp hoặc sà lan, rồi được tân trang để bay lại. Đổi lại, tải trọng tối đa giảm.",
+   "en": "The first stage keeps some propellant to turn back, slow down for re-entry and land on a pad or a droneship, then is refurbished to fly again. The price is a lower maximum payload."
+  }
+ }
+]

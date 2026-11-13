@@ -1,0 +1,9 @@
+{
+ "name": "VNREDSAT 1",
+ "line1": "1 39160U 13021B   26308.46606966  .00000535  00000+0  10880-3 0  9990",
+ "line2": "2 39160  97.8913 356.3476 0001582  94.0242 266.1142 14.64781302720826",
+ "provenance": {
+  "source": "https://celestrak.org/NORAD/elements/gp.php?CATNR=39160&FORMAT=TLE",
+  "retrieved": "2026-11-05T01:39:38+00:00"
+ }
+}

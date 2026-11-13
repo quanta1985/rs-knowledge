@@ -1,5 +1,5 @@
 /**
- * Lab 7 — Ảnh tổng hợp không mây / Cloud-free composite · Sổ tay Viễn thám & GIS
+ * Lab 12 — Ảnh tổng hợp không mây / Cloud-free composite · Sổ tay Viễn thám & GIS
  * Dán vào https://code.earthengine.google.com và bấm Run.
  * Paste into https://code.earthengine.google.com and press Run.
  *

@@ -1,0 +1,19 @@
+---
+// Display formula rendered by KaTeX at build time (no client JS).
+// `where` explains the symbols, one per line: "TeX :: description". It is a plain attribute string on purpose:
+// JSX attribute strings keep backslashes; a JS array literal would eat them ('\Delta' becomes 'Delta').
+import katex from 'katex';
+import 'katex/dist/katex.min.css';
+
+interface Props { tex: string; label?: string; where?: string }
+const { tex, label, where = '' } = Astro.props;
+const rows = where.split('\n').map((l) => l.split(' :: ')).filter((r) => r.length === 2).map(([a, b]) => [a.trim(), b.trim()]);
+const html = katex.renderToString(tex, { displayMode: true, throwOnError: true, output: 'html' });
+const sym = (s: string) => katex.renderToString(s, { throwOnError: true, output: 'html' });
+---
+<figure class="formula-card">
+  {label && <figcaption class="mono-label">{label}</figcaption>}
+  <div class="formula-math" set:html={html} />
+  {rows.length > 0 && <dl class="formula-where">{rows.map(([s, d]) => <><dt set:html={sym(s)} /><dd>{d}</dd></>)}</dl>}
+  <slot />
+</figure>

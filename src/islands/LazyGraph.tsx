@@ -29,20 +29,20 @@ export default function LazyGraph({ lang }: { lang: Lang }) {
   return (
     <div className="dark-card">
       <div>
-        <pre style={{ margin: '0 0 10px', background: '#070c17', border: '1px solid rgba(148,163,184,.22)', borderRadius: 8, padding: '10px 12px', fontSize: '0.78rem', overflowX: 'auto' }}>
-          {STEPS.map((s, i) => <code key={i} style={{ display: 'block', background: 'none', color: i < k ? (i === k - 1 ? '#4fc3cd' : '#e2e8f0') : '#475569' }}>{s[code]}</code>)}
+        <pre style={{ margin: '0 0 10px', background: 'var(--st-panel)', border: '1px solid var(--st-line)', borderRadius: 8, padding: '10px 12px', fontSize: '0.78rem', overflowX: 'auto' }}>
+          {STEPS.map((s, i) => <code key={i} style={{ display: 'block', background: 'none', color: i < k ? (i === k - 1 ? 'var(--st-accent)' : 'var(--st-fg)') : 'var(--st-line)' }}>{s[code]}</code>)}
         </pre>
         <svg className="chart" viewBox={`0 0 ${W} ${STEPS.length * (BH + GAP)}`} width="100%" role="img" aria-label={T.fig}>
           <title>{T.fig}</title>
           {done.map((s, i) => {
             const y = i * (BH + GAP), last = s.computed;
             return <g key={i}>
-              {i > 0 && <line x1={W / 2} x2={W / 2} y1={y - GAP} y2={y} stroke="#94a3b8" markerEnd="url(#lz)" />}
-              <rect x={W / 2 - 150} y={y} width={300} height={BH} rx={8} fill={last ? 'rgba(227,178,90,.18)' : 'rgba(79,195,205,.12)'} stroke={last ? '#e3b25a' : '#4fc3cd'} />
-              <text x={W / 2} y={y + BH / 2 + 4} textAnchor="middle" style={{ fill: '#e2e8f0' }}>{s.node}</text>
+              {i > 0 && <line x1={W / 2} x2={W / 2} y1={y - GAP} y2={y} stroke="var(--st-muted)" markerEnd="url(#lz)" />}
+              <rect x={W / 2 - 150} y={y} width={300} height={BH} rx={8} fill={last ? 'rgba(227,178,90,.18)' : 'rgba(79,195,205,.12)'} stroke={last ? 'var(--st-warn)' : 'var(--st-accent)'} />
+              <text x={W / 2} y={y + BH / 2 + 4} textAnchor="middle" style={{ fill: 'var(--st-fg)' }}>{s.node}</text>
             </g>;
           })}
-          <defs><marker id="lz" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L10,5L0,10z" fill="#94a3b8" /></marker></defs>
+          <defs><marker id="lz" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L10,5L0,10z" fill="var(--st-muted)" /></marker></defs>
         </svg>
       </div>
       <div className="hud-static">

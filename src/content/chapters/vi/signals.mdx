@@ -1,0 +1,720 @@
+---
+title: Truyền tín hiệu & trạm mặt đất
+n: 5
+summary: Một vệ tinh viễn thám chụp ảnh cả ngày nhưng chỉ nói chuyện được với trạm ở Hà Nội vài lượt, mỗi lượt khoảng mười phút. Chương này đi từ băng tần, decibel, anten và nhiễu tới ngân sách đường truyền, mưa nhiệt đới, điều chế và giới hạn Shannon, đa truy nhập, Doppler, cách một trạm mặt đất tải dữ liệu ảnh xuống, và vì sao tín hiệu GNSS yếu hơn cả nhiễu mà điện thoại vẫn bắt được.
+objectives:
+  - Biết các băng tần L, S, C, X, Ku, Ka dùng cho việc gì, vì sao, và ai phân chia tần số (ITU, Cục Tần số vô tuyến điện).
+  - Đổi qua lại tỉ số, dB, dBW, dBm; tính độ lợi chảo, độ rộng búp, EIRP; giải thích anten mảng pha và phân cực.
+  - Tính suy hao không gian tự do, nhiệt độ nhiễu, G/T và cộng chúng thành ngân sách đường truyền; đọc C/N0, Eb/N0, Es/N0 và biên dự trữ.
+  - Ước lượng suy hao do mưa ở Việt Nam theo ITU-R, hiểu điều chế, mã hóa, giới hạn Shannon và điều chế thích ứng (ACM).
+  - Phân biệt FDMA, TDMA, CDMA, OFDMA và tái sử dụng tần số bằng búp sóng điểm.
+  - Tính lượt bay qua, Doppler, độ trễ và lượng dữ liệu tải xuống mỗi ngày của một trạm mặt đất; biết vai trò của laser EDRS.
+updated: "2026-11-06"
+---
+import Term from '../../../components/Term.astro';
+import Depth from '../../../components/Depth.astro';
+import Figure from '../../../components/Figure.astro';
+import Formula from '../../../components/Formula.astro';
+import Stats from '../../../components/Stats.astro';
+import Steps from '../../../components/Steps.astro';
+import LabLinks from '../../../components/LabLinks.astro';
+import Note from '../../../components/Note.astro';
+import Tiles from '../../../components/Tiles.astro';
+import Predict from '../../../islands/Predict.tsx';
+import SignalHero from '../../../islands/SignalHero.tsx';
+import SignalBands from '../../../islands/SignalBands.tsx';
+import SignalDb from '../../../islands/SignalDb.tsx';
+import SignalArray from '../../../islands/SignalArray.tsx';
+import SignalLink from '../../../islands/SignalLink.tsx';
+import SignalRain from '../../../islands/SignalRain.tsx';
+import SignalConstellation from '../../../islands/SignalConstellation.tsx';
+import SignalShannon from '../../../islands/SignalShannon.tsx';
+import SignalAccess from '../../../islands/SignalAccess.tsx';
+import SignalBeams from '../../../islands/SignalBeams.tsx';
+import SignalPasses from '../../../islands/SignalPasses.tsx';
+import SignalDoppler from '../../../islands/SignalDoppler.tsx';
+import SignalVolume from '../../../islands/SignalVolume.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/signals.json';
+
+<Figure
+  title="Hình 5.1 — Một đường truyền vệ tinh từ đầu đến cuối: công suất, suy hao, mưa và biên dự trữ"
+  try="Với 'LEO băng X', kéo góc ngẩng từ 90° xuống 5°: suy hao không gian tự do tăng bao nhiêu dB? Chọn 'GEO băng Ka' rồi bật mưa 0,01 %: biên dự trữ còn không? Thu nhỏ chảo xuống 0,3 m, hoặc tăng tốc độ dữ liệu, và xem thanh nào trong bảng thác thay đổi."
+  source="Sơ đồ minh họa, không theo tỉ lệ. Ngân sách: FSPL, độ lợi chảo, C/N0, nhiễu do mưa ΔT = 275 K·(1 − 10^(−A/10)) (src/lib/signals.ts). Mưa: ITU-R P.618-13 cho Hà Nội, tính bằng ITU-Rpy 0.4 (scripts/data/export_signals.py); độ cao lớp mưa ITU-R P.839-4. Thông số bốn kịch bản là giá trị minh họa điển hình, không phải thông số công bố của một vệ tinh cụ thể. Eb/N0 cần: DVB-S2 QPSK 3/4 2,3 dB (ETSI EN 302 307-1, Bảng 13)."
+>
+  <SignalHero client:visible lang="vi" />
+</Figure>
+
+Hình trên là toàn bộ chương thu gọn trong một màn hình: một vệ tinh phát, tín hiệu đi qua khoảng không, tầng điện ly, lớp mưa, rồi rơi vào một chảo thu có nhiễu riêng. Mỗi chặng cộng hoặc trừ một số decibel. Cuối cùng còn dương thì liên lạc được. Các mục dưới đây mở từng thanh trong bảng thác đó ra.
+
+## 5.1 Sóng vô tuyến và băng tần
+
+Mọi liên lạc với vệ tinh đi bằng sóng điện từ, nhanh bằng ánh sáng. Bước sóng và tần số liên hệ với nhau qua:
+
+<Formula label="Bước sóng" tex="\lambda = \frac{c}{f}, \qquad c = 299\,792\,458\ \text{m/s}" where="
+\lambda :: bước sóng (m)
+f :: tần số (Hz)
+" />
+
+Ở 437 MHz (vô tuyến UHF của CubeSat) λ = 68,6 cm; ở 1,575 GHz (GPS L1) 19,0 cm; ở 2,2 GHz 13,6 cm; ở 8,1 GHz 3,7 cm; ở 12 GHz 2,5 cm; ở 30 GHz chỉ còn 1,0 cm. Kỹ sư gọi các khoảng tần số bằng chữ cái (<Term id="frequency-band">băng tần</Term>, theo chuẩn IEEE 521), mỗi băng có "tính cách" riêng:
+
+| Băng | Tần số (GHz) | Bước sóng | Dùng cho | Khi trời mưa |
+|---|---|---|---|---|
+| UHF, L | 0,3–2 | 15–100 cm | Vệ tinh nhỏ, GNSS (Chương 7), di động vệ tinh, SAR băng L | Gần như không ảnh hưởng |
+| S | 2–4 | 7,5–15 cm | Điều khiển vệ tinh (TT&C), SAR băng S | Không đáng kể |
+| C | 4–8 | 3,8–7,5 cm | Truyền hình, trung kế qua vệ tinh địa tĩnh ở vùng mưa nhiều; radar Sentinel-1 | Rất nhỏ |
+| X | 8–12 | 2,5–3,8 cm | Tải ảnh viễn thám xuống (8025–8400 MHz), radar băng X | Nhỏ |
+| Ku | 12–18 | 1,7–2,5 cm | Truyền hình trực tiếp tới nhà, VSAT, đầu cuối Internet vệ tinh | Vài dB đến hơn 10 dB ở nhiệt đới |
+| Ka | 27–40 | 0,75–1,1 cm | Vệ tinh thông lượng cao, trạm gateway | Rất lớn |
+| V, W | 40–110 | 2,7–7,5 mm | Gateway thế hệ mới (băng E 71–86 GHz), liên kết giữa vệ tinh | Rất lớn, cả hơi nước |
+| Quang học | ≈ 194 000 (1550 nm) | µm | Laser giữa vệ tinh (EDRS), downlink quang | Mây chặn hoàn toàn |
+
+<Figure
+  title="Hình 5.2 — Các băng tần trên trục tần số và những dải vệ tinh dùng thật"
+  try="Bấm từng băng: băng nào suy hao do mưa ở Hà Nội vượt 1 dB? Tìm dải 'Ảnh EO băng X' và 'Ku truyền hình': vì sao ảnh vệ tinh không tải xuống ở băng Ku? Để ý hai vạch hấp thụ của hơi nước (22 GHz) và oxy (60 GHz)."
+  source="Tên băng: IEEE Std 521-2019. Dải tần: Thể lệ Vô tuyến điện ITU (EESS 8025–8400 MHz; vận hành vũ trụ băng S 2025–2110 / 2200–2290 MHz); GPS L1 1575,42 MHz (IS-GPS-200); Sentinel-1 5,405 GHz (ESA). Suy hao mưa: ITU-R P.618-13, Hà Nội, 0,1 % năm, góc ngẩng 45°, tâm băng (scripts/data/export_signals.py)."
+>
+  <SignalBands client:visible lang="vi" />
+</Figure>
+
+Quy luật chung: **tần số càng cao, càng nhiều băng thông** (nên càng nhiều Mbit/s), anten cùng cỡ càng hội tụ mạnh, nhưng **càng sợ mưa**. Vệ tinh VINASAT-1 của Việt Nam (quỹ đạo địa tĩnh 132°E) mang 8 bộ phát đáp băng C và 12 bộ băng Ku; VINASAT-2 (131,8°E) mang băng Ku.
+
+Trong viễn thông vệ tinh người ta hay nói theo dải cụ thể chứ không theo ranh giới IEEE. "Ku" thương mại gồm đường xuống 10,7–12,75 GHz và đường lên 13,75–14,5 GHz; "Ka" thương mại là đường xuống 17,7–20,2 GHz và đường lên 27,5–30 GHz. **Đường lên thường dùng dải cao hơn đường xuống.** Vệ tinh thiếu điện nên được dành dải thấp, nơi mưa và khí quyển làm suy hao ít hơn và bộ khuếch đại trên vệ tinh hiệu quả hơn; trạm mặt đất dư công suất nên gánh dải cao.
+
+### Ai phân chia tần số: ITU và Việt Nam
+
+Sóng vô tuyến không dừng ở biên giới, nên phổ tần được chia theo luật quốc tế:
+
+<Tiles
+  items={[
+    { t: 'ITU-R', d: 'Thể lệ Vô tuyến điện: bảng phân chia băng tần cho từng nghiệp vụ (cố định qua vệ tinh, thám sát Trái Đất, định vị…)' },
+    { t: '3 Vùng ITU', d: 'Thế giới chia ba vùng; Việt Nam thuộc Vùng 3 (châu Á – Thái Bình Dương)' },
+    { t: 'Hồ sơ và phối hợp', d: 'Mỗi hệ thống nộp hồ sơ, phối hợp với hệ thống có trước để tránh can nhiễu, rồi đăng ký vào Sổ đăng ký tần số quốc tế' },
+    { t: 'Vị trí GEO', d: 'Khe quỹ đạo địa tĩnh và tần số đi kèm là tài nguyên khan hiếm; VINASAT-1 ở 132°E là kết quả phối hợp nhiều năm' },
+    { t: 'Giới hạn EPFD', d: 'Điều 22: chòm vệ tinh phi địa tĩnh (Starlink) không được gây nhiễu quá mức cho vệ tinh GEO' },
+    { t: 'Ở Việt Nam', d: 'Cục Tần số vô tuyến điện (Bộ Khoa học và Công nghệ) cấp phép sử dụng tần số' },
+  ]}
+  caption="Chuỗi quản lý phổ tần, từ quốc tế tới quốc gia."
+/>
+
+Một ví dụ gần đây: ngày 13/2/2026 Cục Tần số vô tuyến điện cấp giấy phép sử dụng tần số cho Starlink tại Việt Nam, giai đoạn đầu gồm 4 trạm cổng (gateway) và tối đa 600 000 thiết bị đầu cuối (VnEconomy, 15/2/2026).
+
+<Note kind="key">
+
+<mark class="key">Chọn băng tần là đổi băng thông lấy độ bền với thời tiết.</mark> Băng thấp (L, S, C) bền nhưng chật; băng cao (Ku, Ka, V, quang) rộng nhưng sợ mưa và mây. Và không ai được tự ý phát: mọi tần số đều phải được ITU và cơ quan quốc gia cho phép.
+
+</Note>
+
+## 5.2 Ngôn ngữ decibel
+
+Tín hiệu vệ tinh trải qua những hệ số cực lớn và cực nhỏ: anten khuếch đại hàng chục nghìn lần, đường đi làm yếu đi 10²⁰ lần. Viết bằng <Term id="decibel">decibel</Term>, phép nhân trở thành phép cộng:
+
+<Formula label="Decibel" tex="x_{\text{dB}} = 10\log_{10}\frac{P_2}{P_1}, \qquad P_{\text{dBW}} = 10\log_{10}\frac{P}{1\ \text{W}}, \qquad P_{\text{dBm}} = P_{\text{dBW}} + 30" where="
+P_1,\ P_2 :: hai công suất cần so sánh
+P_{\text{dBW}} :: công suất so với 1 W
+P_{\text{dBm}} :: công suất so với 1 mW
+" />
+
+| Đơn vị | Nghĩa | Ví dụ |
+|---|---|---|
+| dB | Tỉ số công suất | +3 dB ≈ ×2; +10 dB = ×10; −20 dB = ×1/100 |
+| dBW, dBm | Công suất so với 1 W hoặc 1 mW | 100 W = 20 dBW = 50 dBm; 1 mW = −30 dBW |
+| dBi | Độ lợi anten so với anten đẳng hướng | Chảo 0,6 m ở 12 GHz: 35,3 dBi |
+| dBK, dB/K | Nhiệt độ nhiễu; tỉ số G/T | 150 K = 21,8 dBK |
+| dB·Hz | Băng thông hoặc C/N0 | 1 MHz = 60,0 dB·Hz; 36 MHz = 75,6 dB·Hz |
+
+Mẹo nhẩm: tách số dB thành **phần chục** (mỗi 10 dB là một số 0) và **phần lẻ** (3 dB ≈ ×2, 6 dB ≈ ×4, 7 dB ≈ ×5). 33 dB = 30 + 3 dB = ×1000 × 2 = ×2000.
+
+<Predict client:visible lang="vi"
+  title="2000 W là bao nhiêu dBW?"
+  q="Một trạm mặt đất phát 2000 W lên vệ tinh. Viết công suất đó bằng dBW."
+  slider={{ min: 0, max: 60, step: 0.5, unit: 'dBW' }} answer={33} tol={1}
+  why="2000 = 1000 × 2, nên 30 dB + 3 dB = 33 dBW (chính xác 33,01 dBW), tức 63 dBm. Đổi sang dB là để các bước sau chỉ còn cộng trừ." />
+
+<Figure
+  title="Hình 5.3 — Thang decibel của một đường truyền vệ tinh"
+  try="Kéo tới +33 dB và đọc mẹo nhẩm. Bấm −205,5: tỉ số là bao nhiêu? So mốc 'GPS tới mặt đất' với mốc '1 mW': tín hiệu GPS yếu hơn 1 mW bao nhiêu lần?"
+  source="Mốc tính bằng chính công thức của chương (src/lib/signals.ts): độ lợi chảo η = 0,6; FSPL LEO 786 km ở thiên đỉnh, 8,1 GHz; FSPL Hà Nội – VINASAT-1 (36 975 km), 12 GHz; k = 1,380649 × 10⁻²³ J/K. Công suất GPS L1 C/A tối thiểu ở mặt đất −158,5 dBW: IS-GPS-200."
+>
+  <SignalDb client:visible lang="vi" />
+</Figure>
+
+<Note kind="myth">
+
+"Hai máy phát 10 dBW cộng lại thành 20 dBW." Sai: cộng dB là **nhân** công suất. Hai máy 10 W cộng lại 20 W, tức 13 dBW (tăng 3 dB). Chỉ cộng dB khi một đại lượng đi qua một chuỗi khuếch đại hoặc suy hao nối tiếp.
+
+</Note>
+
+<Note kind="key">
+
+Một đường truyền vô tuyến là **một phép cộng dB**: công suất phát + độ lợi anten − suy hao + độ lợi anten thu − nhiễu. Nhớ được câu này là đọc được mọi bảng ngân sách đường truyền.
+
+</Note>
+
+## 5.3 Anten: dồn năng lượng vào một hướng
+
+Anten đẳng hướng (lý tưởng) tỏa đều ra mọi hướng. Anten thật dồn năng lượng vào một búp hẹp. Chảo parabol gom sóng như gương lõm gom ánh sáng. <Term id="antenna-gain">Độ lợi</Term> và độ rộng búp nửa công suất của chảo đường kính D:
+
+<Formula label="Độ lợi và độ rộng búp chảo parabol" tex="G = \eta\left(\frac{\pi D}{\lambda}\right)^2, \qquad \theta_{3\text{dB}} \approx 70\,\frac{\lambda}{D}\ (^\circ)" where="
+G :: độ lợi (lần); đổi sang dBi bằng 10 log10 G
+\eta :: hiệu suất khẩu độ, thường 0,55–0,7
+D :: đường kính chảo (m)
+\theta_{3\text{dB}} :: độ rộng búp mà công suất còn một nửa
+" />
+
+Độ lợi tăng theo bình phương tần số khi giữ nguyên chảo, búp hẹp lại tương ứng. Vì vậy chảo băng Ku nhỏ hơn chảo băng C cho cùng hiệu năng, nhưng phải hướng chính xác hơn. Chảo truyền hình gia đình 0,6 m ở 12 GHz cho 35,3 dBi, búp rộng 2,9°; chảo 5,4 m của trạm thu ảnh ở 8,1 GHz cho 51,0 dBi, búp chỉ 0,48°; chảo 13 m cho 58,6 dBi.
+
+<div class="worked">
+
+#### Ví dụ: chảo 1,2 m băng Ku
+
+1. λ ở 12 GHz = 2,5 cm. G = 0,6 × (π × 1,2 / 0,025)² ≈ 13 700 lần, tức **41,4 dBi**.
+2. Độ rộng búp ≈ 70 × 0,025 / 1,2 = **1,46°**.
+3. Nếu chảo lệch 0,73° (nửa búp), tín hiệu đã giảm **3 dB**, mất một nửa công suất. Gió làm rung chảo vài phần mười độ đã đủ thấy.
+
+</div>
+
+<Predict client:visible lang="vi"
+  title="Gấp đôi đường kính chảo thì được bao nhiêu dB?"
+  q="Thay chảo 1,2 m bằng chảo 2,4 m, cùng tần số và hiệu suất. Độ lợi tăng bao nhiêu?"
+  options={['+3 dB', '+6 dB', '+12 dB', 'Gấp đôi số dBi']} answer={1}
+  why="Độ lợi tỉ lệ với diện tích chảo, tức D². Gấp đôi D là gấp bốn diện tích: 10·log10(4) = +6,02 dB. Cái giá: búp sóng hẹp một nửa, nên chảo lớn phải bám vệ tinh chính xác hơn." />
+
+Phía phát, đại lượng quan trọng là <Term id="eirp">EIRP</Term> (công suất bức xạ đẳng hướng tương đương), "độ sáng" của máy phát theo hướng người nhận:
+
+<Formula label="EIRP" tex="\mathrm{EIRP}_{\text{dBW}} = P_t\,[\text{dBW}] + G_t\,[\text{dBi}]" where="
+P_t :: công suất đưa vào anten phát
+G_t :: độ lợi anten phát
+" />
+
+Vệ tinh 10 W với anten 6 dBi có EIRP 16 dBW, như một anten đẳng hướng phát 40 W theo hướng chính. Kịch bản truyền hình băng Ku ở Hình 5.1 dùng EIRP 52 dBW (giá trị minh họa).
+
+### Anten mảng pha
+
+Thay vì một chảo xoay cơ khí, <Term id="signals-phased-array">anten mảng pha</Term> gồm hàng trăm đến hàng nghìn phần tử nhỏ cùng phát một tín hiệu nhưng lệch pha nhau một chút. Sóng cộng dồn ở hướng mong muốn và triệt tiêu ở hướng khác. Muốn lái búp lệch góc θ₀ khỏi pháp tuyến, hai phần tử cạnh nhau cách d phải lệch pha:
+
+<Formula label="Lái búp sóng mảng pha" tex="\Delta\varphi = \frac{2\pi d \sin\theta_0}{\lambda}" where="
+d :: khoảng cách giữa hai phần tử
+\theta_0 :: góc lái so với pháp tuyến của tấm anten
+" />
+
+<Figure
+  title="Hình 5.4 — Lái búp sóng anten mảng pha và búp giả"
+  try="Với 16 phần tử cách λ/2, lái từ 0° sang 60°: búp rộng ra bao nhiêu, độ lợi giảm bao nhiêu? Tăng khoảng cách lên 1 λ rồi lái 30°: búp giả xuất hiện ở đâu? Tăng số phần tử từ 8 lên 32."
+  source="Hệ số mảng của mảng tuyến tính đều, phần tử đẳng hướng, biên độ đều (src/lib/signals.ts: arrayFactorDb, gratingLobesDeg); độ rộng búp ≈ 0,886·λ/(N·d·cos θ₀). Sơ đồ 1 chiều; anten thật là mảng 2 chiều."
+>
+  <SignalArray client:visible lang="vi" />
+</Figure>
+
+- **Khoảng cách phần tử thường ≤ λ/2.** Rộng hơn, sẽ có những hướng khác mà các phần tử cũng cùng pha: <Term id="signals-grating-lobe">búp giả</Term> mạnh ngang búp chính, phát năng lượng đi sai chỗ. Ở 12 GHz, λ/2 = 1,25 cm.
+- **Lái búp điện tử trong vài micro giây**, không có bộ phận chuyển động, và tạo được nhiều búp cùng lúc.
+- **Nhược điểm:** lái càng xa pháp tuyến, diện tích hiệu dụng giảm theo cos θ₀ (ở 60° mất 3,0 dB) và búp rộng gấp đôi (với 16 phần tử: 6,3° ở pháp tuyến, 12,7° ở 60°). Mảng pha cũng tốn điện và đắt; chip tạo búp tích hợp giá rẻ là thứ đưa nó tới đầu cuối của người tiêu dùng.
+
+### Phân cực
+
+Sóng có thể **phân cực tuyến tính** (ngang hoặc đứng) hoặc **phân cực tròn** (quay phải RHCP, quay trái LHCP). Hai phân cực trực giao cho phép dùng lại cùng một tần số hai lần. Ở tần số thấp (L, S), tầng điện ly làm xoay mặt phẳng phân cực tuyến tính (hiệu ứng Faraday), nên GNSS dùng phân cực tròn RHCP: máy thu không cần biết sóng đã xoay bao nhiêu. Truyền hình băng Ku thường dùng phân cực tuyến tính, và người lắp chảo phải xoay đầu thu (LNB) cho khớp. Ở băng Ku, Ka, giọt mưa lớn bị dẹt khi rơi nên làm **khử phân cực**: một phần năng lượng chuyển sang phân cực kia, gây nhiễu cho kênh dùng chung tần số.
+
+<Note kind="key">
+
+Anten không tạo ra năng lượng, nó chỉ **dồn năng lượng vào một hướng**. Chảo to hơn hoặc tần số cao hơn cho búp hẹp hơn và độ lợi lớn hơn, đổi lại phải hướng chính xác hơn; mảng pha thì lái búp bằng pha thay vì bằng động cơ.
+
+</Note>
+
+## 5.4 Suy hao không gian tự do
+
+Rời anten, năng lượng loang trên những mặt cầu ngày càng lớn, mật độ giảm theo 1/d². Tính cho anten thu đẳng hướng (diện tích hiệu dụng λ²/4π), ta có <Term id="fspl">suy hao không gian tự do</Term>:
+
+<Formula label="Suy hao không gian tự do (FSPL)" tex="L_{fs} = \left(\frac{4\pi d}{\lambda}\right)^2 \;\Rightarrow\; L_{fs}\,[\text{dB}] = 20\log_{10} d_{\text{km}} + 20\log_{10} f_{\text{GHz}} + 92{,}45" where="
+d :: khoảng cách vệ tinh – trạm
+f :: tần số
+" />
+
+<Predict client:visible lang="vi"
+  title="Đường tới vệ tinh địa tĩnh mất bao nhiêu dB?"
+  q="Từ Hà Nội tới VINASAT-1 (khoảng 37 000 km) ở 12 GHz, suy hao không gian tự do khoảng bao nhiêu?"
+  slider={{ min: 150, max: 240, step: 1, unit: 'dB' }} answer={205} tol={3}
+  why="FSPL = 20·log10(4π × 36 975 km × 12 GHz / c) = 205,4 dB: tín hiệu yếu đi khoảng 3,5 × 10²⁰ lần. Đó là lý do vệ tinh truyền hình cần EIRP cỡ 50 dBW và chảo nhà vẫn nhỏ được." />
+
+Với vệ tinh quỹ đạo thấp, khoảng cách đổi liên tục trong một lượt bay qua. Sentinel-2 bay ở 786 km: ở thiên đỉnh FSPL băng X (8,1 GHz) là 168,5 dB; khi vệ tinh ở góc ngẩng 5°, <Term id="slant-range">khoảng cách nghiêng</Term> là 2 754 km và FSPL 179,4 dB. Gần 11 dB chênh lệch trong vài phút, nên vệ tinh viễn thám thường dùng anten "đẳng thông" (isoflux) phát mạnh hơn về phía rìa, hoặc đổi tốc độ dữ liệu theo góc ngẩng.
+
+<Note kind="myth">
+
+"Tần số cao bị suy hao nhiều hơn trong chân không." FSPL tăng theo f² chỉ vì quy ước tính với anten thu đẳng hướng, vốn có diện tích thu nhỏ đi ở tần số cao. Nếu giữ **cố định kích thước chảo** ở hai đầu, độ lợi mỗi chảo tăng 6 dB khi tần số gấp đôi, bù dư 6 dB suy hao. Trong chân không, sóng tần số cao không "mất năng lượng" nhiều hơn; nhược điểm thật sự của tần số cao là mưa và khí quyển.
+
+</Note>
+
+<Note kind="key">
+
+Gấp đôi khoảng cách hay gấp đôi tần số đều thêm **6 dB** suy hao. Đường lên vệ tinh địa tĩnh mất khoảng 200 dB, đường tới vệ tinh quỹ đạo thấp khoảng 170–180 dB.
+
+</Note>
+
+## 5.5 Nhiễu nhiệt và tỉ số G/T
+
+Mọi vật ở nhiệt độ T đều phát nhiễu nhiệt. Công suất nhiễu mà máy thu "nghe" thấy trong băng thông B:
+
+<Formula label="Nhiễu nhiệt" tex="N = k\,T_{sys}\,B, \qquad k = 1{,}380649\times10^{-23}\ \text{J/K} = -228{,}6\ \text{dBW/(K}\cdot\text{Hz)}" where="
+k :: hằng số Boltzmann
+T_{sys} :: nhiệt độ nhiễu hệ thống (K)
+B :: băng thông (Hz)
+" />
+
+<Term id="system-noise-temperature">Nhiệt độ nhiễu hệ thống</Term> gồm nhiều phần: nhiễu bầu trời mà anten nhìn thấy (bầu trời quang ở băng Ku chỉ vài chục K, nhưng mặt đất ấm khoảng 290 K lọt vào các búp phụ), suy hao dây dẫn, và nhiễu của bộ khuếch đại tạp âm thấp (LNA, hay LNB trong chảo truyền hình). Theo công thức Friis, tầng khuếch đại đầu tiên quyết định phần lớn nhiễu:
+
+<Formula label="Công thức Friis cho chuỗi máy thu" tex="T_{sys} = T_{ant} + T_1 + \frac{T_2}{G_1} + \frac{T_3}{G_1 G_2} + \cdots" where="
+T_{ant} :: nhiệt độ nhiễu anten (bầu trời, mặt đất, mưa)
+T_1,\ G_1 :: nhiệt độ nhiễu và độ lợi tầng đầu (LNA)
+T_2,\ T_3 :: các tầng sau: bị chia cho độ lợi phía trước
+" />
+
+Vì vậy LNB được gắn ngay tại tiêu điểm chảo: một đoạn cáp dài trước LNA sẽ cộng thẳng suy hao và nhiễu của nó vào T_sys. Chất lượng một trạm thu được tóm trong một con số, <Term id="g-over-t">G/T</Term>:
+
+<Formula label="Hệ số phẩm chất trạm thu" tex="\frac{G}{T}\,[\text{dB/K}] = G_r\,[\text{dBi}] - 10\log_{10} T_{sys}" where="
+G_r :: độ lợi anten thu
+T_{sys} :: nhiệt độ nhiễu hệ thống
+" />
+
+<Stats items={[
+  { v: '14,9', u: 'dB/K', l: 'chảo 0,6 m băng Ku, 120 K' },
+  { v: '28,0', u: 'dB/K', l: 'chảo 5,4 m băng X, 200 K' },
+  { v: '−228,6', u: 'dBW/(K·Hz)', l: 'hằng số Boltzmann viết bằng dB' },
+]} caption="G/T của hai trạm trong chương (độ lợi η = 0,65 và 0,6). Muốn tăng G/T: chảo to hơn hoặc LNA ít nhiễu hơn." />
+
+<Note kind="key">
+
+Tín hiệu yếu không đáng sợ bằng **tín hiệu yếu so với nhiễu**. Một trạm tốt có G/T cao: chảo lớn để gom tín hiệu, LNA lạnh và sát tiêu điểm để nhiễu thấp.
+
+</Note>
+
+## 5.6 Ngân sách đường truyền
+
+Ghép tất cả lại, tỉ số công suất sóng mang trên mật độ nhiễu tại máy thu:
+
+<Formula label="Phương trình đường truyền" tex="\frac{C}{N_0}\,[\text{dB}\cdot\text{Hz}] = \mathrm{EIRP} - L_{fs} - L_{rain} - L_{other} + \frac{G}{T} + 228{,}6" where="
+L_{rain} :: suy hao do mưa
+L_{other} :: khí quyển, lệch hướng, lệch phân cực, thiết bị
+" />
+
+<Formula label="Từ C/N0 tới biên dự trữ" tex="\frac{E_b}{N_0} = \frac{C}{N_0} - 10\log_{10} R_b, \qquad \frac{E_s}{N_0} = \frac{C}{N_0} - 10\log_{10} R_s, \qquad M = \left(\frac{E_b}{N_0}\right)_{have} - \left(\frac{E_b}{N_0}\right)_{need}" where="
+R_b :: tốc độ bit (bit/s)
+R_s :: tốc độ ký hiệu (ký hiệu/s); băng thông chiếm B = R_s(1 + α), α = 0,05–0,35
+M :: biên dự trữ (dB)
+" />
+
+<Term id="cn0">C/N0</Term> cho biết tín hiệu mạnh đến đâu so với nhiễu. <Term id="ebn0">Eb/N0</Term> chia năng lượng đó cho từng bit: truyền nhanh gấp 10 lần thì mỗi bit kém đi 10 dB. Mỗi cách điều chế và mã hóa cần một Eb/N0 tối thiểu (mục 5.7). Phần dư là <Term id="link-margin">biên dự trữ</Term>, để dành cho mưa, lão hóa thiết bị, chảo lệch hướng.
+
+<Tiles
+  items={[
+    { t: 'EIRP', d: 'Công suất phát + độ lợi anten phát' },
+    { t: 'Suy hao', d: 'Không gian tự do + mưa + khí quyển, lệch hướng' },
+    { t: 'G/T', d: 'Độ lợi chảo thu − nhiệt độ nhiễu' },
+    { t: 'Tốc độ bit', d: '−10·log10(Rb): càng nhanh càng tốn' },
+  ]}
+  sum="Biên dự trữ = EIRP − suy hao + G/T + 228,6 − 10·log10(Rb) − Eb/N0 cần"
+  note="Dương: liên lạc được · giữ vài dB cho mưa, lão hóa, lệch hướng anten"
+  caption="Bốn nhóm số hạng của một ngân sách đường truyền. Mọi số hạng đều là dB nên chỉ cần cộng trừ."
+/>
+
+<Figure
+  title="Hình 5.5 — Ngân sách đường truyền dạng thác: từ công suất phát tới biên dự trữ"
+  try="Chọn 'LEO băng X': hạ góc ngẩng từ 90° xuống 5°, biên dự trữ còn bao nhiêu? Đổi chảo thu 5,4 m thành 13 m. Chọn 'GEO băng Ku', bật mưa 0,01 %: để ý nhiệt độ hệ thống cũng tăng. Đổi tần số xuống 4 GHz (băng C) rồi bật lại mưa."
+  source="Công thức FSPL, độ lợi chảo, C/N0 và nhiễu do mưa ở trên (src/lib/signals.ts). Suy hao mưa: ITU-R P.618-13 cho Hà Nội, tính bằng ITU-Rpy 0.4 (scripts/data/export_signals.py). Thông số bốn kịch bản là giá trị minh họa điển hình, không phải thông số công bố của một vệ tinh cụ thể. Eb/N0 cần: QPSK không mã 9,6 dB ở BER 10⁻⁵; DVB-S2 QPSK 3/4 2,3 dB (ETSI EN 302 307-1, Bảng 13)."
+>
+  <SignalLink client:visible lang="vi" />
+</Figure>
+
+<div class="worked">
+
+#### Ví dụ: tải ảnh băng X xuống chảo 5,4 m
+
+Kịch bản minh họa: vệ tinh ở 786 km, góc ngẩng 10°, phát 10 W qua anten 6 dBi; trạm có chảo 5,4 m (η = 0,6), nhiệt độ hệ thống 200 K; tốc độ 560 Mbit/s; tổn hao khác 3 dB; Eb/N0 cần 2,3 dB.
+
+1. Khoảng cách nghiêng 2 338 km → FSPL ở 8,1 GHz = **178,0 dB**.
+2. EIRP = 10 dBW + 6 dBi = **16,0 dBW**. G/T = 51,0 dBi − 10·log10(200) = **28,0 dB/K**.
+3. C/N0 = 16,0 − 178,0 − 3 + 28,0 + 228,6 = **91,6 dB·Hz**.
+4. Eb/N0 = 91,6 − 10·log10(560 × 10⁶) = **4,1 dB** → biên dự trữ 4,1 − 2,3 = **1,8 dB**.
+
+Cùng C/N0 đó, giới hạn Shannon cho phép tối đa khoảng 2,1 Gbit/s; mã DVB-S2 QPSK 3/4 đạt khoảng 0,85 Gbit/s. Khoảng cách giữa hai con số là cái giá của mã hóa thực tế.
+
+</div>
+
+<div class="worked">
+
+#### Ví dụ: truyền hình băng Ku từ VINASAT về Hà Nội
+
+Kịch bản minh họa: EIRP 52 dBW; khoảng cách 36 975 km; 12 GHz; chảo 0,6 m (η = 0,65), T_sys 120 K; tổn hao khác trời quang 1 dB; tốc độ ký hiệu 30 Msym/s.
+
+1. FSPL = **205,4 dB**. Độ lợi chảo 35,7 dBi; G/T = 35,7 − 20,8 = **14,9 dB/K**.
+2. C/N0 = 52 − 205,4 − 1 + 14,9 + 228,6 = **89,1 dB·Hz**.
+3. Es/N0 = 89,1 − 10·log10(30 × 10⁶) = **14,3 dB**. DVB-S2 8PSK 3/4 cần 7,91 dB, nên còn **6,4 dB** dự trữ cho mưa.
+
+</div>
+
+### Mưa, khí quyển và độ khả dụng
+
+Ở tần số trên khoảng 10 GHz, giọt mưa (đường kính vài mm, cỡ bước sóng) hấp thụ và tán xạ sóng. Khuyến nghị ITU-R P.838 cho suy hao riêng γ = k·R^α (dB/km), với R là cường độ mưa (mm/h); P.618 tính suy hao trên cả đường nghiêng qua lớp mưa, vượt quá trong p % thời gian của một năm trung bình. Theo bản đồ ITU-R P.837-7, cường độ mưa vượt 0,01 % thời gian (R0,01, khoảng 53 phút mỗi năm) là **88,8 mm/h ở Hà Nội** và 89,5 mm/h ở TP.HCM, so với 9,4 mm/h ở Svalbard. Ở 12 GHz, R0,01 của Hà Nội cho γ = 4,2 dB/km, và lớp mưa dày khoảng 5 km.
+
+<Stats items={[
+  { v: '88,8', u: 'mm/h', l: 'mưa vượt 0,01 % thời gian ở Hà Nội (ITU-R P.837-7)' },
+  { v: '13,0', u: 'dB', l: 'suy hao băng Ku 0,01 % năm, Hà Nội → VINASAT-1' },
+  { v: '0,29', u: 'dB', l: 'cùng điều kiện ở băng C, 4 GHz' },
+]} caption="Cùng một cơn mưa, băng Ku mất gần 45 lần nhiều dB hơn băng C." />
+
+<Figure
+  title="Hình 5.6 — Suy hao do mưa theo tần số ở Hà Nội, TP.HCM và Svalbard"
+  try="Đặt 0,01 % và góc ngẩng 45°: ở 12 GHz Hà Nội mất bao nhiêu dB, Svalbard bao nhiêu? Kéo tần số từ 4 GHz lên 30 GHz. Chuyển sang 1 %: vì sao mạng Internet băng Ka vẫn dùng được hầu hết thời gian?"
+  source="ITU-R P.618-13 (suy hao đường nghiêng), P.837-7 (cường độ mưa), P.838-3 (k, α, phân cực tròn), P.839-4 (độ cao lớp mưa), tính bằng ITU-Rpy 0.4 cho tọa độ trung tâm Hà Nội (21,03°N; 105,85°E), TP.HCM (10,78°N; 106,70°E) và Svalbard (78,23°N; 15,39°E). scripts/data/export_signals.py."
+>
+  <SignalRain client:visible lang="vi" />
+</Figure>
+
+Với tuyến từ Hà Nội lên VINASAT-1 (góc ngẩng 51,5°), suy hao vượt quá:
+
+| Tần số | 1 % năm (≈ 3,7 ngày) | 0,1 % năm (≈ 8,8 giờ) | 0,01 % năm (≈ 53 phút) |
+|---|---|---|---|
+| 4 GHz (C) | 0,01 dB | 0,08 dB | 0,29 dB |
+| 12 GHz (Ku) | 1,1 dB | 5,1 dB | 13,0 dB |
+| 20 GHz (Ka) | 3,7 dB | 15,4 dB | 35,7 dB |
+| 30 GHz (Ka) | 8,3 dB | 32,3 dB | 69,9 dB |
+
+Mưa còn gây hại lần thứ hai: lớp nước ấm mà anten nhìn xuyên qua **phát nhiễu**, làm nhiệt độ hệ thống tăng:
+
+<Formula label="Nhiễu do mưa" tex="\Delta T = T_m\left(1 - 10^{-A/10}\right), \qquad T_m \approx 275\ \text{K}" where="
+A :: suy hao do mưa (dB)
+T_m :: nhiệt độ trung bình của lớp mưa
+" />
+
+Mưa làm mất 3 dB thì T_sys tăng thêm 137 K; với chảo 120 K, nhiễu gần gấp đôi. Đó là lý do một cơn mưa làm Es/N0 tụt nhiều hơn chính số dB suy hao.
+
+Ngoài mưa còn các hiệu ứng khác:
+
+- **Khí quyển:** hơi nước có vạch hấp thụ quanh 22 GHz, oxy quanh 60 GHz (ITU-R P.676). Vì thế dải 60 GHz hợp cho liên kết giữa các vệ tinh: mặt đất không nghe được, không bị nhiễu từ dưới lên.
+- **Tầng điện ly:** gây trễ và nhấp nháy (scintillation) ở băng L, S, mạnh nhất quanh xích đạo từ vào sau hoàng hôn những năm Mặt Trời hoạt động mạnh. Việt Nam nằm trong vùng này; Chương 7 bàn kỹ ảnh hưởng tới GNSS.
+- **Độ khả dụng:** tuyến thiết kế cho 99,9 % thời gian/năm được phép gián đoạn khoảng 8,8 giờ/năm; 99,99 % chỉ còn khoảng 53 phút. Ở băng Ku Hà Nội, bước nhảy đó đòi thêm khoảng 8 dB dự trữ (5,1 → 13,0 dB).
+- **Giải pháp:** giữ dự trữ công suất; điều chế thích ứng (ACM, mục 5.7); đa dạng vị trí gateway (hai trạm cách nhau vài chục km hiếm khi cùng gặp mưa lớn); điều khiển công suất đường lên.
+
+<Note kind="key">
+
+Ở Việt Nam, **băng C gần như miễn nhiễm với mưa**, băng Ku cần giữ dự trữ cỡ 5 dB cho 99,9 % thời gian, còn băng Ka trong cơn mưa rào có thể mất tín hiệu hoàn toàn. Vì vậy băng C vẫn được dùng nhiều cho trung kế và truyền hình chuyên nghiệp, còn hệ thống Ku/Ka dựa vào ACM và nhiều gateway.
+
+</Note>
+
+## 5.7 Điều chế, mã hóa và giới hạn Shannon
+
+<Term id="signals-modulation">Điều chế số</Term> gán từng nhóm bit vào một "điểm" (ký hiệu) trên mặt phẳng pha – biên độ, gọi là chòm sao:
+
+| Điều chế | Bit/ký hiệu | Đặc điểm | Dùng ở |
+|---|---|---|---|
+| BPSK | 1 | Hai pha 0°/180°, bền nhất | GNSS, TT&C, tuyến rất yếu |
+| QPSK | 2 | Bốn pha; cùng tỉ lệ lỗi bit như BPSK ở cùng Eb/N0 nhưng gấp đôi hiệu quả phổ | Phổ biến nhất trên vệ tinh |
+| 8PSK | 3 | Tám pha, biên độ không đổi | Truyền hình DVB-S2 |
+| 16APSK, 32APSK | 4, 5 | Các vòng tròn đồng tâm, ít nhạy với méo của bộ khuếch đại vệ tinh hơn QAM | DVB-S2 tuyến tốt |
+| 16–256QAM | 4–8 | Lưới vuông, hiệu quả nhất nhưng cần SNR cao và bộ khuếch đại tuyến tính | Mặt đất; một số tuyến vệ tinh |
+
+<Figure
+  title="Hình 5.7 — Chòm sao điều chế khi có nhiễu"
+  try="Giữ QPSK, hạ Es/N0 từ 14 dB xuống 4 dB và đếm chấm đỏ. Ở cùng 12 dB, so 8PSK với 32APSK. Với mỗi điều chế, tìm mức Es/N0 mà chấm đỏ gần như biến mất, rồi so với ngưỡng DVB-S2 trong bảng bên phải."
+  source="Mô phỏng 1500 ký hiệu ngẫu nhiên qua kênh nhiễu Gauss trắng, quyết định theo điểm gần nhất (src/lib/signals.ts: simulate). Bán kính vòng APSK theo ETSI EN 302 307-1 §5.4 (tỉ lệ mã 3/4). Lý thuyết QPSK: Q(√(2Eb/N0)); 8PSK: xấp xỉ 2Q(√(2Es/N0)·sin(π/8)). Ngưỡng DVB-S2: Bảng 13 cùng chuẩn."
+>
+  <SignalConstellation client:visible lang="vi" />
+</Figure>
+
+Không có mã, QPSK cần Eb/N0 = 9,6 dB để chỉ sai 1 bit trên 100 000. <Term id="signals-fec">Mã sửa lỗi</Term> (FEC) thêm bit dư theo cấu trúc toán học để máy thu sửa được lỗi: tỉ lệ mã 3/4 nghĩa là cứ 4 bit truyền có 3 bit dữ liệu. Các thế hệ mã: mã chập + Reed–Solomon (DVB-S, CCSDS cũ), turbo (CCSDS, 3G), LDPC (DVB-S2, 5G, CCSDS mới). Với LDPC, DVB-S2 QPSK 3/4 chỉ cần Eb/N0 = 2,31 dB, thấp hơn 7 dB so với không mã.
+
+Cái trần của mọi cách mã hóa là <Term id="shannon-limit">giới hạn Shannon</Term>:
+
+<Formula label="Dung lượng kênh Shannon" tex="C = B\log_2\!\left(1 + \frac{S}{N}\right), \qquad \frac{E_b}{N_0} \ge \frac{2^{\eta} - 1}{\eta} \;\xrightarrow{\;\eta\to 0\;}\; \ln 2 = -1{,}59\ \text{dB}" where="
+C :: tốc độ tối đa truyền tin cậy được (bit/s)
+B :: băng thông (Hz)
+S/N :: tỉ số tín hiệu trên nhiễu
+\eta :: hiệu suất phổ C/B (bit/s/Hz)
+" />
+
+Hai cách tăng dung lượng: tăng băng thông B (tăng tuyến tính) hoặc tăng S/N (chỉ tăng theo logarit). Vì vậy các hệ thống mới chạy đua lên Ka, V, băng E và laser để có băng thông, đồng thời dùng búp hẹp để có S/N cao và tái sử dụng tần số nhiều lần.
+
+<Figure
+  title="Hình 5.8 — Giới hạn Shannon, 28 chế độ DVB-S2 và điều chế thích ứng khi trời mưa"
+  try="Bắt đầu ở Es/N0 trời quang 14,4 dB: ACM chọn chế độ nào? Tăng suy hao mưa lên 3 dB rồi 6 dB và xem thông lượng tụt. Để ý mọi điểm DVB-S2 nằm dưới đường Shannon, cách khoảng 1–3 dB."
+  source="Es/N0 lý tưởng và hiệu suất phổ: ETSI EN 302 307-1 V1.4.1, Bảng 13 (PER 10⁻⁷, AWGN, khung 64 800 bit, không pilot). Chọn chế độ có ngưỡng + 1 dB ≤ Es/N0. Nhiễu do mưa ΔT = 275 K·(1 − 10^(−A/10)) với T_sys trời quang 120 K. Kịch bản là minh họa."
+>
+  <SignalShannon client:visible lang="vi" />
+</Figure>
+
+<Predict client:visible lang="vi"
+  title="Mưa làm mất 3 dB thì truyền hình còn bao nhiêu Mbit/s?"
+  q="Tuyến truyền hình ở ví dụ mục 5.6 có Es/N0 trời quang 14,3 dB, chạy 32APSK 3/4 được 111 Mbit/s (30 Msym/s). Một cơn mưa làm suy hao 3 dB. Với ACM, thông lượng còn khoảng bao nhiêu?"
+  slider={{ min: 0, max: 120, step: 1, unit: 'Mbit/s' }} answer={59} tol={8}
+  why="Mưa vừa trừ 3 dB tín hiệu vừa đẩy T_sys từ 120 K lên 257 K (thêm 3,3 dB nhiễu), nên Es/N0 tụt 6,3 dB, còn 8,0 dB. Chế độ tốt nhất còn dự trữ 1 dB là 8PSK 2/3 (1,98 bit/s/Hz): khoảng 59 Mbit/s. Mưa 6 dB thì xuống QPSK 3/5, khoảng 36 Mbit/s. Tín hiệu không mất, chỉ chậm lại." />
+
+<Note kind="myth">
+
+"Gấp đôi công suất thì gấp đôi tốc độ." Theo Shannon, ở tuyến đủ mạnh thì gấp đôi công suất (+3 dB) chỉ thêm khoảng 1 bit/s/Hz. Gấp đôi **băng thông** mới gần như gấp đôi dung lượng. Chỉ ở tuyến rất yếu (Eb/N0 gần −1,6 dB) thì tốc độ mới gần tỉ lệ thuận với công suất.
+
+</Note>
+
+<Depth level="advanced" title="Hằng số −228,6, giới hạn −1,59 dB và ACM">
+
+N0 = k·T với k = 1,380649 × 10⁻²³ J/K, nên 10·log10(k) = −228,6 dBW/(K·Hz). Đó là lý do "+228,6" xuất hiện trong mọi ngân sách đường truyền.
+
+Dung lượng kênh nhiễu trắng băng thông B: C = B·log2(1 + C/(N0·B)). Cho B → ∞: C → (C/N0)/ln 2. Đặt tốc độ Rb bằng dung lượng đó, Eb/N0 = (C/N0)/Rb = ln 2 = 0,693, tức −1,59 dB. Dưới mức này không mã nào truyền tin cậy được, dù chậm đến đâu. Ở hiệu suất 1 bit/s/Hz giới hạn là 0,00 dB, ở 2 bit/s/Hz là 1,76 dB, ở 4 bit/s/Hz là 5,74 dB.
+
+Đo trên Bảng 13 của DVB-S2: QPSK 1/2 cách giới hạn Shannon 1,07 dB, QPSK 3/4 cách 1,47 dB, 8PSK 3/4 cách 2,25 dB, 32APSK 9/10 cách 2,85 dB. LDPC đưa các chế độ hiệu suất thấp rất sát trần lý thuyết.
+
+**ACM trong DVB-S2:** mỗi khung dữ liệu có thể mang một MODCOD khác nhau. Máy thu báo SNR về; gateway chọn chế độ cho từng đầu cuối. Khi một khách hàng gặp mưa, chỉ khung của khách đó chuyển xuống chế độ bền hơn, những người khác vẫn chạy chế độ nhanh.
+
+</Depth>
+
+<Note kind="key">
+
+Điều chế nhiều điểm hơn chở nhiều bit hơn mỗi ký hiệu nhưng cần tín hiệu mạnh hơn. Mã LDPC hiện đại đưa hệ thống tới cách giới hạn Shannon chỉ 1–3 dB; phần còn lại của cuộc đua dung lượng là **thêm băng thông**.
+
+</Note>
+
+## 5.8 Đa truy nhập và tái sử dụng tần số
+
+Một bộ phát đáp vệ tinh phục vụ nhiều người dùng cùng lúc. <Term id="signals-multiple-access">Đa truy nhập</Term> là cách chia mặt phẳng thời gian – tần số giữa họ:
+
+- **FDMA:** mỗi người một khe tần số, phát liên tục. Đơn giản, nhưng tốn khoảng bảo vệ giữa các khe.
+- **TDMA:** cả băng tần, luân phiên theo khe thời gian. **MF-TDMA** kết hợp cả hai, phổ biến ở mạng VSAT.
+- **CDMA:** mọi người cùng tần số, cùng lúc, mỗi người một mã trải phổ. GNSS dùng cách này: mỗi vệ tinh GPS một mã riêng (mục 5.13).
+- **OFDMA:** chia băng thành rất nhiều sóng mang con trực giao, cấp từng khối cho người dùng (4G, 5G). Nhóm Humphreys (ĐH Texas) giải mã năm 2023 cho thấy đường xuống Starlink dùng OFDM với kênh rộng khoảng 240 MHz.
+
+<Figure
+  title="Hình 5.9 — Năm cách chia một kênh vệ tinh cho nhiều người dùng"
+  try="Chuyển lần lượt FDMA → TDMA → MF-TDMA → CDMA → OFDMA. Cách nào để lại khoảng trống không dùng? Cách nào bắt mọi người đồng bộ thời gian?"
+  source="Sơ đồ khái niệm, cách cấp phát là minh họa. OFDM của Starlink: Humphreys, T. E. và cộng sự (2023), Signal Structure of the Starlink Ku-Band Downlink, IEEE TAES."
+>
+  <SignalAccess client:visible lang="vi" />
+</Figure>
+
+Thay vì một búp phủ cả quốc gia, vệ tinh hiện đại tạo hàng chục đến hàng trăm <Term id="signals-spot-beam">búp sóng điểm</Term>. Các búp không kề nhau dùng lại cùng tần số: đó là <Term id="signals-frequency-reuse">tái sử dụng tần số</Term>. Sơ đồ "4 màu" phổ biến: 2 dải tần × 2 phân cực. Vệ tinh thông lượng cao (HTS) dùng hàng trăm búp băng Ka như vậy. Thêm vài kỹ thuật:
+
+- **Nhảy búp (beam hopping):** búp sóng chuyển giữa các ô theo nhu cầu, dồn dung lượng về nơi đông người dùng.
+- **Bent-pipe và tái sinh:** vệ tinh bent-pipe chỉ đổi tần số và khuếch đại (mặt đất → vệ tinh → mặt đất). Vệ tinh tái sinh giải điều chế, định tuyến gói tin rồi điều chế lại; điều này bắt buộc nếu muốn chuyển gói qua laser giữa các vệ tinh (Chương 6).
+
+<Figure
+  title="Hình 5.10 — Búp sóng điểm và sơ đồ tái sử dụng tần số"
+  try="Chọn K = 4 rồi K = 7: mỗi búp được bao nhiêu MHz, tổng hệ thống bao nhiêu GHz? Chọn K = 1: vì sao tổng lớn nhất mà không ai dùng? Tăng số hàng búp."
+  source="Lưới lục giác minh họa; 500 MHz phổ đường xuống trên 2 phân cực là giả định để so sánh. Khoảng cách đồng kênh D/R = √(3K) theo hình học lưới lục giác."
+>
+  <SignalBeams client:visible lang="vi" />
+</Figure>
+
+<Note kind="key">
+
+Dung lượng của một vệ tinh hiện đại không đến từ một búp mạnh mà từ **nhiều búp hẹp dùng lại cùng một phổ tần**. Với 63 búp và sơ đồ 4 màu, cùng 1 GHz phổ được dùng lại khoảng 16 lần.
+
+</Note>
+
+## 5.9 Trạm mặt đất và lượt bay qua
+
+Vệ tinh địa tĩnh đứng yên trên trời nên một chảo cố định là đủ. Vệ tinh quỹ đạo thấp thì khác: <Term id="ground-station">trạm mặt đất</Term> chỉ liên lạc được khi vệ tinh ở trên <Term id="elevation-mask">góc che</Term> (thường 5–10° vì nhà cửa, cây cối và nhiễu gần chân trời). Vùng nhìn thấy là một vòng tròn quanh trạm: với độ cao 786 km và góc che 5°, bán kính trên mặt đất là 2 506 km; nâng góc che lên 10° còn 2 087 km.
+
+<Steps title="Một lượt thu ảnh ở trạm mặt đất" items={[
+  { tag: 'T−1 ngày', t: 'Lập lịch', d: 'Từ phần tử quỹ đạo mới nhất, tính giờ vệ tinh mọc, lặn và hướng bám; gửi lệnh lên vệ tinh qua kênh TT&C.' },
+  { tag: 'AOS', t: 'Vệ tinh mọc trên góc che', d: 'Chảo đã chờ sẵn ở phương vị mọc; máy thu quét tần số quanh giá trị dự đoán để bắt Doppler.' },
+  { tag: '+30 s', t: 'Khóa tín hiệu', d: 'Khóa sóng mang, khóa ký hiệu, đồng bộ khung CCSDS; vệ tinh bắt đầu xả dữ liệu từ bộ nhớ.' },
+  { tag: '≈ 10 phút', t: 'Bám và tải dữ liệu', d: 'Chảo bám theo vệ tinh; Doppler và khoảng cách đổi liên tục; giải mã LDPC, ghi dữ liệu thô.' },
+  { tag: 'LOS', t: 'Vệ tinh lặn', d: 'Mất tín hiệu khi xuống dưới góc che; chảo quay về vị trí chờ lượt sau.' },
+  { tag: 'Sau lượt', t: 'Chuyển về trung tâm xử lý', d: 'Dữ liệu thô đi qua cáp quang tới trung tâm xử lý thành sản phẩm cấp 1, cấp 2.' },
+]} />
+
+<Predict client:visible lang="vi"
+  title="Hà Nội nói chuyện được với Sentinel-2A bao lâu mỗi ngày?"
+  q="Một trạm ở Hà Nội, góc che 5°. Tổng thời gian liên lạc với Sentinel-2A trong 24 giờ là khoảng bao nhiêu?"
+  options={['Khoảng 4 phút', 'Khoảng 40 phút', 'Khoảng 4 giờ', 'Cả ngày']} answer={1}
+  why="Tính từ phần tử quỹ đạo CelesTrak ngày 04/11/2026: 4 lượt bay qua, dài trung bình 9,5 phút, tổng 37,9 phút. Phần còn lại của ngày vệ tinh ở ngoài vòng tròn nhìn thấy của Hà Nội." />
+
+<Figure
+  title="Hình 5.11 — Lượt bay qua trạm mặt đất của vệ tinh quan sát Trái Đất"
+  try="Chọn Sentinel-2A ở Hà Nội, bấm vào một lượt trong danh sách để nhảy tới lúc đó và xem tia liên lạc. Đổi trạm sang Svalbard: số lượt và tổng phút thay đổi thế nào? Tăng góc che từ 5° lên 15°."
+  source="Phần tử quỹ đạo trung bình CelesTrak (GP/OMM), tải ngày 04/11/2026 (public/data/ch01-missions.json); truyền quỹ đạo Kepler có trôi J2 (src/lib/gnss.ts), lấy mẫu 20 s trong 24 giờ từ 00:00 UTC 04/11/2026 (src/lib/signals.ts, passes). Tọa độ trạm: trung tâm thành phố, không phải vị trí thật của một trạm thu. Tốc độ downlink mặc định: Sentinel-2 560 Mbit/s (ESA eoPortal), Landsat 384 Mbit/s (USGS); VNREDSat-1 100 Mbit/s là giá trị minh họa."
+>
+  <SignalPasses client:visible lang="vi" />
+</Figure>
+
+Ba điều đọc được từ Hình 5.11:
+
+- **Vài lượt ngắn mỗi ngày.** Ở Hà Nội, Sentinel-2A có 4 lượt (37,9 phút), Landsat 9 có 4 lượt (35,6 phút), VNREDSat-1 có 3 lượt (30,1 phút). Lượt dài nhất khoảng 12 phút, khi vệ tinh đi gần qua thiên đỉnh.
+- **Vĩ độ cao thắng tuyệt đối.** Mọi quỹ đạo đồng bộ Mặt Trời (độ nghiêng khoảng 98°) đều đi qua gần hai cực, nên trạm Svalbard (78°N) thấy Sentinel-2A 15 lượt, 156 phút mỗi ngày. Đó là lý do ESA thu ảnh Sentinel-2 qua các trạm Svalbard, Matera và Maspalomas, và USGS dùng Svalbard cho Landsat.
+- **Dữ liệu bị giới hạn bởi phút liên lạc** (mục 5.11).
+
+<Depth level="advanced" title="Hình học vùng nhìn thấy">
+
+Với vệ tinh ở độ cao h, góc ngẩng ε, góc ở tâm Trái Đất giữa trạm và điểm dưới vệ tinh là
+
+<Formula label="Bán kính vùng nhìn thấy" tex="\lambda_c = \arccos\!\left(\frac{R_E\cos\varepsilon}{R_E + h}\right) - \varepsilon, \qquad d = \sqrt{(R_E + h)^2 - (R_E\cos\varepsilon)^2} - R_E\sin\varepsilon" where="
+R_E :: bán kính Trái Đất, 6378,137 km
+\varepsilon :: góc ngẩng (góc che)
+d :: khoảng cách nghiêng
+" />
+
+Với h = 786 km, ε = 5°: λ_c = 22,5° (2 506 km trên mặt đất). Thời gian một lượt dài nhất xấp xỉ (2λ_c / 360°) × chu kỳ quỹ đạo, trừ đi phần Trái Đất quay; với chu kỳ 100,6 phút, khoảng 12–13 phút, khớp với Hình 5.11.
+
+</Depth>
+
+<Note kind="key">
+
+Với vệ tinh quỹ đạo thấp, **vị trí trạm quyết định số phút liên lạc**: Hà Nội có khoảng 38 phút mỗi ngày với Sentinel-2A, Svalbard gấp bốn lần.
+
+</Note>
+
+## 5.10 Doppler và độ trễ
+
+Khi vệ tinh tiến lại gần, tần số thu được cao hơn tần số phát; khi đi xa, thấp hơn. Dịch tần <Term id="signals-doppler">Doppler</Term> tỉ lệ với tốc độ thay đổi khoảng cách:
+
+<Formula label="Dịch tần Doppler" tex="f_D = -\frac{\dot d}{c}\,f" where="
+\dot d :: tốc độ thay đổi khoảng cách (âm khi tiến lại gần)
+f :: tần số sóng mang
+" />
+
+<Predict client:visible lang="vi"
+  title="Doppler ở băng X lớn cỡ nào?"
+  q="Sentinel-2A bay qua gần thiên đỉnh Hà Nội. Ở 8,1 GHz, dịch tần Doppler lớn nhất khoảng bao nhiêu kHz?"
+  slider={{ min: 0, max: 400, step: 5, unit: 'kHz' }} answer={180} tol={25}
+  why="Khoảng cách thay đổi tới 6,68 km/s khi vệ tinh mới mọc, nên f_D = 6,68 / 299 792 × 8,1 GHz ≈ ±180 kHz. Ở 437 MHz chỉ ±9,7 kHz: Doppler tỉ lệ thuận với tần số." />
+
+<Figure
+  title="Hình 5.12 — Đường cong Doppler hình chữ S trong một lượt bay thật"
+  try="Chọn lượt cao nhất của Sentinel-2A ở Hà Nội rồi đổi tần số UHF → S → X: hình dạng giữ nguyên, chỉ thang thay đổi. So một lượt thấp (góc ngẩng cực đại nhỏ) với lượt cao: lượt nào đổi tần nhanh hơn ở giữa?"
+  source="Phần tử quỹ đạo CelesTrak 04/11/2026 (public/data/ch01-missions.json), truyền Kepler + J2 (src/lib/gnss.ts). Tốc độ khoảng cách lấy bằng sai phân trung tâm trong hệ ECEF, nên đã gồm cả Trái Đất quay (src/lib/signals.ts: passProfile). 437 MHz là tần số giả định kiểu CubeSat, không phải tần số của các vệ tinh này."
+>
+  <SignalDoppler client:visible lang="vi" />
+</Figure>
+
+Ở lượt cao nhất của Sentinel-2A qua Hà Nội (22:12 giờ Việt Nam, góc ngẩng cực đại 78,8°), Doppler ở 8,1 GHz là ±180,4 kHz và thay đổi nhanh nhất 1 698 Hz mỗi giây, ngay khi vệ tinh đi qua gần đỉnh đầu. Ở 2,2 GHz còn ±49,0 kHz, ở 437 MHz ±9,7 kHz. Máy thu phải bám tần số theo thời gian thực, thường dựa vào lịch quỹ đạo để đoán trước. Với vệ tinh địa tĩnh, Doppler gần như bằng 0.
+
+Độ trễ truyền sóng t = d/c. Ánh sáng đi 300 km mỗi mili giây:
+
+<Stats items={[
+  { v: '2,62', u: 'ms', l: 'tới Sentinel-2 ở thiên đỉnh (786 km)' },
+  { v: '123,3', u: 'ms', l: 'một chiều Hà Nội → VINASAT-1' },
+  { v: '≥ 238,7', u: 'ms', l: 'mặt đất → vệ tinh địa tĩnh → mặt đất' },
+]} caption="Độ trễ tối thiểu do khoảng cách, chưa tính xử lý." />
+
+Ở góc ngẩng 5°, tới Sentinel-2 mất 9,19 ms. Một cuộc gọi qua vệ tinh địa tĩnh trễ ít nhất 238,7 ms mỗi chiều, nên một câu hỏi và câu trả lời trễ gần nửa giây. Đó là lý do Internet qua chòm vệ tinh quỹ đạo thấp (Chương 6) cho cảm giác như cáp quang, còn Internet qua vệ tinh địa tĩnh thì không.
+
+<Note kind="key">
+
+Quỹ đạo thấp đổi **độ trễ nhỏ** lấy **Doppler lớn và lượt bay ngắn**; quỹ đạo địa tĩnh thì ngược lại. Doppler tỉ lệ với tần số: hàng trăm kHz ở băng X, chỉ vài kHz ở UHF.
+
+</Note>
+
+## 5.11 Tải dữ liệu viễn thám và truyền thông quang
+
+Ảnh viễn thám được tải xuống ở băng X 8025–8400 MHz, dải ITU dành cho thám sát Trái Đất qua vệ tinh. Landsat 8 nén 384 Mbit/s vào 375 MHz băng X bằng mã LDPC tỉ lệ 7/8 (USGS). Sentinel-2 phát ở băng X cỡ 560 Mbit/s theo eoPortal của ESA (một số nguồn thứ cấp ghi 520 Mbit/s), và còn chuyển dữ liệu qua laser tới vệ tinh địa tĩnh của **Hệ thống chuyển tiếp dữ liệu châu Âu** (<Term id="signals-edrs">EDRS</Term>), từ đó xuống trạm băng Ka (ESA). Cách tăng tốc độ: điều chế cao hơn (8PSK, 16APSK), dùng cả hai phân cực, nhiều kênh song song, lên băng Ka 25,5–27 GHz, và nén ảnh (chuẩn CCSDS 122).
+
+<Steps title="Từ điểm ảnh tới người dùng" items={[
+  { tag: '1', t: 'Chụp', d: 'Đầu thu quét, số hóa mỗi điểm ảnh thành 12 bit.' },
+  { tag: '2', t: 'Nén và lưu', d: 'Nén (CCSDS 122), ghi vào bộ nhớ khối trên vệ tinh trong lúc chờ tới trạm.' },
+  { tag: '3', t: 'Tải xuống', d: 'Băng X tới trạm mặt đất khi bay qua, hoặc laser lên EDRS rồi băng Ka xuống mặt đất.' },
+  { tag: '4', t: 'Thu và giải mã', d: 'Giải điều chế, sửa lỗi LDPC, tách khung CCSDS thành dữ liệu thô cấp 0.' },
+  { tag: '5', t: 'Xử lý', d: 'Hiệu chỉnh bức xạ, hình học thành cấp 1 (Sentinel-2 L1C), khí quyển thành cấp 2 (L2A).' },
+  { tag: '6', t: 'Phân phối', d: 'Đưa lên kho dữ liệu (Copernicus, USGS EarthExplorer, Google Earth Engine); người dùng tải về.' },
+]} />
+
+<Figure
+  title="Hình 5.13 — Một ngày tải dữ liệu: phút liên lạc nhân tốc độ"
+  try="Với Sentinel-2A, bật Hà Nội và TP.HCM: vì sao tổng phút nhỏ hơn cộng hai trạm? Bật Svalbard. Rồi tắt hết trạm và kéo thời gian EDRS lên 10 phút: laser bằng bao nhiêu phút băng X?"
+  source="Lượt bay tính từ phần tử quỹ đạo CelesTrak 04/11/2026, góc che 5°, 24 giờ từ 00:00 UTC (src/lib/signals.ts: passes, unionMinutes). Phút trùng (vệ tinh thấy cùng lúc hai trạm) chỉ tính một lần. Tốc độ: Sentinel-2 560 Mbit/s (ESA eoPortal), Landsat 384 Mbit/s (USGS), VNREDSat-1 100 Mbit/s là minh họa. EDRS 1,8 Gbit/s (Airbus, 2016); số phút EDRS mỗi ngày là giả định."
+>
+  <SignalVolume client:visible lang="vi" />
+</Figure>
+
+Với Sentinel-2A ở 560 Mbit/s: riêng Hà Nội 37,9 phút, tối đa khoảng **159 GB** mỗi ngày. Thêm TP.HCM, tổng phút chỉ lên 46,3 chứ không phải 71,5, vì phần lớn thời gian vệ tinh thấy cả hai trạm cùng lúc: hai trạm cách nhau khoảng 1 140 km nằm gọn trong vòng nhìn thấy bán kính 2 500 km. Svalbard một mình được 156,3 phút, khoảng **656 GB**. Mười phút laser EDRS ở 1,8 Gbit/s đã bằng 135 GB.
+
+**Truyền thông quang** cho tốc độ rất cao mà không cần cấp phép phổ tần. Năm 2023, thí nghiệm TBIRD của NASA tải 200 Gbit/s từ một CubeSat xuống trạm quang mặt đất. Nhược điểm: mây chặn hoàn toàn, nên cần nhiều trạm quang ở các vùng khí hậu khác nhau; ở Việt Nam mùa mưa nhiều mây, liên kết quang không gian – mặt đất khó tin cậy hơn liên kết laser giữa các vệ tinh.
+
+<Note kind="key">
+
+<mark>Lượng ảnh một vệ tinh gửi về mỗi ngày bằng số phút liên lạc nhân tốc độ downlink.</mark> Muốn nhiều hơn thì tăng một trong hai: trạm ở vĩ độ cao, nhiều trạm, vệ tinh chuyển tiếp (EDRS), hoặc tốc độ cao hơn (băng Ka, laser).
+
+</Note>
+
+## 5.12 TT&C, CCSDS và an ninh
+
+Một vệ tinh viễn thám có hai loại liên lạc rất khác nhau:
+
+- <Term id="ttc">TT&C</Term> (đo xa, theo dõi, điều khiển): lệnh gửi lên, dữ liệu trạng thái gửi xuống, đo khoảng cách để định quỹ đạo. Tốc độ thấp (vài kbit/s đến vài Mbit/s), thường ở băng S (2025–2110 MHz lên, 2200–2290 MHz xuống), anten gần đẳng hướng để liên lạc được dù vệ tinh quay theo hướng nào. Kịch bản 'LEO băng S' ở Hình 5.5 có biên dự trữ 18,6 dB: TT&C được thiết kế dư rất nhiều vì mất lệnh có thể mất vệ tinh.
+- **Dữ liệu tải** (payload data): ảnh khối lượng lớn, tốc độ hàng trăm Mbit/s, ở băng X (mục 5.11).
+
+Để một trạm thu được vệ tinh của nhiều nước, các cơ quan vũ trụ dùng chung chuẩn của <Term id="ccsds">CCSDS</Term>: cách đóng khung dữ liệu (TM, AOS), mã sửa lỗi (mã chập, Reed–Solomon, turbo, LDPC), giao thức truyền tệp và đo cự ly. Sentinel-2 đóng gói ảnh trong khung CCSDS AOS; nhờ vậy các trạm thương mại có thể thu nhiều sứ mệnh bằng cùng một modem.
+
+**An ninh.** Đường lên là điểm yếu: ai phát được đúng tần số, đúng định dạng thì có thể gửi lệnh. Vì vậy lệnh điều khiển được **xác thực** (chuẩn CCSDS SDLS cho lớp liên kết), dữ liệu quân sự và thương mại cao cấp được **mã hóa** (AES) ngay trên vệ tinh. Hai mối đe dọa khác: **gây nhiễu** (jamming, phát công suất lớn đè lên tín hiệu) và **giả mạo** (spoofing, phát tín hiệu giả trông như thật). Tín hiệu GNSS yếu nên dễ bị cả hai (mục 5.13, Chương 7).
+
+<Note kind="warn">
+
+Mất kênh TT&C nghĩa là mất quyền điều khiển vệ tinh. Mọi hệ thống nghiêm túc đều có trạm dự phòng, chế độ an toàn tự động trên vệ tinh và xác thực lệnh.
+
+</Note>
+
+## 5.13 Tín hiệu định vị GNSS: thời gian là tất cả
+
+Vệ tinh GNSS mang đồng hồ nguyên tử và liên tục phát "giờ của tôi là t, vị trí của tôi là (x, y, z)". Máy thu đo thời gian truyền, từ 67,4 ms (vệ tinh ở thiên đỉnh, 20 200 km) tới 86,1 ms (ở chân trời, 25 801 km), để suy ra khoảng cách. Sai 1 ns thời gian là sai 30 cm khoảng cách. Vì đồng hồ máy thu không chính xác, cần ít nhất 4 vệ tinh để giải 4 ẩn: x, y, z và sai số đồng hồ máy thu. Chương 7 trình bày chi tiết cách giải, các nguồn sai số và cả hiệu chỉnh tương đối tính.
+
+Điều đáng ngạc nhiên nằm ở ngân sách đường truyền: tín hiệu GPS tới mặt đất **yếu hơn cả nhiễu**.
+
+<Stats items={[
+  { v: '−158,5', u: 'dBW', l: 'công suất GPS L1 C/A tối thiểu ở mặt đất (IS-GPS-200)' },
+  { v: '−144,4', u: 'dBW', l: 'nhiễu nhiệt 130 K trong băng 2,046 MHz' },
+  { v: '43,1', u: 'dB', l: 'độ lợi xử lý nhờ trải phổ' },
+]} caption="Tín hiệu thấp hơn nhiễu 14 dB, nhưng tương quan với mã đã biết gom lại được 43 dB." />
+
+<Formula label="Độ lợi xử lý của tín hiệu trải phổ" tex="G_p = 10\log_{10}\frac{R_c}{R_b} = 10\log_{10}\frac{1{,}023\times10^6}{50} = 43{,}1\ \text{dB}" where="
+R_c :: tốc độ chip của mã C/A (1,023 Mchip/s)
+R_b :: tốc độ dữ liệu điều hướng (50 bit/s)
+" />
+
+Dữ liệu 50 bit/s được nhân với một mã giả ngẫu nhiên 1,023 Mchip/s riêng cho từng vệ tinh (đây là CDMA, mục 5.8). Máy thu biết trước mã, tương quan để gom năng lượng lại. Tính theo mật độ: C/N0 = −158,5 − (−228,6 + 10·log10 130) = 49,0 dB·Hz, đủ cho máy thu bám tín hiệu. Cũng vì tín hiệu yếu như vậy, một máy gây nhiễu vài watt có thể làm mất GNSS trong bán kính nhiều km.
+
+<Note kind="key">
+
+GNSS là một bài toán **đo thời gian**, và tín hiệu của nó nằm dưới mức nhiễu. Trải phổ (CDMA) biến điều tưởng như không thể thành định vị trong túi áo.
+
+</Note>
+
+## 5.14 Thực hành
+
+Notebook tính lại toàn bộ chương: bước sóng, FSPL, độ lợi chảo, ngân sách đường truyền của các kịch bản; suy hao mưa ITU-R cho Hà Nội và TP.HCM bằng thư viện ITU-Rpy; truyền quỹ đạo Sentinel-2 bằng SGP4 để liệt kê các lượt bay qua Hà Nội và so với Svalbard; rồi để bạn thiết kế đường truyền cho một vệ tinh nhỏ.
+
+<LabLinks notebook="labs/signals_linkbudget.ipynb" />
+
+**Bài tập gợi ý**
+
+1. Trong Hình 5.5 chọn 'LEO băng S' (786 km) rồi chỉnh thành một CubeSat: phát 2 W qua anten 3 dBi, trạm có chảo 3 m. Ở góc ngẩng 10°, tốc độ tối đa là bao nhiêu với QPSK không mã? Notebook cho phép đổi cả độ cao.
+2. Vì sao truyền hình qua vệ tinh ở vùng nhiệt đới thường dùng băng C với chảo lớn, còn châu Âu dùng băng Ku với chảo nhỏ? Dùng Hình 5.6 để trả lời bằng số.
+3. Một CubeSat phát ở 437 MHz. Dùng Hình 5.12 để tính máy thu phải bám dải tần rộng bao nhiêu kHz. Nếu cùng vệ tinh chuyển sang băng X thì sao?
+4. Ở Hình 5.13, Việt Nam cần thu ảnh của một vệ tinh riêng trong ngày: thêm trạm TP.HCM cạnh Hà Nội lợi bao nhiêu phút? Một trạm ở vĩ độ cao lợi bao nhiêu?
+5. Giải thích cho một khách hàng vì sao dịch vụ băng Ka chậm hẳn khi mưa to, còn đường trung kế băng C của nhà đài thì không. Dùng Hình 5.8 để nói về ACM.
+
+## 5.15 Ôn tập
+
+<Quiz client:visible lang="vi" items={quiz} />
+
+## Tài liệu tham khảo
+
+- Airbus (2016). *Launch of the first satellite in the "SpaceDataHighway" programme* (EDRS-A, laser 1,8 Gbit/s). https://www.airbus.com/en/newsroom/press-releases/2016-01-launch-of-the-first-satellite-in-the-spacedatahighway-programme
+- CCSDS. *TM Synchronization and Channel Coding* (CCSDS 131.0-B), *AOS Space Data Link Protocol* (CCSDS 732.0-B), *Image Data Compression* (CCSDS 122.0-B), *Space Data Link Security Protocol* (CCSDS 355.0-B), Blue Books. https://public.ccsds.org
+- ESA. *Sentinel-2 data flow* (trạm X-band Matera, Maspalomas, Svalbard; laser qua EDRS tới trạm Ka). https://www.esa.int/Applications/Observing_the_Earth/Copernicus/Sentinel-2/Data_flow
+- ESA eoPortal. *Copernicus: Sentinel-2* (downlink băng X 560 Mbit/s). https://www.eoportal.org/satellite-missions/copernicus-sentinel-2
+- ETSI EN 302 307-1 V1.4.1 (2014). *Digital Video Broadcasting (DVB); Second generation framing structure, channel coding and modulation systems (DVB-S2)*, Bảng 9, 10, 13. https://www.etsi.org
+- Humphreys, T. E., Iannucci, P. A., Komodromos, Z. M., & Graff, A. M. (2023). Signal structure of the Starlink Ku-band downlink. *IEEE Transactions on Aerospace and Electronic Systems*.
+- IEEE Std 521-2019. *IEEE Standard Letter Designations for Radar-Frequency Bands*.
+- IS-GPS-200. *Navstar GPS Space Segment/Navigation User Interfaces*. https://www.gps.gov/technical/icwg/
+- ITU. *Radio Regulations* (Điều 5: bảng phân chia tần số; Điều 22: giới hạn EPFD). https://www.itu.int/pub/R-REG-RR
+- ITU-R P.618-13 (2017). *Propagation data and prediction methods required for the design of Earth-space telecommunication systems*. https://www.itu.int/rec/R-REC-P.618
+- ITU-R P.676. *Attenuation by atmospheric gases and related effects*. https://www.itu.int/rec/R-REC-P.676
+- ITU-R P.837-7 (2017). *Characteristics of precipitation for propagation modelling*. https://www.itu.int/rec/R-REC-P.837
+- ITU-R P.838-3 (2005). *Specific attenuation model for rain for use in prediction methods*. https://www.itu.int/rec/R-REC-P.838
+- ITU-R P.839-4 (2013). *Rain height model for prediction methods*. https://www.itu.int/rec/R-REC-P.839
+- del Portillo, I. *ITU-Rpy: A Python implementation of the ITU-R P. Recommendations*, version 0.4. https://github.com/inigodelportillo/ITU-Rpy
+- Kelso, T. S. *CelesTrak*. https://celestrak.org
+- Maral, G., Bousquet, M., & Sun, Z. (2020). *Satellite Communications Systems: Systems, Techniques and Technology* (6th ed.). Wiley.
+- NASA (2023). *TBIRD sets record: 200 Gbps laser link from a CubeSat*. https://www.nasa.gov
+- Nguyễn Văn Tín. *Sổ tay Vệ tinh & Viễn thám*, chương 5. CC BY 4.0. https://satellite-rs-handbook.netlify.app/
+- Pratt, T., & Allnutt, J. E. (2019). *Satellite Communications* (3rd ed.). Wiley.
+- Sklar, B. (2001). *Digital Communications: Fundamentals and Applications* (2nd ed.). Prentice Hall.
+- USGS. *Landsat ground stations*. https://www.usgs.gov/landsat-missions/usgs-landsat-ground-stations
+- USGS Publications Warehouse. *Design and implementation of the next generation Landsat satellite communications system* (publication 70193004). https://pubs.usgs.gov/publication/70193004
+- VnEconomy (15/02/2026). *Chính thức cấp phép cho Internet Starlink vào Việt Nam*. https://vneconomy.vn/chinh-thuc-cap-phep-cho-internet-starlink-vao-viet-nam.htm
+- Lockheed Martin (2008). *Lockheed Martin-built VINASAT-1 satellite launched successfully for Vietnam Posts and Telecommunications Group*. https://news.lockheedmartin.com

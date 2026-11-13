@@ -1,0 +1,592 @@
+---
+title: GNSS & positioning
+n: 7
+summary: A phone knows where it is by timing signals from satellites 20,000 km away. This chapter explains pseudoranges, the four systems GPS, Galileo, GLONASS and BeiDou as seen from Viet Nam, the four error sources and the error budget, DOP, how RTK, PPP and SBAS take accuracy from metres to centimetres, GNSS in phones, and limits such as high-rise streets, jamming and spoofing.
+objectives:
+  - Explain why a receiver measures pseudoranges and why at least 4 satellites are needed.
+  - Tell the four global and two regional systems apart by orbit and signal; read how many satellites are visible from Hanoi.
+  - Compute ionospheric and tropospheric delay and the extra path of multipath; know how each is removed.
+  - Build an error budget (UERE) and multiply it by DOP to estimate the position error.
+  - Compare RTK, PPP and SBAS by principle, accuracy, convergence time and service coverage in Viet Nam.
+  - Know where phone GNSS differs from a survey receiver, and the limits of GNSS (indoors, cities, jamming, spoofing).
+updated: "2026-11-05"
+---
+import Term from '../../../components/Term.astro';
+import Depth from '../../../components/Depth.astro';
+import Figure from '../../../components/Figure.astro';
+import LabLinks from '../../../components/LabLinks.astro';
+import Note from '../../../components/Note.astro';
+import Tiles from '../../../components/Tiles.astro';
+import Formula from '../../../components/Formula.astro';
+import Stats from '../../../components/Stats.astro';
+import Steps from '../../../components/Steps.astro';
+import Predict from '../../../islands/Predict.tsx';
+import GnssTrilat from '../../../islands/GnssTrilat.tsx';
+import GnssGlobe from '../../../islands/GnssGlobe.tsx';
+import GnssDop from '../../../islands/GnssDop.tsx';
+import GnssAtmos from '../../../islands/GnssAtmos.tsx';
+import GnssMultipath from '../../../islands/GnssMultipath.tsx';
+import GnssSkyDop from '../../../islands/GnssSkyDop.tsx';
+import GnssBudget from '../../../islands/GnssBudget.tsx';
+import GnssAugment from '../../../islands/GnssAugment.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/gnss.json';
+
+<Figure
+  title="Figure 7.1 — The GNSS sky seen from one receiver: four constellations, a sky plot and DOP"
+  try="Switch on GLONASS and BeiDou: how do the satellite count and PDOP change? Raise the mask to 30° (like standing in a narrow street). Pick Tromsø: why is the northern sky empty? Pick Quito on the equator and press Play at 3000×."
+  source="CelesTrak GP elements (OMM), groups gps-ops, galileo, glo-ops, beidou, retrieved 4 Nov 2026; epoch 05:00 UTC on 4 Nov 2026. Keplerian propagation plus secular J2 drift; against SGP4 the median error is 13–21 km, at most 83 km after 6 hours (under 0.2° in look direction). Every object in the groups, not filtered by health. DOP with one receiver clock for all systems. DOP rating follows the usual rule of thumb (≤ 1, 2, 5, 10), not a standard. Imagery © Esri, Maxar, Earthstar Geographics."
+>
+  <GnssGlobe client:visible lang="en" />
+</Figure>
+
+## 7.1 Measuring pseudoranges
+
+<Term id="gnss">GNSS</Term> does not measure position directly. Each satellite carries atomic clocks and continuously broadcasts "who I am, where I am, what time it is". The receiver compares the transmit time with the receive time and multiplies by the speed of light to get a range. Because the receiver clock (a cheap quartz crystal) is not synchronised with the satellite clocks, that range carries a common error, hence the name <Term id="pseudorange">pseudorange</Term>.
+
+<Stats items={[
+  { v: '67–86', u: 'ms', l: 'GPS signal travel time to the ground (zenith → horizon)' },
+  { v: '299.8', u: 'm', l: 'range error for a 1 µs clock offset' },
+  { v: '4', l: 'minimum satellites: x, y, z and the clock error δt' },
+]} caption="Travel time for a 20,200 km altitude; c = 299,792.458 km/s (scripts/gnss_numbers.ts)." />
+
+<Predict client:visible lang="en"
+  title="How many metres is a 1 microsecond clock error?"
+  q="The receiver clock runs 1 µs (one millionth of a second) fast. How wrong is the pseudorange to each satellite?"
+  slider={{ min: 0, max: 1000, step: 10, unit: 'm' }} answer={300} tol={30}
+  why="The signal travels 299,792.458 km per second, so 1 µs is 299.8 m and 1 ns is 0.30 m. To be within a few metres, time must be right to a few nanoseconds: that is why satellites need atomic clocks." />
+
+The pseudorange equation to satellite i puts everything the receiver measures into one line:
+
+<Formula label="Pseudorange equation" tex="\rho_i = \sqrt{(x_i - x)^2 + (y_i - y)^2 + (z_i - z)^2} + c\,\delta t + I_i + T_i + \varepsilon_i" where="
+\rho_i :: measured pseudorange to satellite i (m)
+x,\ y,\ z :: receiver position to solve for
+x_i,\ y_i,\ z_i :: satellite position at transmission, from the broadcast ephemeris
+c\,\delta t :: receiver clock error in metres, common to all satellites
+I_i,\ T_i :: ionospheric and tropospheric delay on the path
+\varepsilon_i :: multipath, receiver noise and residual satellite clock and orbit error
+" />
+
+<Note kind="key">
+
+There are **four unknowns**: x, y, z and δt. So at least **four satellites** are needed. <mark class="key">The fourth satellite is not there for "more accuracy"; it is there to solve the receiver's own clock error.</mark>
+
+</Note>
+
+Figure 7.2 shrinks the problem to a plane: two coordinates plus a clock error is three unknowns, so three satellites are needed. When δt ≠ 0, every circle grows by the same c·δt and they no longer meet at one point.
+
+<Figure
+  title="Figure 7.2 — Positioning with pseudoranges: why the clock needs one more satellite"
+  try="Set δt = 12 µs, choose unknowns 'x, y' and press Solve: how far off is the position? Switch to 'x, y, c·δt': what error remains, and is the estimated δt 12 µs? What happens with only 2 satellites?"
+  source="2D simulation without noise: ρᵢ = true range + c·δt, c = 299,792.458 km/s. Solved by Gauss–Newton from the frame centre (src/lib/gnss.ts, solve2d)."
+>
+  <GnssTrilat client:visible lang="en" />
+</Figure>
+
+Inside a receiver, from switch-on to a coordinate, there are six steps:
+
+<Steps title="How a receiver computes a position" items={[
+  { tag: 'Acquire', t: 'Acquire the signal', d: 'Correlate the incoming signal with a replica of each satellite code, searching the Doppler shift caused by satellite motion.' },
+  { tag: 'Track', t: 'Track code and carrier', d: 'A delay-lock loop holds the correlation peak, a phase-lock loop holds the carrier; from them the transmit time of every bit is read.' },
+  { tag: 'Decode', t: 'Read the navigation message', d: 'Broadcast ephemeris (orbit, satellite clock correction) and an ionosphere model. GPS L1 C/A sends 50 bit/s and the ephemeris repeats every 30 s, so without assistance this takes up to about half a minute.' },
+  { tag: 'Measure', t: 'Form pseudoranges', d: 'Receive time (receiver clock) minus transmit time (satellite clock), times c.' },
+  { tag: 'Correct', t: 'Apply corrections', d: 'Remove the satellite clock error, ionospheric delay (model or dual frequency) and tropospheric delay (model).' },
+  { tag: 'Solve', t: 'Least-squares solution', d: 'Find the x, y, z, δt that best fit all pseudoranges, iterating a few times until it converges.' },
+]} />
+
+<div class="worked">
+
+#### Example: how long does a GPS signal travel?
+
+1. A GPS satellite flies at about 20,200 km. At the zenith: t = 20,200 / 299,792 ≈ **67.4 ms**.
+2. Near the horizon the range is √((6378 + 20,200)² − 6378²) ≈ 25,800 km, i.e. **86.1 ms**.
+3. The receiver must measure these 70–90 ms to a few nanoseconds, one part in ten million.
+
+</div>
+
+<Note kind="myth">
+
+**"My phone sends a signal up to the satellite, which works out my position and sends it back."** No. GNSS is **one-way**, from satellite to user. The receiver only listens; the position is computed in the device. The satellites do not know who is using them, so the number of users is unlimited and GNSS by itself cannot "track" anyone. If your location is shared, an app sent it over the mobile network, not GNSS.
+
+</Note>
+
+<Depth level="advanced" title="Linearisation and the least-squares solution">
+
+The range equation is nonlinear. Starting from an approximate position x₀ (even the Earth's centre), a first-order Taylor expansion gives:
+
+<Formula label="Linearised model" tex="\Delta\boldsymbol{\rho} = H\,\Delta\mathbf{x}, \qquad H_i = \begin{bmatrix} -\mathbf{e}_i^{\mathsf T} & 1 \end{bmatrix}, \qquad \Delta\mathbf{x} = (H^{\mathsf T}H)^{-1}H^{\mathsf T}\Delta\boldsymbol{\rho}" where="
+\Delta\boldsymbol{\rho} :: measured pseudoranges minus ranges computed from x₀
+\mathbf{e}_i :: unit vector from the receiver to satellite i
+\Delta\mathbf{x} :: correction to (x, y, z, c·δt)
+" />
+
+Add Δx to x₀ and repeat (Gauss–Newton). Because the satellites are far away, 3–5 iterations converge, as Figure 7.2 shows. The matrix (HᵀH)⁻¹ is also where DOP comes from in section 7.4.
+
+</Depth>
+
+## 7.2 The four global systems and the regional ones
+
+All four systems put most satellites in medium Earth orbit (MEO), inclined about 55–65°, with periods of 11–14 hours. The table is computed from CelesTrak orbital elements at 05:00 UTC on 4 November 2026 (median altitude from mean motion):
+
+<div class="table-wrap">
+
+| System | Operator | Objects in CelesTrak group | MEO altitude | Inclination | Period | Main frequencies |
+|---|---|---|---|---|---|---|
+| GPS | United States | 32 | 20,182 km | 54.9° | 718.0 min | L1 1575.42 · L2 1227.60 · L5 1176.45 MHz |
+| GLONASS | Russia | 26 | 19,130 km | 65.1° | 675.7 min | L1 ~1602 · L2 ~1246 MHz (FDMA), L3 1202.025 MHz |
+| Galileo | European Union | 32 | 23,222 km | 55.6° | 844.7 min | E1 1575.42 · E5a 1176.45 · E5b 1207.14 · E6 1278.75 MHz |
+| BeiDou | China | 53 (32 MEO, 12 IGSO, 9 GEO) | 21,528 km | 54.4° | 773.2 min | B1C 1575.42 · B1I 1561.098 · B2a 1176.45 · B3I 1268.52 MHz |
+
+</div>
+
+The counts are every satellite in the CelesTrak group, **not filtered by health**: some are in maintenance, testing or retired, so fewer are actually usable. The systems deliberately share centre frequencies (1575.42 MHz and 1176.45 MHz) so one antenna and one receiver can track all four. GLONASS is the historical exception: each satellite transmits on a slightly different frequency (FDMA), so receivers must handle frequency-dependent biases.
+
+BeiDou differs from the other three by adding **geostationary (GEO)** and **inclined geosynchronous (IGSO)** satellites over Asia. That helps Viet Nam: of the 21 GEO/IGSO objects in the snapshot, **13 stay above 10° elevation at Hanoi for all 24 hours**.
+
+<Stats items={[
+  { v: '54', l: 'satellites of all 4 systems above a 10° mask at Hanoi, 12:00 on 4 Nov 2026' },
+  { v: '13', l: 'BeiDou GEO/IGSO satellites always above 10° at Hanoi' },
+  { v: '0.69', l: 'median 24-hour PDOP at Hanoi, 4 systems, 10° mask (GPS alone: 1.81)' },
+]} caption="Computed from the chapter's CelesTrak element set (scripts/gnss_numbers.ts); retired satellites not removed." />
+
+<Predict client:visible lang="en"
+  title="How many GPS satellites over Hanoi?"
+  q="At 12:00 noon on 4 Nov 2026, with a 10° mask, how many GPS satellites (out of 32 objects) does a receiver in Hanoi see?"
+  options={['About 4', 'About 8', 'About 16', 'All 32']} answer={1}
+  why="8 satellites. Fewer than a quarter of the constellation, because half is on the far side of the Earth and many are below 10°. Adding Galileo, GLONASS and BeiDou brings the count to 54." />
+
+At the default time of Figure 7.1 (GPS + Galileo, 10° mask), a receiver in Hanoi sees 18 satellites with a PDOP of 1.11. Tromsø's sky has a "hole" to the north because no orbit is inclined more than 65°: satellites never pass over the pole.
+
+### Regional systems: QZSS and NavIC
+
+Two regional systems complement the four global ones in Asia:
+
+- **QZSS** (Japan) uses inclined geosynchronous satellites tracing a figure of eight over East Asia and Australia, plus a geostationary one. Its signals are GPS-compatible, so to a receiver it is like "a few more GPS satellites high in the sky". QZSS also broadcasts two correction services: **CLAS** (centimetre-level, Japan only) and **MADOCA-PPP** (Asia-Oceania, including Viet Nam); see section 7.5.
+- **NavIC** (India) uses geostationary and inclined geosynchronous satellites covering India and its surroundings; Viet Nam is outside its primary service area.
+
+Since receivers started tracking several systems at once (<Term id="gnss-multi">multi-GNSS</Term>), the number of usable satellites has gone from about 8 to several dozen. Figure 7.3 shows where that helps most.
+
+<Figure
+  title="Figure 7.3 — PDOP versus elevation mask: one system and four"
+  try="Drag the mask from 10° to 30°. By what factor does the median GPS PDOP grow? Is there ever no fix? Compare the all-systems line. Switch to Ho Chi Minh City and Tromsø."
+  source="Same CelesTrak element set as Figure 7.1; 96 epochs 15 minutes apart from 05:00 UTC on 4 Nov 2026. PDOP with one common receiver clock (inter-system time offsets assumed known); all objects in the CelesTrak groups, not filtered by health."
+>
+  <GnssDop client:visible lang="en" />
+</Figure>
+
+Three things to read from Figure 7.3 at Hanoi:
+
+1. GPS only, 10° mask: on average **9.2** satellites, median PDOP **1.81**, worst 2.73.
+2. 30° mask (like a narrow street): GPS has on average 5.5 satellites, median PDOP **4.38**, and at times only 3 satellites, so no fix.
+3. With all four systems, a 30° mask still leaves on average 36.7 satellites and a median PDOP of **1.37**, better than GPS alone with a 10° mask.
+
+<Note kind="key">
+
+<mark class="key">Multi-GNSS helps most where the sky is blocked: cities, narrow valleys, forests.</mark> In open fields a single system already gives good geometry.
+
+</Note>
+
+<Depth level="ref" title="Inter-system time offsets">
+
+Each system has its own time scale (GPST, GST, GLONASST, BDT). A multi-system receiver either adds one clock unknown per system (each one "costs" a satellite) or uses a broadcast offset such as the Galileo–GPS GGTO. Figures 7.1 and 7.3 use one common clock, so real multi-system DOP is slightly larger than shown.
+
+</Depth>
+
+## 7.3 The four main error sources
+
+A pseudorange is the true range plus a series of errors. The four largest groups are satellite clock and orbit, the ionosphere, the troposphere and multipath. Each has its own remedy.
+
+<Tiles
+  items={[
+    { t: 'Satellite clock & orbit', d: '≤ 2.0 m (95 %, GPS SPS 2020)' },
+    { t: 'Ionosphere', d: '8–16 m on L1 (50–100 TECU)' },
+    { t: 'Troposphere', d: '2.3 m at zenith · 4.6 m at 30°' },
+    { t: 'Multipath', d: 'usually under 2–3 m; NLOS tens of m' },
+  ]}
+  sum="Pseudorange = true range + c·δt + the errors above"
+  note="Dual frequency removes the ionosphere · models remove most of the troposphere · antenna, siting and algorithms reduce multipath"
+  caption="The four error groups and their typical size. Ionosphere and troposphere from the formulas below; clock & orbit from the GPS SPS Performance Standard (2020); multipath from ESA Navipedia."
+/>
+
+### Satellite clocks and orbits
+
+GPS satellites carry rubidium or caesium atomic clocks; Galileo adds passive hydrogen masers. Even so, the satellite positions and clocks a receiver uses are **predictions** computed by the control segment and uploaded, so they drift slightly from reality. The 2020 GPS performance standard commits to a signal-in-space range error (SIS URE) of at most **2.0 m** (95 %, global average, all ages of data); in practice it is usually much smaller. IGS post-processed products are accurate to a few centimetres, and they are the basis of PPP (section 7.5).
+
+### Ionospheric delay
+
+The ionosphere (about 60–1000 km) holds free electrons knocked loose by solar radiation. The code signal is slowed in proportion to the <Term id="tec">total electron content</Term> along the path and inversely to the square of the frequency:
+
+<Formula label="First-order ionospheric delay (code)" tex="I = \frac{40.3\ \mathrm{TEC}}{f^2}\ \ [\mathrm{m}], \qquad 1\ \mathrm{TECU} = 10^{16}\ \mathrm{e/m^2} \;\Rightarrow\; I_{L1} = 0.162\ \mathrm{m/TECU}" where="
+\mathrm{TEC} :: electrons in a 1 m² column along the path (electrons/m²)
+f :: carrier frequency (Hz); L1 = 1575.42 MHz
+40.3 :: constant from the plasma refractive index (m³/s²)
+" />
+
+By day in the tropics, in years of high solar activity, vertical TEC can reach 50–100 TECU, i.e. **8.1–16.2 m** on L1. A satellite at 30° elevation looks through the ionosphere at a slant, so the TEC on its path is 1.75 times larger: 50 TECU vertical becomes 14.2 m. Viet Nam lies under the northern crest of the <Term id="gnss-eia">equatorial ionisation anomaly</Term>, one of the highest-TEC regions in the world, and post-sunset scintillation can make receivers lose lock. In October 2024 NASA and NOAA announced that the Sun had reached the maximum phase of solar cycle 25; scintillation can stay strong for a few years after the peak.
+
+Single-frequency receivers use a model broadcast in the navigation message: GPS uses the Klobuchar model, estimated to remove only **about 50 %** of the ionospheric error (RMS); Galileo uses NeQuick-G. The thorough fix is to measure on two frequencies:
+
+<Predict client:visible lang="en"
+  title="How much more does the ionosphere delay L5 than L1?"
+  q="L1 = 1575.42 MHz, L5 = 1176.45 MHz. For the same TEC, the ionospheric delay on L5 compared with L1 is:"
+  options={['The same', 'About 1.3×', 'About 1.8×', 'About 3×']} answer={2}
+  why="Delay scales as 1/f², so the ratio is (1575.42 / 1176.45)² = 1.793. Because the delay differs by frequency, measuring on two frequencies lets you solve for it and remove it." />
+
+<Formula label="Ionosphere-free combination" tex="P_{IF} = \frac{f_1^2 P_1 - f_2^2 P_2}{f_1^2 - f_2^2} \approx 2.26\,P_{L1} - 1.26\,P_{L5}" where="
+P_1,\ P_2 :: pseudoranges on the two frequencies f_1, f_2 (m)
+P_{IF} :: pseudorange with the first-order ionospheric delay removed
+" />
+
+The first-order delay (over 99 % of the total) cancels completely. The price is noise: for L1/L5 the coefficients are 2.26 and −1.26, so the noise of P_IF is about **2.59 times** the single-frequency noise (for equal, independent noise). Dual frequency therefore pays off most when measurement noise is low: the fast-chipping L5 signal, a good antenna, little multipath.
+
+<Figure
+  title="Figure 7.4 — Atmospheric delay on the slant path"
+  try="Set TEC = 100 TECU and elevation 15°: how many metres on L1? What is left after the ionosphere-free combination? Drag the elevation from 90° to 5° and see the troposphere grow faster than the ionosphere at low angles. Switch Hanoi to Sa Pa."
+  source="I = 40.3·TEC/f² with a thin-shell obliquity factor at 350 km. Zenith dry delay from Saastamoinen (1972); the Sa Pa pressure of 840 hPa is a standard-atmosphere assumption for 1.6 km, not a measurement. Zenith wet delay is an assumption (Navipedia: a few tens of centimetres). Tropospheric mapping 1/sin E. Code: src/lib/gnss.ts."
+>
+  <GnssAtmos client:visible lang="en" />
+</Figure>
+
+### Tropospheric delay
+
+The lower atmosphere (0 to about 12 km) slows **all frequencies equally**, so dual frequency cannot remove it. The delay has a **dry** (hydrostatic, about 90 %) part that depends on pressure and a **wet** part from water vapour. The dry part at the zenith follows very well from surface pressure:
+
+<Formula label="Tropospheric delay: Saastamoinen model and mapping function" tex="T(E) \approx \big(\mathrm{ZHD} + \mathrm{ZWD}\big)\,m(E), \qquad \mathrm{ZHD} = \frac{0.0022768\,P}{1 - 0.00266\cos 2\varphi - 0.00028\,H}, \qquad m(E) \approx \frac{1}{\sin E}" where="
+P :: surface pressure (hPa)
+\varphi,\ H :: station latitude and height (km)
+\mathrm{ZHD},\ \mathrm{ZWD} :: zenith hydrostatic and wet delays (m)
+m(E) :: mapping function of elevation E; 1/sin E is good to about 15°
+" />
+
+At Hanoi, with 1013.25 hPa, the zenith dry delay is **2.31 m**; at Sa Pa (1.6 km, about 840 hPa assumed) it is 1.92 m. At 30° elevation the path is twice as long, 4.62 m. At 5°, 1/sin E gives a factor of 11.5, about 26 m (standard mapping functions such as Niell give a little less). The wet part is only a few tens of centimetres but varies strongly, especially in Viet Nam's rainy season, and is the hardest residual error for RTK and PPP. Conversely, because it can be measured, the wet delay at CORS stations becomes a water-vapour data source for weather forecasting (section 7.7).
+
+<Predict client:visible lang="en"
+  title="Tropospheric delay at 30° elevation"
+  q="The zenith dry delay at Hanoi is 2.31 m. With a 1/sin E mapping, what dry delay does a satellite at 30° elevation suffer?"
+  slider={{ min: 0, max: 15, step: 0.1, unit: 'm' }} answer={4.62} tol={0.4}
+  why="1/sin 30° = 2, so the delay is 2 × 2.31 = 4.62 m. Ignored, it would lengthen pseudoranges to low satellites by almost 5 m: that is why every receiver has a tropospheric model and many use a 10–15° mask." />
+
+### Multipath
+
+Signals reflected by glass walls, water and road surfaces reach the antenna together with the direct signal. <Term id="multipath">Multipath</Term> cannot be modelled remotely because it depends on the surroundings of each antenna. According to ESA Navipedia, code multipath is usually **under 2–3 m**, but can in theory reach 1.5 code chips. On the carrier phase it never exceeds a quarter wavelength (about 5 cm on L1) and is usually under 1 cm.
+
+The worst case in high-rise streets is <Term id="gnss-nlos">NLOS</Term>: the direct ray is blocked and the receiver only gets a reflection. The pseudorange then grows by the whole extra path, possibly tens of metres, with no direct ray to "pull" it back. Figure 7.5 computes the extra path for a street cross-section.
+
+<Formula label="Extra path for a reflection off a vertical wall" tex="\Delta s = 2\,d\cos E" where="
+d :: horizontal distance from the antenna to the reflecting wall (m)
+E :: satellite elevation
+" />
+
+<Figure
+  title="Figure 7.5 — Multipath and NLOS in a street"
+  try="Pick 'High-rise street': why does the receiver still get a signal although the direct ray is blocked, and how wrong is the pseudorange? Pick 'Narrow, low-rise' and move the receiver to the middle of the street. In 'Boulevard', lower the elevation to 25°: does the extra path exceed 1.5 L5 chips (44 m)?"
+  source="2D geometric model: satellite in the plane across the street, specular reflection off the right-hand wall, antenna 1.5 m high. L1 C/A chip = c/1.023 MHz = 293.1 m; L5 chip = c/10.23 MHz = 29.3 m (IS-GPS-200, IS-GPS-705). The street sections are illustrative, not real streets. Code: src/lib/gnss.ts, canyon."
+>
+  <GnssMultipath client:visible lang="en" />
+</Figure>
+
+Figure 7.5 shows three cases: direct ray only (good), direct plus reflection (multipath, an error that is a fraction of the extra path), and reflection only (NLOS, the whole extra path, e.g. **16.1 m** in the high-rise section). Short-chip signals such as L5 (29.3 m) help: reflections delayed by more than about 1.5 chips (44 m) hardly bias the correlator, whereas with L1 C/A (293 m) every reflection in a street falls inside the zone of influence. <mark>Multipath can only be reduced on site: a good antenna, an open location, short-chip signals and algorithms that drop suspected NLOS satellites.</mark>
+
+<Note kind="tip">
+
+Place survey antennas away from walls, metal roofs and water; use a choke-ring antenna for permanent stations; and set a 10–15° mask to drop low rays that both reflect easily and cross the most atmosphere.
+
+</Note>
+
+## 7.4 DOP: geometry decides accuracy
+
+For the same range error, the computed position can be good or bad depending on where the satellites are in the sky. If they cluster on one side, the spheres intersect at shallow angles and a small error pushes the intersection far away. <Term id="dop">DOP</Term> measures that amplification, multiplying the <Term id="gnss-uere">UERE</Term>, the user equivalent range error:
+
+<Formula label="Position error = geometry × range error" tex="\sigma_{H} = \mathrm{HDOP}\cdot\sigma_{\mathrm{UERE}}, \qquad \sigma_{V} = \mathrm{VDOP}\cdot\sigma_{\mathrm{UERE}}" where="
+\sigma_{\mathrm{UERE}} :: standard deviation of the pseudorange error (m), the same for all satellites
+\sigma_H,\ \sigma_V :: horizontal and vertical position error (1σ)
+" />
+
+DOP comes from the design matrix H of section 7.1, written in the local East–North–Up frame (E, N, U) plus a clock column:
+
+<Formula label="DOP from the matrix Q" tex="Q = (H^{\mathsf T}H)^{-1}, \quad \mathrm{GDOP} = \sqrt{\operatorname{tr} Q}, \quad \mathrm{PDOP} = \sqrt{q_{EE} + q_{NN} + q_{UU}}, \quad \mathrm{HDOP} = \sqrt{q_{EE} + q_{NN}}, \quad \mathrm{VDOP} = \sqrt{q_{UU}}, \quad \mathrm{TDOP} = \sqrt{q_{TT}}" where="
+H_i :: row i: (−cos E sin A, −cos E cos A, −sin E, 1) with azimuth A and elevation E
+q_{EE},\ q_{NN},\ q_{UU},\ q_{TT} :: diagonal elements of Q for East, North, Up and clock
+" />
+
+PDOP is for 3D position, HDOP horizontal, VDOP vertical, TDOP the clock, and GDOP all of them. Almost everywhere VDOP is larger than HDOP, because no satellite below the horizon "pins" the height from underneath: at Hanoi, GPS with a 10° mask, the median 24-hour HDOP is 0.89 and VDOP 1.56. The rating below is a common convention, not a standard:
+
+<div class="table-wrap">
+
+| DOP | Rating | Good enough for |
+|---|---|---|
+| ≤ 1 | Ideal | Everything |
+| 1–2 | Good | Surveying, precise navigation |
+| 2–5 | Moderate | Consumer mapping, car navigation |
+| 5–10 | Poor | Rough guidance only |
+| > 10 | Unreliable | Discard |
+
+</div>
+
+<Figure
+  title="Figure 7.6 — DOP on a sky plot: drag satellites, watch geometry change the error"
+  try="Pick 'N–S street canyon': by what factor does HDOP grow compared with 'Open sky', and which way does the error ellipse stretch? Drag one satellite to the low East: how does the ellipse shrink? Pick 'One corner of the sky' and raise the mask to 30°."
+  source="Three hand-placed 8-satellite skies (illustrative, not a real epoch). DOP from Q = (HᵀH)⁻¹ in East–North–Up; the ellipse is the horizontal 1σ error: semi-axes = √(eigenvalues of the EN block of Q) × UERE. Code: src/lib/gnss.ts, dopQ and enEllipse."
+>
+  <GnssSkyDop client:visible lang="en" />
+</Figure>
+
+<div class="worked">
+
+#### Example: one phone, two streets
+
+1. The phone's range error is about 3 m (UERE). The open sky of Figure 7.6 has an HDOP of **0.99**, so the horizontal 1σ error ≈ 0.99 × 3 = **3.0 m**.
+2. In the north–south street canyon the two low satellites to the East and West are blocked and HDOP rises to **6.61**: horizontal 1σ ≈ 6.61 × 3 = **19.8 m**, before any multipath.
+3. The error ellipse stretches East–West (major axis at azimuth 89°), exactly where satellites are missing. That is why GPS fixes in narrow streets jump to the parallel street rather than along the street.
+
+</div>
+
+<Predict client:visible lang="en"
+  title="What if HDOP grows fourfold?"
+  q="UERE is still 3 m, but HDOP grows from 1.2 to 4.8. What is the horizontal 1σ error in metres?"
+  slider={{ min: 0, max: 30, step: 0.5, unit: 'm' }} answer={14.4} tol={1.5}
+  why="σ_H = HDOP × UERE = 4.8 × 3 = 14.4 m, four times the original 3.6 m. DOP multiplies the range error directly: bad geometry turns a good phone into a poor one." />
+
+### From error budget to position error
+
+UERE combines the independent errors of section 7.3 as a root-sum-square:
+
+<Formula label="Range error budget (UERE)" tex="\sigma_{\mathrm{UERE}} = \sqrt{\sigma_{\mathrm{sat}}^2 + \sigma_{\mathrm{iono}}^2 + \sigma_{\mathrm{tropo}}^2 + \sigma_{\mathrm{mp+noise}}^2}" where="
+\sigma_{\mathrm{sat}} :: satellite clock and orbit: 2.0 m (95 %) / 1.96 ≈ 1.02 m (GPS SPS 2020)
+\sigma_{\mathrm{iono}} :: residual after the Klobuchar model (single frequency) or 0 (dual frequency)
+\sigma_{\mathrm{tropo}} :: unmodelled wet part, 0.1 m at the zenith × 1/sin E
+\sigma_{\mathrm{mp+noise}} :: depends on the environment; ×2.59 with the ionosphere-free combination
+" />
+
+<Figure
+  title="Figure 7.7 — Error budget: UERE times DOP gives the position error"
+  try="Single-frequency receiver, TEC 30 TECU: which component dominates UERE²? Switch to dual frequency: how small does the 95 % horizontal error get? Now pick 'High-rise street' and 'GPS · 30°': why is dual frequency worse than single frequency?"
+  source="Clock & orbit: SIS URE ≤ 2.0 m (95 %) from the GPS SPS Performance Standard 2020, converted to 1σ. Ionosphere: I = 40.3·TEC/f² × obliquity, Klobuchar removes about 50 % (ESA Navipedia). Troposphere: zenith wet delay 0.1 m (Navipedia nominal) left in × 1/sin E. Multipath + noise: 0.5 / 2 / 5 m are illustrative assumptions (Navipedia: usually under 2–3 m). HDOP/VDOP: 24-hour medians at Hanoi from the CelesTrak set of 4 Nov 2026. Horizontal 95 % ≈ 2 × σ_H (2DRMS)."
+>
+  <GnssBudget client:visible lang="en" />
+</Figure>
+
+For a single-frequency receiver in open sky at Hanoi (TEC 30 TECU, typical elevation 45°, GPS, 10° mask), the ionosphere leaves 3.28 m and dominates the UERE (3.48 m). The 95 % horizontal error is about **6.2 m** and vertical **10.6 m**, within the GPS SPS standard (≤ 8 m horizontal, ≤ 13 m vertical, global average). With dual frequency, UERE drops to 1.65 m and the 95 % horizontal error to **3.0 m**. But in a high-rise street (5 m multipath, 30° mask), the ionosphere-free combination multiplies multipath by 2.59 and comes out **worse** than single frequency (41.8 m against 19.5 m, horizontal 95 %).
+
+<Note kind="key">
+
+<mark class="key">Position error = DOP × UERE.</mark> To improve, reduce either one: more satellites and a lower mask for a smaller DOP, or remove range errors with dual frequency, models and corrections (section 7.5). Where multipath is heavy, removing the ionosphere does not help; deal with multipath first.
+
+</Note>
+
+## 7.5 RTK, PPP and SBAS
+
+Standalone code positioning (like an ordinary phone) reaches a few metres. Doing better means removing the errors of section 7.3, in one of three ways: differencing with a nearby station (RTK), using precise global satellite orbits and clocks (PPP), or receiving regional corrections through geostationary satellites (SBAS).
+
+<div class="table-wrap">
+
+| Technique | Principle | Needs | Horizontal accuracy | Time |
+|---|---|---|---|---|
+| Standalone (code) | Solve 4 unknowns from pseudoranges | One receiver | ≤ 8 m (95 %, GPS SPS standard) | Instant |
+| <Term id="sbas">SBAS</Term> | Geostationary satellites broadcast regional corrections and integrity | SBAS-capable receiver inside the service area | ≤ 3 m (95 %, EGNOS Open Service) | Instant |
+| <Term id="ppp">PPP</Term> | Precise global orbits and clocks, every error modelled | Dual-frequency receiver, correction products | 0.2–0.3 m (95 %, HAS, B2b, MADOCA) | Minutes to 30 min |
+| <Term id="rtk">RTK</Term> | Difference with a nearby base, measure <Term id="carrier-phase">carrier phase</Term> | Base or CORS network within tens of km, data link | 2–4 cm (VNGEONET, tested) | Once integers are fixed |
+
+</div>
+
+<Figure
+  title="Figure 7.8 — Published accuracy of positioning methods, and whether they serve Viet Nam"
+  try="Click each row. Why does Galileo HAS have good accuracy but 'not officially' for Viet Nam? How far does BeiDou PPP-B2b reach? Compare PPP's convergence time with RTK's."
+  source="GPS SPS Performance Standard 5th ed. (2020); EGNOS Open Service SDD; BDS Open Service Performance Standard v3.0 (2021), service area as presented by BeiDou at ICG-17 (2023); QZSS: Cabinet Office of Japan notices and the MADOCA target (ICG 2022); Galileo HAS SDD Issue 1.0 (Jan 2023); VNGEONET: Tài nguyên & Môi trường newspaper, 10 Dec 2019. Each figure has its own statistic (95 % or test result), so compare orders of magnitude only."
+>
+  <GnssAugment client:visible lang="en" />
+</Figure>
+
+### 7.5.1 RTK: differencing with a nearby station
+
+RTK works because a nearby base and rover suffer almost the same satellite clock, ionospheric and tropospheric errors; differencing cancels them. On top of that RTK uses the <Term id="carrier-phase">carrier phase</Term> (19 cm wavelength on L1), not just the code, so once the integer number of cycles is known the accuracy reaches centimetres.
+
+<Steps title="How RTK works" items={[
+  { tag: '1', t: 'The base knows its exact coordinates', d: 'Its antenna sits on a surveyed mark and observes the same satellites as the rover.' },
+  { tag: '2', t: 'Send observations or corrections', d: 'The base streams data in the RTCM format, usually over the Internet with the NTRIP protocol, or by radio.' },
+  { tag: '3', t: 'Double differences', d: 'The rover differences between the two receivers and between two satellites: satellite and receiver clock errors cancel, the atmosphere almost cancels.' },
+  { tag: '4', t: 'Fix the integers', d: 'Solve the integer cycle ambiguities of the carrier phase. Before fixing the solution is "float" (dm); after, "fixed" (cm).' },
+  { tag: '5', t: 'Continuous positioning', d: 'Centimetre positions every second, as long as phase lock and the correction stream hold.' },
+]} />
+
+The farther from the base, the more the atmosphere differs between the two sites and the worse the accuracy. **Network RTK** solves this: many continuously operating reference stations (<Term id="gnss-cors">CORS</Term>) form a grid, a server interpolates the errors and sends the rover a "virtual reference station" (VRS) right next to it.
+
+In Viet Nam the national satellite positioning network **VNGEONET** is operated by the Viet Nam Department of Surveying, Mapping and Geographic Information (Cục Đo đạc, Bản đồ và Thông tin địa lý Việt Nam). According to the Ministry of Natural Resources and Environment (December 2019), it has **65 CORS stations**: 24 Geodetic CORS 150–200 km apart that anchor the national coordinate frame, and 41 NRTK CORS 50–80 km apart in three regions (Red River Delta and Thanh Hóa, Central and Central Highlands, the South), with tested RTK accuracy of **2–4 cm**. At the time the Department planned about 90–100 more NRTK stations. Commercial CORS networks and provincial or company networks exist alongside.
+
+<Stats items={[
+  { v: '65', l: 'VNGEONET CORS stations (24 Geodetic + 41 NRTK), 2019' },
+  { v: '2–4', u: 'cm', l: 'tested RTK accuracy on VNGEONET' },
+  { v: '50–80', u: 'km', l: 'spacing of the NRTK stations' },
+]} caption="Source: Tài nguyên & Môi trường newspaper (Ministry of Natural Resources and Environment), 10 Dec 2019. The current count may differ; check with the Department of Surveying, Mapping and Geographic Information." />
+
+<Note kind="warn">
+
+RTK corrections give coordinates in the **base station's frame**. Mixing VN-2000 and ITRF/WGS84 shifts points by tens of centimetres to a few metres (Chapter 10). Always state the frame and epoch when delivering data.
+
+</Note>
+
+### 7.5.2 PPP: one receiver, global corrections
+
+<Term id="ppp">PPP</Term> needs no nearby base. It uses precise satellite orbits and clocks (from IGS or a service provider), the ionosphere-free combination of code and phase, and estimates everything else.
+
+<Steps title="How PPP works" items={[
+  { tag: '1', t: 'A global network computes products', d: 'Dozens to hundreds of stations worldwide compute precise orbits, satellite clocks and signal biases.' },
+  { tag: '2', t: 'Broadcast the corrections', d: 'Over the Internet, or in the satellite signal itself: Galileo E6 (HAS), BeiDou B2b, QZSS L6 (MADOCA, CLAS).' },
+  { tag: '3', t: 'Remove the ionosphere', d: 'A dual-frequency receiver forms ionosphere-free code and carrier-phase combinations.' },
+  { tag: '4', t: 'Estimate everything together', d: 'Position, receiver clock, wet tropospheric delay and the phase ambiguities.' },
+  { tag: '5', t: 'Converge', d: 'The solution improves as the satellite geometry changes. Fixing integers (PPP-AR) or adding regional atmospheric corrections (PPP-RTK) converges faster.' },
+]} />
+
+More and more PPP corrections are broadcast **free, straight from the satellites**:
+
+- **Galileo HAS** (High Accuracy Service): the initial service started on 24 Jan 2023. The Service Level 1 targets are 20 cm horizontal and 40 cm vertical (95 %) with 300 s convergence; with Galileo + GPS the typical values are ≤ 15 cm horizontal and ≤ 20 cm vertical (68 %). But the Service Definition Document (SDD Issue 1.0) **excludes 90°–180°E, 60°S–60°N from its commitments**, which includes Viet Nam: users here can still use it, without a performance guarantee.
+- **BeiDou PPP-B2b**: broadcast by three BeiDou-3 GEO satellites. The performance standard (v3.0, 2021) commits to ≤ 0.3 m horizontal and ≤ 0.6 m vertical (95 %), convergence ≤ 30 min, over 10°–55°N, 75°–135°E. Most of Viet Nam lies inside, except the far south (Cà Mau at about 8.6°N) and the Trường Sa archipelago.
+- **QZSS MADOCA-PPP**: operational since 1 Apr 2024 over Asia-Oceania, with a target under 30 cm horizontal (95 %); Internet distribution since 1 Jul 2024. **CLAS** reaches centimetres but only for Japan.
+
+<Stats items={[
+  { v: '20', u: 'cm', l: 'Galileo HAS: 95 % horizontal target, 300 s convergence' },
+  { v: '0.3', u: 'm', l: 'BeiDou PPP-B2b: 95 % horizontal, convergence ≤ 30 min' },
+  { v: '30', u: 'cm', l: 'QZSS MADOCA-PPP: 95 % horizontal target' },
+]} caption="Galileo HAS SDD 1.0 (2023); BDS OS Performance Standard v3.0 (2021); MADOCA target (ICG 2022). These are commitments or targets, not measurements in Viet Nam." />
+
+PPP is the low-cost choice for precision farming, structure monitoring and vessels far from CORS stations, at the price of waiting for convergence.
+
+<Note kind="key">
+
+The three augmentations trade accuracy, time and infrastructure: **RTK** gives centimetres almost at once but needs a base within tens of kilometres; **PPP** gives a few decimetres anywhere but needs time to converge; **SBAS** gives a few metres instantly, with integrity, but only inside its service area.
+
+</Note>
+
+### 7.5.3 SBAS: regional corrections via geostationary satellites
+
+<Term id="sbas">SBAS</Term> was built for aviation: besides corrections it broadcasts **integrity**, telling the aircraft when not to trust a satellite.
+
+<Steps title="How SBAS works" items={[
+  { tag: '1', t: 'Reference station network', d: 'Dozens of stations across a continent monitor every GNSS satellite.' },
+  { tag: '2', t: 'Master station computes corrections', d: 'Orbit and satellite clock corrections and an ionospheric delay grid, with error bounds for each satellite.' },
+  { tag: '3', t: 'Uplink to a geostationary satellite', d: 'The GEO rebroadcasts on L1 with a GPS-like signal.' },
+  { tag: '4', t: 'The receiver applies them', d: 'No Internet needed; the receiver just needs SBAS enabled and to be inside the service area.' },
+]} />
+
+Current SBAS: WAAS (US), EGNOS (Europe), MSAS (Japan), GAGAN (India), BDSBAS (China), KASS (Korea), SouthPAN (Australia, New Zealand). The EGNOS Open Service commits to ≤ 3 m horizontal and ≤ 4 m vertical (95 %, at the worst user location). GEO signals from GAGAN or BDSBAS can be received in Viet Nam, but **no SBAS has an official service area covering Viet Nam**, so here SBAS is at best an unofficial augmentation.
+
+<Note kind="why" label="Link to remote sensing">
+
+Every Earth-observation satellite such as Sentinel-1 and Sentinel-2 carries a dual-frequency GNSS receiver for precise orbit determination: if you do not know where the satellite is, you do not know where the pixel is. On the ground, ground control points (GCPs) for image rectification and DEM checks (Chapter 17) are surveyed with RTK.
+
+</Note>
+
+## 7.6 GNSS in phones and sensor fusion
+
+A phone has a small, linearly polarised antenna held next to a body, so signals are weak and multipath is heavy. Four changes have brought phones closer to professional receivers:
+
+<Tiles
+  items={[
+    { t: 'Multi-GNSS', d: 'GPS + Galileo + GLONASS + BeiDou (+ QZSS): dozens of satellites instead of about 8' },
+    { t: 'Dual frequency L1 + L5', d: 'Since 2018 (Xiaomi Mi 8, Broadcom BCM47755 chip): L5 chips are 10× shorter, resisting multipath better' },
+    { t: 'A-GNSS', d: 'The mobile network supplies ephemeris and an approximate position: a fix in seconds' },
+    { t: 'Raw measurements', d: 'Since Android 7 (API 24, 2016) apps can read raw measurements and compute pseudoranges themselves' },
+  ]}
+  caption="Four advances of phone GNSS. Sources: EUSPA (2017) on Android raw measurements; IS-GPS-705 on the L5 chip rate."
+/>
+
+- **Dual frequency.** L5 has a 10.23 MHz chip rate, 10 times the L1 C/A code, so a chip is only 29.3 m long instead of 293 m. The correlation peak is sharper and tells reflections apart better (Figure 7.5); combined with L1 it also removes the ionosphere in open sky.
+- **A-GNSS.** Without help the receiver must decode the 50 bit/s message itself, which takes up to about 30 seconds. With A-GNSS the ephemeris comes over the mobile network and the time to first fix drops to a few seconds.
+- **Raw measurements.** Apps can read the receive time, Doppler, C/N0 and, on some phones, carrier phase. This opens the way to PPP and RTK on phones, and to inspection apps such as GPSTest.
+
+<Note kind="myth">
+
+**"Phone GPS needs the Internet (3G/4G) to work."** No. A GNSS receiver only needs the satellite signals, so it still gets a fix at sea or in mountains without coverage. The Internet only helps **A-GNSS** (a faster first fix) and loads **maps**; for offline navigation, download offline maps beforehand.
+
+</Note>
+
+In tunnels, under flyovers or between tall buildings, a phone does not rely on GNSS alone:
+
+<Steps title="Sensor fusion when the signal is weak" items={[
+  { tag: 'GNSS', t: 'Absolute position when available', d: 'Position and velocity from satellites, with a confidence estimate.' },
+  { tag: 'IMU', t: 'Bridge gaps with inertia', d: 'Accelerometers and gyroscopes carry distance and heading forward (dead reckoning) in a tunnel; the error grows with time.' },
+  { tag: 'Barometer', t: 'Floor height', d: 'A barometer measures height changes of a few metres, compensating for the large VDOP.' },
+  { tag: 'Wi-Fi', t: 'Indoor positioning', d: 'Wi-Fi, Bluetooth and cellular fingerprints replace GNSS indoors.' },
+  { tag: 'Map', t: 'Map matching', d: 'Snap GNSS points to the road network, often with a hidden Markov model, so the car does not "drive" across rooftops.' },
+]} />
+
+Phone GNSS data is the main input to mobility analytics (ride-hailing, traffic, tourism). Urban GNSS points are often 3–15 m off, so they must be map-matched before analysis. The classic method uses a hidden Markov model, with road segments as hidden states and GNSS points as noisy observations (Newson and Krumm, 2009).
+
+## 7.7 Applications and limits
+
+Beyond positioning and navigation, GNSS is invisible infrastructure for many systems:
+
+- **Time synchronisation**: 4G/5G base stations, power grids, trading venues and data centres take their time from GNSS. Many people do not know they depend on it.
+- **Surveying and deformation monitoring**: CORS stations measure tectonic motion and subsidence of millimetres per year, providing checkpoints for InSAR (Chapter 16); fixed receivers monitor dams, bridges and landslide slopes. In the Mekong Delta and Hanoi, GNSS and InSAR together measure land subsidence.
+- **GNSS meteorology**: the wet tropospheric delay at CORS stations converts to precipitable water vapour (PWV) for rain forecast models. Radio-occultation satellites such as COSMIC-2 profile atmospheric temperature and humidity from bent GNSS signals.
+- **GNSS reflectometry (GNSS-R)**: NASA's 8-microsatellite CYGNSS constellation measures GPS signals reflected by the sea to estimate hurricane winds, and over land to estimate soil moisture and flooding.
+- **Precision agriculture, autosteering**: tractors, transplanters and spraying drones use centimetre RTK.
+
+<Stats items={[
+  { v: '−158.5', u: 'dBW', l: 'minimum received GPS L1 C/A power at the ground, about 1.4 × 10⁻¹⁶ W' },
+  { v: 'Feb 2022', l: 'when EASA saw GNSS jamming and spoofing start to rise sharply around conflict zones' },
+]} caption="IS-GPS-200 (minimum received power); EASA Safety Information Bulletin 2022-02R3 (5 Jul 2024)." />
+
+GNSS signals reach the ground extremely weak, below the background noise. That makes them easy to **jam**: a low-power transmitter can blank receivers over a wide radius; and to **spoof**: transmit fake signals so a receiver computes a wrong position or time. The European Union Aviation Safety Agency's bulletin (EASA SIB 2022-02R3, July 2024) reports jamming and spoofing increasing since February 2022, especially around the Black Sea, the Baltic Sea, the Eastern Mediterranean, the Middle East and the Arctic, and stresses that spoofing is riskier than jamming because it is harder to detect.
+
+<Note kind="warn">
+
+Countermeasures: multi-frequency, multi-system receivers; navigation message authentication (Galileo OSNMA); multi-element anti-jam antennas; and IMU fusion to detect implausible position jumps. Critical infrastructure (timing for power grids, telecoms) should always have a non-GNSS backup.
+
+</Note>
+
+Where GNSS does **not** do well:
+
+- **Indoors, tunnels, underground car parks**: signals do not penetrate; Wi-Fi, Bluetooth or UWB are needed.
+- **Dense cities**: multipath, NLOS and a high mask (sections 7.3, 7.4); multi-GNSS, L5 and an IMU help.
+- **Under dense forest canopy**: signals are attenuated and errors grow.
+- **Height**: worse than horizontal (VDOP > HDOP), and it is height above the WGS84 ellipsoid, not above sea level (Chapter 10 on coordinate systems and VN-2000).
+- **Geomagnetic storms and ionospheric scintillation** in the equatorial zone after sunset: receivers lose lock and RTK/PPP lose their integer fix.
+
+<Note kind="key">
+
+<mark class="key">GNSS is accurate and free but fragile: the signal is so weak that a small device can block or fake it.</mark> Any system that needs a trustworthy position or time needs a backup.
+
+</Note>
+
+## 7.8 Hands-on
+
+The notebook loads the chapter's orbital element set, propagates it with SGP4, counts visible satellites and computes DOP at Hanoi over 24 hours, draws a sky plot, then writes a least-squares solver for a 3D position from simulated pseudoranges (with clock error and noise).
+
+<LabLinks notebook="labs/gnss_positioning.ipynb" />
+
+**Suggested exercises**
+
+1. In Figure 7.2, place the receiver outside the triangle S1–S2–S3 and solve again. How many iterations are needed? Why is this geometry worse?
+2. Compute the ionospheric delay on L1 and L5 for TEC = 30 TECU. After the ionosphere-free combination, by how much does the noise grow?
+3. In Figure 7.6, place 5 satellites to get the smallest HDOP. What rule do you find?
+4. Open a satellite-status app (e.g. GPSTest on Android) in the schoolyard and then between two buildings. Compare the count per system with Figure 7.1 and note the HDOP the app reports.
+
+## 7.9 Review
+
+<Quiz client:visible lang="en" items={quiz} />
+
+## References
+
+- Cabinet Office, Government of Japan. *QZSS notices: start of MADOCA-PPP operational service (1 Apr 2024) and Internet distribution (1 Jul 2024)*. https://qzss.go.jp/en/
+- China Satellite Navigation Office (2017). *BeiDou Navigation Satellite System Signal In Space Interface Control Document: Open Service Signal B1C* (version 1.0) and *B2a* (version 1.0). http://en.beidou.gov.cn
+- China Satellite Navigation Office (2021). *BeiDou Navigation Satellite System Open Service Performance Standard* (version 3.0); PPP service area as presented at ICG-17 (2023). https://www.unoosa.org/documents/pdf/icg/2023/ICG-17/icg17_PPP_03.pdf
+- EASA (2024). *Safety Information Bulletin 2022-02R3: Global Navigation Satellite System Outage and Alterations Leading to Communication / Navigation / Surveillance Degradation*. https://ad.easa.europa.eu/blob/EASA_SIB_2022_02_R3.pdf/SIB_2022-02R3_1
+- European Commission. *EGNOS Open Service*. https://defence-industry-space.ec.europa.eu/eu-space/egnos-satellite-navigation/egnos-open-service_en
+- European Union (2023). *European GNSS (Galileo) Open Service Signal-In-Space Interface Control Document*, Issue 2.1. https://www.gsc-europa.eu
+- EUSPA (2023). *Galileo High Accuracy Service Service Definition Document (HAS SDD)*, Issue 1.0. https://www.gsc-europa.eu/sites/default/files/sites/all/files/Galileo-HAS-SDD_v1.0.pdf
+- European GNSS Agency (2017). *Using GNSS Raw Measurements on Android Devices* (white paper). https://www.euspa.europa.eu
+- ESA Navipedia. *Klobuchar Ionospheric Model*; *Tropospheric Delay*; *Multipath*. https://gssc.esa.int/navipedia/
+- Hofmann-Wellenhof, B., Lichtenegger, H., & Wasle, E. (2008). *GNSS — Global Navigation Satellite Systems: GPS, GLONASS, Galileo, and more*. Springer.
+- Johnston, G., Riddell, A., & Hausler, G. (2017). The International GNSS Service. In P. Teunissen & O. Montenbruck (Eds.), *Springer Handbook of Global Navigation Satellite Systems* (pp. 967–982). Springer.
+- Kelso, T. S. *CelesTrak*. https://celestrak.org
+- Klobuchar, J. A. (1987). Ionospheric time-delay algorithm for single-frequency GPS users. *IEEE Transactions on Aerospace and Electronic Systems*, AES-23(3), 325–331.
+- Ministry of Natural Resources and Environment, Tài nguyên & Môi trường newspaper (10 Dec 2019). *Mạng lưới trạm định vị vệ tinh quốc gia: bước tiến mới* (The national satellite positioning network: a new step). https://nongnghiepmoitruong.vn/mang-luoi-tram-dinh-vi-ve-tinh-quoc-gia-buoc-tien-moi-d657262.html
+- Misra, P., & Enge, P. (2011). *Global Positioning System: Signals, Measurements, and Performance* (revised 2nd ed.). Ganga-Jamuna Press.
+- NASA & NOAA (15 Oct 2024). *NASA, NOAA: Sun Reaches Maximum Phase in 11-Year Solar Cycle*. https://www.nasa.gov
+- Newson, P., & Krumm, J. (2009). Hidden Markov map matching through noise and sparseness. *Proceedings of the 17th ACM SIGSPATIAL International Conference on Advances in Geographic Information Systems*, 336–343.
+- Nguyễn Văn Tín. *Sổ tay Vệ tinh & Viễn thám* (Satellite & Remote Sensing Handbook), chapter 7. CC BY 4.0. https://satellite-rs-handbook.netlify.app/
+- Saastamoinen, J. (1972). Atmospheric correction for the troposphere and stratosphere in radio ranging of satellites. In *The Use of Artificial Satellites for Geodesy*, Geophysical Monograph 15, 247–251. American Geophysical Union.
+- Teunissen, P. J. G., & Montenbruck, O. (Eds.) (2017). *Springer Handbook of Global Navigation Satellite Systems*. Springer.
+- U.S. Department of Defense (2020). *Global Positioning System Standard Positioning Service Performance Standard* (5th ed.). https://www.gps.gov
+- U.S. Space Force (2022). *IS-GPS-200* and *IS-GPS-705*: Navstar GPS Space Segment / Navigation User Interfaces. https://www.gps.gov

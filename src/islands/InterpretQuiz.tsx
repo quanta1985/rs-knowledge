@@ -62,8 +62,8 @@ export default function InterpretQuiz({ lang }: { lang: Lang }) {
       { k: T.score, v: `${score} / ${TARGETS.length}`, tone: 'accent' },
       ...(finished ? [] : [{ k: lang === 'vi' ? 'Cảnh · tổ hợp' : 'Scene · composite', v: `${SCENES.find((s) => s.id === t.scene)?.name[lang]} · ${preset.rgb.map((b) => b.slice(1)).join('-')}`, tone: 'muted' as const }]),
     ]}>
-      <p style={{ margin: '10px 0 4px', font: '600 0.95rem/1.4 var(--font-body)', color: '#e2e8f0' }}>{finished ? `${T.done}: ${score}/${TARGETS.length}` : t.q[lang]}</p>
-      {v && <p role="status" style={{ margin: '4px 0', fontWeight: 600, color: v.ok ? '#57d69a' : '#f7867a' }}>{v.ok ? T.right : T.wrong}</p>}
+      <p style={{ margin: '10px 0 4px', font: '600 0.95rem/1.4 var(--font-body)', color: 'var(--st-fg)' }}>{finished ? `${T.done}: ${score}/${TARGETS.length}` : t.q[lang]}</p>
+      {v && <p role="status" style={{ margin: '4px 0', fontWeight: 600, color: v.ok ? 'var(--st-ok)' : 'var(--st-bad)' }}>{v.ok ? T.right : T.wrong}</p>}
       {hint && !finished && <p className="muted" style={{ margin: '4px 0', fontSize: '0.8rem' }}>{t.hint[lang]}</p>}
     </StatPanel>
   );

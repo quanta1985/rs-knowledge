@@ -1,0 +1,601 @@
+---
+title: Cấu tạo & vận hành vệ tinh
+n: 4
+summary: Camera hay radar chỉ là một phần của vệ tinh. Phần còn lại, gọi là nền tảng (bus), phải lo điện, hướng nhìn, nhiệt độ, nhiên liệu, máy tính chịu bức xạ, liên lạc với mặt đất và cả việc tự rời quỹ đạo khi hết nhiệm vụ. Chương này tính từng "ngân sách" đó bằng số liệu thật, từ VNREDSat-1 tới PicoDragon, rồi đi qua các pha vận hành và bài toán rác vũ trụ.
+objectives:
+  - Phân biệt nền tảng (bus) với tải hữu ích, kể được tám phân hệ và xếp được vệ tinh theo lớp khối lượng.
+  - Tính thời gian vệ tinh nằm trong bóng Trái Đất từ độ cao và góc beta, rồi ước lượng mảng pin mặt trời và độ xả sâu của ắc quy.
+  - Đổi sai số hướng nhìn ra mét trên mặt đất; kể các cảm biến và cơ cấu chấp hành của ADCS.
+  - Dùng cân bằng bức xạ để giải thích vì sao nhiệt độ bề mặt phụ thuộc tỉ số α/ε chứ không phụ thuộc màu.
+  - Lập ngân sách Δv cho bù lực cản và hạ quỹ đạo, đổi ra khối lượng nhiên liệu cho động cơ hóa học và động cơ điện.
+  - Giải thích SEU, latch-up, TID và Dị thường Nam Đại Tây Dương, cùng các cách giảm thiểu.
+  - "Kể đường đi của một ảnh từ yêu cầu chụp tới tay người dùng, các pha vận hành từ LEOP tới cuối đời, và cách nhà vận hành tránh va chạm."
+updated: "2026-11-06"
+---
+import Term from '../../../components/Term.astro';
+import Depth from '../../../components/Depth.astro';
+import Figure from '../../../components/Figure.astro';
+import Formula from '../../../components/Formula.astro';
+import Stats from '../../../components/Stats.astro';
+import Steps from '../../../components/Steps.astro';
+import LabLinks from '../../../components/LabLinks.astro';
+import Note from '../../../components/Note.astro';
+import Tiles from '../../../components/Tiles.astro';
+import Predict from '../../../islands/Predict.tsx';
+import BusDiagram from '../../../islands/BusDiagram.tsx';
+import BusPower from '../../../islands/BusPower.tsx';
+import BusPointing from '../../../islands/BusPointing.tsx';
+import BusThermal from '../../../islands/BusThermal.tsx';
+import BusPropulsion from '../../../islands/BusPropulsion.tsx';
+import BusRadiation from '../../../islands/BusRadiation.tsx';
+import BusLatency from '../../../islands/BusLatency.tsx';
+import BusDecay from '../../../islands/BusDecay.tsx';
+import BusDebris from '../../../islands/BusDebris.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/satellite-bus.json';
+
+<Figure
+  title="Hình 4.1 — Giải phẫu một vệ tinh quan sát"
+  try="Bấm vào mảng pin rồi bấm Chạy: mức ắc quy tụt khi vệ tinh vào bóng Trái Đất. Đổi góc beta sang 60°: còn bóng tối không? Bấm động cơ và kéo độ cao xuống 400 km: lực cản ăn bao nhiêu Δv mỗi năm? Bấm liên lạc: một trạm ở Hà Nội thấy vệ tinh mấy lần mỗi ngày?"
+  source="Vệ tinh minh họa cỡ 130 kg (mảng pin 1,2 m² GaAs 28 %, tải 150 W, ắc quy 400 Wh, mặt tản nhiệt sơn trắng, B = 0,01 m²/kg, hydrazine 220 s); tỉ lệ khối lượng là minh họa. Mọi số trong bảng bên phải được tính trực tiếp bằng src/lib/bus.ts: bóng Trái Đất hình trụ, mật độ khí quyển NRLMSIS 2.1, quỹ đạo đồng bộ Mặt Trời tròn qua trạm Hòa Lạc với góc ngẩng ≥ 5°. Hình quỹ đạo không theo tỉ lệ."
+>
+  <BusDiagram client:visible lang="vi" />
+</Figure>
+
+## 4.1 Nền tảng và tải hữu ích
+
+Một vệ tinh quan sát Trái Đất gồm hai phần. **<Term id="payload">Tải hữu ích</Term>** (payload) là lý do vệ tinh được phóng: camera, radar, máy thu GNSS hay bộ phát viễn thông. **<Term id="satellite-bus">Nền tảng</Term>** (bus) là mọi thứ còn lại, giữ cho tải hữu ích sống và làm việc:
+
+<Tiles
+  items={[
+    { t: 'EPS', d: 'Pin mặt trời, ắc quy, phân phối điện' },
+    { t: 'ADCS', d: 'Bộ dò sao, con quay, bánh xe phản lực' },
+    { t: 'Nhiệt', d: 'Chăn MLI, mặt tản nhiệt, sưởi' },
+    { t: 'Đẩy', d: 'Hydrazine hoặc động cơ điện' },
+    { t: 'OBC', d: 'Máy tính, phần mềm bay, bộ nhớ ảnh' },
+    { t: 'TT&C', d: 'Lệnh lên, đo xa xuống, băng S' },
+  ]}
+  sum="Cộng với kết cấu: bảy phân hệ của nền tảng, cộng tải hữu ích là tám"
+  note="Mỗi phân hệ có một 'ngân sách' riêng: khối lượng, điện, nhiệt, dữ liệu, Δv"
+/>
+
+Nhiều hãng bán nền tảng dựng sẵn, rồi gắn tải hữu ích của khách lên. VNREDSat-1, vệ tinh quan sát quang học đầu tiên của Việt Nam (2013), do Astrium (nay là Airbus) chế tạo trên nền tảng AstroSat-100 và mang camera NAOMI chụp ảnh toàn sắc 2,5 m, đa phổ 10 m.
+
+<Note kind="key">
+
+Ảnh đẹp hay xấu không chỉ do camera. Điện không đủ thì không chụp được, hướng nhìn lệch thì ảnh lệch, nhiệt độ trôi thì tiêu cự trôi, không có trạm thu thì ảnh nằm mãi trong bộ nhớ. <mark class="key">Tải hữu ích chỉ tốt bằng nền tảng mang nó.</mark>
+
+</Note>
+
+### Vệ tinh Việt Nam to nhỏ thế nào
+
+Kích thước vệ tinh trải rộng hàng nghìn lần. NASA chia vệ tinh nhỏ theo khối lượng: **mini** 100–180 kg, **micro** 10–100 kg, **nano** 1–10 kg, **pico** 0,01–1 kg. Bảng dưới xếp các vệ tinh quan sát của Việt Nam cạnh Sentinel-2.
+
+<div class="table-wrap">
+
+| Vệ tinh | Khối lượng | Lớp | Dạng / tải hữu ích | Trạng thái |
+|---|---|---|---|---|
+| PicoDragon (2013) | khoảng 1 kg | pico/nano | CubeSat 1U, 10 × 10 × 11,35 cm; camera, thử liên lạc | thả từ ISS 19/11/2013, rơi 28/02/2014 |
+| NanoDragon (2021) | khoảng 3,8 kg | nano | CubeSat; máy thu nhận dạng tàu (AIS) | phóng 09/11/2021, không liên lạc được |
+| MicroDragon (2019) | khoảng 50 kg | micro | khối 50 × 50 × 50 cm; camera | phóng 18/01/2019, rơi 01/10/2024 |
+| VNREDSat-1 (2013) | khoảng 120 kg (các nguồn ghi 115–130 kg) | mini | AstroSat-100; NAOMI 2,5 m / 10 m, dải chụp 17,5 km | phóng 07/05/2013, vẫn hoạt động |
+| LOTUSat-1 | khoảng 600 kg | vệ tinh cỡ vừa | NEC (Nhật Bản) chế tạo; radar | chưa phóng; mục tiêu năm 2027 (tin tháng 5/2026) |
+| Sentinel-2A (để so) | 1140 kg, gồm 123 kg nhiên liệu | lớn | camera MSI 13 băng | phóng 2015 |
+
+</div>
+
+Vệ tinh càng nhỏ càng rẻ và làm nhanh, nhưng ít điện, ít chỗ cho ăng-ten và kính, khó giữ hướng chính xác, thường không có động cơ. Các mục sau đi qua từng giới hạn đó.
+
+## 4.2 Năng lượng: pin mặt trời, ắc quy và bóng Trái Đất
+
+Ngoài vũ trụ, mỗi mét vuông vuông góc với tia nắng nhận **1361 W** (hằng số Mặt Trời). Tấm pin GaAs ba lớp đổi khoảng 28 % thành điện, tấm silic khoảng 15 %. Nhưng mỗi vòng quỹ đạo vệ tinh bay qua **bóng Trái Đất** và phải sống bằng ắc quy.
+
+<Predict client:visible lang="vi"
+  title="Bao nhiêu phần mỗi vòng nằm trong bóng tối?"
+  q="Một vệ tinh bay tròn ở 700 km, mặt phẳng quỹ đạo chứa hướng Mặt Trời (góc beta = 0). Bao nhiêu phần trăm mỗi vòng nó ở trong bóng Trái Đất?"
+  slider={{ min: 0, max: 60, step: 1, unit: '%' }} answer={35.7} tol={3}
+  why="35,7 %, tức 35,3 phút trên chu kỳ 98,8 phút. Ở quỹ đạo thấp, Trái Đất che gần trọn một góc khá lớn của bầu trời nhìn từ vệ tinh. Lên cao hơn thì phần tối giảm chậm: 34,9 % ở 786 km." />
+
+<Note kind="myth">
+
+"Quỹ đạo nào cũng nửa sáng nửa tối." Sai: ở 700 km, phần tối nhiều nhất là 35,7 % vì vệ tinh ở trên cao còn thấy Mặt Trời sau khi mặt đất bên dưới đã vào đêm. Và với góc beta lớn, có những quỹ đạo gần như không bao giờ tối.
+
+</Note>
+
+Phần bóng tối phụ thuộc **<Term id="beta-angle">góc beta</Term>**, góc giữa hướng Mặt Trời và mặt phẳng quỹ đạo. Beta bằng 0 thì vệ tinh đi qua chính giữa bóng. Beta càng lớn, vệ tinh càng đi lướt mép bóng, và trên một giá trị tới hạn thì không còn bóng tối (ở 700 km là khoảng 64°).
+
+<Formula label="Phần quỹ đạo nằm trong bóng (bóng hình trụ)" tex="f_e = \frac{1}{\pi}\arccos\!\left(\frac{\sqrt{h^2 + 2R_\oplus h}}{(R_\oplus + h)\cos\beta}\right), \qquad f_e = 0 \ \text{khi}\ |\sin\beta| \ge \frac{R_\oplus}{R_\oplus + h}" where="
+f_e :: phần chu kỳ ở trong bóng Trái Đất
+h :: độ cao quỹ đạo tròn
+R_\oplus :: bán kính Trái Đất, 6378 km
+\beta :: góc beta
+" />
+
+Quỹ đạo đồng bộ Mặt Trời giữ beta gần như cố định theo năm. Sentinel-2 qua xích đạo lúc 10:30 sáng (nút giảm), beta khoảng 22° vào xuân phân, nên vẫn mất 33,8 phút trong bóng mỗi vòng. Sentinel-1 chọn quỹ đạo **bình minh – hoàng hôn** (nút tăng lúc 18:00): mặt phẳng quỹ đạo gần như vuông góc với tia nắng, beta từ khoảng 58° tới 90° theo mùa, và bóng tối nhiều nhất chỉ chiếm 19,2 % một vòng. Radar tự phát sóng, không cần nắng chiếu mặt đất, nên chọn quỹ đạo nhiều điện nhất.
+
+<Figure
+  title="Hình 4.2 — Ngân sách điện: mức pin qua ba vòng quỹ đạo"
+  try="Bắt đầu ở mặc định (786 km, SSO 10:30, 2,5 m² GaAs, tải 300 W). Thu nhỏ mảng pin tới khi đường chuyển đỏ. Đổi sang quỹ đạo bình minh – hoàng hôn: cần mảng pin nhỏ hơn bao nhiêu? Đổi sang tế bào silic thì sao?"
+  source="Quỹ đạo tròn, bóng Trái Đất hình trụ (bỏ qua vùng nửa tối), mảng pin luôn hướng Mặt Trời. Hằng số Mặt Trời 1361 W/m² (Kopp & Lean 2011); hệ số suy giảm vốn có 0,77 và hiệu suất truyền 0,6 (bóng tối) / 0,8 (có nắng) theo SMAD §11.4; hiệu suất sạc 90 % là giả định (src/lib/bus.ts)."
+>
+  <BusPower client:visible lang="vi" />
+</Figure>
+
+Mảng pin phải đủ cho hai việc: nuôi tải lúc có nắng, và nạp lại cho ắc quy phần đã xả trong bóng. Năng lượng đi qua ắc quy mất nhiều hơn, nên phần bóng tối bị chia cho hiệu suất thấp hơn:
+
+<Formula label="Công suất mảng pin cần (SMAD)" tex="P_{sa} = \frac{P_e T_e / X_e + P_d T_d / X_d}{T_d}" where="
+P_e,\ P_d :: tải trong bóng và lúc có nắng (W)
+T_e,\ T_d :: thời gian trong bóng và có nắng mỗi vòng
+X_e,\ X_d :: hiệu suất đường truyền điện qua ắc quy (0,6) và trực tiếp (0,8)
+" />
+
+<div class="worked">
+
+#### Ví dụ: mảng pin cho tải 300 W ở 786 km
+
+1. Chu kỳ 100,6 phút; với beta 22,2°, vệ tinh ở trong bóng T<sub>e</sub> = 33,8 phút, có nắng T<sub>d</sub> = 66,8 phút.
+2. P<sub>sa</sub> = (300 × 33,8 / 0,6 + 300 × 66,8 / 0,8) / 66,8 ≈ **628 W**.
+3. Một mét vuông GaAs 28 % cho 1361 × 0,28 × 0,77 ≈ 293 W, nên cần khoảng **2,14 m²** khi mới phóng. Pin còn lão hóa vì bức xạ, nên thiết kế thật dư thêm cho cuối đời nhiệm vụ.
+
+</div>
+
+Ắc quy cũng có giới hạn. **<Term id="depth-of-discharge">Độ xả sâu</Term>** (DoD) là phần dung lượng dùng mỗi lần qua bóng. Ở 700 km vệ tinh sạc xả 14,6 lần mỗi ngày, 5325 lần mỗi năm; xả càng sâu ắc quy càng mau hỏng, nên các thiết kế LEO thường giữ DoD thấp, cỡ vài chục phần trăm.
+
+<Stats items={[
+  { v: '35,3', u: 'phút', l: 'tối mỗi vòng ở 700 km, beta 0°' },
+  { v: '5325', l: 'lần sạc–xả mỗi năm ở 700 km' },
+  { v: '69', u: 'phút', l: 'nhật thực dài nhất mỗi ngày ở GEO' },
+  { v: '44', u: 'ngày', l: 'mỗi mùa nhật thực GEO, quanh hai điểm phân' },
+]} caption="Vệ tinh địa tĩnh chỉ vào bóng khi Mặt Trời gần mặt phẳng xích đạo (beta dưới 8,7°), tức khoảng 88 ngày mỗi năm, nên ắc quy GEO chịu ít chu kỳ hơn hẳn và được xả sâu hơn. Mô hình bóng hình trụ; vùng nửa tối làm thời gian thật dài thêm vài phút." />
+
+<Depth level="advanced" title="Góc beta của quỹ đạo đồng bộ Mặt Trời">
+
+Góc beta tính từ độ nghiêng i, hiệu xích kinh Ω − α☉ giữa nút tăng và Mặt Trời, và xích vĩ δ☉ của Mặt Trời:
+
+<Formula tex="\sin\beta = \cos\delta_\odot \sin i \,\sin(\Omega - \alpha_\odot) + \sin\delta_\odot \cos i" />
+
+Với quỹ đạo đồng bộ Mặt Trời, Ω − α☉ cố định theo giờ địa phương của nút: nút giảm 10:30 nghĩa là nút tăng 22:30, tức Ω − α☉ = 157,5°.
+
+</Depth>
+
+## 4.3 Điều khiển tư thế: nhìn đúng chỗ
+
+Vệ tinh không có gì để bám vào, nên muốn quay camera thì phải quay cả vệ tinh. Phân hệ **<Term id="adcs">điều khiển tư thế</Term>** (ADCS) làm hai việc: **xác định** vệ tinh đang hướng về đâu, và **điều khiển** để xoay nó tới hướng cần.
+
+<div class="table-wrap">
+
+| Cảm biến | Đo gì | Độ chính xác điển hình |
+|---|---|---|
+| Cảm biến Mặt Trời | hướng Mặt Trời | 0,005° tới 3° |
+| Cảm biến chân trời (hồng ngoại) | hướng tâm Trái Đất | 0,1° tới 1° ở LEO |
+| Từ kế | từ trường Trái Đất, so với mô hình | 1° tới 5° |
+| <Term id="star-tracker">Bộ dò sao</Term> | chụp trường sao, so danh mục sao | 1 giây cung tới 1 phút cung |
+| Con quay | tốc độ quay, nội suy giữa các lần đo sao | trôi 0,003 °/h tới 1 °/h |
+| Máy thu GNSS | vị trí, vận tốc, thời gian | vài mét |
+
+</div>
+
+Cơ cấu chấp hành gồm: **<Term id="reaction-wheel">bánh xe phản lực</Term>** quay nhanh hay chậm lại để thân vệ tinh quay ngược chiều (bảo toàn mômen động lượng), thường lắp 4 bánh để còn đủ 3 trục nếu một bánh hỏng; **<Term id="bus-cmg">con quay mômen điều khiển</Term>** (CMG) giữ một bánh quay đều rồi nghiêng trục để sinh mômen lớn, dùng trên vệ tinh cần xoay nhanh như Pléiades và trên Trạm Vũ trụ Quốc tế; **<Term id="magnetorquer">cuộn từ</Term>** đẩy vào từ trường Trái Đất để xả bớt mômen thừa mà nhiễu (khí cản, áp suất bức xạ, gradient trọng lực) dồn vào bánh xe; động cơ nhỏ dùng khi cần mômen lớn hoặc khi bánh xe bão hòa.
+
+Khi có sự cố, phần mềm đưa vệ tinh về **<Term id="bus-safe-mode">chế độ an toàn</Term>**: tắt tải hữu ích, quay mảng pin về Mặt Trời, giữ ấm ắc quy và chờ lệnh từ mặt đất.
+
+Sai số hướng nhìn nhỏ đến đâu thì đủ? Câu trả lời là so với pixel. Ở thiên đế, một góc nhỏ Δθ (radian) lệch trên mặt đất khoảng h · Δθ:
+
+<Formula label="Sai số hướng nhìn ra mét trên mặt đất (thiên đế)" tex="\Delta x \approx h\,\Delta\theta, \qquad 1'' = 4{,}85\ \mu\text{rad}" where="
+\Delta x :: độ lệch trên mặt đất
+h :: độ cao vệ tinh
+\Delta\theta :: sai số góc, tính bằng radian
+" />
+
+<Predict client:visible lang="vi"
+  title="Lệch 1 giây cung, ảnh lệch bao nhiêu mét?"
+  q="Sentinel-2 bay ở 786 km. Nếu hướng nhìn thẳng xuống lệch 1 giây cung (1/3600 độ), điểm chụp trên mặt đất lệch bao nhiêu mét?"
+  options={['khoảng 0,4 m', 'khoảng 4 m', 'khoảng 40 m', 'khoảng 400 m']} answer={1}
+  why="786 km × (1/3600 · π/180) ≈ 3,81 m. Pixel Sentinel-2 là 10 m, nên vài giây cung đã bằng nửa pixel. Lệch 0,01° (36 giây cung) là 137 m, tức gần 14 pixel." />
+
+<Figure
+  title="Hình 4.3 — Sai số hướng nhìn đổi ra mét trên mặt đất"
+  try="Chọn VNREDSat-1 (pixel 2,5 m): sai số bao nhiêu giây cung thì lệch đúng một pixel? Nghiêng camera 30° khỏi thiên đế: cùng sai số góc, độ lệch mặt đất tăng bao nhiêu?"
+  source="Hình học Trái Đất cầu bán kính 6378,137 km. Sentinel-2: độ cao danh định 786 km (ESA). VNREDSat-1: độ cao tính từ phần tử quỹ đạo CelesTrak ngày 04/11/2026 (src/lib/bus.ts, groundError)."
+>
+  <BusPointing client:visible lang="vi" />
+</Figure>
+
+Với VNREDSat-1 ở khoảng 678 km, 1 giây cung là 3,29 m trên mặt đất, nên một pixel toàn sắc 2,5 m chỉ tương ứng 0,76 giây cung. Không vệ tinh nào giữ hướng chính xác tới mức đó chỉ bằng phần cứng; ảnh được nắn lại trên mặt đất bằng điểm khống chế và mô hình địa hình (Chương 17). Yêu cầu định vị của Sentinel-2 là sai số dưới 20 m (2σ) khi chưa dùng điểm khống chế, tương đương 5,2 giây cung nhìn từ 786 km; báo cáo chất lượng của ESA cho thấy thực tế đạt khoảng 12 m.
+
+<Note kind="key">
+
+Bộ dò sao cho biết hướng tới vài giây cung, bánh xe phản lực xoay vệ tinh, cuộn từ xả mômen thừa. Phần sai số còn lại, cỡ vài mét tới vài chục mét trên mặt đất, được sửa bằng điểm khống chế khi xử lý ảnh.
+
+</Note>
+
+<Note kind="why" label="Vì sao vệ tinh nhỏ khó chụp nét?">
+
+Bánh xe phản lực, bộ dò sao tốt và kính lớn đều nặng và tốn điện. Vệ tinh 50 kg như MicroDragon không thể mang ADCS của một vệ tinh 1 tấn, nên vừa khó giữ hướng chính xác vừa khó giữ ổn định (rung, "jitter") trong lúc chụp.
+
+</Note>
+
+## 4.4 Kiểm soát nhiệt
+
+Trong chân không không có đối lưu. Nhiệt chỉ đi bằng dẫn nhiệt bên trong vệ tinh và **bức xạ** ra ngoài. Mỗi bề mặt nhận nắng theo **hệ số hấp thụ** α (phần ánh sáng Mặt Trời bị hút) và thải nhiệt theo **<Term id="emissivity">hệ số phát xạ</Term>** ε ở hồng ngoại. Khi nhiệt vào bằng nhiệt ra, bề mặt đạt nhiệt độ cân bằng:
+
+<Formula label="Cân bằng bức xạ của tấm phẳng hướng Mặt Trời (định luật Stefan–Boltzmann)" tex="\alpha S + q = \varepsilon \sigma T^4 \quad\Rightarrow\quad T = \left(\frac{\alpha S + q}{\varepsilon\sigma}\right)^{1/4}" where="
+\alpha :: hệ số hấp thụ ánh sáng Mặt Trời
+\varepsilon :: hệ số phát xạ hồng ngoại
+S :: hằng số Mặt Trời, 1361 W/m²
+q :: nhiệt tỏa từ thiết bị bên trong (W/m²)
+\sigma :: hằng số Stefan–Boltzmann, 5,67 × 10⁻⁸ W/(m²·K⁴)
+" />
+
+Không có nhiệt bên trong, nhiệt độ chỉ phụ thuộc **tỉ số α/ε**. Một tấm đen lý tưởng (α = ε = 1) lên 120 °C. Sơn trắng (α/ε = 0,22) chỉ còn −3 °C, gương OSR −52 °C. Ngược lại, nhôm bóng (α/ε = 3) lên 245 °C, mạ vàng tới 349 °C, vì kim loại bóng hút ít nắng nhưng thải nhiệt còn kém hơn.
+
+<Predict client:visible lang="vi"
+  title="Tấm nhôm bóng hay tấm sơn đen nóng hơn?"
+  q="Hai tấm phẳng cùng hướng thẳng Mặt Trời, mặt sau cách nhiệt. Một tấm sơn đen (α 0,95, ε 0,88), một tấm nhôm đánh bóng (α 0,15, ε 0,05). Tấm nào nóng hơn khi cân bằng?"
+  options={['Sơn đen, vì đen hút nắng', 'Nhôm bóng, vì gần như không thải được nhiệt', 'Bằng nhau', 'Không xác định được']} answer={1}
+  why="Nhôm bóng có α/ε = 3, cân bằng ở 245 °C; sơn đen α/ε ≈ 1,08, ở 128 °C. Thứ quyết định là tỉ số hấp thụ trên phát xạ, không phải màu mắt thấy." />
+
+<Figure
+  title="Hình 4.4 — Nhiệt độ cân bằng theo lớp phủ, và dao động qua các vòng quỹ đạo"
+  try="Chọn sơn trắng ở 700 km, beta 0°: tấm nhiệt độ dao động trong khoảng nào? Thêm nhiệt tỏa bên trong 100 W/m² để nó vào vùng xanh. Tăng độ dày tấm nhôm: biên độ dao động thay đổi thế nào? Đặt beta 70° (không còn bóng tối)."
+  source="Tấm phẳng luôn hướng Mặt Trời, bức xạ một mặt ra không gian lạnh; bỏ qua hồng ngoại và ánh sáng phản xạ từ Trái Đất. Tấm nhôm (2700 kg/m³, 900 J/(kg·K)); tích phân Euler bước 10 s; bóng Trái Đất hình trụ (src/lib/bus.ts, thermalSim). α, ε là giá trị điển hình làm tròn, chỉ đúng bậc độ lớn; lớp phủ thật đổi theo độ dày và lão hóa. Vùng xanh 0–40 °C chỉ để minh họa."
+>
+  <BusThermal client:visible lang="vi" />
+</Figure>
+
+Mỗi vòng quỹ đạo, bề mặt lại nóng lên dưới nắng và nguội đi trong bóng. Với tấm nhôm 2 mm sơn trắng ở 700 km, beta 0°, nhiệt độ dao động từ −70 °C tới −7 °C; thêm 100 W/m² nhiệt tỏa từ thiết bị bên trong, khoảng đó thành −37 °C tới 18 °C. Kỹ sư nhiệt dùng các công cụ:
+
+- **<Term id="bus-mli">Chăn cách nhiệt nhiều lớp</Term>** (MLI): hàng chục lớp màng mỏng phủ nhôm xen lưới, gần như chặn bức xạ. Lớp "giấy vàng" quen thuộc thường là màng Kapton màu hổ phách có phủ nhôm mặt sau.
+- **<Term id="bus-radiator">Mặt tản nhiệt</Term>** phủ gương OSR hoặc sơn trắng (α thấp, ε cao), đặt ở mặt ít nhận nắng.
+- **Ống nhiệt** dẫn nhiệt từ thiết bị nóng ra mặt tản nhiệt; **sưởi điện** có điều nhiệt giữ ấm ắc quy và quang học khi ở trong bóng.
+- **Làm lạnh chủ động** bằng máy làm lạnh cryo cho đầu dò hồng ngoại nhiệt (Chương 8).
+
+<Note kind="myth">
+
+"Vũ trụ lạnh nên vệ tinh lúc nào cũng lạnh." Không hẳn: chân không là chất cách nhiệt rất tốt, nên vấn đề thường là **thải nhiệt** của thiết bị ra ngoài. Một tấm nhôm bóng dưới nắng có thể lên trên 200 °C, trong khi cùng tấm đó trong bóng tối lạnh dần về hàng trăm độ âm.
+
+</Note>
+
+<Note kind="key">
+
+<mark>Nhiệt độ bề mặt được quyết định bởi α/ε, không phải màu sắc.</mark> Thiết kế nhiệt là chọn lớp phủ, cách nhiệt và mặt tản nhiệt sao cho mọi thiết bị nằm trong khoảng nhiệt độ cho phép cả lúc nắng gắt lẫn lúc trong bóng.
+
+</Note>
+
+## 4.5 Động cơ đẩy trên vệ tinh
+
+Vệ tinh cần động cơ để nâng quỹ đạo sau khi tách tên lửa, **<Term id="station-keeping">giữ quỹ đạo</Term>** trong một hành lang hẹp (để vết bay lặp lại đúng chu kỳ, Chương 2), bù lực cản, né rác và hạ quỹ đạo khi hết nhiệm vụ. Có hai họ chính.
+
+<div class="table-wrap">
+
+| Loại | Nguyên lý | <Term id="specific-impulse">Isp</Term> điển hình | Lực đẩy | Dùng cho |
+|---|---|---|---|---|
+| Khí lạnh | phụt khí nén (nitơ, butan) | 50–75 s | mN | CubeSat, chỉnh tư thế |
+| <Term id="bus-hydrazine">Hydrazine đơn thành phần</Term> | phân hủy xúc tác | 150–225 s | 0,1–vài chục N | phần lớn vệ tinh quan sát LEO |
+| Hai thành phần (MMH/NTO) | đốt nhiên liệu với chất oxy hóa | 300–340 s | vài N tới vài trăm N | vệ tinh GEO, nâng quỹ đạo |
+| <Term id="bus-electric-propulsion">Động cơ Hall</Term> | ion hóa khí trơ, gia tốc bằng điện trường | khoảng 1500–2000 s | vài chục tới vài trăm mN | Starlink, vệ tinh GEO điện |
+| Động cơ ion lưới | gia tốc ion qua lưới điện cực | 2000–5000 s | vài chục mN | tàu thăm dò, GEO |
+
+</div>
+
+Isp càng cao thì càng ít nhiên liệu cho cùng Δv, theo đúng <Term id="rocket-equation">phương trình tên lửa</Term> ở Chương 3, viết lại để ra khối lượng nhiên liệu:
+
+<Formula label="Nhiên liệu cần cho một Δv" tex="m_p = m_{dry}\left(e^{\Delta v / (I_{sp} g_0)} - 1\right)" where="
+m_p :: khối lượng nhiên liệu
+m_{dry} :: khối lượng vệ tinh khi hết nhiên liệu
+\Delta v :: tổng thay đổi vận tốc cần (m/s)
+I_{sp} :: xung lực riêng (s)
+g_0 :: 9,80665 m/s²
+" />
+
+Động cơ điện đổi lấy Isp cao bằng lực đẩy rất nhỏ, vì lực đẩy bị giới hạn bởi công suất điện mà mảng pin cấp được:
+
+<Formula label="Lực đẩy của động cơ điện" tex="F = \frac{2\eta P}{g_0 I_{sp}}" where="
+F :: lực đẩy (N)
+\eta :: hiệu suất tổng của động cơ
+P :: công suất điện cấp cho động cơ (W)
+" />
+
+<div class="worked">
+
+#### Ví dụ: động cơ Hall chạy argon của Starlink V2 Mini
+
+SpaceX công bố động cơ này cho 170 mN, Isp 2500 s ở 4,2 kW. Với hiệu suất η = 0,5: F = 2 × 0,5 × 4200 / (9,80665 × 2500) = **0,171 N**, khớp với số công bố. Lực đó chỉ cỡ trọng lượng một quả trứng nhỏ; bù lại, động cơ chạy hàng giờ mỗi ngày với rất ít khí.
+
+</div>
+
+Lượng Δv để **bù lực cản** đúng bằng phần vận tốc mà khí quyển lấy đi mỗi năm, và tăng vọt khi xuống thấp hoặc khi Mặt Trời hoạt động mạnh. Với vệ tinh có hệ số đạn đạo 0,01 m²/kg, ở 500 km cần 1,1 m/s mỗi năm khi Mặt Trời yên nhưng 19 m/s khi Mặt Trời mạnh; ở 786 km chỉ còn 0,03–0,6 m/s. **Hạ quỹ đạo có kiểm soát** (đốt một lần để cận điểm xuống 50 km, vệ tinh rơi vào vùng biển định trước) từ 786 km tốn khoảng 205 m/s, nhiều hơn hẳn tổng Δv bù lực cản.
+
+<Formula label="Δv bù lực cản mỗi năm (quỹ đạo tròn)" tex="\Delta v_{yr} = \tfrac{1}{2}\rho v^2 B \cdot t_{yr}, \qquad B = \frac{C_d A}{m}" where="
+\rho :: mật độ khí quyển ở độ cao quỹ đạo
+v :: vận tốc quỹ đạo
+B :: hệ số đạn đạo (m²/kg)
+t_{yr} :: số giây trong một năm
+" />
+
+<Figure
+  title="Hình 4.5 — Ngân sách Δv và nhiên liệu cho cả đời nhiệm vụ"
+  try="Mặc định: 700 km, 7 năm, Mặt Trời mạnh, rơi có kiểm soát. Đổi sang 'Để tự rơi': nhiên liệu còn bao nhiêu? Kéo độ cao xuống 400 km: bù lực cản chiếm bao nhiêu? So cột hydrazine với cột Hall."
+  source="Mật độ khí quyển NRLMSIS 2.1 (trung bình toàn cầu, F10.7 = 70 hoặc 200, giữ không đổi suốt nhiệm vụ). Bù lực cản = ½ ρ v² B mỗi năm; hạ quỹ đạo có kiểm soát = một lần đốt tiếp tuyến tới cận điểm 50 km; 'rơi trong 5 năm' = chuyển Hohmann tới độ cao có tuổi thọ tự nhiên 5 năm. Isp là giá trị giữa khoảng điển hình (Wertz & Larson 1999). Bỏ qua né va chạm và giữ độ nghiêng (src/lib/bus.ts)."
+>
+  <BusPropulsion client:visible lang="vi" />
+</Figure>
+
+<div class="worked">
+
+#### Ví dụ: vệ tinh 1 tấn, 7 năm ở 786 km
+
+1. Bù lực cản khi Mặt Trời mạnh suốt 7 năm (B = 0,01 m²/kg): 7 × 0,59 ≈ 4 m/s.
+2. Hạ quỹ đạo có kiểm soát tới cận điểm 50 km: 205 m/s. Tổng **209 m/s**.
+3. Với khối lượng khô 1000 kg: hydrazine (220 s) cần **102 kg**, hai thành phần (310 s) 71 kg, Hall (1600 s) 13 kg, khí lạnh (70 s) tới 356 kg.
+
+Sentinel-2 cùng độ cao mang 123 kg nhiên liệu trên tổng 1140 kg: cùng bậc độ lớn với phép tính thô này.
+
+</div>
+
+<Note kind="key">
+
+Động cơ hóa học cho lực đẩy lớn, phản ứng nhanh; động cơ điện tiết kiệm nhiên liệu gấp nhiều lần nhưng đẩy rất chậm. Ở LEO thấp, lực cản ngốn nhiên liệu; ở LEO cao, phần lớn Δv dành cho việc tự hạ quỹ đạo cuối đời.
+
+</Note>
+
+## 4.6 Máy tính, phần mềm bay và môi trường bức xạ
+
+Máy tính trên khoang (OBC, hay phân hệ C&DH) chạy **phần mềm bay**: thực thi lịch lệnh được gửi lên trước, thu số liệu đo xa, điều khiển ADCS, quản lý bộ nhớ ảnh, nén và định dạng dữ liệu. Quan trọng nhất là **<Term id="bus-fdir">FDIR</Term>** (phát hiện, cô lập và khắc phục lỗi): phần lớn thời gian vệ tinh ở ngoài tầm trạm, nên phải tự xử lý sự cố, nặng thì về chế độ an toàn.
+
+Điện tử ngoài vũ trụ bị hạt năng lượng cao bắn phá: proton và electron bị bẫy trong vành đai Van Allen, hạt từ các đợt bùng nổ Mặt Trời và tia vũ trụ. Chúng gây ba loại hỏng:
+
+<Tiles
+  items={[
+    { t: 'SEU', d: 'Một hạt lật một bit trong bộ nhớ hay thanh ghi. Mềm, sửa được' },
+    { t: 'Latch-up', d: 'Hạt kích một đường dẫn ký sinh, dòng điện tăng vọt; phải ngắt điện ngay kẻo cháy chip' },
+    { t: 'TID', d: 'Liều bức xạ tích lũy làm linh kiện trôi đặc tính rồi hỏng dần theo năm' },
+  ]}
+  sum="Hai loại đầu là 'sự kiện đơn lẻ', loại thứ ba là lão hóa"
+/>
+
+Trong đó **<Term id="bus-seu">SEU</Term>** và **<Term id="bus-latch-up">latch-up</Term>** xảy ra từng lần một, còn **<Term id="bus-tid">TID</Term>** tích lũy suốt đời nhiệm vụ.
+
+Ở LEO, phần lớn các sự cố này dồn vào **<Term id="bus-saa">Dị thường Nam Đại Tây Dương</Term>** (SAA). Trục từ của Trái Đất lệch và không đi qua tâm, nên trên Nam Mỹ và Nam Đại Tây Dương từ trường yếu nhất; vành đai bức xạ trong vì thế xuống thấp nhất ở đó, tới độ cao của các vệ tinh LEO.
+
+<Figure
+  title="Hình 4.6 — Từ trường yếu nhất ở đâu: Dị thường Nam Đại Tây Dương ở 500 km"
+  try="Rê chuột qua Nam Mỹ rồi qua Việt Nam: cường độ chênh nhau bao nhiêu lần? Kéo ngưỡng xuống 21 000 nT để thấy lõi của SAA, rồi lên 30 000 nT: vùng yếu kéo dài tới đâu?"
+  source="Cường độ từ trường tổng |B| ở độ cao 500 km, kỷ nguyên 2026.0, mô hình IGRF-14 (IAGA, hệ số từ NOAA NCEI), lưới 2°, tính bằng scripts/data/export_bus_data.py. Đây là cường độ từ trường, KHÔNG phải bản đồ thông lượng hạt: SAA là nơi vành đai bức xạ trong xuống thấp nhất vì từ trường yếu nhất. Bảng màu viridis đảo (sáng = yếu)."
+>
+  <BusRadiation client:visible lang="vi" />
+</Figure>
+
+Theo IGRF-14, ở 500 km từ trường yếu nhất khoảng 18 300 nT, tại khoảng 22° Nam, 60° Tây; trên Hà Nội là khoảng 35 300 nT, mạnh gấp 1,93 lần. Ở mặt đất, cực tiểu của SAA khoảng 22 100 nT. Nhiều thiết bị nhạy (cảm biến quang học, máy dò hạt) tạm tắt hoặc gắn cờ dữ liệu khi bay qua vùng này.
+
+Các cách giảm thiểu:
+
+- **Linh kiện chịu bức xạ** (rad-hard), ví dụ họ vi xử lý RAD750: chậm hơn chip thương mại nhiều thế hệ nhưng rất bền.
+- **<Term id="bus-edac">EDAC</Term>**: bộ nhớ có mã sửa lỗi, định kỳ "quét" để sửa bit bị lật trước khi lỗi chồng lỗi.
+- **TMR** (dư ba): ba mạch tính cùng một việc, lấy kết quả theo đa số.
+- **Watchdog**: mạch đếm giờ tự khởi động lại máy tính nếu phần mềm treo; mạch hạn dòng tự ngắt khi có latch-up.
+- **Dự phòng nóng/lạnh**: máy tính, bánh xe, bộ phát có bản sao để chuyển sang khi hỏng.
+
+Vệ tinh nhỏ kiểu NewSpace hay dùng linh kiện thương mại (COTS) rẻ và nhanh hơn, bù bằng các biện pháp trên và chấp nhận rủi ro cao hơn. Máy tính mạnh hơn cũng cho phép **xử lý trên vệ tinh**: lọc ảnh mây, nén, phát hiện tàu ngay trên quỹ đạo, chỉ gửi xuống phần có giá trị.
+
+<Note kind="key">
+
+Bức xạ ở LEO không đều: phần lớn lỗi bit rơi vào lúc bay qua SAA. Thiết kế chịu lỗi (EDAC, TMR, watchdog, FDIR) quan trọng không kém linh kiện chịu bức xạ.
+
+</Note>
+
+## 4.7 Phân đoạn mặt đất và luồng dữ liệu
+
+Vệ tinh nói chuyện với mặt đất qua hai kênh (chi tiết ở Chương 5). Kênh **<Term id="ttc">TT&C</Term>** (đo xa, bám sát và điều khiển) tốc độ thấp nhưng rất tin cậy, thường ở băng S (2025–2110 MHz lên, 2200–2290 MHz xuống), theo chuẩn <Term id="ccsds">CCSDS</Term>; đo cự ly và Doppler trên kênh này giúp xác định quỹ đạo. Ảnh đi trên kênh tốc độ cao riêng ở băng X (8025–8400 MHz dành cho quan sát Trái Đất), băng Ka, hoặc laser.
+
+Vệ tinh LEO chỉ liên lạc được khi đang trong tầm nhìn của một <Term id="ground-station">trạm mặt đất</Term>. Quỹ đạo đồng bộ Mặt Trời đi qua gần hai cực mỗi vòng, nên trạm ở vĩ độ cao thấy gần như mọi vòng bay; trạm gần xích đạo chỉ thấy vài lần mỗi ngày.
+
+<Predict client:visible lang="vi"
+  title="Trạm Hòa Lạc thấy VNREDSat-1 mấy lần mỗi ngày?"
+  q="VNREDSat-1 bay quỹ đạo đồng bộ Mặt Trời ở khoảng 680 km, khoảng 14,6 vòng mỗi ngày. Một trạm ở Hòa Lạc (21° Bắc) liên lạc được (góc ngẩng ≥ 5°) bao nhiêu lần mỗi ngày?"
+  slider={{ min: 0, max: 15, step: 0.5 }} answer={3} tol={1}
+  why="Khoảng 3 lần, tổng chừng 29 phút mỗi ngày (mô phỏng từ phần tử quỹ đạo thật). Trạm SvalSat ở Svalbard (78° Bắc) thấy cùng vệ tinh 15 lần mỗi ngày, hơn 2 giờ liên lạc. Báo chí năm 2013 cũng ghi trạm Hòa Lạc có 2–4 lần liên lạc mỗi ngày." />
+
+<Figure
+  title="Hình 4.7 — Một ngày liên lạc và thời gian ảnh nằm chờ trong bộ nhớ"
+  try="Chỉ bật Hòa Lạc: một ảnh chụp ở thời điểm ngẫu nhiên phải chờ trung bình bao lâu mới xuống được mặt đất? Bật thêm SvalSat, rồi TrollSat. Tăng góc ngẩng tối thiểu lên 15° (vì núi, nhà cao tầng): mất bao nhiêu lần qua?"
+  source="Phần tử quỹ đạo GP thật của VNREDSat-1 và Sentinel-2A (CelesTrak, 04/11/2026), lan truyền Kepler + J2 trong 48 giờ, bước 20 s (src/lib/gnss.ts). Tọa độ trạm gần đúng: Hòa Lạc 21,01° B 105,52° Đ; SvalSat 78,23° B 15,39° Đ; TrollSat 72,01° N 2,53° Đ. Thời gian chờ tính cho ảnh chụp ở thời điểm ngẫu nhiên trong ngày đầu, tới lần qua trạm kế tiếp (src/lib/bus.ts, waitStats). Không tính vệ tinh chuyển tiếp."
+>
+  <BusLatency client:visible lang="vi" />
+</Figure>
+
+<Stats items={[
+  { v: '3', u: 'lần/ngày', l: 'VNREDSat-1 qua trạm Hòa Lạc (29 phút)' },
+  { v: '15', u: 'lần/ngày', l: 'cùng vệ tinh qua SvalSat ở Svalbard' },
+  { v: '4,7', u: 'giờ', l: 'ảnh chờ trung bình nếu chỉ có trạm Hòa Lạc' },
+  { v: '20', u: 'phút', l: 'chờ trung bình với Hòa Lạc + Svalbard + Troll' },
+]} caption="Mô phỏng 48 giờ từ phần tử quỹ đạo CelesTrak ngày 04/11/2026, góc ngẩng ≥ 5°. Với chỉ trạm Hòa Lạc, có ảnh phải chờ tới 10,7 giờ." />
+
+Đó là lý do các nhà vận hành thuê mạng trạm toàn cầu (KSAT, SSC, AWS Ground Station…) theo phút, đặt trạm ở vùng cực, hoặc dùng **vệ tinh chuyển tiếp** ở GEO: hệ thống EDRS của châu Âu nhận dữ liệu Sentinel-1 và Sentinel-2 qua laser 1,8 Gbit/s rồi chuyển về trạm châu Âu gần như ngay lập tức.
+
+Với Việt Nam, hệ thống mặt đất của VNREDSat-1 gồm trung tâm vận hành thuộc Viện Hàn lâm Khoa học và Công nghệ Việt Nam, trạm điều khiển ở Khu Công nghệ cao Hòa Lạc, và một trạm thu ảnh của Bộ Tài nguyên và Môi trường. Trung tâm Điều khiển và Khai thác vệ tinh nhỏ của Viện Công nghệ Vũ trụ (STI) điều chỉnh quỹ đạo vệ tinh từ trạm Hòa Lạc. Khi chụp chính lãnh thổ Việt Nam, ảnh có thể được xả xuống ngay trong lần bay qua đó.
+
+<Steps title="Từ yêu cầu chụp đến ảnh trong tay người dùng" items={[
+  { tag: 'Yêu cầu', t: 'Đặt lịch chụp (tasking)', d: 'Người dùng nêu vùng quan tâm, khoảng thời gian, góc nghiêng tối đa, lượng mây chấp nhận được.' },
+  { tag: 'Khả thi', t: 'Tìm cơ hội chụp', d: 'Tính các lần vệ tinh bay qua vùng đó theo quỹ đạo, xếp với các yêu cầu khác, xem dự báo mây.' },
+  { tag: 'Lệnh lên', t: 'Gửi kế hoạch qua kênh TT&C', d: 'Kế hoạch chụp được nạp lên ở lần qua trạm điều khiển trước đó; với trạm Hòa Lạc chỉ có khoảng 3 cơ hội mỗi ngày.' },
+  { tag: 'Chụp', t: 'Vệ tinh xoay và chụp', d: 'ADCS xoay vệ tinh tới hướng cần, camera ghi ảnh vào bộ nhớ khối.' },
+  { tag: 'Chờ', t: 'Ảnh nằm trong bộ nhớ', d: 'Tới lần bay qua trạm thu kế tiếp: trung bình 4,7 giờ nếu chỉ có Hòa Lạc, 38 phút nếu có thêm Svalbard (Hình 4.7).' },
+  { tag: 'Xả', t: 'Truyền xuống băng X', d: 'Trong vài phút của lần qua trạm, hoặc qua vệ tinh chuyển tiếp ở GEO.' },
+  { tag: 'Xử lý', t: 'Tạo sản phẩm các mức', d: 'Giải nén, hiệu chỉnh bức xạ và hình học, tạo sản phẩm từ mức 0 tới mức 2 (Chương 12).' },
+  { tag: 'Giao', t: 'Tới tay người dùng', d: 'Qua cổng web, API hoặc đẩy thẳng lên đám mây của khách.' },
+]} />
+
+<Note kind="example" label="Việt Nam">
+
+Ở vùng nhiệt đới nhiều mây như Việt Nam, nhất là mùa mưa, một yêu cầu chụp quang học thường phải chờ nhiều lần bay qua mới có ảnh không mây (Chương 9 đếm số ngày dùng được ở Hà Nội và An Giang). Radar chụp xuyên mây (Chương 16) vì thế đặc biệt có giá trị ở đây.
+
+</Note>
+
+<Note kind="key">
+
+Một ảnh chỉ có giá trị khi nó xuống tới mặt đất. Độ trễ từ lúc chụp tới lúc dùng phụ thuộc mạng trạm nhiều hơn là vệ tinh: một trạm ở vĩ độ thấp thấy vệ tinh SSO vài lần mỗi ngày, một trạm vùng cực thấy gần như mọi vòng.
+
+</Note>
+
+## 4.8 Các pha vận hành
+
+Một nhiệm vụ đi qua các pha nối tiếp. Thời lượng dưới đây lấy từ Sentinel-2A và các vệ tinh quan sát nêu trong chương.
+
+<Steps title="Vòng đời một vệ tinh quan sát" items={[
+  { tag: 'Vài giờ – vài ngày', t: 'LEOP: phóng và quỹ đạo ban đầu', d: 'Tách khỏi tên lửa, triệt tiêu chuyển động lộn nhào, mở tấm pin, tìm Mặt Trời, bắt liên lạc lần đầu, kiểm tra sức khỏe. Sentinel-2A: phóng 23/06/2015, kết thúc LEOP ngày 26/06/2015.' },
+  { tag: 'Vài tuần – vài tháng', t: 'Chạy thử (commissioning)', d: 'Nâng quỹ đạo về đúng vị trí, thử từng phân hệ, hiệu chỉnh camera, kiểm định chất lượng dữ liệu. Sentinel-2A dự kiến ba tháng.' },
+  { tag: 'Nhiều năm', t: 'Vận hành thường xuyên', d: 'Lập kế hoạch chụp, xác định quỹ đạo, giữ quỹ đạo, đánh giá nguy cơ va chạm, cập nhật phần mềm, xử lý bất thường.' },
+  { tag: 'Tùy', t: 'Kéo dài nhiệm vụ', d: 'VNREDSat-1 thiết kế 5 năm, đã bay hơn 10 năm. Landsat 5 thiết kế 3 năm, vận hành gần 29 năm (1984–2013).' },
+  { tag: 'Vài tuần – vài tháng', t: 'Kết thúc', d: 'Hạ quỹ đạo (LEO) hoặc đẩy lên quỹ đạo nghĩa địa (GEO), xả hết nhiên liệu và ắc quy, tắt bộ phát.' },
+]} />
+
+Bước cuối gọi là **<Term id="bus-passivation">thụ động hóa</Term>**: xả hết năng lượng còn lại (nhiên liệu, khí nén, ắc quy) để vệ tinh chết không tự nổ thành mảnh vỡ. Vệ tinh GEO hết đời được đẩy lên **<Term id="bus-graveyard-orbit">quỹ đạo nghĩa địa</Term>** cao hơn vành đai địa tĩnh vài trăm km; hướng dẫn IADC đặt mức tối thiểu 235 km cộng một số hạng theo áp suất bức xạ.
+
+<Note kind="key">
+
+LEOP và chạy thử là lúc rủi ro cao nhất; vận hành thường xuyên chiếm gần hết đời vệ tinh, với FDIR và chế độ an toàn làm lưới đỡ. Cuối đời không phải là "tắt máy": phải rời quỹ đạo có ích và thụ động hóa.
+
+</Note>
+
+## 4.9 Lực cản, tránh va chạm và rác vũ trụ
+
+Ở quỹ đạo thấp vẫn còn một chút không khí. Nó hãm vệ tinh, làm quỹ đạo thấp dần (**<Term id="orbital-decay">suy giảm quỹ đạo</Term>**), rồi xuống tới khoảng 150 km thì vệ tinh rơi trong vài ngày. Mật độ không khí ở độ cao đó lại thay đổi mạnh theo **hoạt động Mặt Trời**: khi Mặt Trời mạnh, tia cực tím nung nóng và làm phồng tầng nhiệt quyển. Theo mô hình NRLMSIS 2.1, ở 400 km mật độ lúc Mặt Trời mạnh (F10.7 = 200) gấp 9,3 lần lúc Mặt Trời yên (F10.7 = 70); ở 600 km là 24,5 lần.
+
+<Predict client:visible lang="vi"
+  title="CubeSat 3U ở 500 km tự rơi sau bao lâu?"
+  q="Một CubeSat 3U nặng 4 kg, không có động cơ, được thả ở 500 km. Nó tự rơi khỏi quỹ đạo sau khoảng bao lâu?"
+  options={['Vài tuần', 'Khoảng 1 đến 11 năm, tùy Mặt Trời', 'Khoảng 100 năm', 'Không bao giờ rơi']} answer={1}
+  why="Với mô hình của Hình 4.8: 0,94 năm nếu Mặt Trời luôn mạnh, 11,4 năm nếu Mặt Trời luôn yên. Thực tế Mặt Trời đổi theo chu kỳ 11 năm, nên kết quả nằm giữa hai số đó. Ở 400 km chỉ còn 0,2–1,4 năm; ở 600 km là 3,7–72 năm." />
+
+<Figure
+  title="Hình 4.8 — Tuổi thọ quỹ đạo theo độ cao ban đầu và hoạt động Mặt Trời"
+  try="Chọn PicoDragon và đặt độ cao 415 km (quanh độ cao ISS lúc nó được thả). Mô hình cho bao nhiêu ngày? Thực tế nó rơi sau 101 ngày. Với CubeSat 3U, phải thả dưới độ cao nào để chắc chắn rơi trong 5 năm?"
+  source="Quỹ đạo tròn, da/dt = −√(μa) · ρ(a) · Cd·A/m, tích phân theo độ cao tới 150 km. Mật độ ρ: NRLMSIS 2.1 (Emmert và cs. 2021, qua pymsis), trung bình theo vĩ độ −60…60° và 12 giờ địa phương, Ap = 15, giữ hoạt động Mặt Trời không đổi. Cd = 2,2; diện tích là diện tích chiếu trung bình của khối hộp đang lộn nhào. Mô hình đơn giản: sai số cỡ hai lần là bình thường."
+>
+  <BusDecay client:visible lang="vi" />
+</Figure>
+
+Kiểm tra mô hình với hai vệ tinh Việt Nam đã rơi, theo danh mục vật thể của CelesTrak. PicoDragon được thả ở khoảng 415 km ngày 19/11/2013 và rơi ngày 28/02/2014, sau **101 ngày**; mô hình cho 55 ngày (Mặt Trời mạnh) tới 407 ngày (Mặt Trời yên), và năm 2014 gần đỉnh chu kỳ Mặt Trời 24. MicroDragon, quỹ đạo ban đầu khoảng 500 km, sống **5,7 năm** (01/2019 – 10/2024); mô hình cho 1,2 tới 14,8 năm. Cả hai đều nằm giữa hai giới hạn: mô hình đúng bậc độ lớn, không hơn.
+
+<Formula label="Phương trình suy giảm quỹ đạo tròn" tex="\frac{da}{dt} = -\sqrt{\mu a}\;\rho(a)\,B, \qquad B = \frac{C_d A}{m}" where="
+a :: bán kính quỹ đạo
+\mu :: hằng số hấp dẫn của Trái Đất
+\rho(a) :: mật độ khí quyển ở bán kính đó
+B :: hệ số đạn đạo; B lớn thì rơi nhanh
+" />
+
+### Rác vũ trụ và hội chứng Kessler
+
+Quỹ đạo thấp ngày càng đông. Danh mục công khai của CelesTrak (05/11/2026) có 34 344 vật thể đang ở quỹ đạo Trái Đất có phần tử quỹ đạo; 28 936 trong số đó nằm ở 200–2000 km. Danh mục chỉ gồm những vật đủ lớn để radar theo dõi (cỡ 10 cm trở lên ở LEO); mảnh nhỏ hơn nhiều hơn rất nhiều.
+
+<Figure
+  title="Hình 4.9 — Vật thể được theo dõi theo độ cao"
+  try="Kéo dải độ cao tới 550 km: phần lớn là gì? Rồi tới 800 km: phần mảnh vỡ là bao nhiêu, và một mảnh ở đó tự rơi sau bao lâu? Tắt 'Vệ tinh đang hoạt động' để chỉ xem 'rác'."
+  source="CelesTrak SATCAT (celestrak.org/pub/satcat.csv), truy cập 05/11/2026: vật thể chưa rơi, tâm quỹ đạo là Trái Đất, có phần tử quỹ đạo; độ cao trung bình = (viễn điểm + cận điểm)/2, ô 20 km. 'Đang hoạt động' theo mã trạng thái của CelesTrak (+, P, B, S, X); vật thể chưa rõ loại tính là mảnh vỡ. Tuổi thọ: mô hình của Hình 4.8 với B = 0,01 m²/kg. Vị trí ISS, Starlink, Sentinel-2, OneWeb là gần đúng."
+>
+  <BusDebris client:visible lang="vi" />
+</Figure>
+
+<Stats items={[
+  { v: '16 078', l: 'vệ tinh đang hoạt động ở 200–2000 km' },
+  { v: '10 141', l: 'mảnh vỡ được theo dõi ở cùng vùng' },
+  { v: '83', u: '%', l: 'vật thể ở 700–900 km là mảnh vỡ (4693 / 5655)' },
+]} caption="CelesTrak SATCAT, 05/11/2026. Ở 450–600 km có 12 041 vật thể nhưng chỉ 389 mảnh vỡ: dải này đông vì các chòm sao băng rộng, và lực cản kéo mảnh vỡ xuống trong vài năm." />
+
+Dải 700–900 km dày mảnh vỡ vì hai sự kiện: Trung Quốc thử vũ khí chống vệ tinh vào vệ tinh khí tượng Phong Vân 1C ngày 11/01/2007, tạo hơn 3000 mảnh được theo dõi; và vụ va chạm giữa Iridium 33 và Kosmos 2251 đã chết ngày 10/02/2009. Ngày 15/11/2021, Nga thử vũ khí chống vệ tinh vào Kosmos 1408, tạo hơn 1500 mảnh. Ở độ cao đó, mảnh vỡ sống hàng chục tới hàng trăm năm (Hình 4.8).
+
+Năm 1978, Donald Kessler và Burton Cour-Palais cảnh báo một ngưỡng nguy hiểm, nay gọi là **<Term id="kessler-syndrome">hội chứng Kessler</Term>**: khi mật độ vật thể đủ cao, mỗi va chạm sinh mảnh vỡ gây thêm va chạm, theo phản ứng dây chuyền, cho tới khi một dải quỹ đạo không dùng được nữa.
+
+<Note kind="myth">
+
+"Vũ trụ rộng mênh mông, hai vật không thể đâm nhau." Ở cùng một dải độ cao, hàng nghìn vật thể cắt qua quỹ đạo nhau với vận tốc tương đối tới hơn 10 km/s; một mảnh 1 cm mang năng lượng như một vụ nổ nhỏ. Vụ Iridium–Kosmos năm 2009 là va chạm thật giữa hai vệ tinh nguyên vẹn.
+
+</Note>
+
+### Tránh va chạm
+
+Các trung tâm giám sát không gian (như Lực lượng Không gian Mỹ, công bố qua Space-Track) sàng lọc mọi cặp vật thể và phát **cảnh báo <Term id="conjunction">tiếp cận gần</Term>** (Conjunction Data Message) khi dự báo hai vật đi sát nhau. Nhà vận hành tính **<Term id="bus-collision-probability">xác suất va chạm</Term>** P<sub>c</sub> từ khoảng cách gần nhất, sai số vị trí của hai vật và kích thước của chúng:
+
+<Steps title="Quyết định một lần né tránh" items={[
+  { tag: 'T − 7 ngày', t: 'Sàng lọc', d: 'Lan truyền quỹ đạo mọi vật thể, tìm các cặp sẽ đi qua nhau trong một "hộp" an toàn.' },
+  { tag: 'T − vài ngày', t: 'Tính Pc', d: 'Kết hợp khoảng cách gần nhất với elip sai số vị trí của hai vật. Sai số càng lớn, Pc càng khó tin.' },
+  { tag: 'Ngưỡng', t: 'So với ngưỡng', d: 'NASA CARA: Pc trên 10⁻⁷ cần theo dõi, trên 10⁻⁴ phải có biện pháp giảm thiểu. ESA bắt đầu lập kế hoạch cơ động khi Pc vượt khoảng 1/10 000.' },
+  { tag: 'T − 1 ngày', t: 'Lên kế hoạch và đốt', d: 'Một lần đốt nhỏ vài vòng trước điểm gặp, thường dọc theo hướng bay, rồi kiểm tra lại không tạo tiếp cận mới.' },
+]} />
+
+ESA cho biết trung bình phải cơ động tránh va chạm hơn một lần cho mỗi vệ tinh mỗi năm, phần lớn là để tránh mảnh vỡ. Các chòm sao lớn như Starlink có hệ thống tránh va chạm tự động (Chương 6). Vệ tinh không có động cơ, như phần lớn CubeSat, không né được gì.
+
+### Quy tắc cuối đời
+
+Hướng dẫn giảm thiểu rác vũ trụ của IADC từ lâu khuyến nghị vệ tinh LEO rời quỹ đạo trong vòng **25 năm** sau khi hết nhiệm vụ. Ngày 29/09/2022, Ủy ban Truyền thông Liên bang Hoa Kỳ (FCC, quyết định 22-74) siết lại thành **5 năm** cho các vệ tinh được FCC cấp phép hoặc cấp quyền tiếp cận thị trường Mỹ, kết thúc nhiệm vụ ở hoặc đi qua vùng dưới 2000 km, sau hai năm chuyển tiếp (tới 29/09/2024). ESA theo đuổi cách tiếp cận "Zero Debris" (không tạo thêm rác) vào năm 2030.
+
+Trên Hình 4.8, với hệ số đạn đạo 0,02 m²/kg, tuổi thọ tự nhiên vượt 5 năm khi độ cao ban đầu trên khoảng 460 km (Mặt Trời yên) hoặc 620 km (Mặt Trời mạnh). Cao hơn thế, vệ tinh phải có động cơ để tự hạ quỹ đạo (Hình 4.5).
+
+<Note kind="key">
+
+<mark class="key">Tuổi thọ quỹ đạo tăng theo hàm mũ với độ cao.</mark> Cùng một CubeSat, ở 400 km rơi sau vài tháng tới hơn một năm, ở 700 km sống hàng chục tới hàng trăm năm. Vì vậy rác ở 700–900 km là mối lo lâu dài nhất, và tránh va chạm cùng quy tắc 5 năm đã thành một phần cốt lõi của vận hành.
+
+</Note>
+
+## 4.10 CubeSat: vệ tinh theo khuôn
+
+**<Term id="cubesat">CubeSat</Term>** ra đời ở Đại học Bách khoa California (Cal Poly) và Stanford năm 1999 với một ý đơn giản: chuẩn hóa vỏ ngoài để mọi vệ tinh nhỏ dùng chung một bộ thả. Một đơn vị **1U** rộng 10 × 10 cm, cao 11,35 cm. Bản đặc tả CubeSat (CDS) rev. 14.1 năm 2022 cho phép 1U nặng tới 2,00 kg; các bản cũ hơn giới hạn 1,33 kg. Ghép 2U, 3U, 6U, 12U để có chỗ cho camera và pin lớn hơn.
+
+PicoDragon là CubeSat 1U do Trung tâm Vũ trụ Việt Nam làm, nặng khoảng 1 kg, được thả từ module Kibo của ISS năm 2013. Cái giá của sự rẻ và nhanh là ít điện, ít khả năng giữ hướng và thường không có động cơ: thả thấp thì sống ngắn (như PicoDragon), thả cao thì có thể thành rác hàng chục năm.
+
+<Note kind="key">
+
+CubeSat làm vũ trụ rẻ đi nhiều lần nhờ chuẩn hóa, nhưng mọi ngân sách của chương này (điện, hướng, nhiệt, bức xạ, liên lạc, cuối đời) vẫn áp dụng, chỉ chặt hơn.
+
+</Note>
+
+## 4.11 Thực hành
+
+Notebook tính phần bóng tối theo độ cao và góc beta trong một năm cho Sentinel-2 và quỹ đạo bình minh – hoàng hôn, lập ngân sách điện và mô phỏng mức ắc quy, rồi tính tuổi thọ quỹ đạo với bảng mật độ NRLMSIS. Chương này không cần Earth Engine.
+
+<LabLinks notebook="labs/satellite_power.ipynb" />
+
+**Bài tập gợi ý**
+
+1. Một CubeSat 3U có tấm pin gắn thân 0,03 m² mỗi mặt, tải trung bình 5 W. Ở 500 km với beta 0°, nó có đủ điện không?
+2. Với VNREDSat-1, sai số hướng bao nhiêu độ thì ảnh lệch 1 km? Vì sao vẫn cần nắn ảnh bằng điểm khống chế?
+3. Một mặt tản nhiệt phải thải 200 W ở 20 °C. Với sơn trắng (ε = 0,9) và không nhận nắng, cần bao nhiêu mét vuông?
+4. Vệ tinh 100 kg ở 500 km, Mặt Trời mạnh, 5 năm: so nhiên liệu hydrazine với động cơ Hall (dùng Hình 4.5).
+5. Vì sao chòm sao Starlink (Chương 6) chọn thả vệ tinh ở độ cao thấp rồi mới nâng lên?
+
+## 4.12 Ôn tập
+
+<Quiz client:visible lang="vi" items={quiz} />
+
+## Tài liệu tham khảo
+
+- Cal Poly CubeSat Program (2022). *CubeSat Design Specification*, Rev. 14.1. https://www.nasa.gov/wp-content/uploads/2018/01/cubesatdesignspecificationrev14_12022-02-09.pdf
+- CelesTrak. SATCAT (satcat.csv), truy cập 05/11/2026; bản ghi PICODRAGON (39413), MICRODRAGON (43935); phần tử GP truy cập 04/11/2026. https://celestrak.org/satcat/search.php
+- Dân trí / DTiNews (2013). Bài về hệ thống mặt đất VNREDSat-1 (trung tâm vận hành, trạm Hòa Lạc, trạm thu ảnh). https://dtinews.dantri.com.vn/print/20130504143804400.htm
+- Emmert, J. T., Drob, D. P., Picone, J. M., và cs. (2021). NRLMSIS 2.0: A whole-atmosphere empirical model of temperature and neutral species densities. *Earth and Space Science*, 8, e2020EA001321. https://doi.org/10.1029/2020EA001321
+- eoPortal. VNREDSat-1. https://www.eoportal.org/satellite-missions/vnredsat-1
+- eoPortal. Pico Dragon. https://www.eoportal.org/satellite-missions/pico-dragon
+- ESA. Sentinel-2: Facts and figures. https://www.esa.int/Applications/Observing_the_Earth/Copernicus/Sentinel-2/Facts_and_figures
+- ESA (2015). Sentinel-2A completes critical first days in space. https://www.esa.int/Applications/Observing_the_Earth/Copernicus/Sentinel-2/Sentinel-2A_completes_critical_first_days_in_space
+- ESA. Sentinel-2 Data Quality Report. https://sentinel.esa.int/documents/247904/685211/Sentinel-2+Data+Quality+Report
+- ESA. Sentinel-1 orbit. https://sentinels.copernicus.eu/web/sentinel/missions/sentinel-1/satellite-description/orbit
+- ESA. Automating collision avoidance. https://www.esa.int/Space_Safety/Space_Debris/Automating_collision_avoidance
+- ESA. European Data Relay System (EDRS). https://www.esa.int/Applications/Connectivity_and_Secure_Communications/European_Data_Relay_System_EDRS_Overview
+- FCC (2022). *Space Innovation; Mitigation of Orbital Debris in the New Space Age*, Second Report and Order, FCC 22-74. https://docs.fcc.gov/public/attachments/FCC-22-74A1.pdf
+- Gilmore, D. G. (Ed.) (2002). *Spacecraft Thermal Control Handbook*, Vol. I (2nd ed.). The Aerospace Press.
+- Gunter's Space Page. MicroDragon. https://space.skyrocket.de/doc_sdat/microdragon.htm
+- IADC. *IADC Space Debris Mitigation Guidelines*. Inter-Agency Space Debris Coordination Committee. https://www.iadc-home.org/documents_public
+- IAGA (2024). International Geomagnetic Reference Field, 14th generation (IGRF-14), hệ số tại NOAA NCEI. https://www.ngdc.noaa.gov/IAGA/vmod/coeffs/igrf14coeffs.txt
+- Kessler, D. J., & Cour-Palais, B. G. (1978). Collision frequency of artificial satellites: The creation of a debris belt. *Journal of Geophysical Research*, 83(A6), 2637–2646. https://doi.org/10.1029/JA083iA06p02637
+- Kopp, G., & Lean, J. L. (2011). A new, lower value of total solar irradiance: Evidence and climate significance. *Geophysical Research Letters*, 38, L01706. https://doi.org/10.1029/2010GL045777
+- NASA. Small Spacecraft Technology State of the Art, ch. 1 (phân loại vệ tinh nhỏ theo khối lượng). https://www.nasa.gov/smallsat-institute/sst-soa/
+- NASA CARA. Close approach risk assessment. https://www.nasa.gov/cara/close-approach-risk-assessment
+- NASA Orbital Debris Program Office. *Orbital Debris Quarterly News* (vụ thử ASAT 2007, va chạm Iridium 33 – Kosmos 2251 năm 2009, vụ thử ASAT Kosmos 1408 năm 2021). https://orbitaldebris.jsc.nasa.gov/quarterly-news/
+- Nhân Dân (2024). Making efficient use of VNREDSat-1 satellite. https://en.nhandan.vn/making-efficient-use-of-vnredsat-1-satellite-post12759.html
+- Nguyễn Văn Tín. *Sổ tay Vệ tinh & Viễn thám*, chương 4. CC BY 4.0. https://satellite-rs-handbook.netlify.app/
+- SpaceNews (2023). SpaceX launches first upgraded Starlink satellites (động cơ Hall argon 170 mN, 2500 s, 4,2 kW). https://spacenews.com/?p=145860
+- Tuổi Trẻ News (2026). Japan aims for 2027 launch of Vietnam's LOTUSat-1 Earth observation satellite. https://news.tuoitre.vn/japan-aims-for-2027-launch-of-vietnams-lotusat-1-earth-observation-satellite-103260504134743019.htm
+- USGS. Landsat 5. https://www.usgs.gov/landsat-missions/landsat-5
+- VOV (2021). Vietnam's NanoDragon satellite passes final tests before launch in Japan. https://amp.vov.vn/en/society/vietnams-nanodragon-satellite-pass-final-tests-before-launch-in-japan-883489.vov
+- Wertz, J. R., & Larson, W. J. (Eds.) (1999). *Space Mission Analysis and Design* (3rd ed.), ch. 11 Spacecraft subsystems, ch. 17 Space propulsion systems. Microcosm / Kluwer.

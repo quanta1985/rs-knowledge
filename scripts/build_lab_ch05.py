@@ -6,9 +6,9 @@
 from labkit import MD, PY, main
 
 CELLS = [
-    (MD, """# Lab 5 — Hệ tọa độ, VN-2000, raster và vector / CRS, VN-2000, raster and vector
+    (MD, """# Lab 10 — Hệ tọa độ, VN-2000, raster và vector / CRS, VN-2000, raster and vector
 
-**Sổ tay Viễn thám & GIS — Chương 5** · [Mở chương / Open chapter](https://quanta1985.github.io/rs-knowledge/vi/ch05-gis/)
+**Sổ tay Viễn thám & GIS — Chương 10** · [Mở chương / Open chapter](https://quanta1985.github.io/rs-knowledge/vi/ch05-gis/)
 
 1. Một điểm qua WGS84, UTM, VN-2000 bằng `pyproj` / One point through WGS84, UTM and VN-2000 with `pyproj`.
 2. Tự viết phép Helmert 7 tham số và so với PROJ / Write the 7-parameter Helmert yourself and compare with PROJ.

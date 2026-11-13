@@ -1,0 +1,582 @@
+[
+ {
+  "q": {
+   "vi": "Khoảng cách tới vệ tinh tăng gấp đôi thì suy hao không gian tự do tăng bao nhiêu?",
+   "en": "If the distance to a satellite doubles, how much does free-space path loss grow?"
+  },
+  "options": [
+   {
+    "vi": "Khoảng 6 dB",
+    "en": "About 6 dB"
+   },
+   {
+    "vi": "Khoảng 3 dB",
+    "en": "About 3 dB"
+   },
+   {
+    "vi": "Gấp đôi số dB",
+    "en": "The dB value doubles"
+   },
+   {
+    "vi": "Không đổi, sóng vô tuyến không suy hao trong chân không",
+    "en": "Nothing, radio waves do not weaken in vacuum"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "FSPL tỉ lệ với d², tức 20·log10(2) = 6,02 dB mỗi lần gấp đôi khoảng cách. Năng lượng không mất đi mà loang ra trên mặt cầu lớn hơn.",
+   "en": "FSPL scales with d², i.e. 20·log10(2) = 6.02 dB per doubling. Energy is not lost; it spreads over a larger sphere."
+  }
+ },
+ {
+  "q": {
+   "vi": "Thay chảo thu 1,2 m bằng chảo 2,4 m (cùng tần số, cùng hiệu suất). Độ lợi thay đổi thế nào?",
+   "en": "A 1.2 m receive dish is replaced by a 2.4 m dish (same frequency and efficiency). How does the gain change?"
+  },
+  "options": [
+   {
+    "vi": "Tăng 6 dB và búp sóng hẹp một nửa",
+    "en": "It rises 6 dB and the beam halves"
+   },
+   {
+    "vi": "Tăng 3 dB, búp sóng giữ nguyên",
+    "en": "It rises 3 dB, same beam"
+   },
+   {
+    "vi": "Tăng gấp đôi số dBi",
+    "en": "The dBi value doubles"
+   },
+   {
+    "vi": "Không đổi vì công suất phát không đổi",
+    "en": "No change because transmit power is the same"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Độ lợi tỉ lệ với diện tích chảo (D²): gấp đôi đường kính là gấp bốn lần, +6 dB. Búp hẹp lại nên phải bám vệ tinh chính xác hơn.",
+   "en": "Gain scales with dish area (D²): double the diameter is four times the area, +6 dB. The narrower beam must be pointed more precisely."
+  }
+ },
+ {
+  "q": {
+   "vi": "Vì sao vệ tinh quan sát Trái Đất tải ảnh xuống ở băng X chứ không ở băng S?",
+   "en": "Why do Earth-observation satellites download imagery in X-band rather than S-band?"
+  },
+  "options": [
+   {
+    "vi": "Băng X có nhiều băng thông hơn cho tốc độ hàng trăm Mbit/s mà mưa vẫn chỉ gây suy hao nhỏ",
+    "en": "X-band has more bandwidth for hundreds of Mbit/s while rain still causes little loss"
+   },
+   {
+    "vi": "Băng X có suy hao không gian tự do nhỏ hơn",
+    "en": "X-band has lower free-space path loss"
+   },
+   {
+    "vi": "Băng S bị tầng điện ly chặn hoàn toàn",
+    "en": "The ionosphere blocks S-band completely"
+   },
+   {
+    "vi": "Băng X đi thẳng qua Trái Đất tới mọi trạm",
+    "en": "X-band passes through the Earth to every station"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Băng EESS 8025–8400 MHz rộng 375 MHz, đủ cho vài trăm Mbit/s. Băng S hẹp hơn nhiều nên dùng cho TT&C tốc độ thấp. Băng X còn có FSPL lớn hơn băng S, nhưng chảo trạm bù được.",
+   "en": "The 8025–8400 MHz EESS band is 375 MHz wide, enough for hundreds of Mbit/s. S-band is much narrower and carries low-rate TT&C. X-band actually has more FSPL than S-band; ground dishes make up for it."
+  }
+ },
+ {
+  "q": {
+   "vi": "Trong ngân sách đường truyền, vì sao làm việc bằng dB?",
+   "en": "Why are link budgets worked in dB?"
+  },
+  "options": [
+   {
+    "vi": "Phép nhân các hệ số rất lớn và rất nhỏ trở thành phép cộng trừ",
+    "en": "Multiplying very large and very small factors becomes adding and subtracting"
+   },
+   {
+    "vi": "Vì dB là đơn vị công suất chuẩn SI",
+    "en": "Because dB is the SI unit of power"
+   },
+   {
+    "vi": "Để làm tròn số cho đẹp",
+    "en": "To round numbers nicely"
+   },
+   {
+    "vi": "Vì máy thu chỉ đo được dB",
+    "en": "Because receivers can only measure dB"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Công suất 10 W nhân độ lợi 10⁵ chia suy hao 10¹⁸… trong dB chỉ còn 10 + 50 − 180. dB là tỉ số logarit, không phải đơn vị SI.",
+   "en": "10 W times a gain of 10⁵ divided by a loss of 10¹⁸… becomes 10 + 50 − 180 in dB. dB is a logarithmic ratio, not an SI unit."
+  }
+ },
+ {
+  "q": {
+   "vi": "Truyền nhanh gấp 10 lần với cùng C/N0 thì Eb/N0 thay đổi thế nào?",
+   "en": "Sending 10 times faster with the same C/N0 changes Eb/N0 by how much?"
+  },
+  "options": [
+   {
+    "vi": "Giảm 10 dB",
+    "en": "It drops 10 dB"
+   },
+   {
+    "vi": "Giảm 20 dB",
+    "en": "It drops 20 dB"
+   },
+   {
+    "vi": "Không đổi",
+    "en": "No change"
+   },
+   {
+    "vi": "Tăng 10 dB",
+    "en": "It rises 10 dB"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Eb/N0 = C/N0 − 10·log10(Rb). Cùng công suất chia cho gấp 10 lần số bit mỗi giây, mỗi bit nhận ít năng lượng hơn 10 lần.",
+   "en": "Eb/N0 = C/N0 − 10·log10(Rb). The same power shared over ten times as many bits per second leaves each bit one tenth of the energy."
+  }
+ },
+ {
+  "q": {
+   "vi": "Một vệ tinh truyền hình băng Ku cần biên dự trữ lớn ở Hà Nội chủ yếu vì lý do nào?",
+   "en": "A Ku-band TV satellite needs a large margin in Hanoi mainly because of what?"
+  },
+  "options": [
+   {
+    "vi": "Mưa nhiệt đới: khoảng 0,1 % thời gian trong năm suy hao vượt quá 5 dB",
+    "en": "Tropical rain: for about 0.1 % of the year attenuation exceeds 5 dB"
+   },
+   {
+    "vi": "Tầng điện ly ở vĩ độ thấp",
+    "en": "The low-latitude ionosphere"
+   },
+   {
+    "vi": "Vệ tinh địa tĩnh trôi khỏi vị trí mỗi ngày",
+    "en": "The geostationary satellite drifting off station every day"
+   },
+   {
+    "vi": "Hiệu ứng Doppler",
+    "en": "The Doppler effect"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Theo ITU-R P.618 với số liệu mưa P.837, tuyến 12 GHz từ Hà Nội tới 132°E bị suy hao hơn 5 dB trong 0,1 % thời gian một năm (khoảng 9 giờ) và hơn 13 dB trong 0,01 %.",
+   "en": "With ITU-R P.618 and P.837 rain data, the 12 GHz path from Hanoi to 132°E loses more than 5 dB for 0.1 % of the year (about 9 hours) and more than 13 dB for 0.01 %."
+  }
+ },
+ {
+  "q": {
+   "vi": "Một trạm ở Hà Nội liên lạc được với Sentinel-2A bao lâu mỗi ngày (góc che 5°)?",
+   "en": "How long per day can a station in Hanoi talk to Sentinel-2A (5° mask)?"
+  },
+  "options": [
+   {
+    "vi": "Khoảng 40 phút, chia thành vài lượt khoảng 10 phút",
+    "en": "About 40 minutes, in a few passes of about 10 minutes"
+   },
+   {
+    "vi": "Cả ngày, vì vệ tinh luôn ở trên trời Việt Nam",
+    "en": "All day, because the satellite always stays over Viet Nam"
+   },
+   {
+    "vi": "Khoảng 2 phút",
+    "en": "About 2 minutes"
+   },
+   {
+    "vi": "Khoảng 6 giờ",
+    "en": "About 6 hours"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Tính từ phần tử quỹ đạo CelesTrak ngày 04/11/2026: 4 lượt, tổng 37,9 phút. Trạm Svalbard ở 78°N thấy cùng vệ tinh 15 lượt, tổng 156 phút, vì mọi quỹ đạo cực đều đi qua gần đó.",
+   "en": "From CelesTrak elements of 4 Nov 2026: 4 passes, 37.9 minutes in total. A Svalbard station at 78°N sees the same satellite on 15 passes, 156 minutes, because every polar orbit passes nearby."
+  }
+ },
+ {
+  "q": {
+   "vi": "Gọi điện thoại qua một vệ tinh địa tĩnh, tín hiệu đi một chiều (mặt đất → vệ tinh → mặt đất) mất ít nhất bao lâu?",
+   "en": "For a phone call through a geostationary satellite, how long does a one-way hop (ground → satellite → ground) take at least?"
+  },
+  "options": [
+   {
+    "vi": "Khoảng 0,24 giây",
+    "en": "About 0.24 s"
+   },
+   {
+    "vi": "Khoảng 0,02 giây",
+    "en": "About 0.02 s"
+   },
+   {
+    "vi": "Khoảng 2 giây",
+    "en": "About 2 s"
+   },
+   {
+    "vi": "Tức thời, sóng vô tuyến không có trễ",
+    "en": "Instant, radio has no delay"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "2 × 35 786 km / c = 238,7 ms khi cả hai trạm ở ngay dưới vệ tinh; thực tế dài hơn vì đường nghiêng. Một câu hỏi và câu trả lời mất gần nửa giây.",
+   "en": "2 × 35,786 km / c = 238.7 ms with both stations directly below the satellite; slant paths make it longer. A question and its answer take almost half a second."
+  }
+ },
+ {
+  "q": {
+   "vi": "TT&C khác dữ liệu tải (payload data) ở điểm nào?",
+   "en": "How does TT&C differ from payload data?"
+  },
+  "options": [
+   {
+    "vi": "TT&C là lệnh và trạng thái tốc độ thấp, cần cực kỳ tin cậy; dữ liệu tải là ảnh khối lượng lớn, cần tốc độ cao",
+    "en": "TT&C is low-rate commands and housekeeping that must be extremely reliable; payload data is bulk imagery that needs high rate"
+   },
+   {
+    "vi": "TT&C chỉ dùng cho vệ tinh địa tĩnh",
+    "en": "TT&C is only for geostationary satellites"
+   },
+   {
+    "vi": "Dữ liệu tải được mã hóa, TT&C thì không",
+    "en": "Payload data is encrypted, TT&C is not"
+   },
+   {
+    "vi": "Không khác, cùng một đường truyền",
+    "en": "No difference, it is the same link"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Mất một gói ảnh có thể tải lại; mất một lệnh có thể mất vệ tinh. Vì vậy TT&C ở băng S với anten gần đẳng hướng và biên dự trữ lớn, còn ảnh đi băng X hoặc laser.",
+   "en": "Losing an image packet can be re-downloaded; losing a command can lose the satellite. So TT&C uses S-band with near-omnidirectional antennas and big margins, while imagery goes over X-band or laser."
+  }
+ },
+ {
+  "q": {
+   "vi": "Giới hạn Shannon nói điều gì về Eb/N0?",
+   "en": "What does the Shannon limit say about Eb/N0?"
+  },
+  "options": [
+   {
+    "vi": "Không có cách mã hóa nào truyền tin cậy được dưới khoảng −1,6 dB",
+    "en": "No coding scheme can communicate reliably below about −1.6 dB"
+   },
+   {
+    "vi": "Eb/N0 phải luôn lớn hơn 9,6 dB",
+    "en": "Eb/N0 must always exceed 9.6 dB"
+   },
+   {
+    "vi": "Eb/N0 càng nhỏ thì tốc độ càng cao",
+    "en": "The smaller Eb/N0, the higher the rate"
+   },
+   {
+    "vi": "Eb/N0 không ảnh hưởng tới tỉ lệ lỗi bit",
+    "en": "Eb/N0 does not affect the bit error rate"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Với băng thông không giới hạn, C = B·log2(1 + S/N) dẫn tới Eb/N0 ≥ ln 2 = −1,59 dB. QPSK không mã cần 9,6 dB cho BER 10⁻⁵; mã hiện đại như LDPC tiến gần giới hạn trong vài dB.",
+   "en": "With unlimited bandwidth, C = B·log2(1 + S/N) gives Eb/N0 ≥ ln 2 = −1.59 dB. Uncoded QPSK needs 9.6 dB for BER 10⁻⁵; modern codes such as LDPC come within a few dB of the limit."
+  }
+ },
+ {
+  "q": {
+   "vi": "Vì sao trong viễn thông vệ tinh đường lên thường dùng dải tần cao hơn đường xuống?",
+   "en": "Why does the uplink usually use a higher band than the downlink?"
+  },
+  "options": [
+   {
+    "vi": "Vì tần số cao truyền nhanh hơn",
+    "en": "Because higher frequencies travel faster"
+   },
+   {
+    "vi": "Vì vệ tinh thiếu điện nên được dành dải thấp, ít suy hao; trạm mặt đất dư công suất nên gánh dải cao",
+    "en": "Because the power-starved satellite gets the lower, less attenuated band; the ground station has power to spare"
+   },
+   {
+    "vi": "Vì ITU cấm đường xuống ở tần số cao",
+    "en": "Because the ITU forbids high-frequency downlinks"
+   },
+   {
+    "vi": "Vì anten vệ tinh không thu được tần số thấp",
+    "en": "Because satellite antennas cannot receive low frequencies"
+   }
+  ],
+  "answer": 1,
+  "why": {
+   "vi": "Mưa và khí quyển làm suy hao ít hơn ở dải thấp, bộ khuếch đại trên vệ tinh cũng hiệu quả hơn; trạm mặt đất dư công suất bù được suy hao lớn hơn ở dải cao.",
+   "en": "Rain and gases attenuate less in the lower band and the satellite amplifier is more efficient there; the ground station has the power to overcome the larger loss of the higher band."
+  }
+ },
+ {
+  "q": {
+   "vi": "Hai máy phát, mỗi máy 10 dBW, phát cùng lúc. Tổng công suất là bao nhiêu?",
+   "en": "Two transmitters of 10 dBW each are on together. What is the total power?"
+  },
+  "options": [
+   {
+    "vi": "20 dBW",
+    "en": "20 dBW"
+   },
+   {
+    "vi": "13 dBW",
+    "en": "13 dBW"
+   },
+   {
+    "vi": "10 dBW",
+    "en": "10 dBW"
+   },
+   {
+    "vi": "100 dBW",
+    "en": "100 dBW"
+   }
+  ],
+  "answer": 1,
+  "why": {
+   "vi": "10 dBW = 10 W; hai máy 20 W = 13,0 dBW. Cộng dB là nhân công suất, chỉ dùng cho các tầng nối tiếp.",
+   "en": "10 dBW = 10 W; two give 20 W = 13.0 dBW. Adding dB multiplies powers; it applies only to stages in series."
+  }
+ },
+ {
+  "q": {
+   "vi": "Một anten mảng pha có các phần tử cách nhau 1 λ, lái búp 30°. Điều gì xảy ra?",
+   "en": "A phased array has elements 1 λ apart and steers its beam to 30°. What happens?"
+  },
+  "options": [
+   {
+    "vi": "Búp hẹp hơn và không có hậu quả gì",
+    "en": "The beam is narrower with no side effects"
+   },
+   {
+    "vi": "Xuất hiện búp giả ở −30°, mạnh ngang búp chính",
+    "en": "A grating lobe appears at −30°, as strong as the main beam"
+   },
+   {
+    "vi": "Anten không lái được quá 15°",
+    "en": "The array cannot steer beyond 15°"
+   },
+   {
+    "vi": "Độ lợi tăng gấp đôi",
+    "en": "The gain doubles"
+   }
+  ],
+  "answer": 1,
+  "why": {
+   "vi": "sin θ = sin 30° − λ/d = 0,5 − 1 = −0,5, tức −30°: các phần tử lại cùng pha ở hướng đó. Giữ d ≤ λ/2 để tránh.",
+   "en": "sin θ = sin 30° − λ/d = 0.5 − 1 = −0.5, i.e. −30°: the elements add in phase there too. Keep d ≤ λ/2 to avoid it."
+  }
+ },
+ {
+  "q": {
+   "vi": "Mưa làm suy hao 3 dB trên tuyến băng Ku có T_sys 120 K. Vì sao Es/N0 tụt nhiều hơn 3 dB?",
+   "en": "Rain causes a 3 dB fade on a Ku-band link with T_sys = 120 K. Why does Es/N0 drop by more than 3 dB?"
+  },
+  "options": [
+   {
+    "vi": "Vì mưa làm chảo lệch hướng",
+    "en": "Because rain misaligns the dish"
+   },
+   {
+    "vi": "Vì lớp mưa ấm còn phát nhiễu, làm T_sys tăng thêm khoảng 137 K",
+    "en": "Because the warm rain also radiates noise, adding about 137 K to T_sys"
+   },
+   {
+    "vi": "Vì tốc độ bit tự tăng",
+    "en": "Because the bit rate rises by itself"
+   },
+   {
+    "vi": "Không đúng, Es/N0 chỉ tụt đúng 3 dB",
+    "en": "It does not; Es/N0 drops by exactly 3 dB"
+   }
+  ],
+  "answer": 1,
+  "why": {
+   "vi": "ΔT = 275 × (1 − 10^−0,3) ≈ 137 K: nhiễu tăng 3,3 dB, cộng 3 dB suy hao thành 6,3 dB.",
+   "en": "ΔT = 275 × (1 − 10^−0.3) ≈ 137 K: noise rises 3.3 dB, plus the 3 dB fade gives 6.3 dB."
+  }
+ },
+ {
+  "q": {
+   "vi": "Theo ETSI EN 302 307-1, DVB-S2 QPSK 3/4 cần Es/N0 = 4,03 dB với hiệu suất 1,49 bit/s/Hz. Eb/N0 cần là bao nhiêu?",
+   "en": "Per ETSI EN 302 307-1, DVB-S2 QPSK 3/4 needs Es/N0 = 4.03 dB at 1.49 bit/s/Hz. What Eb/N0 does it need?"
+  },
+  "options": [
+   {
+    "vi": "Khoảng 2,3 dB",
+    "en": "About 2.3 dB"
+   },
+   {
+    "vi": "Khoảng 9,6 dB",
+    "en": "About 9.6 dB"
+   },
+   {
+    "vi": "Khoảng −1,6 dB",
+    "en": "About −1.6 dB"
+   },
+   {
+    "vi": "Khoảng 4,0 dB",
+    "en": "About 4.0 dB"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Eb/N0 = Es/N0 − 10·log10(η) = 4,03 − 1,72 = 2,31 dB, thấp hơn 7 dB so với QPSK không mã (9,6 dB).",
+   "en": "Eb/N0 = Es/N0 − 10·log10(η) = 4.03 − 1.72 = 2.31 dB, 7 dB below uncoded QPSK (9.6 dB)."
+  }
+ },
+ {
+  "q": {
+   "vi": "Cách nào gần như gấp đôi dung lượng của một tuyến đã mạnh?",
+   "en": "Which nearly doubles the capacity of an already strong link?"
+  },
+  "options": [
+   {
+    "vi": "Gấp đôi công suất phát",
+    "en": "Doubling transmit power"
+   },
+   {
+    "vi": "Gấp đôi băng thông",
+    "en": "Doubling the bandwidth"
+   },
+   {
+    "vi": "Gấp đôi đường kính chảo thu",
+    "en": "Doubling the receive dish diameter"
+   },
+   {
+    "vi": "Dùng mã tỉ lệ thấp hơn",
+    "en": "Using a lower-rate code"
+   }
+  ],
+  "answer": 1,
+  "why": {
+   "vi": "C = B·log2(1 + S/N): dung lượng tỉ lệ với B nhưng chỉ tăng theo logarit của S/N. Gấp đôi công suất (+3 dB) chỉ thêm khoảng 1 bit/s/Hz.",
+   "en": "C = B·log2(1 + S/N): capacity grows linearly with B but only logarithmically with S/N. Doubling power (+3 dB) adds about 1 bit/s/Hz."
+  }
+ },
+ {
+  "q": {
+   "vi": "GPS dùng cách đa truy nhập nào để mọi vệ tinh phát cùng tần số L1?",
+   "en": "Which multiple-access scheme lets every GPS satellite transmit on the same L1 frequency?"
+  },
+  "options": [
+   {
+    "vi": "FDMA",
+    "en": "FDMA"
+   },
+   {
+    "vi": "TDMA",
+    "en": "TDMA"
+   },
+   {
+    "vi": "CDMA: mỗi vệ tinh một mã giả ngẫu nhiên",
+    "en": "CDMA: one pseudo-random code per satellite"
+   },
+   {
+    "vi": "OFDMA",
+    "en": "OFDMA"
+   }
+  ],
+  "answer": 2,
+  "why": {
+   "vi": "Mỗi vệ tinh GPS có mã C/A riêng; máy thu tách từng vệ tinh bằng cách tương quan với mã đó.",
+   "en": "Each GPS satellite has its own C/A code; the receiver separates them by correlating with each code."
+  }
+ },
+ {
+  "q": {
+   "vi": "Sentinel-2A bay qua Hà Nội. Ở 8,1 GHz Doppler cực đại khoảng ±180 kHz. Ở 437 MHz là bao nhiêu?",
+   "en": "Sentinel-2A passes over Hanoi; at 8.1 GHz the peak Doppler is about ±180 kHz. What is it at 437 MHz?"
+  },
+  "options": [
+   {
+    "vi": "Khoảng ±10 kHz",
+    "en": "About ±10 kHz"
+   },
+   {
+    "vi": "Khoảng ±180 kHz",
+    "en": "About ±180 kHz"
+   },
+   {
+    "vi": "Khoảng ±3 MHz",
+    "en": "About ±3 MHz"
+   },
+   {
+    "vi": "Bằng 0",
+    "en": "Zero"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Doppler tỉ lệ thuận với tần số: 180 × 437/8100 ≈ 9,7 kHz.",
+   "en": "Doppler scales with frequency: 180 × 437/8100 ≈ 9.7 kHz."
+  }
+ },
+ {
+  "q": {
+   "vi": "Thêm trạm TP.HCM cạnh trạm Hà Nội thì số phút liên lạc mỗi ngày với Sentinel-2A tăng từ 37,9 lên bao nhiêu?",
+   "en": "Adding a Ho Chi Minh City station next to Hanoi raises the daily contact with Sentinel-2A from 37.9 minutes to how much?"
+  },
+  "options": [
+   {
+    "vi": "Khoảng 46 phút: hai trạm thường thấy vệ tinh cùng lúc",
+    "en": "About 46 min: the two stations often see the satellite at the same time"
+   },
+   {
+    "vi": "Khoảng 72 phút, cộng thẳng hai trạm",
+    "en": "About 72 min, the two simply add"
+   },
+   {
+    "vi": "Khoảng 156 phút",
+    "en": "About 156 min"
+   },
+   {
+    "vi": "Không đổi",
+    "en": "Unchanged"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Hai trạm cách nhau khoảng 1 140 km, nằm trong vòng nhìn thấy bán kính 2 500 km, nên phần lớn lượt trùng nhau: hợp lại 46,3 phút chứ không phải 71,5.",
+   "en": "The stations are about 1,140 km apart, inside a 2,500 km visibility circle, so most passes overlap: the union is 46.3 min, not 71.5."
+  }
+ },
+ {
+  "q": {
+   "vi": "Tín hiệu GPS L1 C/A tới mặt đất (−158,5 dBW) thấp hơn nhiễu nhiệt khoảng 14 dB. Vì sao máy thu vẫn bắt được?",
+   "en": "The GPS L1 C/A signal at the ground (−158.5 dBW) is about 14 dB below thermal noise. How can a receiver use it?"
+  },
+  "options": [
+   {
+    "vi": "Nhờ anten điện thoại có độ lợi 40 dB",
+    "en": "The phone antenna has 40 dB of gain"
+   },
+   {
+    "vi": "Nhờ trải phổ: tương quan với mã đã biết cho độ lợi xử lý 43 dB",
+    "en": "Spread spectrum: correlating with the known code gives 43 dB of processing gain"
+   },
+   {
+    "vi": "Vì nhiễu nhiệt không ảnh hưởng tới GPS",
+    "en": "Thermal noise does not affect GPS"
+   },
+   {
+    "vi": "Vì vệ tinh GPS phát ở băng Ka",
+    "en": "GPS satellites transmit at Ka-band"
+   }
+  ],
+  "answer": 1,
+  "why": {
+   "vi": "10·log10(1,023 × 10⁶ / 50) = 43,1 dB; C/N0 khoảng 49 dB·Hz là đủ bám tín hiệu.",
+   "en": "10·log10(1.023 × 10⁶ / 50) = 43.1 dB; a C/N0 near 49 dB-Hz is enough to track."
+  }
+ }
+]

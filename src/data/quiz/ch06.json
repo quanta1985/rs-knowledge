@@ -38,7 +38,7 @@
   { "q": { "vi": "Trong 296 lần chụp Sentinel-2 vùng An Giang 2023–2024 chỉ giữ được 70. Lý do chính?", "en": "Of 296 Sentinel-2 acquisitions over An Giang in 2023–2024 only 70 were kept. Main reason?" },
     "options": [ { "vi": "Mây che phủ", "en": "Cloud cover" }, { "vi": "Vệ tinh hỏng", "en": "Satellite failure" }, { "vi": "Lúa bị ngập", "en": "Flooded rice" }, { "vi": "Dữ liệu trả phí", "en": "Paid data" } ],
     "answer": 0,
-    "why": { "vi": "Mùa mưa nhiệt đới làm mất nhiều ảnh quang học (tháng 7–9/2024 gần như không có ảnh dùng được). Một phần con số 296 là ảnh trùng do 2 tile chồng nhau. Radar SAR (Chương 11) xuyên qua mây.", "en": "The tropical wet season wipes out many optical images (almost nothing usable in Jul–Sep 2024). Part of the 296 are duplicates from overlapping tiles. SAR (Chapter 11) sees through clouds." } },
+    "why": { "vi": "Mùa mưa nhiệt đới làm mất nhiều ảnh quang học (tháng 7–9/2024 gần như không có ảnh dùng được). Một phần con số 296 là ảnh trùng do 2 tile chồng nhau. Radar SAR (Chương 16) xuyên qua mây.", "en": "The tropical wet season wipes out many optical images (almost nothing usable in Jul–Sep 2024). Part of the 296 are duplicates from overlapping tiles. SAR (Chapter 16) sees through clouds." } },
   { "q": { "vi": "Vì sao NDVI 'bão hòa' trên tán lá rất dày?", "en": "Why does NDVI 'saturate' over very dense canopies?" },
     "options": [
       { "vi": "Phản xạ đỏ đã gần 0, nên NIR tăng thêm làm tỷ số thay đổi rất ít", "en": "Red reflectance is already near 0, so further NIR increases barely change the ratio" },

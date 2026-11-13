@@ -1,5 +1,6 @@
 ---
-// Lists every lab in labs/ at build time (one row per chNN_* stem: Colab notebook + GEE script).
+// Lists every lab in labs/ at build time (one row per <id>_* stem: Colab notebook + GEE script).
+// <id> is the first token of the chapter slug: ch03_physics → ch03-physics, gnss_dop → gnss, satellite_power → satellite-bus.
 import fs from 'node:fs';
 import path from 'node:path';
 import { CHAPTERS } from '../data/chapters';
@@ -9,7 +10,7 @@ const lang = langFromUrl(Astro.url);
 const REPO = 'quanta1985/rs-knowledge';
 const dir = path.join(process.cwd(), 'labs'); // astro dev/build run from the project root
 const files = fs.readdirSync(dir);
-const stems = [...new Set(files.filter((f) => /^ch\d\d_.*\.(ipynb|js)$/.test(f)).map((f) => f.replace(/\.(ipynb|js)$/, '')))].sort();
+const stems = [...new Set(files.filter((f) => /^[a-z0-9]+_.*\.(ipynb|js)$/.test(f)).map((f) => f.replace(/\.(ipynb|js)$/, '')))].sort();
 
 /** Title from the GEE header (" * Lab N — vi / en · …") or the notebook's first markdown line ("# Lab N — vi / en"). */
 const titleOf = (stem: string) => {
@@ -23,10 +24,10 @@ const titleOf = (stem: string) => {
   return lang === 'vi' ? vi : en ?? vi;
 };
 const rows = stems.map((stem) => {
-  const n = Number(stem.slice(2, 4));
-  const ch = CHAPTERS.find((c) => c.n === n);
+  const ch = CHAPTERS.find((c) => stem.startsWith(`${c.slug.split('-')[0]}_`));
+  const n = ch?.n ?? 0;
   return { stem, n, ch, title: titleOf(stem), nb: files.includes(`${stem}.ipynb`), js: files.includes(`${stem}.js`) };
-});
+}).sort((a, b) => a.n - b.n || a.stem.localeCompare(b.stem));
 const L = lang === 'vi'
   ? { ch: 'Chương', lab: 'Bài thực hành', py: 'Python (Colab)', gee: 'GEE (JavaScript)', open: 'Mở', script: 'Xem script', count: `${rows.length} bài thực hành` }
   : { ch: 'Chapter', lab: 'Lab', py: 'Python (Colab)', gee: 'GEE (JavaScript)', open: 'Open', script: 'View script', count: `${rows.length} labs` };

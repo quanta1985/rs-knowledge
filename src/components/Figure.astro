@@ -1,17 +1,24 @@
 ---
-// Frame for every interactive figure: title, the widget, a "try this" prompt, caption and data source.
+// Card for every interactive figure: grey header (mono "FIGURE n.k" tag + title), the widget, a "try this" prompt, caption, source.
 import { langFromUrl } from '../i18n/ui';
 
-interface Props { title: string; try?: string; source?: string; id?: string }
-const { title, try: tryThis, source, id } = Astro.props;
+interface Props { title: string; try?: string; source?: string; id?: string; tag?: string }
+const { title, try: tryThis, source, id, tag } = Astro.props;
 const lang = langFromUrl(Astro.url);
+const vi = lang === 'vi';
+// "Hình 2.1 — Chu kỳ…" → tag "Hình 2.1", heading "Chu kỳ…"
+const m = title.match(/^((?:Hình|Figure|Bảng|Table)\s+\d+\.\d+[a-z]?)\s*[—–:-]\s*(.+)$/);
+const label = tag ?? (m ? m[1] : vi ? 'Mô phỏng' : 'Interactive');
+const heading = m ? m[2] : title;
 ---
 <figure class="fig" id={id}>
-  <p class="fig-title">{title}</p>
-  <slot />
-  {tryThis && <p class="try"><strong>{lang === 'vi' ? 'Thử: ' : 'Try: '}</strong>{tryThis}</p>}
-  <figcaption>
-    <slot name="caption" />
-    {source && <div class="source muted">{lang === 'vi' ? 'Nguồn dữ liệu: ' : 'Data: '}{source}</div>}
-  </figcaption>
+  <div class="fig-head"><span class="mono-label">{label}</span><p class="fig-title">{heading}</p></div>
+  <div class="fig-body">
+    <slot />
+    {tryThis && <p class="try"><strong>{vi ? 'Thử' : 'Try'}</strong>{tryThis}</p>}
+    <figcaption>
+      <slot name="caption" />
+      {source && <div class="source">{vi ? 'Nguồn dữ liệu: ' : 'Data: '}{source}</div>}
+    </figcaption>
+  </div>
 </figure>

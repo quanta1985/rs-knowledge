@@ -66,7 +66,7 @@ export default function AggregateLab({ lang }: { lang: Lang }) {
       <LineChart title={T.title} x={[lg(10), lg(640)]} y={[0, 8]} xLabel={T.x} yLabel={T.y} height={170}
         xTicks={levels.filter((_, i) => i % 2 === 0).map((l) => lg(l.size))} xFormat={(v) => String(Math.round(2 ** v))} yFormat={(v) => String(v)}
         vline={lg(cur.size)}
-        series={[{ id: 'a', label: T.water, color: '#4fc3cd', marker: 'circle', points: levels.map((l) => [lg(l.size), l.km2]) }]} />
+        series={[{ id: 'a', label: T.water, color: 'var(--st-accent)', marker: 'circle', points: levels.map((l) => [lg(l.size), l.km2]) }]} />
     </StatPanel>
   );
   const bar = <>

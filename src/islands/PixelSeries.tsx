@@ -82,7 +82,7 @@ export default function PixelSeries({ lang }: { lang: Lang }) {
     ]}>
       <div aria-hidden="true" style={{ marginTop: 8 }}>
         <div style={{ height: 8, borderRadius: 3, background: grad }} />
-        <div className="num" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: '#94a3b8' }}><span>{y0}</span><span>{T.bp}</span><span>{y1}</span></div>
+        <div className="num" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--st-muted)' }}><span>{y0}</span><span>{T.bp}</span><span>{y1}</span></div>
       </div>
       <p className="muted" style={{ margin: '6px 0 0', fontSize: '0.72rem' }}>{T.hint}.</p>
     </StatPanel>

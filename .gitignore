@@ -4,3 +4,4 @@ dist/
 scripts/data/*.npy
 __pycache__/
 .ipynb_checkpoints/
+dist-*/

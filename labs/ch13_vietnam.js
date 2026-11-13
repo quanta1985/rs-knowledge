@@ -1,5 +1,5 @@
 /**
- * Lab 13 — Case study Việt Nam / Viet Nam case studies · Sổ tay Viễn thám & GIS
+ * Lab 18 — Case study Việt Nam / Viet Nam case studies · Sổ tay Viễn thám & GIS
  * Dán vào https://code.earthengine.google.com và bấm Run.
  * Paste into https://code.earthengine.google.com and press Run.
  *

@@ -3,7 +3,7 @@ import type { Lang } from '../i18n/ui';
 import { Slider, StatPanel } from './VizUi';
 
 const H = 694; // km, a typical very-high-resolution optical orbit (e.g. Pléiades)
-const CYAN = '#4fc3cd', AMBER = '#E69F00';
+const CYAN = 'var(--st-accent)', AMBER = '#E69F00';
 
 const TXT = {
   vi: { title: 'Thị sai lập thể', bh: 'Tỷ số đáy / độ cao B/H', h: 'Độ cao vật', gsd: 'Kích thước pixel', sp: 'Sai số đo khớp ảnh',
@@ -35,19 +35,19 @@ export default function StereoParallax({ lang }: { lang: Lang }) {
   return (
     <div className="dark-card">
       <svg className="chart" viewBox={`0 0 ${W} ${HH}`} width="100%" role="img" aria-label={`${T.fig}: B/H ${bh}, Δp ${nf(dp)} m`}>
-        <line x1={0} x2={W} y1={gy} y2={gy} stroke="#e2e8f0" strokeWidth={1.5} />
-        <path d={`M${cx - 70},${gy}L${cx},${top.y}L${cx + 70},${gy}`} fill="#334155" stroke="#e2e8f0" />
+        <line x1={0} x2={W} y1={gy} y2={gy} stroke="var(--st-fg)" strokeWidth={1.5} />
+        <path d={`M${cx - 70},${gy}L${cx},${top.y}L${cx + 70},${gy}`} fill="var(--st-panel)" stroke="var(--st-fg)" />
         {[s1, s2].map((s, i) => <g key={i}>
           <line x1={s.x} y1={s.y} x2={i ? g2 : g1} y2={gy} stroke={i ? AMBER : CYAN} strokeWidth={1.5} />
           <line x1={s.x} y1={s.y} x2={cx} y2={gy} stroke={i ? AMBER : CYAN} strokeWidth={1} strokeDasharray="4 4" opacity={0.6} />
-          <rect x={s.x - 12} y={s.y - 8} width={24} height={14} rx={3} fill="#e2e8f0" />
+          <rect x={s.x - 12} y={s.y - 8} width={24} height={14} rx={3} fill="var(--st-fg)" />
           <text x={s.x} y={s.y - 14} textAnchor="middle">{i ? T.s2 : T.s1}</text>
         </g>)}
-        <line x1={s1.x} x2={s2.x} y1={sat + 18} y2={sat + 18} stroke="#e2e8f0" />
+        <line x1={s1.x} x2={s2.x} y1={sat + 18} y2={sat + 18} stroke="var(--st-fg)" />
         <text x={cx} y={sat + 32} textAnchor="middle">{T.base} = {nf(B, 0)} km</text>
-        <line x1={Math.min(g1, g2)} x2={Math.max(g1, g2)} y1={gy + 14} y2={gy + 14} stroke="#f7867a" strokeWidth={3} />
-        <text x={cx} y={gy + 34} textAnchor="middle" style={{ fill: '#f7867a' }}>Δp</text>
-        <circle cx={top.x} cy={top.y} r={4} fill="#fff" /><text x={top.x + 8} y={top.y - 4}>{T.top}</text>
+        <line x1={Math.min(g1, g2)} x2={Math.max(g1, g2)} y1={gy + 14} y2={gy + 14} stroke="var(--st-bad)" strokeWidth={3} />
+        <text x={cx} y={gy + 34} textAnchor="middle" style={{ fill: 'var(--st-bad)' }}>Δp</text>
+        <circle cx={top.x} cy={top.y} r={4} fill="var(--st-fg)" /><text x={top.x + 8} y={top.y - 4}>{T.top}</text>
         <text x={cx + 74} y={gy - 4}>{T.foot}</text>
         <text x={8} y={HH - 6} style={{ fontSize: 10 }}>{T.note}</text>
       </svg>

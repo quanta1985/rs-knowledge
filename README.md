@@ -1,4 +1,4 @@
-# Sổ tay Viễn thám & GIS · Remote Sensing & GIS Handbook
+# GIS and Remote Sensing Knowledge
 
 Sổ tay song ngữ (Việt–Anh) phục vụ tra cứu và giảng dạy viễn thám. Mỗi khái niệm đi kèm hình tương tác và ví dụ tính trên ảnh vệ tinh thật của Việt Nam.
 A bilingual (Vietnamese–English) handbook for teaching and reference. Every concept comes with an interactive figure and a worked example on real satellite imagery of Viet Nam.

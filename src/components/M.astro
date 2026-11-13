@@ -1,0 +1,6 @@
+---
+// Inline math: <M tex="\Delta v" />, rendered by KaTeX at build time.
+import katex from 'katex';
+const html = katex.renderToString(Astro.props.tex as string, { throwOnError: true, output: 'html' });
+---
+<span class="m" set:html={html} />

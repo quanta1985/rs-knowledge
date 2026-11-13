@@ -1,0 +1,17 @@
+---
+// Callout with a mono label. kind: key (teal, the one thing to remember) · tip · example · why (ochre) · warn (red)
+// · myth (violet: a wrong belief, then the correction).
+import { langFromUrl } from '../i18n/ui';
+
+type Kind = 'key' | 'tip' | 'example' | 'why' | 'warn' | 'myth';
+interface Props { kind?: Kind; label?: string }
+const { kind = 'key', label } = Astro.props;
+const vi = langFromUrl(Astro.url) === 'vi';
+const DEFAULT: Record<Kind, [string, string]> = {
+  key: ['Ghi nhớ', 'Key point'], tip: ['Mẹo', 'Tip'], example: ['Ví dụ', 'Example'], why: ['Vì sao?', 'Why?'], warn: ['Lưu ý', 'Caution'], myth: ['Hiểu lầm thường gặp', 'Common misconception'],
+};
+---
+<aside class={`note ${kind}`}>
+  <span class="note-label">{label ?? DEFAULT[kind][vi ? 0 : 1]}</span>
+  <slot />
+</aside>

@@ -1,5 +1,5 @@
 /**
- * Lab 8 — Tổ hợp màu để giải đoán / Composites for interpretation · Sổ tay Viễn thám & GIS
+ * Lab 13 — Tổ hợp màu để giải đoán / Composites for interpretation · Sổ tay Viễn thám & GIS
  * Dán vào https://code.earthengine.google.com và bấm Run.
  * Paste into https://code.earthengine.google.com and press Run.
  *

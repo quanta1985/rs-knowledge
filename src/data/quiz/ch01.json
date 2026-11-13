@@ -259,5 +259,179 @@
    "vi": "Mặt phẳng quỹ đạo quay 0,961°/ngày, chậm hơn Mặt Trời (0,986°/ngày), nên giờ bay qua sớm dần khoảng 36 phút mỗi năm (ước tính J2).",
    "en": "The plane turns 0.961°/day, slower than the Sun (0.986°/day), so the overpass gets earlier by about 36 min per year (J2 estimate)."
   }
+ },
+ {
+  "q": {
+   "vi": "Vì sao Trạm Vũ trụ Quốc tế không rơi xuống đất?",
+   "en": "Why does the International Space Station not fall to the ground?"
+  },
+  "options": [
+   {
+    "vi": "Nó đang rơi, nhưng bay ngang đủ nhanh để mặt đất cong đi kịp bên dưới",
+    "en": "It is falling, but moves sideways fast enough for the ground to curve away beneath it"
+   },
+   {
+    "vi": "Ở 420 km không còn trọng lực",
+    "en": "There is no gravity at 420 km"
+   },
+   {
+    "vi": "Động cơ của trạm đẩy liên tục lên trên",
+    "en": "Its engines push upwards all the time"
+   },
+   {
+    "vi": "Lực đẩy của khí quyển giữ trạm lại",
+    "en": "Air pressure holds it up"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Trọng lực ở 420 km vẫn còn khoảng 88 %. Trạm rơi tự do liên tục; ở 7,7 km/s, mỗi giây nó rơi đúng bằng độ cong của mặt cầu ở độ cao đó.",
+   "en": "Gravity at 420 km is still about 88 %. The station is in continuous free fall; at 7.7 km/s it falls each second exactly as much as the sphere curves at that altitude."
+  }
+ },
+ {
+  "q": {
+   "vi": "Trong một vệ tinh, \"payload\" là gì?",
+   "en": "In a satellite, what is the \"payload\"?"
+  },
+  "options": [
+   {
+    "vi": "Thiết bị làm nhiệm vụ: camera, radar, bộ phát đáp viễn thông",
+    "en": "The equipment that does the job: camera, radar, communications transponder"
+   },
+   {
+    "vi": "Phần nhiên liệu còn lại",
+    "en": "The remaining propellant"
+   },
+   {
+    "vi": "Hệ thống pin và điện năng",
+    "en": "The battery and power system"
+   },
+   {
+    "vi": "Khung chịu lực khi phóng",
+    "en": "The structure that carries launch loads"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Payload là lý do vệ tinh tồn tại. Pin, khung, điều khiển tư thế, liên lạc thuộc về bus, nền tảng giữ cho payload hoạt động.",
+   "en": "The payload is why the satellite exists. Batteries, structure, attitude control and communications belong to the bus, the platform that keeps the payload working."
+  }
+ },
+ {
+  "q": {
+   "vi": "Vì sao khí tượng cần cả vệ tinh GEO (như Himawari-9) lẫn vệ tinh quỹ đạo cực (như NOAA-20)?",
+   "en": "Why does meteorology need both GEO satellites (like Himawari-9) and polar-orbiting ones (like NOAA-20)?"
+  },
+  "options": [
+   {
+    "vi": "GEO nhìn liên tục một nửa Trái Đất để theo dõi mây; LEO cực bay thấp, đo chi tiết hơn và phủ cả vùng cực",
+    "en": "GEO watches one hemisphere continuously to track clouds; polar LEO flies low, measures in more detail and covers the poles"
+   },
+   {
+    "vi": "GEO chỉ hoạt động ban ngày, LEO chỉ ban đêm",
+    "en": "GEO works only by day, LEO only at night"
+   },
+   {
+    "vi": "LEO rẻ hơn nên chỉ dùng khi GEO hỏng",
+    "en": "LEO is cheaper, so it is used only when GEO fails"
+   },
+   {
+    "vi": "Hai loại đo cùng một thứ để dự phòng",
+    "en": "Both measure the same thing, as backup"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Đây là đánh đổi giữa độ cao và độ chi tiết: GEO ở 35 786 km nhìn rộng và liên tục nhưng thô và không thấy vùng cực; LEO ở vài trăm km nhìn chi tiết nhưng mỗi nơi chỉ vài lần một ngày.",
+   "en": "It is the altitude–detail trade-off: GEO at 35,786 km sees wide and continuously but coarsely and misses the poles; LEO at a few hundred km sees detail but each place only a few times a day."
+  }
+ },
+ {
+  "q": {
+   "vi": "Theo danh mục CelesTrak tháng 11/2026, họ sứ mệnh nào có nhiều vệ tinh đang hoạt động nhất?",
+   "en": "According to the CelesTrak catalogue of November 2026, which mission family has the most active satellites?"
+  },
+  "options": [
+   {
+    "vi": "Viễn thông (khoảng 80 %, phần lớn là Starlink)",
+    "en": "Communications (about 80 %, mostly Starlink)"
+   },
+   {
+    "vi": "Quan sát Trái Đất",
+    "en": "Earth observation"
+   },
+   {
+    "vi": "Định vị GNSS",
+    "en": "GNSS navigation"
+   },
+   {
+    "vi": "Khoa học",
+    "en": "Science"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "13 485 trên 16 873 vệ tinh thuộc nhóm viễn thông; riêng Starlink có 11 207 chiếc. Các hệ GNSS chỉ cần vài chục vệ tinh mỗi hệ.",
+   "en": "13,485 of 16,873 satellites are in communications groups; Starlink alone has 11,207. Each GNSS needs only a few dozen satellites."
+  }
+ },
+ {
+  "q": {
+   "vi": "Kỳ đánh giá CDR (Critical Design Review) khép lại pha nào của một sứ mệnh?",
+   "en": "The Critical Design Review (CDR) closes which phase of a mission?"
+  },
+  "options": [
+   {
+    "vi": "Pha C, thiết kế chi tiết",
+    "en": "Phase C, detailed design"
+   },
+   {
+    "vi": "Pha A, khả thi",
+    "en": "Phase A, feasibility"
+   },
+   {
+    "vi": "Pha E, khai thác",
+    "en": "Phase E, operations"
+   },
+   {
+    "vi": "Pha F, kết thúc",
+    "en": "Phase F, close-out"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Pha B kết thúc bằng PDR (thiết kế sơ bộ), pha C bằng CDR (thiết kế chi tiết). Sau CDR mới bắt đầu chế tạo, tích hợp và thử nghiệm ở pha D.",
+   "en": "Phase B ends with the PDR (preliminary design), phase C with the CDR (detailed design). Only after the CDR do building, integration and testing start in phase D."
+  }
+ },
+ {
+  "q": {
+   "vi": "Vệ tinh viễn thông đầu tiên của Việt Nam là gì, phóng năm nào?",
+   "en": "What was Viet Nam's first communications satellite, and when was it launched?"
+  },
+  "options": [
+   {
+    "vi": "VINASAT-1, năm 2008",
+    "en": "VINASAT-1, in 2008"
+   },
+   {
+    "vi": "VNREDSat-1, năm 2013",
+    "en": "VNREDSat-1, in 2013"
+   },
+   {
+    "vi": "VINASAT-2, năm 2012",
+    "en": "VINASAT-2, in 2012"
+   },
+   {
+    "vi": "LOTUSat-1, năm 2025",
+    "en": "LOTUSat-1, in 2025"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "VINASAT-1 phóng bằng Ariane 5 ngày 18/04/2008 (UTC), vị trí địa tĩnh 132° Đông. VNREDSat-1 (2013) là vệ tinh quan sát Trái Đất đầu tiên; LOTUSat-1 đến 11/2026 vẫn chưa phóng.",
+   "en": "VINASAT-1 launched on Ariane 5 on 18 April 2008 (UTC), geostationary slot 132° E. VNREDSat-1 (2013) was the first Earth-observation satellite; LOTUSat-1 had not launched as of November 2026."
+  }
  }
 ]

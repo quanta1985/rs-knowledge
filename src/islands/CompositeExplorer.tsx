@@ -35,7 +35,7 @@ export default function CompositeExplorer({ lang, initial = 'camau' }: { lang: L
     <label className="ctl">
       <span className="ctl-label">{label}</span>
       <select value={rgb[i]} aria-label={label} onChange={(e) => setRgb((o) => o.map((x, k) => (k === i ? e.target.value : x)) as [string, string, string])}
-        style={{ minHeight: 32, background: '#0d1424', color: '#e2e8f0', border: '1px solid rgba(148,163,184,.3)', borderRadius: 8 }}>
+        style={{ minHeight: 32, background: 'var(--st-bg)', color: 'var(--st-fg)', border: '1px solid var(--st-line)', borderRadius: 8 }}>
         {BANDS.filter((b) => scene.bands[b]).map((b) => <option key={b} value={b}>{b} · {S2[b].name[lang]}</option>)}
       </select>
     </label>
@@ -53,7 +53,7 @@ export default function CompositeExplorer({ lang, initial = 'camau' }: { lang: L
         {BANDS.map((b, i) => {
           const v = spec?.[b] ?? 0, h = Math.min(1, v / 0.5) * (CH - 26), on = rgb.includes(b);
           return <g key={b}>
-            <rect x={i * bw + 5} width={bw - 10} y={CH - 26 - h} height={h} fill={on ? '#4fc3cd' : '#94a3b8'} opacity={on ? 1 : 0.5} />
+            <rect x={i * bw + 5} width={bw - 10} y={CH - 26 - h} height={h} fill={on ? 'var(--st-accent)' : 'var(--st-muted)'} opacity={on ? 1 : 0.5} />
             <text x={i * bw + bw / 2} y={CH - 14} textAnchor="middle">{b}</text>
             <text x={i * bw + bw / 2} y={CH - 3} textAnchor="middle">{spec ? nf(v) : ''}</text>
           </g>;

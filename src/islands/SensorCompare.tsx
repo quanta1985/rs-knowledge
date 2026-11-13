@@ -113,9 +113,9 @@ export default function SensorCompare({ lang }: { lang: Lang }) {
     ]}>
       {effView === 'ndvi' && <div aria-hidden="true" style={{ marginTop: 8 }}>
         <div style={{ height: 8, borderRadius: 3, background: gradient }} />
-        <div className="num" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: '#94a3b8' }}><span>−1</span><span>0</span><span>+1</span></div>
+        <div className="num" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--st-muted)' }}><span>−1</span><span>0</span><span>+1</span></div>
       </div>}
-      {!layer.green && <p style={{ margin: '6px 0 0', fontSize: '0.72rem', color: '#94a3b8' }}>{T.noFc}</p>}
+      {!layer.green && <p style={{ margin: '6px 0 0', fontSize: '0.72rem', color: 'var(--st-muted)' }}>{T.noFc}</p>}
     </StatPanel>
   );
   const bar = <>

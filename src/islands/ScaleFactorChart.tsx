@@ -5,7 +5,7 @@ import { Slider, StatPanel } from './VizUi';
 
 const LON: [number, number] = [101.5, 110];
 const PPM: [number, number] = [-500, 1300];
-const CYAN = '#4fc3cd', AMBER = '#E69F00';
+const CYAN = 'var(--st-accent)', AMBER = '#E69F00';
 const CITIES = [
   { lon: 103.97, vi: 'Lào Cai', en: 'Lao Cai' }, { lon: 105.83, vi: 'Hà Nội', en: 'Hanoi' },
   { lon: 106.70, vi: 'TP.HCM', en: 'HCMC' }, { lon: 107.97, vi: 'Móng Cái', en: 'Mong Cai' }, { lon: 108.22, vi: 'Đà Nẵng', en: 'Da Nang' },
@@ -53,22 +53,22 @@ export default function ScaleFactorChart({ lang }: { lang: Lang }) {
       <svg className="chart" viewBox={`0 0 ${W} ${H}`} width="100%" role="img" aria-label={`${T.fig}: ${T.utm}, ${T.tm3}`}
         onPointerMove={pick} onPointerDown={pick} style={{ touchAction: 'none', cursor: 'crosshair' }}>
         {[-400, 0, 400, 800, 1200].map((p) => <g key={p}>
-          <line x1={L} x2={W - R} y1={sy(p)} y2={sy(p)} stroke="#94a3b8" opacity={p === 0 ? 0.6 : 0.15} />
+          <line x1={L} x2={W - R} y1={sy(p)} y2={sy(p)} stroke="var(--st-muted)" opacity={p === 0 ? 0.6 : 0.15} />
           <text x={L - 6} y={sy(p) + 4} textAnchor="end">{p > 0 ? `+${p}` : p}</text>
         </g>)}
         {[102, 104, 106, 108, 110].map((x) => <text key={x} x={sx(x)} y={H - B + 16} textAnchor="middle">{x}°</text>)}
         <text x={(L + W - R) / 2} y={H - 6} textAnchor="middle">{T.x}</text>
         <text transform={`translate(14 ${(TOP + H - B) / 2}) rotate(-90)`} textAnchor="middle">{T.y}</text>
-        <line x1={sx(108)} x2={sx(108)} y1={TOP} y2={H - B} stroke="#fff" strokeDasharray="3 3" opacity={0.5} />
+        <line x1={sx(108)} x2={sx(108)} y1={TOP} y2={H - B} stroke="var(--st-fg)" strokeDasharray="3 3" opacity={0.5} />
         <path d={path((x) => ppm(scaleFactor(x, lat, utmCm(x), 0.9996)), (x) => x < 108)} stroke={AMBER} strokeWidth={2.5} fill="none" />
         <path d={path((x) => ppm(scaleFactor(x, lat, utmCm(x), 0.9996)), (x) => x >= 108)} stroke={AMBER} strokeWidth={2.5} fill="none" />
         <path d={path((x) => ppm(scaleFactor(x, lat, cm, 0.9999)), (x) => Math.abs(x - cm) <= 1.5)} stroke={CYAN} strokeWidth={2.5} fill="none" />
         <path d={path((x) => ppm(scaleFactor(x, lat, cm, 0.9999)))} stroke={CYAN} strokeWidth={1} strokeDasharray="4 4" fill="none" opacity={0.6} />
         {CITIES.map((c, i) => <g key={c.en}>
-          <line x1={sx(c.lon)} x2={sx(c.lon)} y1={H - B - 6} y2={H - B} stroke="#e2e8f0" />
+          <line x1={sx(c.lon)} x2={sx(c.lon)} y1={H - B - 6} y2={H - B} stroke="var(--st-fg)" />
           <text x={sx(c.lon)} y={H - B - 10 - (i % 2) * 12} textAnchor="middle" style={{ fontSize: 10 }}>{c[lang]}</text>
         </g>)}
-        <line x1={sx(lon)} x2={sx(lon)} y1={TOP} y2={H - B} stroke="#fff" opacity={0.8} />
+        <line x1={sx(lon)} x2={sx(lon)} y1={TOP} y2={H - B} stroke="var(--st-fg)" opacity={0.8} />
         <circle cx={sx(lon)} cy={sy(ppm(kU))} r={4.5} fill={AMBER} />
         <rect x={sx(lon) - 4} y={sy(ppm(kT)) - 4} width={8} height={8} fill={CYAN} />
       </svg>

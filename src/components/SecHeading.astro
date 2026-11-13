@@ -1,0 +1,8 @@
+---
+// MDX h2/h3 override: "8.1 Title" → <span class="sec-n">8.1</span> Title (text and id unchanged, so the TOC still links).
+interface Props { level: 2 | 3; id?: string }
+const { level, ...rest } = Astro.props;
+const html = (await Astro.slots.render('default')).replace(/^(\d+\.\d+(?:\.\d+)?)(\s)/, '<span class="sec-n">$1</span>$2');
+const Tag = level === 2 ? 'h2' : 'h3';
+---
+<Tag {...rest} set:html={html} />

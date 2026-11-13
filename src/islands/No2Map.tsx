@@ -62,7 +62,7 @@ export default function No2Map({ lang }: { lang: Lang }) {
     ]}>
       <p className="stat-title" style={{ marginTop: 10 }}>{T.scale}</p>
       <div style={{ height: 10, borderRadius: 3, background: gradient }} aria-hidden="true" />
-      <div className="num" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: '#94a3b8' }}><span>0</span><span>{MAX / 2}</span><span>≥ {MAX}</span></div>
+      <div className="num" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: 'var(--st-muted)' }}><span>0</span><span>{MAX / 2}</span><span>≥ {MAX}</span></div>
     </StatPanel>
   );
   const bar = <>

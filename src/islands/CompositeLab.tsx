@@ -59,7 +59,7 @@ export default function CompositeLab({ lang }: { lang: Lang }) {
     ]}>
       {view === 'count' && <div aria-hidden="true" style={{ marginTop: 8 }}>
         <div style={{ height: 10, borderRadius: 3, background: grad }} />
-        <div className="num" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: '#94a3b8' }}><span>0</span><span>{d.nAll}</span></div>
+        <div className="num" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: 'var(--st-muted)' }}><span>0</span><span>{d.nAll}</span></div>
       </div>}
     </StatPanel>
   );

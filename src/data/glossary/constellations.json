@@ -1,0 +1,164 @@
+[
+ {
+  "id": "leo",
+  "vi": "Quỹ đạo thấp (LEO)",
+  "en": "Low Earth orbit (LEO)",
+  "def": {
+   "vi": "Quỹ đạo dưới khoảng 2000 km, chu kỳ 88–127 phút. Gần mặt đất nên tín hiệu trễ ít và suy hao nhỏ, nhưng mỗi vệ tinh chỉ thấy một vùng nhỏ và bay qua trong vài phút.",
+   "en": "Orbits below about 2000 km, with periods of 88–127 minutes. Close to the ground, so signals are delayed and attenuated little, but each satellite sees only a small area and passes in a few minutes."
+  }
+ },
+ {
+  "id": "megaconstellation",
+  "vi": "Siêu chòm sao",
+  "en": "Megaconstellation",
+  "def": {
+   "vi": "Chòm sao hàng trăm đến hàng chục nghìn vệ tinh LEO cùng một nhà khai thác, như Starlink, OneWeb, Kuiper, thiết kế để phủ liên tục và cung cấp dung lượng lớn.",
+   "en": "A constellation of hundreds to tens of thousands of LEO satellites from one operator, such as Starlink, OneWeb or Kuiper, built for continuous coverage and large capacity."
+  }
+ },
+ {
+  "id": "walker-constellation",
+  "vi": "Chòm sao Walker",
+  "en": "Walker constellation",
+  "def": {
+   "vi": "Cách xếp T vệ tinh trên P mặt phẳng quỹ đạo tròn cùng độ cao và độ nghiêng, các mặt phẳng cách đều nhau, vệ tinh mặt phẳng kề lệch pha F·360°/T. Ký hiệu i: T/P/F (Walker, 1984).",
+   "en": "T satellites on P equally spaced circular orbit planes of the same altitude and inclination, with a phase offset of F·360°/T between neighbouring planes. Written i: T/P/F (Walker, 1984)."
+  }
+ },
+ {
+  "id": "orbital-shell",
+  "vi": "Lớp quỹ đạo (shell)",
+  "en": "Orbital shell",
+  "def": {
+   "vi": "Một nhóm vệ tinh của chòm sao cùng độ cao và độ nghiêng, thường là một chòm sao Walker. Starlink gồm nhiều lớp ở các độ nghiêng 43°, 53°, 70° và khoảng 97°.",
+   "en": "A group of a constellation's satellites at the same altitude and inclination, usually one Walker pattern. Starlink has several shells at 43°, 53°, 70° and about 97° inclination."
+  }
+ },
+ {
+  "id": "footprint",
+  "vi": "Vùng phủ (footprint)",
+  "en": "Footprint",
+  "def": {
+   "vi": "Vùng mặt đất nhìn thấy một vệ tinh trên góc ngẩng tối thiểu. Bán kính tăng theo độ cao và giảm khi góc ngẩng tối thiểu tăng.",
+   "en": "The ground area that sees a satellite above the minimum elevation. Its radius grows with altitude and shrinks as the minimum elevation rises."
+  }
+ },
+ {
+  "id": "streets-of-coverage",
+  "vi": "Dải phủ (streets of coverage)",
+  "en": "Streets of coverage",
+  "def": {
+   "vi": "Dải liên tục dọc vết bay mà các vệ tinh cùng một mặt phẳng phủ kín khi vùng phủ của chúng chồng lên nhau. Dùng để ước lượng số vệ tinh cho chòm sao quỹ đạo cực.",
+   "en": "The continuous strip along the ground track covered by the satellites of one plane when their footprints overlap. Used to size polar-orbit constellations."
+  }
+ },
+ {
+  "id": "inter-satellite-link",
+  "vi": "Liên kết giữa vệ tinh",
+  "en": "Inter-satellite link",
+  "def": {
+   "vi": "Đường truyền trực tiếp giữa hai vệ tinh, ngày nay thường bằng laser. Cho phép dữ liệu đi trong không gian tới vệ tinh gần đích mà không cần trạm mặt đất ở giữa.",
+   "en": "A direct link between two satellites, today usually by laser. Lets data travel in space to a satellite near its destination without a ground station in between."
+  }
+ },
+ {
+  "id": "user-terminal",
+  "vi": "Thiết bị đầu cuối người dùng",
+  "en": "User terminal",
+  "def": {
+   "vi": "Ăng-ten và modem của thuê bao. Với LEO thường là ăng-ten mảng pha phẳng tự lái búp sóng theo vệ tinh đang bay qua.",
+   "en": "The subscriber's antenna and modem. For LEO it is usually a flat phased-array antenna that steers its beam to follow the passing satellite."
+  }
+ },
+ {
+  "id": "phased-array-antenna",
+  "vi": "Ăng-ten mảng pha",
+  "en": "Phased-array antenna",
+  "def": {
+   "vi": "Ăng-ten gồm nhiều phần tử nhỏ; thay đổi pha tín hiệu ở từng phần tử để lái búp sóng bằng điện tử, không cần quay cơ học.",
+   "en": "An antenna made of many small elements; shifting the signal phase at each element steers the beam electronically, without moving parts."
+  }
+ },
+ {
+  "id": "gateway-station",
+  "vi": "Trạm cổng (gateway)",
+  "en": "Gateway station",
+  "def": {
+   "vi": "Trạm mặt đất nối chòm sao với Internet mặt đất. Không có liên kết giữa vệ tinh, thuê bao chỉ dùng được khi vệ tinh cùng thấy thuê bao và một trạm cổng.",
+   "en": "A ground station that connects the constellation to the terrestrial Internet. Without inter-satellite links a user is served only when a satellite sees both the user and a gateway."
+  }
+ },
+ {
+  "id": "round-trip-time",
+  "vi": "Thời gian khứ hồi (RTT)",
+  "en": "Round-trip time (RTT)",
+  "def": {
+   "vi": "Thời gian một gói tin đi tới đích và nhận lại phản hồi. Cận dưới là thời gian ánh sáng đi hai lần đường truyền; qua vệ tinh địa tĩnh ít nhất khoảng 477 ms.",
+   "en": "The time for a packet to reach its destination and the reply to come back. Its lower bound is twice the light travel time on the path; via a geostationary satellite at least about 477 ms."
+  }
+ },
+ {
+  "id": "space-debris",
+  "vi": "Rác vũ trụ",
+  "en": "Space debris",
+  "def": {
+   "vi": "Vật thể nhân tạo không còn hoạt động trên quỹ đạo: vệ tinh hỏng, tầng tên lửa, mảnh vỡ do nổ hoặc va chạm. Ở LEO chúng bay khoảng 7–8 km/s nên mảnh 1 cm cũng có thể phá hủy vệ tinh.",
+   "en": "Non-functional artificial objects in orbit: dead satellites, rocket stages, fragments from explosions or collisions. In LEO they move at about 7–8 km/s, so a 1 cm fragment can destroy a satellite."
+  }
+ },
+ {
+  "id": "conjunction",
+  "vi": "Tiếp cận gần (conjunction)",
+  "en": "Conjunction",
+  "def": {
+   "vi": "Lần hai vật thể trên quỹ đạo đi qua sát nhau. Khi xác suất va chạm vượt ngưỡng, nhà khai thác cho vệ tinh cơ động tránh va chạm.",
+   "en": "A close approach between two orbiting objects. When the collision probability exceeds a threshold, the operator manoeuvres the satellite to avoid it."
+  }
+ },
+ {
+  "id": "kessler-syndrome",
+  "vi": "Hội chứng Kessler",
+  "en": "Kessler syndrome",
+  "def": {
+   "vi": "Kịch bản mật độ vật thể ở một độ cao đủ lớn để va chạm sinh mảnh vỡ, mảnh vỡ lại gây thêm va chạm, khiến số mảnh tăng dây chuyền (Kessler & Cour-Palais, 1978).",
+   "en": "A scenario in which objects at some altitude are dense enough that collisions create fragments that cause further collisions, so debris grows in a cascade (Kessler & Cour-Palais, 1978)."
+  }
+ },
+ {
+  "id": "constellations-bent-pipe",
+  "vi": "Bent-pipe (ống uốn)",
+  "en": "Bent pipe",
+  "def": {
+   "vi": "Kiểu vệ tinh chỉ chuyển tiếp: nhận tín hiệu đường lên rồi phát lại xuống mặt đất, không định tuyến qua vệ tinh khác. Chỉ chạy được khi người dùng và trạm cổng cùng nhìn thấy một vệ tinh.",
+   "en": "A relay-only satellite link: the satellite receives the uplink and retransmits it down, without routing through other satellites. It works only when the user and a gateway see the same satellite."
+  }
+ },
+ {
+  "id": "constellations-pop",
+  "vi": "Điểm hiện diện (PoP)",
+  "en": "Point of presence (PoP)",
+  "def": {
+   "vi": "Nơi mạng của nhà khai thác vệ tinh nối vào Internet, thường đặt ở trung tâm dữ liệu; quyết định địa chỉ IP và vị trí 'địa lý' mà Internet thấy ở người dùng.",
+   "en": "Where the satellite operator's network meets the Internet, usually in a data centre; it decides the IP address and apparent location the Internet sees for a user."
+  }
+ },
+ {
+  "id": "constellations-handover",
+  "vi": "Chuyển vùng (handover)",
+  "en": "Handover",
+  "def": {
+   "vi": "Việc chuyển kết nối của người dùng từ vệ tinh này sang vệ tinh khác khi mạng phân bổ lại. Với Starlink, các nghiên cứu đo đạc thấy mạng phân bổ lại khoảng mỗi 15 giây.",
+   "en": "Moving a user's connection from one satellite to another when the network reallocates. For Starlink, measurement studies see a reallocation about every 15 seconds."
+  }
+ },
+ {
+  "id": "constellations-direct-to-cell",
+  "vi": "Direct-to-Cell (vệ tinh tới điện thoại)",
+  "en": "Direct-to-Cell",
+  "def": {
+   "vi": "Dịch vụ cho điện thoại di động thông thường kết nối thẳng với vệ tinh mang trạm gốc LTE, dùng phổ của nhà mạng đối tác. Cần ăng-ten vệ tinh rất lớn và bù Doppler.",
+   "en": "A service that lets ordinary mobile phones connect directly to satellites carrying an LTE base station, on a partner operator's spectrum. It needs very large satellite antennas and Doppler pre-compensation."
+  }
+ }
+]

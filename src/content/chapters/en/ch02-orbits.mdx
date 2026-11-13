@@ -1,43 +1,123 @@
 ---
 title: Orbits & coverage
 n: 2
-summary: Why satellites do not fall, why most Earth-observation satellites fly at a 98° inclination, and how many days Sentinel-2 needs to image all of Viet Nam. Every number comes from Kepler's laws, the J2 effect and real orbital elements.
+summary: Why satellites do not fall, the six numbers that describe an orbit, why most Earth-observation satellites fly at a 98° inclination, how real orbits depart from Kepler's ellipse, and how many days Sentinel-2 needs to image all of Viet Nam. Every number comes from Kepler's laws, the J2 effect and real orbital elements.
 objectives:
-  - Compute the period and velocity of a circular orbit from its altitude with Kepler's third law.
-  - Tell LEO, sun-synchronous, MEO and GEO orbits apart and know what each is used for.
+  - State Kepler's three laws; compute period, circular speed and escape speed, and use the vis-viva equation on elliptical orbits.
+  - Read the six Keplerian elements on a diagram and decode a real TLE into period, semi-major axis and altitude.
+  - Tell LEO, SSO, MEO, GEO, GTO and Molniya orbits apart and know what each is used for.
+  - Name the main perturbations (J2, drag, Moon and Sun, radiation pressure) and estimate orbital lifetime from altitude.
   - Explain how J2 makes sun-synchronous orbits possible and compute the required inclination.
-  - Read ground tracks, swaths and repeat cycles; estimate how many days it takes to cover a region.
-updated: "2026-11-04"
+  - Read ground tracks, repeat cycles and visibility; compute central angle, slant range and pass time from altitude and elevation.
+updated: "2026-11-05"
 ---
 import Term from '../../../components/Term.astro';
 import Depth from '../../../components/Depth.astro';
 import Figure from '../../../components/Figure.astro';
 import LabLinks from '../../../components/LabLinks.astro';
-import KeplerChart from '../../../islands/KeplerChart.tsx';
+import Note from '../../../components/Note.astro';
+import Tiles from '../../../components/Tiles.astro';
+import Formula from '../../../components/Formula.astro';
+import Stats from '../../../components/Stats.astro';
+import Steps from '../../../components/Steps.astro';
+import Predict from '../../../islands/Predict.tsx';
 import OrbitExplorer from '../../../islands/OrbitExplorer.tsx';
+import KeplerEllipse from '../../../islands/KeplerEllipse.tsx';
+import KeplerChart from '../../../islands/KeplerChart.tsx';
+import ElementsDiagram from '../../../islands/ElementsDiagram.tsx';
+import TleReader from '../../../islands/TleReader.tsx';
+import OrbitTypes from '../../../islands/OrbitTypes.tsx';
+import J2Drift from '../../../islands/J2Drift.tsx';
+import SsoYear from '../../../islands/SsoYear.tsx';
 import RevisitMap from '../../../islands/RevisitMap.tsx';
+import VisibilityGeometry from '../../../islands/VisibilityGeometry.tsx';
 import Quiz from '../../../islands/Quiz.tsx';
 import quiz from '../../../data/quiz/ch02.json';
 
-<p class="muted" style="font-size:0.9rem">This chapter is adapted from chapter 2 (Orbital mechanics) of <a href="https://satellite-rs-handbook.netlify.app/" rel="noopener"><em>Sổ tay Vệ tinh & Viễn thám</em></a> (Nguyễn Văn Tín, CC BY 4.0), shortened for image users and extended with figures computed on real orbits.</p>
+<Figure
+  title="Figure 2.1 — Six kinds of Earth orbit, flown on a real globe"
+  try="Start with the ISS, then pick Sentinel-2, GPS, Geostationary, Molniya and GTO: how do the period and speed change? On Molniya, watch the 'Now' row: where is the satellite fast, where slow? Pick Sentinel-2 and drag the inclination down to 90°: what happens to 'Sun-synchronous?'? The red dot is Hanoi."
+  source="Two-body elliptical orbit (Kepler's equation) plus first-order secular J2 drift of the node and perigee (J2 = 1.08263×10⁻³, Re = 6378.137 km), sidereal time after IAU 1982. Ascending node placed at 105°E at 03:30 UTC on 4 Nov 2026. Presets: ISS (NASA), Sentinel-2 (ESA), GPS (GPS.gov), geostationary, Molniya (half a sidereal day, 600 km perigee, i = 63.4°, ω = 270°), Ariane 5 standard GTO (250 × 35,943 km, i = 6°, ω = 178°; Arianespace, Ariane 5 User's Manual). Basemap © Esri, Maxar, Earthstar Geographics."
+>
+  <OrbitExplorer client:visible lang="en" />
+</Figure>
 
-## 2.1 Why satellites do not fall
+## 2.1 Gravity and Kepler's three laws
 
-A satellite **is always falling**. It misses the ground because it moves sideways fast enough: while it falls, the curved surface drops away by the same amount. At 400 km, gravity is still 88.5 % of its surface value. Astronauts float because the station and the crew fall freely together.
+A satellite **is always falling**. It misses the ground because it moves sideways fast enough: while it falls, the curved surface drops away by the same amount. What pulls it down is Newton's gravity between the Earth and the satellite:
 
-For a circular orbit of radius r (from the Earth's centre), gravity provides the centripetal force:
+<Formula label="Gravity and the standard gravitational parameter" tex="F = \frac{G M_\oplus m}{r^2}, \qquad \mu \equiv G M_\oplus = 398\,600.4\ \text{km}^3/\text{s}^2" where="
+r :: distance from the Earth's centre to the satellite (km)
+m :: mass of the satellite
+\mu :: the Earth's standard gravitational parameter, known far more precisely than G or M alone
+" />
 
-<p class="formula">v = √(μ / r),   T = 2π √(r³ / μ),   μ = GM = 398,600.4 km³/s²</p>
+<Predict client:visible lang="en"
+  title="How much gravity is left on a space station?"
+  q="Astronauts on the International Space Station (about 400 km up) float. What percentage of surface gravity acts on them there?"
+  options={["Almost 0 %", "About 10 %", "About 50 %", "About 90 %"]} answer={3}
+  why="Gravity falls off as 1/r². At 400 km, r is only 6 % larger than the Earth's radius, so g is still (6378/6778)² ≈ 88.5 %. Astronauts float because the station and the crew fall freely together, not because gravity is gone." />
 
-The second formula is **Kepler's third law**: the period depends only on the size of the orbit, not on the satellite's mass. A few-kilogram CubeSat and a multi-tonne satellite at the same altitude share the same period.
+Orbital mechanics almost always uses the product μ = GM instead of G and M separately. The Earth's equatorial radius is 6378.137 km (WGS84), its mean radius 6371 km. At 400 km, gravity is still **88.5 %** of its surface value.
+
+Johannes Kepler derived three laws from Tycho Brahe's observations of Mars (1609 and 1619). Newton later proved all three from the law of gravitation. They hold for artificial satellites around the Earth:
+
+<Tiles items={[
+  { t: 'Law 1: orbits are ellipses', d: 'The Earth sits at one focus. A circular orbit is an ellipse with zero eccentricity. The closest point is perigee, the farthest apogee.' },
+  { t: 'Law 2: equal areas', d: 'The line from the Earth to the satellite sweeps equal areas in equal times: fast at perigee, slow at apogee (conservation of angular momentum).' },
+  { t: 'Law 3: T² is proportional to a³', d: 'The period depends only on the semi-major axis a, not on eccentricity or the satellite’s mass.' },
+]} />
+
+<Formula label="Kepler's third law" tex="T = 2\pi\sqrt{\frac{a^3}{\mu}}" where="
+T :: orbital period (s)
+a :: semi-major axis (km); for a circular orbit a = r = R⊕ + h
+" />
+
+A 4 kg CubeSat and the 420-tonne ISS at the same altitude share the same period. Figure 2.2 shows laws 1 and 2 at work: a geostationary transfer orbit (GTO) is split into equal time intervals, and the area of each sector is measured, not assumed.
 
 <Figure
-  title="Figure 2.1 — Orbital period versus altitude"
-  try="Hover along the curve. At what altitude does the period equal one sidereal day (1436 min)? Where do the Earth-observation satellites sit?"
-  source="Curve: Kepler's third law for circular orbits, equatorial radius 6378.137 km. Filled dots: real satellites, altitude from mean motion (CelesTrak, 4 Nov 2026). Hollow dots: nominal orbits of the ISS, GPS and a geostationary satellite."
+  title="Figure 2.2 — The Kepler ellipse: equal areas in equal times"
+  try="On the GTO, compare the long thin sectors near apogee with the short wide ones near perigee: are the measured areas equal? Drag e from 0 to 0.8 and read the perigee-to-apogee speed ratio. Pick the circular LEO: the dots are evenly spaced."
+  source="Two-body problem, Kepler's equation solved by Newton iteration; speed from vis-viva, μ = 398,600.4418 km³/s², Re = 6378.137 km. Sector areas from the polygon (shoelace) formula with 40 points per arc. One orbit takes 10 seconds on screen whatever the real period."
 >
-  <KeplerChart client:visible lang="en" />
+  <KeplerEllipse client:visible lang="en" />
 </Figure>
+
+### Circular speed, escape speed and the vis-viva equation
+
+On a circular orbit gravity provides the centripetal force: μm/r² = mv²/r. Hence:
+
+<Formula label="Circular speed and escape speed" tex="v_{c} = \sqrt{\frac{\mu}{r}}, \qquad v_{esc} = \sqrt{\frac{2\mu}{r}} = \sqrt{2}\,v_{c}" where="
+v_{c} :: speed needed to fly a circle of radius r
+v_{esc} :: minimum speed to leave the Earth for good from radius r
+" />
+
+<Stats items={[
+  { v: '7.91', u: 'km/s', l: 'circular speed at the surface (first cosmic velocity)' },
+  { v: '11.18', u: 'km/s', l: 'escape speed from the surface (second)' },
+  { v: '7.67', u: 'km/s', l: 'circular speed at 400 km (ISS)' },
+  { v: '3.07', u: 'km/s', l: 'circular speed in geostationary orbit' },
+]} caption="Computed from μ = 398,600.4 km³/s² and the 6378.137 km equatorial radius (scripts/ch02_numbers.ts)." />
+
+On an elliptical orbit the speed at any distance r is given by the **<Term id="ch02-vis-viva">vis-viva</Term> equation**, the most useful tool for orbit changes:
+
+<Formula label="Vis-viva and specific energy" tex="v^2 = \mu\left(\frac{2}{r} - \frac{1}{a}\right), \qquad \varepsilon = \frac{v^2}{2} - \frac{\mu}{r} = -\frac{\mu}{2a}" where="
+v :: speed at radius r (km/s)
+a :: semi-major axis; a = r on a circle, a → ∞ for an escape orbit
+\varepsilon :: specific energy (per kg); negative means the satellite is bound to the Earth
+" />
+
+<Note kind="myth">
+
+"Higher orbits are faster." The opposite: a geostationary satellite moves at 3.07 km/s, the ISS at 7.67 km/s. But **reaching** a higher orbit costs energy: ε rises from −29.40 km²/s² at 400 km to −4.73 km²/s² in geostationary orbit. The extra energy goes into potential energy, not speed. Changing orbit with two burns (Hohmann) is in Chapter 3.
+
+</Note>
+
+<Predict client:visible lang="en"
+  title="How fast does Vinasat fly?"
+  q="The Vinasat telecom satellite stands still in Viet Nam's sky at 35,786 km. How fast is it actually moving along its orbit?"
+  slider={{ min: 0, max: 10, step: 0.05, unit: 'km/s' }} answer={3.07} tol={0.35}
+  why="r = 6378 + 35,786 = 42,164 km, v = √(398,600 / 42,164) = 3.07 km/s, over 11,000 km/h. It 'stands still' because one orbit takes exactly one turn of the Earth, not because it does not move." />
 
 <div class="worked">
 
@@ -48,41 +128,239 @@ The second formula is **Kepler's third law**: the period depends only on the siz
 3. Period: T = 2π √(7164.1³ / 398,600.4) = 6035 s = **100.6 min**.
 4. Revolutions per day: 1440 / 100.6 ≈ **14.3**. ESA designed exactly 14 3/10 revolutions per day so the ground track repeats after 10 days (143 orbits).
 
-A geostationary satellite needs T equal to one sidereal day (1436.07 min). Solving Kepler's third law gives an altitude of **35,786 km** and a velocity of **3.07 km/s**.
+#### Example: geostationary orbit and GTO
+
+1. A geostationary satellite needs T equal to one **sidereal day**: 86,164 s, the time the Earth takes to turn 360° relative to the stars, 3 min 56 s shorter than the solar day.
+2. Inverting Kepler III: a = ∛(μ (T/2π)²) = **42,164 km**, an altitude of **35,786 km** and a speed of **3.07 km/s**.
+3. A GTO with a 250 km perigee and a 35,786 km apogee: a = (6628 + 42,164)/2 = 24,396 km, e = 0.728, period **10.5 hours**.
+4. Vis-viva: v = **10.19 km/s** at perigee and only **1.60 km/s** at apogee. The ratio 6.36 equals r_apogee / r_perigee, as law 2 predicts.
 
 </div>
 
-## 2.2 Kinds of orbit
+Figure 2.3 plots Kepler's third law for every altitude, with real satellites.
+
+<Figure
+  title="Figure 2.3 — Orbital period versus altitude"
+  try="Hover along the curve. At what altitude does the period equal one sidereal day (1436 min)? Where do the Earth-observation satellites sit?"
+  source="Curve: Kepler's third law for circular orbits, equatorial radius 6378.137 km. Filled dots: real satellites, altitude from mean motion (CelesTrak, 4 Nov 2026). Hollow dots: nominal orbits of the ISS, GPS and a geostationary satellite."
+>
+  <KeplerChart client:visible lang="en" />
+</Figure>
+
+<Note kind="key">
+
+<mark class="key">The period depends only on the semi-major axis a; the speed at each point follows from vis-viva.</mark> Three numbers worth knowing: LEO about 7.6 km/s and 95 min; geostationary 3.07 km/s, one sidereal day, 35,786 km.
+
+</Note>
+
+## 2.2 The six Keplerian elements
+
+To know where a satellite is at a given time takes exactly **6 numbers**: the equivalent of 3 position coordinates plus 3 velocity components. The easiest set to picture is the <Term id="ch02-orbital-elements">Keplerian elements</Term>, in three groups:
+
+<Tiles items={[
+  { t: 'Size and shape: a, e', d: 'The semi-major axis a sets the period and energy. The eccentricity e sets the shape: r_perigee = a(1−e), r_apogee = a(1+e).' },
+  { t: 'Orientation: i, Ω, ω', d: 'Inclination i and right ascension of the ascending node Ω place the orbit plane in space; the argument of perigee ω turns the ellipse inside that plane.' },
+  { t: 'Position: ν (or M)', d: 'The true anomaly ν is the angle from perigee to the satellite. The mean anomaly M carries the same information as if the satellite moved uniformly.' },
+]} />
+
+The angles are measured in the **Earth-centred inertial frame (ECI)**: the x axis points to the **vernal equinox ♈** (the Sun's direction at the March equinox), the z axis to the north pole. The orbit plane cuts the equatorial plane along the **line of nodes**. The point where the satellite crosses the equator northbound is the <Term id="ch02-raan">ascending node ☊</Term>.
+
+<Figure
+  title="Figure 2.4 — The six Keplerian elements: each slider changes one thing"
+  try="Drag Ω: the whole orbit plane turns around the polar axis, but the ellipse keeps its shape. Drag ω: the ellipse turns inside its plane while the node stays put. Drag i past 90°: the satellite becomes retrograde. Drag e to 0: does perigee still mean anything? Drag on the picture to rotate the view."
+  source="Drawn to scale (Earth radius 6378 km). Positions from the Keplerian elements with the standard Ω, i, ω rotations (Vallado 2013, algorithm COE2RV); orthographic projection, camera elevation 22°."
+>
+  <ElementsDiagram client:visible lang="en" />
+</Figure>
 
 <div class="table-wrap">
 
-| Orbit | Altitude | Period | Used for |
+| Symbol | Name | Meaning | Typical values |
 |---|---|---|---|
-| LEO (low Earth orbit) | 160–2000 km | ~88–127 min | Space stations, telecom constellations, remote sensing |
-| Sun-synchronous (a kind of LEO) | ~500–800 km, inclination ~97–99° | ~95–101 min | Most optical and radar satellites: Sentinel, Landsat, VNREDSat-1 |
-| MEO (medium Earth orbit) | 2000–35,786 km | 2–24 h | Navigation: GPS at 20,200 km, period 718.7 min |
-| GEO (geostationary) | 35,786 km, inclination 0° | 1436 min | Telecom (Vinasat), meteorology (Himawari) |
+| a | Semi-major axis | Size of the orbit; sets the period and energy | LEO 6800–7200 km; GEO 42,164 km |
+| e | Eccentricity | 0 is a circle, 0–1 an ellipse | Earth-observation satellites ~0.0001–0.001; GTO ~0.73; Molniya ~0.74 |
+| i | Inclination | Angle between orbit plane and equator; above 90° is retrograde | ISS 51.6°; GPS 55°; SSO ~98° |
+| Ω | Right ascension of the ascending node (RAAN) | Turns the plane around the polar axis, measured from ♈ to the ascending node | The planes of a constellation are evenly spaced in Ω |
+| ω | Argument of perigee | Where perigee lies in the plane, from the ascending node in the direction of flight | Molniya 270°: apogee hangs over the northern hemisphere |
+| ν or M | True / mean anomaly | Where the satellite is at the reference time (epoch) | Changes continuously 0–360° |
 
 </div>
 
-Periods and velocities in the table follow from the formulas in section 2.1. High-resolution imaging needs to fly low, close to the ground. Geostationary weather satellites accept the distance so that they always see the same region and can image it every 10 minutes.
+<Formula label="Radius from the true anomaly" tex="r = \frac{a(1-e^2)}{1+e\cos\nu}, \qquad r_p = a(1-e), \quad r_a = a(1+e)" where="
+\nu :: true anomaly: ν = 0 at perigee, 180° at apogee
+r_p,\ r_a :: perigee and apogee radius (subtract 6378 km for altitude)
+" />
 
-## 2.3 Sun-synchronous orbits and J2
+<Note kind="key">
 
-The Earth is not a perfect sphere: its equatorial radius is about 21 km larger than its polar radius. This bulge, described by the <Term id="j2">J2</Term> coefficient, pulls on orbits and makes the **orbit plane precess** around the Earth's axis:
+<mark class="key">a and e give size and shape, i, Ω and ω point the orbit in space, ν places the satellite on it.</mark> A circular orbit needs only a and i for its shape and tilt; ω loses its meaning when there is no perigee.
 
-<p class="formula">dΩ/dt = −(3/2) · n · J2 · (Re / a)² · cos i</p>
+</Note>
 
-where n is the satellite's angular rate, Re the equatorial radius, a the orbit radius and i the inclination. For the ISS (420 km, 51.6°) the plane turns **−4.95° per day** (westward).
+<Note kind="why">
 
-The Earth goes around the Sun by 360° in 365.24 days, 0.9856° per day eastward. If the inclination makes dΩ/dt exactly +0.9856°/day, the orbit plane follows the Sun and the satellite passes each latitude at the same local time. That is a <Term id="sun-synchronous-orbit">sun-synchronous orbit</Term>. A positive dΩ/dt needs a negative cos i, i.e. **i above 90°**: the satellite flies slightly against the Earth's rotation.
+Inclination is limited by the latitude of the launch site: a direct launch from latitude φ reaches only i ≥ φ. Getting down to i = 0° for a geostationary satellite takes extra propellant to "bend" the plane, so sites near the equator have an edge. Chapter 3 works out the cost.
+
+</Note>
+
+### Reading a TLE
+
+A **<Term id="ch02-tle">TLE</Term>** (two-line element set) is a text format of two 69-column lines, issued by the US Space Force and published on CelesTrak and Space-Track. It holds "mean" elements meant only for the **SGP4** propagator. Figure 2.5 shows the real TLE of VNREDSat-1, Viet Nam's first Earth-observation satellite, downloaded from CelesTrak on 5 Nov 2026.
 
 <Figure
-  title="Figure 2.2 — Build your own circular orbit passing over Viet Nam"
-  try="Choose Sentinel-2, then drag the inclination from 98.6° down to 90°: what happens to 'Sun-synchronous?'? Choose 'Geostationary': why does the satellite stand still on the globe? Raise the altitude to 6000 km: is there still a sun-synchronous inclination?"
-  source="Circular two-body orbit plus first-order J2 node drift (J2 = 1.08263×10⁻³, Re = 6378.137 km), sidereal time after IAU 1982. Ascending node placed at 105°E at 03:30 UTC on 4 Nov 2026 so the track crosses Viet Nam. Presets: ISS (NASA), Sentinel-2 (ESA), Landsat 9 (USGS), GPS, geostationary. Basemap © Esri, Maxar, Earthstar Geographics."
+  title="Figure 2.5 — Decoding the real TLE of VNREDSat-1"
+  try="Tap '14.64781302' on line 2: the mean motion gives the period, semi-major axis and altitude. Tap '0001582': why is there no decimal point? Tap '26308.46606966': what date and time is that? Tap the last digit of each line: is the checksum valid?"
+  source="VNREDSat-1 TLE (NORAD 39160) from CelesTrak, downloaded 5 Nov 2026 01:39 UTC, epoch 4 Nov 2026 11:11 UTC (scripts/data/export_ch02_tle.py). Format after Kelso, CelesTrak 'NORAD Two-Line Element Set Format'. Decoding and checksum: src/lib/kepler.ts (parseTle); semi-major axis from Kepler III."
 >
-  <OrbitExplorer client:visible lang="en" />
+  <TleReader client:visible lang="en" />
+</Figure>
+
+<Predict client:visible lang="en"
+  title="From one number to altitude"
+  q="The last field of line 2 says VNREDSat-1 makes 14.648 orbits per day. Estimate its altitude (hint: Sentinel-2 makes 14.3 per day at 786 km)."
+  slider={{ min: 300, max: 1200, step: 10, unit: 'km' }} answer={678} tol={40}
+  why="Period 1440 / 14.648 = 98.31 min. Kepler III: a = ∛(μ(T/2π)²) = 7056 km; minus the 6378 km radius gives about 678 km. More orbits per day means a shorter period, so it is lower than Sentinel-2." />
+
+<Steps title="From TLE to altitude, step by step (VNREDSat-1)" items={[
+  { tag: 'n', t: 'Read the mean motion', d: 'Columns 53–63 of line 2: n = 14.64781302 rev/day.' },
+  { tag: 'T', t: 'Convert to period', d: 'T = 1440 / n = 98.31 min = 5898 s.' },
+  { tag: 'a', t: 'Invert Kepler III', d: 'a = ∛(μ (T/2π)²) = 7055.9 km.' },
+  { tag: 'h', t: 'Subtract the radius, apply e', d: 'e = 0.0001582, so perigee 676.7 km, apogee 678.9 km: almost circular.' },
+]} />
+
+<Note kind="warn">
+
+TLE elements are mean elements tied to SGP4, not the "true" Keplerian elements at an instant. Feeding them straight into two-body formulas gives wrong answers. A TLE is good to about 1 km at epoch and degrades by a few km per day, worst in low orbits where drag follows solar activity (Vallado et al., 2006). Operators use far better orbits: Sentinel-1's post-processed orbits are accurate to about 5 cm, good enough for measuring ground deformation with InSAR (Chapter 16).
+
+</Note>
+
+<Depth level="advanced" title="ECI, ECEF and time scales">
+
+Keplerian elements live in the **ECI** frame (inertial, not turning with the Earth). Maps and GNSS use **ECEF** (fixed to the Earth, turning with it). The two differ by a rotation about z by **Greenwich mean sidereal time** (GMST), which grows 360.9856° per solar day; the figures in this chapter use the IAU 1982 formula. Exact conversion also needs precession, nutation and polar motion (Vallado 2013).
+
+Time has several scales too. **TAI** is International Atomic Time, perfectly uniform. **UTC** follows the Earth's rotation with leap seconds: since 1 January 2017, TAI − UTC = 37 s. **GPS time** equals TAI − 19 s and has no leap seconds, so today GPS − UTC = 18 s (IERS Bulletin C). TLE epochs are in UTC.
+
+</Depth>
+
+## 2.3 Kinds of orbit
+
+<Figure
+  title="Figure 2.6 — Kinds of orbit drawn to scale"
+  try="Press Play and compare the dots: the LEO dot laps more than 15 times while the GEO dot goes round once. Pick GTO: where does it touch the GEO circle? Pick Molniya: why does the satellite 'hang' so long near the top?"
+  source="Orbits from Kepler III and vis-viva (src/lib/kepler.ts), Re = 6378.137 km; each orbit drawn in its own plane at one common scale. GTO 250 × 35,786 km; Molniya half a sidereal day, 600 km perigee; GPS 20,200 km (GPS.gov); Galileo 23,222 km (ESA). Light delay with c = 299,792.458 km/s."
+>
+  <OrbitTypes client:visible lang="en" />
+</Figure>
+
+Shrink the Earth to a 22 cm football and the ISS flies only about **7 mm** above its surface, while a geostationary satellite sits about **73 cm** from its centre. Low Earth orbit is a very thin shell hugging the planet.
+
+<div class="table-wrap">
+
+| Orbit | Altitude | Period | Speed | Used for |
+|---|---|---|---|---|
+| VLEO (very low) | below ~450 km | ~90–93 min | ~7.7 km/s | Very-high-resolution imaging, very low latency; needs constant thrust against drag |
+| LEO | ~450–2000 km | ~94–127 min | 6.9–7.6 km/s | Remote sensing, Starlink (550 km), OneWeb (1200 km), ISS |
+| SSO (a kind of LEO) | ~500–800 km, i ≈ 97–99° | ~95–101 min | ~7.5 km/s | Most optical and radar satellites: Landsat, Sentinel, VNREDSat-1 |
+| MEO | 2000–35,786 km | 2–24 h | 3.1–6.9 km/s | GNSS: GPS 20,200 km (718.7 min), Galileo 23,222 km |
+| GEO (geostationary) | 35,786 km, i = 0°, e = 0 | 1 sidereal day (1436.1 min) | 3.07 km/s | Telecom (Vinasat), weather (Himawari) |
+| GTO | perigee ~250 km, apogee 35,786 km | ~10.5 h | 10.2 at perigee / 1.6 at apogee (km/s) | Temporary orbit where rockets drop geostationary satellites |
+| Molniya (HEO) | perigee ~600 km, apogee ~39,800 km, i = 63.4° | half a sidereal day (~718 min) | 10.0 at perigee / 1.5 at apogee (km/s) | High-latitude coverage (Russia) |
+| Lagrange points L1, L2 | ~1.5 million km | with the Earth around the Sun, 1 year | — | SOHO, DSCOVR (L1); JWST (L2) |
+
+</div>
+
+Periods and speeds in the table follow from the formulas in section 2.1. High-resolution imaging needs to fly low, close to the ground. Geostationary weather satellites accept the distance so that they always see the same region: Himawari images the full Earth disc every 10 minutes.
+
+<Stats items={[
+  { v: '1.8', u: 'ms', l: 'vertical light delay to LEO at 550 km' },
+  { v: '67', u: 'ms', l: 'to GPS at 20,200 km' },
+  { v: '119', u: 'ms', l: 'to geostationary orbit at 35,786 km' },
+]} caption="One way, vertical, c = 299,792.458 km/s. Up to a geostationary satellite and back down takes at least about 0.24 s: why a call via GEO has a noticeable lag (Chapter 5)." />
+
+<Depth level="advanced" title="Why does Molniya use i = 63.4°?">
+
+J2 (section 2.4) makes the argument of perigee ω drift at a rate proportional to (5cos²i − 1). At cos²i = 1/5, i.e. **i = 63.4°** or 116.6°, the drift vanishes. This is the <Term id="ch02-critical-inclination">critical inclination</Term>. Thanks to it, Molniya's apogee always stays over the northern hemisphere, where the satellite is slow: it spends about 11 of every 12 hours north of the equator. Figure 2.7 shows the perigee curve crossing zero at exactly 63.4° at every altitude.
+
+</Depth>
+
+<Note kind="key">
+
+<mark class="key">An orbit is chosen for the job: low to see detail, sun-synchronous for steady lighting, MEO for navigation, GEO to hover over one region.</mark>
+
+</Note>
+
+## 2.4 Perturbations: why real orbits are not perfect ellipses
+
+Kepler's laws hold only for the two-body problem with a perfectly spherical Earth. In reality several small forces change the orbit gradually:
+
+<div class="table-wrap">
+
+| Perturbation | Cause | Main effect | Strongest in |
+|---|---|---|---|
+| <Term id="j2">J2</Term> | The Earth is oblate: equatorial radius 21.4 km larger than polar; J2 = 1.08263×10⁻³ | The orbit plane turns (node drift), perigee drifts | LEO; the largest perturbation |
+| Atmospheric drag | Thin air remains at a few hundred km; density rises sharply with solar activity | Energy loss, the orbit decays and re-enters | Below ~700 km |
+| Moon and Sun | Third-body pull | Geostationary inclination grows by about 0.75–0.95°/year | GEO, HEO |
+| Solar radiation pressure | Photons carry momentum and push on the panels | Seasonal changes in eccentricity | Light satellites with large area, high orbits |
+| Equatorial asymmetry (J22) | The equator is slightly elliptical | Geostationary satellites drift in longitude toward two stable points near 75°E and 105°W | GEO |
+
+</div>
+
+J2 is the first (and largest) term in the expansion of the Earth's gravity field. The equatorial bulge tugs on the orbit, making the **orbit plane precess** around the Earth's axis and **perigee drift** within the plane. The time-averaged ("secular") rates are:
+
+<Formula label="J2 drift of the node and perigee" tex="\dot\Omega = -\frac{3}{2}\, n J_2 \left(\frac{R_\oplus}{p}\right)^{2}\cos i, \qquad \dot\omega = \frac{3}{4}\, n J_2 \left(\frac{R_\oplus}{p}\right)^{2}\left(5\cos^2 i - 1\right)" where="
+n = \sqrt{\mu/a^3} :: mean angular rate of the satellite (rad/s)
+p = a(1-e^2) :: semi-latus rectum (equal to a on a circle)
+R_\oplus :: equatorial radius 6378.137 km
+\cos i :: its sign sets the direction of the node drift
+" />
+
+For the ISS (420 km, 51.6°) the node regresses **4.95° per day** westward and perigee advances 3.70°/day. At GPS altitude (20,200 km) J2 is much weaker: the node drifts only 0.039°/day.
+
+<Figure
+  title="Figure 2.7 — J2 drift rates versus inclination"
+  try="Pick Sentinel-2: the round marker sits right on the Sun line +0.9856°/day. Pick the ISS: how many degrees per day does its node drift? Raise the altitude to 6000 km: does the node curve still meet the Sun line? Pick Molniya: where does the dashed curve cross zero?"
+  source="First-order secular J2 drift (Vallado 2013, section 9.6), J2 = 1.08263×10⁻³, Re = 6378.137 km, μ = 398,600.4418 km³/s². Presets: Sentinel-2 (ESA), ISS (NASA), GPS (GPS.gov), Molniya (half a sidereal day, e = 0.737)."
+>
+  <J2Drift client:visible lang="en" />
+</Figure>
+
+### Orbital lifetime under drag
+
+Drag is proportional to air density, which falls roughly exponentially with altitude but, at a given altitude, can differ tens of times between a quiet and an active Sun. The ladder below is for a small satellite without propulsion with a ballistic coefficient Cd·A/m = 0.02 m²/kg, using NRLMSIS 2.1 density at two levels of solar activity (the same model as Chapter 4):
+
+<Steps title="How long until it re-enters? (Cd·A/m = 0.02 m²/kg; active → quiet Sun)" items={[
+  { tag: '300 km', t: '13 → 43 days', d: 'Starlink releases new satellites low: if one fails, it comes down quickly.' },
+  { tag: '400 km', t: '79 days → 1.5 years', d: 'The ISS at this height has to reboost regularly.' },
+  { tag: '500 km', t: '1.0 → 12 years', d: 'Many CubeSats here deorbit by themselves within a few years.' },
+  { tag: '600 km', t: '4 → 77 years', d: 'Starts to exceed the FCC 5-year post-mission rule (Chapter 4).' },
+  { tag: '700–800 km', t: '14 → 930 years', d: 'Sun-synchronous altitudes: debris here stays for centuries.' },
+]} />
+
+A real case: on 3 February 2022 SpaceX launched 49 Starlink satellites into an orbit with a perigee of about 210 km. A geomagnetic storm heated and expanded the atmosphere, raising drag by up to about 50 % over previous launches. SpaceX reported that up to 40 of the satellites would re-enter or already had (SpaceX, 8 Feb 2022). Figure 4.4 in Chapter 4 lets you compute lifetime yourself from altitude, satellite size and solar activity.
+
+<Note kind="key">
+
+<mark class="key">J2 turns the orbit plane and moves perigee; drag lowers orbits below ~700 km.</mark> The "nuisance" J2 is what makes sun-synchronous orbits possible, the next section.
+
+</Note>
+
+## 2.5 Sun-synchronous orbits (SSO)
+
+The Earth goes around the Sun by 360° in 365.24 days, **0.9856° per day** eastward. If the inclination makes dΩ/dt exactly +0.9856°/day, the orbit plane follows the Sun: the angle between the plane and the Sun's direction stays the same all year. The satellite then passes each latitude at the same local time. That is a <Term id="sun-synchronous-orbit">sun-synchronous orbit</Term>.
+
+A positive dΩ/dt needs a negative cos i, i.e. **i above 90°**: the satellite flies slightly against the Earth's rotation. Solving the J2 formula for dΩ/dt = +0.9856°/day:
+
+<Formula label="Sun-synchronous inclination" tex="\cos i_{SSO} = -\,\frac{\dot\Omega_{\odot}}{\tfrac{3}{2}\, n J_2 \left(R_\oplus/a\right)^2}, \qquad \dot\Omega_{\odot} = \frac{360^\circ}{365.2422\ \text{d}} = 0.9856^\circ/\text{d}" where="
+\dot\Omega_{\odot} :: rate at which the Sun moves east around the sky
+i_{SSO} :: 97.4° at 500 km; 98.2° at 705 km; 98.5° at 786 km
+" />
+
+<Figure
+  title="Figure 2.8 — The orbit plane over a year: sun-synchronous or not"
+  try="With 'Sun-synchronous', drag the day from 0 to 365: does the descending-node time change? Pick 'Polar, i = 90°': after 3 months, how far has the descending-node time moved? Pick the ISS: why does its pass time change so fast?"
+  source="Seen from above the ecliptic, circular Earth orbit. The orbit plane turns at its J2 rate: +0.9856°/day (SSO), 0 (i = 90°), −4.95°/day (ISS, 420 km, 51.6°). Local time of the ascending node = 12 h + (Ω − α☉)/15; the descending node starts at 10:30 like Sentinel-2."
+>
+  <SsoYear client:visible lang="en" />
 </Figure>
 
 The J2 formula applied to real satellites (CelesTrak elements from Chapter 1):
@@ -100,20 +378,53 @@ The J2 formula applied to real satellites (CelesTrak elements from Chapter 1):
 
 The first three match the theory almost exactly: they are actively kept in their orbits. VNREDSat-1 is 0.21° off, so its overpass time is drifting (Chapter 1).
 
+**Why optical remote sensing likes SSO:**
+
+- **Repeatable lighting.** The same local time means a similar Sun angle from image to image (changing only with the seasons), which makes time series comparable.
+- **A chosen imaging time.** A local time of the descending node (<Term id="ltdn">LTDN</Term>) of about 10:00–10:30 balances a high enough Sun against afternoon convective clouds that have not yet built up. Landsat 8/9 cross at about 10:00, Sentinel-2 at 10:30.
+- **Dawn–dusk orbits.** Nodes at 06:00/18:00 put the orbit plane nearly perpendicular to the Sun's direction, so the solar panels are almost always lit. Ideal for power-hungry SAR such as Sentinel-1 (ascending node 18:00).
+
+<Note kind="myth">
+
+"Sun-synchronous satellites are always in sunlight." Only dawn–dusk orbits come close, and even they pass through the Earth's shadow during a short season around one of the solstices. A 10:30 SSO like Sentinel-2 enters the shadow on the night side every orbit, for about a third of the time (Chapter 4 computes this eclipse share).
+
+</Note>
+
 <Depth level="advanced" title="The altitude limit of sun-synchronous orbits">
 
-Higher up, J2 weakens (through (Re/a)² and n). To still turn 0.9856°/day, cos i must become more negative. Near 6000 km it needs cos i ≈ −1, i.e. i ≈ 180°; above that no inclination works. Figure 2.2 then shows "none (too high)". In practice sun-synchronous orbits are used almost only below 1000 km.
+Higher up, J2 weakens (through (Re/a)² and n). To still turn 0.9856°/day, cos i must become more negative. Near 6000 km it needs cos i ≈ −1, i.e. i ≈ 180°; above that no inclination works, and Figures 2.1 and 2.7 show "none". In practice sun-synchronous orbits are used almost only below 1000 km.
 
 </Depth>
 
-## 2.4 Ground tracks, swaths and revisit
+<Note kind="key">
 
-The <Term id="ground-track">ground track</Term> is the path traced by the point directly below the satellite. During one 100.6-minute orbit the Earth turns 25.2°, so the next track is 25.2° further west (about 2800 km at the equator). Sentinel-2's swath is 290 km, much narrower than that gap, so a single satellite needs many days for its tracks to fill the gaps.
+<mark class="key">SSO exploits the J2 perturbation: an inclination of about 97–99° makes the orbit plane turn 0.9856°/day with the Sun and fixes the imaging time all year.</mark>
 
-Sentinel-2 images only on the **descending pass**, when the ground below is in daylight. It crosses the equator at 10:30 local time (<Term id="ltdn">LTDN</Term>), and its track repeats exactly after a 10-day <Term id="repeat-cycle">repeat cycle</Term>.
+</Note>
+
+## 2.6 Ground tracks, repeat cycles and coverage
+
+The <Term id="ground-track">ground track</Term> is the path traced by the point directly below the satellite (nadir). The highest latitude it reaches equals i (or 180° − i for retrograde orbits). Because the Earth turns 360° in a sidereal day, each orbit's track shifts west:
+
+<Formula label="Westward track shift per orbit" tex="\Delta L = 360^\circ \times \frac{T}{86\,164\ \text{s}}" where="
+T :: orbital period (s)
+\Delta L :: longitude shift of the track between consecutive orbits (ignoring node drift)
+" />
+
+During one 100.7-minute Sentinel-2 orbit the Earth turns 25.2°, so the next track is 25.2° further west (about 2810 km at the equator). Sentinel-2's swath is 290 km, much narrower than that gap, so a single satellite needs many days for its tracks to fill the gaps.
+
+### Repeat cycle and revisit
+
+An orbit **repeats** when after exactly k orbits in d days the satellite is back on the same track. The altitude is tuned to satisfy this; that is the <Term id="repeat-cycle">repeat cycle</Term>:
+
+- **Landsat 8/9:** 233 orbits / 16 days (period 98.9 min), altitude 705 km. Swath 185 km × 233 = 43,105 km, just enough to cover the 40,075 km equator. The two satellites are 8 days apart, so a point is imaged every 8 days.
+- **Sentinel-2:** 143 orbits / 10 days, 786 km, 290 km swath. Two satellites 180° apart give a 5-day revisit at the equator, shorter at mid-latitudes where swaths overlap.
+- **Sentinel-1:** 175 orbits / 12 days, 693 km. An exactly repeating track matters for InSAR (Chapter 16).
+
+Sentinel-2 images only on the **descending pass**, when the ground below is in daylight. It crosses the equator at 10:30 local time and its track repeats exactly after 10 days.
 
 <Figure
-  title="Figure 2.3 — How many days does Sentinel-2 need to image all of Viet Nam's land?"
+  title="Figure 2.9 — How many days does Sentinel-2 need to image all of Viet Nam's land?"
   try="With 1 satellite, drag the days from 1 to 10 and read 'Land seen at least once'. Switch to 2 satellites: how many days now? After 10 days, how many times is each point imaged on average?"
   source="Sentinel-2 reference orbit (ESA): 14 3/10 revolutions per day, inclination 98.62°, descending node at 10:30 local time, 290 km swath; only descending passes between 6 and 25°N. Land points: 0.1° grid inside the LSIB 2017 outline (simplified to 2 km), 2778 points. Day-to-day phasing is modelled, not the real acquisition plan. Basemap © Esri, Maxar, Earthstar Geographics."
 >
@@ -137,32 +448,84 @@ Simulation results:
 
 Viet Nam is long and narrow from north to south, almost parallel to the tracks. One pass can therefore cover up to 40 % of the land, but some days no pass crosses it at all. With two satellites each point is imaged **2.23 times** on average in 10 days. That is why ESA says "Sentinel-2 revisits every 5 days".
 
-Being imaged is not the same as having a usable image. Chapter 4 showed that in Hanoi only 92 of 433 dates in 2022–2024 were clear enough. At Hanoi's latitude the satellite passes at about **10:43** local time, just when summer convective clouds start to build.
+<Note kind="myth">
 
-<Depth level="ref" title="Reference: orbit parameters of common satellites">
+"Repeat cycle and revisit are the same thing." The **repeat cycle** is the number of days until the ground track coincides again, a property of the orbit. The **<Term id="revisit">revisit</Term>** is the gap between two *possible* acquisitions of a point. It is much shorter with more satellites, where swaths overlap at high latitudes, or when the satellite tilts to image off-nadir: WorldView-3 can image a point almost daily at large tilt angles, at the cost of coarser resolution and more distorted geometry.
 
-<div class="table-wrap">
+</Note>
 
-| Satellite | Nominal altitude | Inclination | Equator crossing | Repeat cycle |
-|---|---|---|---|---|
-| Sentinel-2A/B/C | 786 km | 98.62° | 10:30, descending node | 10 days (1 satellite), 5 days (2) |
-| Sentinel-1 | 693 km | 98.18° | 18:00, ascending node | 12 days (1 satellite) |
-| Landsat 8, 9 | 705 km | 98.2° | ~10:00, descending node | 16 days (1 satellite), 8 days (2) |
-| MODIS Terra / Aqua | 705 km | 98.2° | 10:30 descending / 13:30 ascending (nominal) | 1–2 days |
+Being imaged is not the same as having a usable image. Chapter 9 showed that in Hanoi only 92 of 433 dates in 2022–2024 were clear enough. At Hanoi's latitude the satellite passes at about **10:43** local time, just when summer convective clouds start to build.
+
+### Visibility geometry: elevation, central angle and slant range
+
+A ground station or user dish works only when the satellite is above a **minimum elevation ε** over the horizon: near the horizon buildings, trees and hills block the view, and the signal crosses more atmosphere. For a satellite at radius r = R + h, three quantities describe what is in view: the central angle λ (half the coverage, seen from the Earth's centre), the nadir angle η at the satellite and the <Term id="slant-range">slant range</Term> d:
+
+<Formula label="Central angle, nadir angle and slant range" tex="\lambda = \arccos\!\left(\frac{R\cos\varepsilon}{R+h}\right) - \varepsilon, \qquad \sin\eta = \frac{R\cos\varepsilon}{R+h}, \qquad \lambda + \eta + \varepsilon = 90^\circ" where="
+\varepsilon :: minimum elevation of the ground station
+\lambda :: Earth central angle from nadir to the edge of coverage; coverage radius along the ground = R·λ (λ in radians)
+\eta :: nadir angle: how far off vertical the satellite must look to see the edge
+" />
+
+<Formula label="Slant range and visible share of the surface" tex="d = \sqrt{(R+h)^2 - R^2\cos^2\varepsilon} - R\sin\varepsilon, \qquad f = \frac{1-\cos\lambda}{2}" where="
+d :: distance from a station at the edge of coverage to the satellite (km)
+f :: share of the Earth's surface inside the coverage (spherical cap)
+" />
+
+<Predict client:visible lang="en"
+  title="How long does a Starlink dish see one satellite?"
+  q="A Starlink satellite at 550 km passes straight overhead. The dish works only above 25° elevation. How long is the satellite in view?"
+  options={["About 30 seconds", "About 4–5 minutes", "About 30 minutes", "About 2 hours"]} answer={1}
+  why="At 550 km and ε = 25°, the central angle is λ = 8.45°. The satellite crosses an arc of 2λ = 16.9° in a 95.7-minute orbit: 16.9/360 × 95.7 ≈ 4.5 min. So the dish keeps switching satellites, and Starlink needs thousands of them (Chapter 6)." />
+
+<Figure
+  title="Figure 2.10 — Coverage versus altitude and minimum elevation"
+  try="Pick Starlink and lower the elevation from 25° to 10°: how much does the coverage radius grow? Pick Sentinel-2 → ground station: how long does a station in Hanoi receive data on each pass? Pick GEO: why do three geostationary satellites cover almost the whole Earth except the poles?"
+  source="Spherical geometry, Earth radius 6378.137 km, drawn to scale (Wertz and Larson 1999, section 5.2). Longest pass time for an overhead pass, ignoring the Earth's rotation. Preset elevations are illustrative: Starlink 25° (SpaceX FCC filings), ground station 5°, GPS 10°."
+>
+  <VisibilityGeometry client:visible lang="en" />
+</Figure>
+
+<Stats items={[
+  { v: '941', u: 'km', l: 'coverage radius of Starlink at 550 km, ε = 25°' },
+  { v: '4.5', u: 'min', l: 'its longest pass' },
+  { v: '12.6', u: 'min', l: 'Sentinel-2 in view of a ground station, ε = 5°' },
+  { v: '42.4', u: '%', l: 'of the Earth’s surface seen from geostationary orbit (ε = 0°)' },
+]} caption="Computed with the formulas above (scripts/ch02_numbers.ts)." />
+
+<div class="worked">
+
+#### Example: how much does a geostationary satellite see?
+
+1. ε = 0°, r = 42,164 km: λ = arccos(6378 / 42,164) = **81.3°**.
+2. Surface share: f = (1 − cos 81.3°)/2 = **42.4 %**. Three satellites 120° apart cover almost the whole Earth, except the polar caps above about 81° latitude.
+3. Slant range at the edge: d = √(42,164² − 6378²) = 41,679 km, a one-way delay of 139 ms against 119 ms at nadir.
+4. With a more realistic ε = 5°, the visible share drops to 38.2 %.
 
 </div>
 
-Sources: ESA Sentinel-1 and Sentinel-2 User Handbooks, USGS Landsat Missions, NASA MODIS. Terra's crossing time has been getting earlier since its orbit stopped being maintained (Chapter 1).
+<Note kind="key">
 
-</Depth>
+<mark class="key">Coverage is set by altitude and minimum elevation: LEO sees little and passes in minutes, GEO sees almost half the Earth and stands still.</mark> The repeat cycle is a property of the orbit; the revisit can be much shorter with more satellites or off-nadir imaging.
 
-<Depth level="advanced" title="Orbital elements and GP/TLE sets">
+</Note>
 
-Six numbers fix a satellite's position at a given time. The easiest to picture are the six Keplerian elements: semi-major axis a, eccentricity e, inclination i, right ascension of the ascending node Ω (RAAN), argument of perigee ω and mean anomaly M. CelesTrak publishes them as GP (OMM JSON) or TLE sets, computed for the SGP4 propagator. Figures 1.2 and 2.2 use a simpler model (circular orbit, J2 node drift only), good enough for illustration but off by about ten km after a day. For accurate pass prediction, use SGP4 (the Python `sgp4` package or `satellite.js`).
+## 2.7 Constellations
 
-</Depth>
+A single LEO satellite sees a small area and passes in a few minutes. Continuous coverage or frequent revisits need several satellites working together: a <Term id="walker-constellation">constellation</Term>. The most common layout is the **Walker Delta**, written i : t/p/f: t satellites spread evenly over p planes spaced 360°/p in Ω, with f the phasing between adjacent planes.
 
-## 2.5 Lab
+- **Galileo:** 56° : 24/3/1 (ESA). **GPS** uses 6 planes inclined at 55°.
+- **Starlink**, original 550 km shell: 72 planes × 22 satellites at 53°.
+- **Sentinel-2** is the smallest constellation: two satellites in one plane, 180° apart (Figure 2.9).
+
+A satellite at inclination i spends the most time near latitudes ±i, where its track "turns around". So Starlink's 53° shell is densest around 40–53° latitude; Viet Nam (8–23°N) sits in a sparser zone but is still covered. Chapter 6 goes deeper into constellation design: Walker patterns, latency, how many satellites are needed, and a globe with the real Starlink fleet.
+
+<Note kind="key">
+
+<mark class="key">One satellite is limited by its coverage and repeat cycle; continuous coverage or denser revisits need more satellites and more planes.</mark>
+
+</Note>
+
+## 2.8 Lab
 
 The notebook computes period, velocity and sun-synchronous inclination versus altitude, draws Sentinel-2's tracks over Viet Nam for 10 days, and compares them with the real number of Sentinel-2 images of a point in Earth Engine. The GEE script shows the footprints of Sentinel-2 images over Viet Nam for 10 consecutive days.
 
@@ -173,16 +536,25 @@ The notebook computes period, velocity and sun-synchronous inclination versus al
 1. Compute the sun-synchronous inclination at 500 km. Is it larger or smaller than at 786 km?
 2. Landsat 8 and 9 have a 185 km swath and a 16-day repeat cycle. How many days do the two need to image all of Viet Nam?
 3. Count the real Sentinel-2 images of your home town in January 2024. Does it match "every 5 days"? Why or why not?
+4. Download the latest VNREDSat-1 TLE from CelesTrak, decode its mean motion into altitude and compare with Figure 2.5. How much has the altitude changed?
+5. A ground station in Ho Chi Minh City works down to ε = 5°. At most how long is Sentinel-2 in view on one pass? And at ε = 10°?
 
-## 2.6 Review
+## 2.9 Review
 
 <Quiz client:visible lang="en" items={quiz} />
 
 ## References
 
+- Arianespace (2016). *Ariane 5 User's Manual*, Issue 5 Revision 2.
 - Drusch, M., et al. (2012). Sentinel-2: ESA's optical high-resolution mission for GMES operational services. *Remote Sensing of Environment*, 120, 25–36.
 - ESA (2015). *Sentinel-2 User Handbook*. European Space Agency.
-- Kelso, T. S. *CelesTrak*. https://celestrak.org
+- ESA. *Sentinel-1 User Guide* and *Copernicus POD Service*. https://sentinels.copernicus.eu
+- IERS. *Bulletin C* (leap seconds, TAI − UTC). https://www.iers.org
+- Kelso, T. S. *CelesTrak* and *NORAD Two-Line Element Set Format*. https://celestrak.org
 - Nguyễn Văn Tín. *Sổ tay Vệ tinh & Viễn thám*, chapter 2. CC BY 4.0. https://satellite-rs-handbook.netlify.app/
+- Soop, E. M. (1994). *Handbook of Geostationary Orbits*. Kluwer / ESA.
+- SpaceX (8 Feb 2022). *Geomagnetic storm and recently deployed Starlink satellites*. https://www.spacex.com/updates
+- USGS. *Landsat 8* and *Landsat 9* Data Users Handbooks. https://www.usgs.gov/landsat-missions
 - Vallado, D. A. (2013). *Fundamentals of Astrodynamics and Applications* (4th ed.). Microcosm Press.
+- Vallado, D. A., Crawford, P., Hujsak, R., & Kelso, T. S. (2006). Revisiting Spacetrack Report #3. AIAA 2006-6753.
 - Wertz, J. R., & Larson, W. J. (Eds.) (1999). *Space Mission Analysis and Design* (3rd ed.). Microcosm / Kluwer.

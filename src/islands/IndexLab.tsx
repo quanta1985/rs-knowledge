@@ -96,14 +96,14 @@ export default function IndexLab({ lang, initial = 'NDVI' }: { lang: Lang; initi
       <svg className="hist" viewBox={`-4 -4 ${HW + 8} ${HH + 22}`} role="img" aria-label={T.hist}>
         {hist.map((c, i) => {
           const x0 = -1 + (2 * i) / BINS, h = (c / maxC) * HH, hit = x0 + 1 / BINS >= thr;
-          return <rect key={i} x={hx(x0)} width={HW / BINS - 0.5} y={HH - h} height={h} fill={hit ? `rgb(${MASK})` : '#94a3b8'} opacity={hit ? 0.95 : 0.45} />;
+          return <rect key={i} x={hx(x0)} width={HW / BINS - 0.5} y={HH - h} height={h} fill={hit ? `rgb(${MASK})` : 'var(--st-muted)'} opacity={hit ? 0.95 : 0.45} />;
         })}
-        <line x1={hx(thr)} x2={hx(thr)} y1={-4} y2={HH} stroke="#e3b25a" strokeWidth={1.5} />
+        <line x1={hx(thr)} x2={hx(thr)} y1={-4} y2={HH} stroke="var(--st-warn)" strokeWidth={1.5} />
         <text x={0} y={HH + 13}>−1</text><text x={HW / 2} y={HH + 13} textAnchor="middle">0</text><text x={HW} y={HH + 13} textAnchor="end">+1</text>
       </svg>
       {mode === 'map' && <div aria-hidden="true" style={{ marginTop: 6 }}>
         <div style={{ height: 8, borderRadius: 3, background: gradient }} />
-        <div className="num" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: '#94a3b8' }}><span>−1</span><span>0</span><span>+1</span></div>
+        <div className="num" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--st-muted)' }}><span>−1</span><span>0</span><span>+1</span></div>
       </div>}
     </StatPanel>
   );

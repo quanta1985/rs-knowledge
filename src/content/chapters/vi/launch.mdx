@@ -1,0 +1,571 @@
+---
+title: Phóng vệ tinh
+n: 3
+summary: Lên quỹ đạo là bài toán tốc độ ngang chứ không phải độ cao. Chương này đi từ khẩu pháo Newton, phương trình tên lửa và tách tầng tới một chuyến Falcon 9 điển hình, ngân sách Δv, bãi phóng và cửa sổ phóng, chuyển quỹ đạo Hohmann, giá phóng và rideshare, môi trường phóng và thử nghiệm, và sáu vệ tinh Việt Nam đã lên quỹ đạo bằng những tên lửa nào.
+objectives:
+  - Giải thích vì sao vệ tinh cần khoảng 7,8 km/s theo phương ngang và vì sao chỉ bay cao là chưa đủ.
+  - Dùng phương trình tên lửa Tsiolkovsky để tính Δv, và giải thích vì sao tên lửa phải có nhiều tầng.
+  - Kể lại trình tự một chuyến bay lên LEO (Max-Q, MECO, tách tầng, SECO) và lập ngân sách Δv, kể cả các tổn thất và phần Trái Đất tự quay giúp.
+  - Từ vĩ độ bãi phóng, suy ra độ nghiêng tối thiểu, hướng phóng, cửa sổ phóng mỗi ngày và cái giá phải trả khi lên quỹ đạo địa tĩnh.
+  - Tính chuyển quỹ đạo Hohmann và đổi mặt phẳng, và giải thích vì sao đổi mặt phẳng nên làm ở viễn điểm.
+  - Nêu được tái sử dụng và rideshare đã đổi giá phóng ra sao, vệ tinh phải chịu những tải nào khi phóng và được thử nghiệm thế nào.
+  - "Kể được cách sáu vệ tinh Việt Nam lên quỹ đạo: tên lửa riêng, đi chung chuyến, thả từ Trạm Vũ trụ Quốc tế."
+updated: "2026-11-06"
+---
+import Term from '../../../components/Term.astro';
+import Depth from '../../../components/Depth.astro';
+import Figure from '../../../components/Figure.astro';
+import LabLinks from '../../../components/LabLinks.astro';
+import Note from '../../../components/Note.astro';
+import Tiles from '../../../components/Tiles.astro';
+import Stats from '../../../components/Stats.astro';
+import Steps from '../../../components/Steps.astro';
+import Predict from '../../../islands/Predict.tsx';
+import LaunchAscent from '../../../islands/LaunchAscent.tsx';
+import LaunchCannon from '../../../islands/LaunchCannon.tsx';
+import LaunchStaging from '../../../islands/LaunchStaging.tsx';
+import LaunchSites from '../../../islands/LaunchSites.tsx';
+import LaunchWindow from '../../../islands/LaunchWindow.tsx';
+import LaunchHohmann from '../../../islands/LaunchHohmann.tsx';
+import LaunchCost from '../../../islands/LaunchCost.tsx';
+import LaunchTimeline from '../../../islands/LaunchTimeline.tsx';
+import Formula from '../../../components/Formula.astro';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/launch.json';
+
+<Figure
+  title="Một chuyến bay lên quỹ đạo thấp, từ bệ phóng tới lúc tầng 2 tắt máy"
+  try="Bấm Chạy và theo dõi khung bên phải: Max-Q đến lúc nào, ở độ cao nào? Tốc độ quỹ đạo 7,8 km/s nhưng động cơ đã tạo bao nhiêu Δv? Kéo tải trọng lên 27 t rồi chọn 'Thu hồi' cho tầng 1: tên lửa còn vào được quỹ đạo không?"
+  source="Mô hình dạy học, không phải số liệu bay: tên lửa hai tầng cỡ Falcon 9 (lực đẩy 7605 kN và 981 kN, thời gian đốt tầng 2 397 s, khối lượng ≈ 549 t theo spacex.com/vehicles/falcon-9; chia khối lượng giữa hai tầng, Isp 282/311 s và 348 s, hệ số cản 0,3 là ước lượng công khai). Phóng về đông từ vĩ độ 28,5°, Trái Đất cầu, khí quyển hàm mũ (thang độ cao 8,5 km); góc nghiêng ban đầu được dò để tầng 1 tắt máy ở góc bay 22°; tầng 2 dẫn hướng tới quỹ đạo 200 km (src/lib/launch.ts, ascent)."
+>
+  <LaunchAscent client:visible lang="vi" />
+</Figure>
+
+## 3.1 Lên quỹ đạo là chuyện tốc độ, không phải độ cao
+
+Tên lửa định cư khoa học có thể lên tới 100 km rồi rơi thẳng xuống sau vài phút. Bay cao chưa đủ. Một vật muốn ở lại trên quỹ đạo phải **bay ngang đủ nhanh** để trong lúc rơi, mặt đất cong đi kịp bên dưới nó. Chương 2 gọi đó là "luôn rơi mà không chạm đất".
+
+<Predict client:visible lang="vi"
+  title="Ở 400 km, phải bay ngang nhanh cỡ nào?"
+  q="Trạm Vũ trụ Quốc tế bay ở khoảng 400 km. Nó phải bay ngang nhanh bao nhiêu để không rơi xuống đất?"
+  slider={{ min: 0, max: 15, step: 0.1, unit: 'km/s' }} answer={7.7} tol={0.3}
+  why="Vận tốc vòng tròn ở 400 km là √(μ/r) = 7,67 km/s, khoảng 27 600 km/h: vòng quanh Trái Đất trong hơn một tiếng rưỡi. Nhanh thêm 41 % (10,84 km/s) thì vật thoát hẳn khỏi Trái Đất." />
+
+Isaac Newton hình dung một khẩu pháo trên đỉnh núi cao. Bắn chậm, viên đạn rơi gần. Bắn nhanh hơn, nó rơi xa hơn. Đến một tốc độ nào đó, nó rơi vòng quanh Trái Đất và trở lại chỗ cũ. Hình 3.1 giải chính xác bài toán đó bằng tích phân số.
+
+<Figure
+  title="Hình 3.1 — Khẩu pháo Newton: bắn đủ nhanh thì rơi mãi không chạm đất"
+  try="Ở 400 km, thử 6 km/s, 7 km/s rồi 7,67 km/s. Viên đạn bay được bao xa trước khi chạm đất? Từ 7,67 đến 10,84 km/s đường bay là hình gì? Hạ điểm bắn xuống 100 km: vận tốc vòng tròn tăng hay giảm?"
+  source="Bài toán hai vật, Trái Đất cầu không quay, bỏ qua không khí; μ = 398 600,4 km³/s², bán kính 6378,137 km; tích phân Runge–Kutta bậc 4 (src/lib/launch.ts, cannon)."
+>
+  <LaunchCannon client:visible lang="vi" />
+</Figure>
+
+Ở 400 km, bắn ngang 6 km/s viên đạn bay được khoảng 2860 km dọc mặt đất, 7 km/s được khoảng 5190 km. Đến **7,67 km/s** nó bay vòng tròn. Từ 7,67 đến 10,84 km/s quỹ đạo là elip, điểm xa nhất cao dần. Từ **10,84 km/s** (vận tốc thoát, √2 lần vận tốc vòng tròn) trở lên nó không quay lại.
+
+<Note kind="key">
+
+Lên quỹ đạo thấp nghĩa là đạt khoảng **7,7–7,8 km/s theo phương ngang**. Phần lớn công sức của tên lửa dồn vào việc tăng tốc ngang, không phải nâng độ cao: lên 200 km chỉ cần khoảng 2 km/s nếu bay thẳng đứng, nhưng vận tốc vòng tròn ở đó là 7,78 km/s.
+
+</Note>
+
+<Note kind="myth">
+
+"Trên quỹ đạo không còn trọng lực nên vệ tinh lơ lửng." Sai: ở 400 km trọng lực vẫn còn gần 90 % so với mặt đất. Vệ tinh và mọi thứ bên trong cùng rơi tự do; chúng không chạm đất chỉ vì đang bay ngang 7,67 km/s.
+
+</Note>
+
+## 3.2 Phương trình tên lửa Tsiolkovsky
+
+Tên lửa tăng tốc bằng cách ném khối khí ra sau thật nhanh. Năm 1903 Konstantin Tsiolkovsky viết ra quan hệ giữa vận tốc tăng thêm và lượng nhiên liệu đốt, gọi là <Term id="rocket-equation">phương trình tên lửa</Term>:
+
+<Formula label="Phương trình tên lửa Tsiolkovsky" tex="\Delta v = I_{sp}\, g_0 \ln\frac{m_0}{m_f}, \qquad g_0 = 9{,}80665\ \text{m/s}^2" where="
+\Delta v :: tốc độ tên lửa tự tạo ra được (m/s)
+I_{sp} :: xung lực riêng (s): nhiên liệu tốt cỡ nào
+m_0,\ m_f :: khối lượng lúc đầu và lúc hết nhiên liệu
+" />
+
+m₀ là khối lượng lúc bắt đầu đốt, m_f là khối lượng khi hết nhiên liệu, <Term id="specific-impulse">Isp</Term> (giây) đo hiệu suất nhiên liệu: số giây một kilogram nhiên liệu tạo được lực đẩy bằng trọng lượng của chính nó. Isp nhân g₀ là **vận tốc khí phụt hiệu dụng** vₑ. <Term id="delta-v">Δv</Term> là "tiền tệ" của mọi chuyến bay vũ trụ.
+
+Điều đáng sợ nằm ở chữ **ln**. Với Isp 300 s, tỉ số khối lượng 10 (90 % là nhiên liệu) cho 6,77 km/s. <mark>Muốn thêm gấp đôi Δv thì tỉ số khối lượng phải bình phương lên, thành 100.</mark> Người ta gọi đó là "sự chuyên chế của phương trình tên lửa".
+
+<div class="table-wrap">
+
+| Loại nhiên liệu / động cơ | Ví dụ | Isp điển hình | Đặc điểm |
+|---|---|---|---|
+| Nhiên liệu rắn | tầng đẩy phụ, Vega, Epsilon | 250–300 s | Đơn giản, lực đẩy lớn; đã cháy thì không tắt, không mở lại được |
+| Dầu hỏa (RP-1) + oxy lỏng | Merlin (Falcon 9) | 300–350 s | Đặc, rẻ, dễ bảo quản; để lại muội than trong động cơ |
+| Methane + oxy lỏng | Raptor (Starship) | khoảng 330–380 s | Cháy sạch hơn, hợp với tái sử dụng |
+| Hydro lỏng + oxy lỏng | RS-25, Vulcain | khoảng 450 s (chân không) | Hiệu suất cao nhất trong nhiên liệu hóa học; bình to và rất lạnh (−253 °C) |
+| Hydrazine một thành phần | động cơ nhỏ trên vệ tinh | khoảng 220–230 s | Đơn giản, tin cậy, nhưng độc |
+| Đẩy điện (Hall, ion) | Starlink, vệ tinh GEO "toàn điện" | 1500–3000 s trở lên | Rất tiết kiệm nhiên liệu nhưng lực đẩy chỉ cỡ mili-newton |
+
+</div>
+
+Isp là dải giá trị điển hình theo Sutton & Biblarz (2017); Isp ở mực nước biển thấp hơn trong chân không vì áp suất không khí cản dòng khí phụt.
+
+<Predict client:visible lang="vi"
+  title="Cần bao nhiêu nhiên liệu để đạt 9,3 km/s?"
+  q="Một tên lửa một tầng có Isp 300 s phải đạt Δv 9,3 km/s. Khối lượng lúc cất cánh phải gấp bao nhiêu lần khối lượng lúc hết nhiên liệu?"
+  slider={{ min: 2, max: 50, step: 0.5 }} answer={23.6} tol={2.5}
+  why="m₀/m_f = exp(9300 / (300 × 9,80665)) ≈ 23,6: hơn 95,7 % khối lượng phải là nhiên liệu, chỉ còn chưa tới 4,3 % cho cả thùng, động cơ lẫn vệ tinh. Không vật liệu nào làm thùng và động cơ nhẹ đến thế. Với hydro–oxy (Isp 450 s) tỉ số còn khoảng 8,2: dễ hơn nhiều nhưng vẫn khó." />
+
+<div class="worked">
+
+#### Ví dụ: VNREDSat-1 chiếm bao nhiêu phần tên lửa Vega?
+
+1. Tên lửa Vega nặng khoảng **137 t** lúc cất cánh (ESA). Nó gồm ba tầng nhiên liệu rắn P80, Zefiro-23, Zefiro-9 và tầng trên AVUM dùng nhiên liệu lỏng.
+2. Chuyến VV02 ngày 07/05/2013 chở ba vệ tinh: Proba-V khoảng 140 kg, VNREDSat-1 khoảng 120 kg và ESTCube-1 khoảng 1 kg, cộng lại khoảng **261 kg**.
+3. Tỉ lệ tải trọng: 261 / 137 000 ≈ **0,19 %**. Ngay cả sức chở danh định của Vega (khoảng 1500 kg lên quỹ đạo tròn 700 km nghiêng 90°) cũng chỉ là 1500 / 137 000 ≈ **1,1 %**.
+
+Nghĩa là gần 99 % khối lượng một tên lửa là nhiên liệu và vỏ, chỉ khoảng một phần trăm tới được quỹ đạo.
+
+</div>
+
+<Depth level="advanced" title="Rút ra phương trình tên lửa">
+
+Trong khoảng thời gian dt, tên lửa khối lượng m ném ra khối khí dm với vận tốc vₑ so với tên lửa. Bảo toàn động lượng (không có ngoại lực): m·dv = −vₑ·dm. Tích phân từ m₀ đến m_f:
+
+<Formula tex="\Delta v = \int dv = -v_e \int_{m_0}^{m_f} \frac{dm}{m} = v_e \ln\frac{m_0}{m_f}, \qquad v_e = I_{sp}\, g_0" />
+
+Trọng lực và lực cản là ngoại lực nên không có trong công thức; chúng được tính riêng thành "tổn thất" (mục 3.4). Isp nhân g₀ chỉ là cách quy đổi lịch sử, để Isp có cùng giá trị dù tính theo hệ mét hay hệ Anh.
+
+</Depth>
+
+## 3.3 Tách tầng và một chuyến bay điển hình
+
+Cách thoát khỏi chữ ln là <Term id="staging">tách tầng</Term>: chia tên lửa thành vài tên lửa chồng lên nhau, đốt hết tầng dưới thì vứt bỏ cả thùng lẫn động cơ của nó. Tầng sau không còn phải tăng tốc khối lượng chết, và Δv của các tầng cộng lại. Đó là lý do Vega có bốn tầng, Ariane 5 có hai tầng chính cộng hai tầng đẩy phụ nhiên liệu rắn.
+
+Có hai cách ghép tầng. **Nối tiếp**: tầng 2 đặt trên tầng 1 và chỉ đánh lửa sau khi tầng 1 tách ra (Falcon 9, Vega). **Song song**: các tầng đẩy phụ đốt cùng lúc với tầng lõi rồi rơi ra giữa chừng (Ariane 5, Falcon Heavy). Tầng trên thường có vòi phun rất to, tối ưu cho chân không, nên Isp cao hơn động cơ cùng loại ở tầng 1.
+
+<Figure
+  title="Hình 3.2 — Phương trình tên lửa và tách tầng"
+  try="Để Isp 300 s, ε = 0,10, chọn 1 tầng: dù giảm tải trọng xuống 0,2 %, tên lửa có lên được LEO không? Chọn 2 rồi 3 tầng và đọc tải trọng tối đa. Tăng Isp lên 450 s (hydro–oxy) thì thứ tự nào đổi?"
+  source="Mô hình N tầng giống nhau: cùng Isp, cùng tỉ lệ kết cấu ε = kết cấu / (kết cấu + nhiên liệu), mỗi tầng mang lên cùng một tỉ lệ khối lượng. Δv cần: vận tốc vòng tròn 200 km 7,78 km/s, trừ phần tự quay theo hướng phóng từ Kourou, cộng tổn thất giả định 1,7 km/s; GTO cộng thêm lần đốt 2,46 km/s (src/lib/launch.ts)."
+>
+  <LaunchStaging client:visible lang="vi" />
+</Figure>
+
+Với Isp 300 s và kết cấu chiếm 10 % mỗi tầng, tên lửa một tầng **không thể** đạt 9,02 km/s cần thiết dù không chở gì. Hai tầng giống nhau mang được tối đa khoảng **1,7 %** khối lượng cất cánh lên LEO, ba tầng khoảng **2,4 %**. Thêm tầng nữa lợi ích giảm dần, trong khi mỗi lần tách tầng là một chỗ có thể hỏng.
+
+<Note kind="why" label="Vì sao không có tên lửa một tầng lên quỹ đạo?">
+
+Vì tỉ lệ kết cấu thực tế khoảng 5–10 %, trong khi một tầng với Isp 300 s cần hơn 95 % là nhiên liệu. Tên lửa tái sử dụng như Falcon 9 vẫn có hai tầng; tầng một quay về hạ cánh, tức là phải giữ lại nhiên liệu và giảm tải trọng.
+
+</Note>
+
+### Đường bay: quay theo trọng lực
+
+Tên lửa không bay theo đường gấp khúc "lên thẳng rồi rẽ ngang". Nó cất cánh thẳng đứng vài giây để rời tháp, nghiêng nhẹ vài độ về hướng phóng, rồi giữ lực đẩy dọc theo vận tốc và để trọng lực từ từ bẻ cong đường bay về phương ngang. Cách bay này gọi là <Term id="launch-gravity-turn">quay theo trọng lực</Term>. Góc tấn gần 0 nên thân tên lửa dài, mảnh không phải chịu lực ngang lớn trong khi khí quyển còn đặc.
+
+Khoảng một phút sau cất cánh, không khí còn khá đặc mà tên lửa đã nhanh, nên áp suất động lên thân đạt cực đại: đó là <Term id="launch-max-q">Max-Q</Term>.
+
+<Formula label="Áp suất động" tex="q = \tfrac{1}{2}\,\rho\, v^2" where="
+q :: áp suất động (Pa), đo tải khí động lên thân tên lửa
+\rho :: mật độ không khí, giảm khoảng e lần sau mỗi 8 km độ cao
+v :: tốc độ so với không khí
+" />
+
+Trong mô phỏng đầu chương, Max-Q đến ở **T+71 s**, độ cao **14 km**, q ≈ **38 kPa**; tầng 1 tắt máy (MECO) ở T+148 s khi đã lên 72 km. Lịch trình thật của SpaceX dưới đây cho Max-Q ở T+1:10 và MECO ở T+2:26: mô hình đơn giản cho ra đúng thứ tự và cỡ thời gian.
+
+<Steps title="Một chuyến Falcon 9 lên LEO: Starlink, Cape Canaveral, 2/4/2026 (giờ SpaceX công bố, xấp xỉ)" items={[
+  { tag: 'T−35:00', t: 'Nạp dầu hỏa RP-1 và oxy lỏng tầng 1', d: 'Oxy lỏng được làm lạnh sâu để đặc hơn, nên phải nạp sát giờ phóng. Oxy lỏng tầng 2 nạp từ T−16:00.' },
+  { tag: 'T−7:00', t: 'Làm lạnh động cơ', d: 'Cho oxy lỏng chảy qua động cơ để chúng không bị sốc nhiệt khi đánh lửa.' },
+  { tag: 'T+0:00', t: 'Cất cánh', d: 'Chín động cơ Merlin, tổng lực đẩy ở mặt đất khoảng 7600 kN. Bay thẳng đứng vài giây rồi bắt đầu quay theo trọng lực.' },
+  { tag: 'T+1:10', t: 'Max-Q', d: 'Áp suất động lên thân tên lửa lớn nhất. Nhiều tên lửa giảm ga quanh thời điểm này để giảm tải kết cấu.' },
+  { tag: 'T+2:26', t: 'Tầng 1 tắt máy (MECO)', d: 'Ba giây sau (T+2:29) hai tầng tách nhau.' },
+  { tag: 'T+2:36', t: 'Tầng 2 đánh lửa (SES-1)', d: 'Một động cơ Merlin Vacuum, vòi phun lớn tối ưu cho chân không.' },
+  { tag: 'T+2:59', t: 'Bỏ chóp mũi (fairing)', d: 'Khi không khí đã đủ loãng để nhiệt ma sát không còn hại vệ tinh.' },
+  { tag: 'T+6:00', t: 'Tầng 1 đốt hãm khi vào lại khí quyển', d: 'Đốt khoảng 22 giây để giảm tốc, rồi đốt hạ cánh từ T+7:56.' },
+  { tag: 'T+8:19', t: 'Tầng 1 hạ cánh trên sà lan', d: 'Sà lan không người lái ngoài Đại Tây Dương; đây là lần bay thứ 15 của tầng 1 này.' },
+  { tag: 'T+8:40', t: 'Tầng 2 tắt máy lần 1 (SECO-1)', d: 'Đã vào quỹ đạo chờ. Lần đốt thứ hai ở T+54:10, kéo dài khoảng một giây, chỉnh quỹ đạo.' },
+  { tag: 'T+1:03:31', t: 'Thả 29 vệ tinh Starlink', d: 'Chuyến rideshare Transporter thì thả hàng chục vệ tinh lần lượt, kéo dài thêm khoảng 10 phút.' },
+]} />
+
+Lịch trình chuyến Transporter-18 (1/10/2026, bay về phía nam từ Vandenberg lên SSO) gần giống: Max-Q T+1:04, MECO T+2:14, SECO-1 T+8:24, nhưng tầng 1 đốt quay đầu ngay sau khi tách (T+2:31) để bay về hạ cánh trên bãi đáp gần bãi phóng (T+7:32). Mỗi lần quay đầu như vậy tốn nhiên liệu, nên tải trọng lớn nhất giảm (mục 3.8).
+
+<Depth level="advanced" title="Starship: cả hai tầng đều được thiết kế để thu hồi">
+
+Starship của SpaceX gồm tầng 1 Super Heavy với 33 động cơ Raptor đốt methane–oxy lỏng và tầng 2 Ship với 6 động cơ Raptor (3 loại tối ưu cho mặt đất, 3 cho chân không). Khác Falcon 9, cả hai tầng đều được thiết kế để quay về và bay lại. Nếu đạt được, chi phí phần cứng mỗi chuyến chủ yếu chỉ còn là nhiên liệu và tân trang.
+
+</Depth>
+
+## 3.4 Ngân sách Δv
+
+Δv tên lửa phải tạo ra không chỉ là vận tốc quỹ đạo. Trong vài phút đầu tên lửa bay gần thẳng đứng, một phần lực đẩy chỉ để chống lại trọng lực (<Term id="gravity-loss">tổn thất trọng lực</Term>); không khí cản và việc bẻ lái cũng tốn thêm. Ngược lại, tên lửa đứng trên một Trái Đất đang quay nên đã có sẵn vận tốc về phía đông.
+
+<Formula label="Ngân sách Δv lên quỹ đạo" tex="\Delta v_{\text{engines}} = v_{\text{orbit}} - v_{\text{rot}} + \Delta v_{g} + \Delta v_{D} + \Delta v_{s}" where="
+v_{\text{orbit}} :: vận tốc quỹ đạo cần đạt (7,78 km/s ở 200 km)
+v_{\text{rot}} :: vận tốc mặt đất do Trái Đất tự quay, theo hướng phóng
+\Delta v_{g} :: tổn thất trọng lực, tích phân g sin γ theo thời gian (γ là góc bay)
+\Delta v_{D} :: tổn thất cản khí, tích phân D/m
+\Delta v_{s} :: tổn thất lái hướng, khi lực đẩy không trùng hướng vận tốc
+" />
+
+Mô phỏng đầu chương tính từng thành phần trong lúc bay. Với 15 t tải trọng, phóng về đông từ vĩ độ 28,5°:
+
+<Stats items={[
+  { v: '8,92', u: 'km/s', l: 'Δv động cơ đã tạo (mô hình)' },
+  { v: '0,92', u: 'km/s', l: 'tổn thất trọng lực' },
+  { v: '0,61', u: 'km/s', l: 'tổn thất lái hướng' },
+  { v: '0,41', u: 'km/s', l: 'Trái Đất tự quay giúp' },
+]} caption="Tổn thất cản khí chỉ 0,02 km/s: tên lửa lớn, nặng nên lực cản chia cho khối lượng rất nhỏ. Tổn thất lái gồm cả lúc tầng 2 phải chúc mũi lên để giữ độ cao khi chưa đủ tốc độ quỹ đạo. Tính bằng node scripts/launch_numbers.ts." />
+
+Cộng lại: 7,78 − 0,41 + 0,92 + 0,02 + 0,61 ≈ 8,9 km/s, thấp hơn một chút con số 9,3–9,5 km/s hay dùng trong giáo trình. Mô hình cũng cho tải trọng lớn nhất khoảng **25,9 t** khi bỏ tầng 1, nhiều hơn 22,8 t SpaceX công bố cho Falcon 9 lên LEO: tên lửa thật giảm ga quanh Max-Q, giữ nhiên liệu dự trữ và chừa biên an toàn, những thứ mô hình bỏ qua.
+
+<Tiles
+  items={[
+    { t: 'Vận tốc quỹ đạo 200 km', d: '7,78 km/s' },
+    { t: 'Tổn thất trọng lực, cản, lái', d: '≈ 1,5–2 km/s (giả định 1,7)' },
+    { t: 'Tự quay giúp (Kourou, phóng về đông)', d: '− 0,46 km/s' },
+    { t: 'LEO → GTO (đốt ở cận điểm)', d: '+ 2,46 km/s' },
+    { t: 'GTO → GEO (vệ tinh tự đốt)', d: '+ 1,49 km/s' },
+  ]}
+  sum="Tên lửa lên LEO ≈ 9,0 km/s · lên GTO ≈ 11,5 km/s"
+  note="Con số theo mô hình của chương (phóng từ Kourou, quỹ đạo chờ 200 km, tổn thất giả định 1,7 km/s); tên lửa thật khác nhau vài trăm m/s."
+/>
+
+Hầu hết vệ tinh viễn thông không được tên lửa đưa thẳng lên quỹ đạo địa tĩnh. Tên lửa thả chúng ở <Term id="gto">quỹ đạo chuyển tiếp địa tĩnh (GTO)</Term>, một elip có cận điểm vài trăm km và viễn điểm ở 35 786 km. Vệ tinh tự đốt động cơ ở viễn điểm, vừa tròn hóa quỹ đạo vừa xóa độ nghiêng còn lại (mục 3.7). VINASAT-1 và VINASAT-2 đều đi đường này.
+
+<Note kind="key">
+
+<mark class="key">Tên lửa phải tạo khoảng 9–9,5 km/s để đạt 7,8 km/s trên quỹ đạo thấp.</mark> Khoảng 1,5–2 km/s chênh lệch là tổn thất trọng lực và lái hướng, trừ đi phần Trái Đất tự quay tặng. Tên lửa càng mạnh (gia tốc lớn) thì càng ít thời gian "đứng chống trọng lực", tổn thất trọng lực càng nhỏ.
+
+</Note>
+
+## 3.5 Bãi phóng, vĩ độ và hướng phóng
+
+Mặt đất ở xích đạo chạy về phía đông 465 m/s. Ở vĩ độ φ, tốc độ này giảm theo cos φ: Kourou (5,2° B) còn 463 m/s, Cape Canaveral (28,6° B) 408 m/s, Baikonur (46° B) 323 m/s. Phóng về phía đông là nhận được phần quà đó.
+
+Quan trọng hơn: mặt phẳng quỹ đạo luôn đi qua tâm Trái Đất và qua bãi phóng, nên **độ nghiêng quỹ đạo không thể nhỏ hơn vĩ độ bãi phóng**. Từ Baikonur không thể phóng thẳng vào quỹ đạo nghiêng dưới 46°.
+
+<Formula label="Độ nghiêng và hướng phóng" tex="\cos i = \cos\varphi\,\sin\beta \quad\Longleftrightarrow\quad \sin\beta = \frac{\cos i}{\cos\varphi}" where="
+i :: độ nghiêng quỹ đạo
+\varphi :: vĩ độ bãi phóng
+\beta :: hướng phóng (phương vị), đo từ hướng bắc theo chiều kim đồng hồ
+" />
+
+Phóng đúng hướng đông (β = 90°) cho i = φ, nhỏ nhất có thể. Phóng về bắc hoặc nam cho quỹ đạo cực. Ngoài vật lý, <Term id="launch-azimuth">hướng phóng</Term> còn bị giới hạn bởi **an toàn tầm bay**: tầng rơi và mảnh vỡ nếu có sự cố không được rơi xuống khu dân cư. Vì vậy các vệ tinh quỹ đạo cực và SSO của Mỹ thường phóng từ Vandenberg (California) bay về phía nam trên Thái Bình Dương, còn Cape Canaveral chỉ phóng về phía biển, trong một hành lang hướng đông.
+
+<Predict client:visible lang="vi"
+  title="Kourou hay Baikonur cho vệ tinh địa tĩnh?"
+  q="Phóng một vệ tinh địa tĩnh từ Baikonur thay vì từ Kourou thì tổng Δv tốn thêm khoảng bao nhiêu?"
+  options={['≈ 0,14 km/s (chỉ phần tự quay)', '≈ 0,9 km/s', '≈ 3 km/s', 'Không tốn thêm']} answer={1}
+  why="Phần tự quay chỉ chênh 140 m/s. Phần lớn nằm ở lần đốt cuối: GTO từ Baikonur nghiêng ít nhất 46°, xóa độ nghiêng đó ở viễn điểm tốn 2,28 km/s, so với 1,49 km/s nếu nghiêng 5,2° như từ Kourou, tức thêm 0,79 km/s. Tổng cộng khoảng 0,9 km/s, mỗi ki-lô-gam vệ tinh phải mang thêm nhiên liệu." />
+
+<Figure
+  title="Hình 3.3 — Bãi phóng, tốc độ tự quay và độ nghiêng tối thiểu"
+  try="Chọn Baikonur rồi kéo độ nghiêng xuống 20°: điều gì xảy ra? Chọn Vandenberg, bấm SSO 98°: hướng phóng chỉ về đâu, và Trái Đất tự quay giúp hay cản? So sánh dòng 'Δv vào GEO' giữa Kourou và Tanegashima."
+  source="Tọa độ bãi phóng làm tròn 0,1°. Tốc độ mặt đất ω·R·cos φ với ω = 7,2921159·10⁻⁵ rad/s, R = 6378,137 km; hướng phóng sin β = cos i / cos φ; Δv lên quỹ đạo tròn 200 km gồm tổn thất giả định 1,7 km/s; vết bay vẽ một vòng quỹ đạo tròn trên Trái Đất cầu (src/lib/launch.ts, src/lib/orbit.ts). Nền ảnh: Esri World Imagery."
+>
+  <LaunchSites client:visible lang="vi" />
+</Figure>
+
+<Note kind="key">
+
+Bãi phóng gần xích đạo có lợi chủ yếu cho **vệ tinh địa tĩnh**: không phải vì 140 m/s tự quay thêm, mà vì GTO gần như nằm sẵn trong mặt phẳng xích đạo. Với vệ tinh viễn thám quỹ đạo đồng bộ Mặt Trời (khoảng 98°), vĩ độ bãi phóng gần như không quan trọng: Δv từ mọi bãi phóng trong hình chỉ chênh vài m/s.
+
+</Note>
+
+<Depth level="advanced" title="Phóng nghịch hành và cái giá của Trái Đất tự quay">
+
+Khi i = φ, sin β = 1: phóng đúng về hướng đông và quỹ đạo chạm vĩ độ cao nhất ngay trên bãi phóng. Khi i &lt; φ, |sin β| &gt; 1: không có nghiệm. Với quỹ đạo nghịch hành i &gt; 90° (đồng bộ Mặt Trời), sin β &lt; 0: tên lửa bay lệch về phía tây so với phương bắc, khoảng 8–12° với các bãi phóng trong hình, nên phải trả thêm khoảng 70–80 m/s.
+
+Vận tốc tên lửa phải tự tạo là hiệu của vận tốc quỹ đạo và vận tốc mặt đất: |v⃗ − v⃗ₑ| = √(v² + vₑ² − 2 v vₑ sin β).
+
+</Depth>
+
+<Depth level="ref" title="Bảng tra: các bãi phóng trong Hình 3.3">
+
+<div class="table-wrap">
+
+| Bãi phóng | Vĩ độ | Tốc độ mặt đất | Độ nghiêng tối thiểu | Δv GTO → GEO |
+|---|---|---|---|---|
+| Kourou (Guyane thuộc Pháp) | 5,2° B | 463 m/s | 5,2° | 1,49 km/s |
+| Satish Dhawan (Ấn Độ) | 13,7° B | 452 m/s | 13,7° | 1,57 km/s |
+| Văn Xương (Trung Quốc) | 19,6° B | 438 m/s | 19,6° | 1,66 km/s |
+| Cape Canaveral (Mỹ) | 28,6° B | 408 m/s | 28,6° | 1,84 km/s |
+| Tanegashima (Nhật Bản) | 30,4° B | 401 m/s | 30,4° | 1,88 km/s |
+| Uchinoura (Nhật Bản) | 31,3° B | 397 m/s | 31,3° | 1,90 km/s |
+| Vandenberg (Mỹ) | 34,7° B | 382 m/s | 34,7° | 1,98 km/s |
+| Mahia (New Zealand) | 39,3° N | 360 m/s | 39,3° | 2,10 km/s |
+| Tửu Tuyền (Trung Quốc) | 41,0° B | 351 m/s | 41,0° | 2,14 km/s |
+| Baikonur (Kazakhstan) | 46,0° B | 323 m/s | 46,0° | 2,28 km/s |
+
+</div>
+
+Tính bằng `node scripts/launch_numbers.ts`. Δv GTO → GEO giả định cận điểm 200 km và GTO nghiêng đúng bằng vĩ độ bãi phóng.
+
+</Depth>
+
+## 3.6 Cửa sổ phóng
+
+<Term id="launch-window">Cửa sổ phóng</Term> là khoảng thời gian tên lửa có thể cất cánh mà vẫn tới đúng quỹ đạo cần đạt. Lý do nằm ở hình học: mặt phẳng quỹ đạo gần như đứng yên trong không gian, còn bãi phóng quay cùng Trái Đất. Mỗi ngày, bãi phóng chỉ đi qua một mặt phẳng cho trước **hai lần**: một lần ở chỗ vết bay của quỹ đạo đi lên phía bắc, một lần ở chỗ nó đi xuống phía nam. Cất cánh sớm hay muộn vài phút là bay vào một mặt phẳng lệch, và sửa lệch mặt phẳng rất tốn Δv (mục 3.7).
+
+<Figure
+  title="Hình 3.4 — Vì sao mỗi ngày chỉ có hai cơ hội phóng vào một mặt phẳng quỹ đạo"
+  try="Chọn Cape Canaveral và ISS 51,6°, bấm cho Trái Đất quay: bãi phóng gặp mặt phẳng lúc nào, phóng theo hướng nào? Đổi sang Baikonur: hai cơ hội gần nhau hơn hay xa hơn? Chọn 'Tự chọn' và kéo độ nghiêng xuống bằng vĩ độ bãi phóng, rồi thấp hơn nữa."
+  source="Hình cầu, mặt phẳng quỹ đạo cố định trong một ngày, nhìn từ trên cực Bắc (chiếu trực giao). Kinh độ của điểm cắt so với nút lên: sin Δλ = tan φ / tan i; hướng phóng sin β = cos i / cos φ; giờ tính theo giờ sao (23,93 h một vòng). Độ trôi mỗi ngày gồm 0,9856°/ngày của Mặt Trời và độ trôi nút do J2 (ISS ở 420 km, SSO ở 700 km). Mốc 03:00 là tùy chọn minh họa (src/lib/launch.ts, windowGeometry, dailyShiftMin)."
+>
+  <LaunchWindow client:visible lang="vi" />
+</Figure>
+
+Từ Cape Canaveral, mặt phẳng ISS đi qua bãi phóng theo hướng **45°** (đông bắc) và **135°** (đông nam), cách nhau **8,56 giờ**. Chỉ cơ hội đông bắc được dùng, vì đường bay đông nam sát bờ biển nước Mỹ. Ngày hôm sau, cơ hội đó đến sớm hơn khoảng **23 phút**: một phần vì Trái Đất quay một vòng so với sao nhanh hơn một ngày mặt trời gần 4 phút, phần lớn vì mặt phẳng ISS trôi về phía tây khoảng 5° mỗi ngày do Trái Đất dẹt (Chương 2).
+
+<Predict client:visible lang="vi"
+  title="Hoãn phóng một ngày, giờ phóng mới là mấy giờ?"
+  q="Một chuyến phóng vệ tinh viễn thám lên quỹ đạo đồng bộ Mặt Trời bị hoãn vì thời tiết. Ngày hôm sau, cửa sổ phóng mở lúc nào so với hôm nay?"
+  options={['Gần như cùng giờ đồng hồ', 'Sớm hơn khoảng 23 phút', 'Muộn hơn khoảng 4 phút', 'Phải chờ một tuần']} answer={0}
+  why="Mặt phẳng SSO được thiết kế để quay đúng 0,9856° mỗi ngày, theo chiều Trái Đất quanh Mặt Trời. Độ trôi đó bù đúng phần chênh giữa ngày sao và ngày mặt trời, nên bãi phóng gặp lại mặt phẳng vào cùng giờ (mô hình cho 0,0 phút/ngày). Với ISS, mặt phẳng trôi ngược chiều nên cửa sổ đến sớm hơn khoảng 23 phút mỗi ngày." />
+
+Độ dài cửa sổ tùy loại nhiệm vụ:
+
+<Tiles
+  items={[
+    { t: 'Gặp ISS', d: 'Tức thời: mọi thứ được canh đến từng giây (NASA, bộ tài liệu báo chí chuyến CRS-4). Phải đúng cả mặt phẳng lẫn vị trí của trạm trên quỹ đạo.' },
+    { t: 'Quỹ đạo đồng bộ Mặt Trời', d: 'Vài phút đến vài chục phút. Landsat 9 (27/9/2021) có cửa sổ 30 phút; tên lửa tự bù một chút lệch mặt phẳng bằng nhiên liệu dự trữ.' },
+    { t: 'GTO / địa tĩnh', d: 'Rộng hơn nhiều, có thể tới cỡ giờ, ràng buộc bởi hướng Mặt Trời lúc thả vệ tinh (pin, cảm biến) và an toàn tầm bay.' },
+    { t: 'Sao Hỏa', d: 'Vài tuần, mỗi khoảng 26 tháng một lần: chu kỳ hội Trái Đất–Sao Hỏa là 780 ngày.' },
+  ]}
+/>
+
+Ngoài hình học còn ràng buộc **thời tiết** (gió đứt tầng cao, nguy cơ sét, mây tích điện, sóng biển ở khu vực thu hồi tầng 1) và **tránh va chạm** (COLA): những phút cất cánh mà tên lửa hoặc tầng trên sẽ đi quá gần một vật thể đang có trên quỹ đạo bị loại khỏi cửa sổ.
+
+<Note kind="key">
+
+<mark class="key">Cửa sổ phóng tồn tại vì bãi phóng quay cùng Trái Đất qua một mặt phẳng quỹ đạo gần như cố định trong không gian.</mark> Nhiệm vụ càng cần đúng mặt phẳng (và đúng vị trí trên quỹ đạo), cửa sổ càng ngắn.
+
+</Note>
+
+<Depth level="advanced" title="Tính giờ và hướng của hai cơ hội phóng">
+
+Đặt nút lên của quỹ đạo làm gốc kinh độ (trong hệ quán tính). Bãi phóng ở vĩ độ φ nằm trong mặt phẳng khi kinh độ quán tính của nó cách nút lên một góc Δλ (vết bay đi lên phía bắc) hoặc 180° − Δλ (đi xuống phía nam):
+
+<Formula tex="\sin\Delta\lambda = \frac{\tan\varphi}{\tan i}, \qquad \Delta t = \frac{180^\circ - 2\,\Delta\lambda}{360^\circ}\times 23{,}93\ \text{h}" where="
+\Delta\lambda :: góc từ nút lên tới bãi phóng, đo dọc xích đạo
+\Delta t :: thời gian giữa cơ hội đi lên phía bắc và cơ hội đi xuống phía nam
+" />
+
+Cape Canaveral (28,6°) tới ISS (51,6°): Δλ = 25,6°, Δt = 8,56 h. Khi i = φ, Δλ = 90° và Δt = 0: hai cơ hội nhập làm một, phóng đúng hướng đông. Độ trôi nút do J2 là Ω̇ = −1,5 n J₂ (R/a)² cos i; với ISS khoảng −5°/ngày.
+
+</Depth>
+
+## 3.7 Chuyển quỹ đạo Hohmann và đổi mặt phẳng
+
+Tên lửa thường thả vệ tinh ở một quỹ đạo trung gian. Cách tiết kiệm nhiên liệu nhất để đi giữa hai quỹ đạo tròn cùng mặt phẳng là <Term id="launch-hohmann">chuyển quỹ đạo Hohmann</Term>: đi nửa vòng một elip tiếp xúc cả hai quỹ đạo, với hai lần đốt. Lần 1 ở quỹ đạo thấp tăng tốc để vào elip; lần 2 ở viễn điểm tăng tốc để tròn hóa ở quỹ đạo cao.
+
+<Formula label="Chuyển quỹ đạo Hohmann" tex="\Delta v_1 = \sqrt{\frac{\mu}{r_1}}\left(\sqrt{\frac{2r_2}{r_1+r_2}}-1\right),\quad \Delta v_2 = \sqrt{\frac{\mu}{r_2}}\left(1-\sqrt{\frac{2r_1}{r_1+r_2}}\right),\quad t = \pi\sqrt{\frac{a_t^3}{\mu}}" where="
+r_1,\ r_2 :: bán kính quỹ đạo đầu và quỹ đạo đích (tính từ tâm Trái Đất)
+a_t = (r_1+r_2)/2 :: bán trục lớn của elip chuyển
+t :: thời gian bay nửa elip
+\mu :: hằng số hấp dẫn của Trái Đất, 398 600,4 km³/s²
+" />
+
+Từ quỹ đạo chờ 200 km lên địa tĩnh (35 786 km): Δv₁ = **2,455 km/s**, Δv₂ = **1,477 km/s**, tổng **3,93 km/s**, mất **5,26 giờ**. Ở viễn điểm, vệ tinh chỉ còn chạy **1,6 km/s**, so với 10,2 km/s ở cận điểm.
+
+Đổi độ nghiêng thì khác: phải xoay cả vectơ vận tốc. Riêng phần <Term id="launch-plane-change">đổi mặt phẳng</Term> một góc Δi ở vận tốc v tốn:
+
+<Formula label="Đổi mặt phẳng quỹ đạo" tex="\Delta v_{\text{plane}} = 2v\sin\frac{\Delta i}{2}, \qquad \Delta v_2 = \sqrt{v_a^2 + v_c^2 - 2 v_a v_c \cos\Delta i}" where="
+v :: vận tốc lúc đổi mặt phẳng
+v_a :: vận tốc ở viễn điểm elip chuyển
+v_c :: vận tốc tròn ở quỹ đạo đích
+\Delta i :: góc đổi mặt phẳng
+" />
+
+Vì tỉ lệ với v, đổi mặt phẳng ở nơi vệ tinh chạy chậm rẻ hơn rất nhiều, và gộp nó vào lần đốt tròn hóa (công thức thứ hai, cộng vectơ) còn rẻ hơn làm hai việc riêng.
+
+<Predict client:visible lang="vi"
+  title="Bẻ 28,5° ngay ở quỹ đạo thấp tốn bao nhiêu?"
+  q="Một vệ tinh ở quỹ đạo tròn 200 km (7,78 km/s) muốn xoay mặt phẳng 28,5° ngay tại đó. Lần đốt này tốn bao nhiêu km/s?"
+  slider={{ min: 0, max: 8, step: 0.1, unit: 'km/s' }} answer={3.83} tol={0.4}
+  why="2 × 7,78 × sin(14,25°) = 3,83 km/s, gần bằng cả hành trình Hohmann lên GEO (3,93 km/s). Gộp 28,5° vào lần đốt ở viễn điểm thì lần đốt đó chỉ tăng từ 1,48 lên 1,84 km/s." />
+
+<Figure
+  title="Hình 3.5 — Chuyển quỹ đạo Hohmann và đổi mặt phẳng"
+  try="Bấm lần lượt 'Từ Kourou', 'Từ Tây Xương', 'Từ Canaveral': Δv₂ thay đổi thế nào? So sánh dòng 'Tổng' với dòng 'đổi mặt phẳng riêng ở quỹ đạo đầu'. Kéo quỹ đạo đích xuống 1000 km: thời gian chuyển còn bao lâu?"
+  source="Bài toán hai vật, quỹ đạo tròn đồng tâm; vệ tinh chạy dọc elip theo phương trình Kepler (nhanh ở cận điểm, chậm ở viễn điểm). Các nút chọn nhanh: quỹ đạo chờ 200 km nghiêng bằng vĩ độ bãi phóng, toàn bộ việc đổi mặt phẳng gộp vào lần đốt ở viễn điểm (src/lib/launch.ts, hohmann)."
+>
+  <LaunchHohmann client:visible lang="vi" />
+</Figure>
+
+<div class="worked">
+
+#### Ví dụ: lên GEO từ Kourou, Tây Xương và Cape Canaveral
+
+Quỹ đạo chờ 200 km, độ nghiêng bằng vĩ độ bãi phóng; lần đốt 1 ở cận điểm như nhau, Δv₁ = 2,455 km/s.
+
+1. **Kourou** (5,2°): lần đốt ở viễn điểm vừa tròn hóa vừa xóa 5,2°: Δv₂ = **1,491 km/s**, tổng **3,945 km/s**.
+2. **Tây Xương** (28,2°, nơi Trung Quốc phóng phần lớn vệ tinh địa tĩnh): Δv₂ = **1,830 km/s**, tổng **4,284 km/s**.
+3. **Cape Canaveral** (28,5°): Δv₂ = **1,836 km/s**, tổng **4,291 km/s**, nhiều hơn Kourou **0,35 km/s**.
+4. Nếu từ Canaveral lại bẻ riêng 28,5° ngay ở quỹ đạo chờ: tốn thêm 3,832 km/s, tổng **7,764 km/s**, gần gấp đôi.
+5. Với động cơ vệ tinh Isp 300 s, lần đốt ở viễn điểm ăn **39,8 %** khối lượng vệ tinh lúc vào GTO nếu phóng từ Kourou, **46,4 %** nếu từ Canaveral. Mấy phần trăm đó là nhiên liệu giữ vị trí, tức là năm tuổi thọ của vệ tinh viễn thông.
+
+</div>
+
+<Note kind="tip">
+
+Vệ tinh viễn thông "toàn điện" không đi Hohmann: động cơ Hall đẩy liên tục từ GTO lên GEO trong nhiều tháng. Isp vài nghìn giây tiết kiệm hàng tấn nhiên liệu, đổi lại phải chờ lâu mới khai thác được.
+
+</Note>
+
+## 3.8 Tái sử dụng, giá phóng và đi chung chuyến
+
+Một tên lửa dùng một lần vứt bỏ cả động cơ lẫn thùng sau vài phút bay. Falcon 9 cho <Term id="launch-reusable">tầng 1 quay về hạ cánh</Term> trên bãi đáp hoặc sà lan rồi bay lại; theo Falcon User's Guide, đến tháng 2/2025 SpaceX đã cho tầng 1 bay lại hơn 384 lần, và tháng 8/2026 một tầng 1 (B1067) bay chuyến thứ 37. Cái giá là nhiên liệu dành cho quay đầu và hạ cánh: trong mô phỏng đầu chương, giữ 10 % nhiên liệu tầng 1 làm tải trọng lớn nhất giảm từ **25,9 t** xuống **18,9 t**.
+
+<Stats items={[
+  { v: '61,7', u: 'k$/kg', l: 'tàu con thoi, chi phí mỗi kg lên LEO' },
+  { v: '2,7', u: 'k$/kg', l: 'Falcon 9 (khi chở đầy)' },
+  { v: '1,4', u: 'k$/kg', l: 'Falcon Heavy' },
+  { v: '37', l: 'lần bay của một tầng 1 Falcon 9 (8/2026)' },
+]} caption="Ba con số đầu: Jones (2018), Bảng A1, USD năm 2018, giá phóng chia cho sức chở LEO tối đa. Falcon 9 rẻ hơn tàu con thoi khoảng 23 lần mỗi kg." />
+
+<Figure
+  title="Hình 3.6 — Chi phí phóng lên quỹ đạo thấp mỗi kg, 1957–2026"
+  try="Bấm vào tàu con thoi rồi Falcon 9: rẻ hơn bao nhiêu lần? Tên lửa nhỏ (Pegasus XL, Scout) nằm ở đâu, vì sao? Hai hình thoi là giá rideshare niêm yết của SpaceX: so với điểm Falcon 9, đi chung đắt hay rẻ hơn mỗi kg?"
+  source="Jones, H. W. (2018), The Recent Large Reduction in Space Launch Cost, ICES-2018-81, Bảng A1 (nghìn USD năm 2018 mỗi kg lên LEO, giá phóng / sức chở tối đa, theo năm bay đầu tiên). Hình thoi: giá rideshare SpaceX lên SSO, USD danh nghĩa: 1 triệu USD cho 200 kg (SpaceNews, 29/8/2019) và 350 000 USD cho 50 kg (rideshare.spacex.com, xem ngày 5/11/2026)."
+>
+  <LaunchCost client:visible lang="vi" />
+</Figure>
+
+Con số "mỗi kg" chỉ đúng khi tên lửa chở đầy. Một vệ tinh 100 kg không thể thuê riêng một chiếc Falcon 9 với giá 270 000 USD, nên phần lớn vệ tinh nhỏ <Term id="rideshare">đi chung chuyến</Term>:
+
+<Tiles
+  items={[
+    { t: 'Chuyến rideshare chuyên dụng', d: 'SpaceX Transporter lên SSO. Transporter-1 (24/1/2021) mang 143 tàu vũ trụ, kỷ lục một chuyến khi đó; Transporter-18 (1/10/2026) mang 130. Giá niêm yết 11/2026: 350 000 USD cho 50 kg, tức 7000 USD/kg.' },
+    { t: 'Tải phụ trên chuyến của người khác', d: 'VNREDSat-1 đi cùng Proba-V trên Vega VV02: rẻ, nhưng quỹ đạo và ngày phóng do tải chính quyết định.' },
+    { t: 'Tên lửa nhỏ chuyên dụng', d: 'Đắt hơn mỗi kg (Pegasus XL 43,5 nghìn USD/kg theo Jones 2018) nhưng được chọn quỹ đạo và giờ phóng riêng.' },
+    { t: 'Phương tiện chuyển quỹ đạo (OTV)', d: 'Một "xe buýt" nhận nhiều vệ tinh từ chuyến rideshare rồi tự đưa từng chiếc tới quỹ đạo hoặc pha mong muốn.' },
+    { t: 'Thả từ ISS', d: 'CubeSat lên trạm trong tàu hàng rồi được bộ thả J-SSOD đẩy ra. PicoDragon của Việt Nam đi đường này năm 2013.' },
+  ]}
+/>
+
+Chuyến Vega VV02 là ví dụ điển hình của tải phụ. Tải chính Proba-V của ESA được thả trước ở khoảng 820 km. Sau đó tầng trên AVUM đốt thêm để hạ quỹ đạo và thả VNREDSat-1 cùng ESTCube-1 ở khoảng 665 km. <Term id="cubesat">CubeSat</Term> thả từ ISS thì nhận quỹ đạo của trạm (khoảng 400 km, 51,6°), không đồng bộ Mặt Trời, và rơi vào khí quyển sau vài tháng.
+
+<Note kind="myth">
+
+"Rideshare rẻ nên vệ tinh nào cũng nên đi rideshare." Đổi lại, bạn không chọn được quỹ đạo, giờ đi qua xích đạo hay ngày phóng; tải chính trễ thì bạn trễ theo. Với một chòm vệ tinh cần đặt đúng vào nhiều mặt phẳng khác nhau, tên lửa riêng hoặc OTV thường hợp lý hơn.
+
+</Note>
+
+<Note kind="key">
+
+Giá mỗi kg lên LEO đã giảm khoảng 23 lần từ tàu con thoi tới Falcon 9, chủ yếu nhờ <mark>thu hồi tầng 1 và bán chỗ trên những chuyến chở đầy</mark>. Vệ tinh nhỏ hưởng lợi qua rideshare, với cái giá là mất quyền chọn quỹ đạo và ngày phóng.
+
+</Note>
+
+## 3.9 Môi trường phóng và thử nghiệm trước phóng
+
+Vài phút phóng là quãng khắc nghiệt nhất trong đời một vệ tinh về cơ học. Nhà cung cấp tên lửa công bố "môi trường dự kiến lớn nhất" để nhà chế tạo vệ tinh thiết kế và thử theo. Falcon User's Guide (bản 2025) cho các con số sau:
+
+<Stats items={[
+  { v: '+6', u: 'g', l: 'tải dọc trục tối đa, vệ tinh trên 1800 kg (±2 g ngang)' },
+  { v: '137,9', u: 'dB', l: 'âm học trong chóp mũi, không có tấm tiêu âm' },
+  { v: '5,13', u: 'Grms', l: 'rung ngẫu nhiên ở đế gắn vệ tinh' },
+  { v: '1000', u: 'g', l: 'sốc tách vòng kẹp (1000–10 000 Hz)' },
+]} caption="SpaceX, Falcon User's Guide (2025). Vệ tinh nhẹ chịu tải lớn hơn: dưới 1000 kg tới +11 g dọc trục và ±7,5 g ngang. Có tấm tiêu âm, âm học còn khoảng 131,5 dB." />
+
+<Tiles
+  items={[
+    { t: 'Gia tốc tĩnh (tựa tĩnh)', d: 'Lực đẩy tăng dần khi tên lửa nhẹ đi, đỉnh ngay trước lúc tắt máy tầng 1 và tầng 2; cộng thêm tải gió và lúc tắt/mở động cơ.' },
+    { t: 'Rung', d: 'Rung hình sin tần số thấp từ kết cấu và động cơ; rung ngẫu nhiên dải rộng truyền qua đế gắn.' },
+    { t: 'Âm học', d: 'Tiếng ồn động cơ dội từ mặt đất và tiếng gió quanh Max-Q đập vào các tấm mỏng như pin mặt trời, ăng-ten.' },
+    { t: 'Sốc', d: 'Nổ bu-lông tách tầng, tách chóp mũi và nhất là lúc vòng kẹp nhả vệ tinh: rất ngắn nhưng gia tốc tới hàng nghìn g ở tần số cao.' },
+    { t: 'Giảm áp', d: 'Áp suất trong chóp mũi giảm không nhanh hơn 2,8 kPa/s trong lúc bay lên; các khoang kín phải có lỗ thông hơi.' },
+  ]}
+/>
+
+Vì vậy, trong giai đoạn lắp ráp, tích hợp và thử nghiệm (AIT), vệ tinh được đưa qua một chuỗi thử. Mẫu thử chất lượng (qualification) chịu mức cao hơn môi trường dự kiến, thường thêm 3 dB hoặc nhân 1,25; vệ tinh bay thật chỉ thử nghiệm thu (acceptance) ở mức dự kiến:
+
+<Steps title="Chuỗi thử nghiệm điển hình theo Falcon User's Guide (Bảng 7-1)" items={[
+  { tag: 'Tải tĩnh', t: 'Thử tải tĩnh', d: '1,25 lần tải giới hạn cho mẫu chất lượng, 1,0 lần cho vệ tinh bay.' },
+  { tag: 'Rung', t: 'Rung hình sin trên bàn rung', d: 'Mức giới hạn × 1,25 khi thử chất lượng, quét 2 octave mỗi phút, theo từng trục.' },
+  { tag: 'Âm / rung', t: 'Thử âm học trong buồng loa (hoặc rung ngẫu nhiên)', d: 'Môi trường dự kiến + 3 dB trong 2 phút khi thử chất lượng; đúng mức dự kiến trong 1 phút khi nghiệm thu.' },
+  { tag: 'Sốc', t: 'Thử sốc tách', d: 'Môi trường dự kiến + 3 dB, ví dụ bằng cách nhả thật vòng kẹp tách vệ tinh.' },
+  { tag: 'EMC', t: 'Tương thích điện từ', d: 'Nếu vệ tinh bật nguồn lúc phóng: biên an toàn 6 dB, để máy phát của vệ tinh và tên lửa không gây nhiễu lẫn nhau.' },
+  { tag: 'TVAC', t: 'Nhiệt chân không', d: 'Khuyến nghị: ít nhất 4 chu kỳ nóng–lạnh trong buồng chân không. Thử này mô phỏng môi trường quỹ đạo, không phải lúc phóng.' },
+  { tag: 'Bãi phóng', t: 'Kiểm tra cuối cùng', d: 'Thử rò rỉ áp suất, kiểm tra các khóa an toàn, đo khối lượng và trọng tâm, rồi ghép vào tên lửa và đóng chóp mũi.' },
+]} />
+
+Thử <Term id="launch-tvac">nhiệt chân không</Term> và thử rung thường là hai bước tốn kém và kéo dài nhất. Vệ tinh nhỏ của các trường đại học hay dùng một bộ thử rút gọn theo yêu cầu của bộ thả (J-SSOD, bộ thả CubeSat).
+
+<Note kind="warn">
+
+Phóng vẫn là khâu rủi ro nhất của một sứ mệnh. Ngày 12/10/2022, tên lửa Epsilon-6 của JAXA lệch tư thế và phải nhận lệnh tự hủy, mất toàn bộ vệ tinh trên tàu. Ngay cả khi tên lửa thành công, vệ tinh vẫn có thể không liên lạc được: đó là trường hợp của NanoDragon năm 2021.
+
+</Note>
+
+<Note kind="key">
+
+<mark class="key">Vệ tinh được thiết kế cho vài phút phóng nhiều không kém cho nhiều năm trên quỹ đạo.</mark> Rung, âm học và sốc tái tạo lúc phóng; nhiệt chân không tái tạo quỹ đạo. Mẫu thử chất lượng chịu mức cao hơn dự kiến để còn biên an toàn.
+
+</Note>
+
+## 3.10 Vệ tinh Việt Nam lên quỹ đạo thế nào
+
+Sáu vệ tinh Việt Nam trong Hình 3.7 đi ba con đường khác nhau. Hai vệ tinh viễn thông VINASAT lên GTO bằng Ariane 5 từ Kourou, đi chung với một vệ tinh khác. VNREDSat-1 là tải phụ trên Vega. Ba vệ tinh nhỏ do Trung tâm Vũ trụ Việt Nam (VNSC) làm thì đi nhờ chương trình của Nhật Bản: PicoDragon thả từ ISS, MicroDragon và NanoDragon trên tên lửa Epsilon trong chương trình Trình diễn công nghệ vệ tinh đổi mới (ISTD) của JAXA. Vệ tinh radar LOTUSat-1 dự kiến phóng bằng tên lửa Epsilon trong năm tài chính 2027 của Nhật Bản (theo Đại sứ Nhật Bản, VnEconomy 20/5/2026).
+
+<Figure
+  title="Hình 3.7 — Các lần phóng vệ tinh Việt Nam, 2008–2021"
+  try="Bấm từng mốc. Vệ tinh nào được tên lửa đưa thẳng tới quỹ đạo làm việc, vệ tinh nào còn phải tự đốt động cơ? Vì sao các vệ tinh nhỏ của VNSC đều bay từ Nhật Bản?"
+  source="Arianespace/ESA (chuyến V182, VA206, VV02), JAXA (danh sách thả J-SSOD, thông cáo Epsilon-4 ngày 18/01/2019 và Epsilon-5 ngày 09/11/2021), Lockheed Martin, VTV, VOV. Giờ theo UTC; quỹ đạo và khối lượng là giá trị danh nghĩa theo các nguồn trên."
+>
+  <LaunchTimeline client:visible lang="vi" />
+</Figure>
+
+<div class="worked">
+
+#### Ví dụ: VINASAT-2 cần tự đốt bao nhiêu Δv?
+
+1. Ariane 5 (chuyến VA206, 15/05/2012, 22:13 UTC) thả VINASAT-2 vào GTO có độ nghiêng 2° (ESA).
+2. Ở viễn điểm, vệ tinh tự đốt để tròn hóa quỹ đạo và xóa 2° độ nghiêng: theo mô hình của chương (cận điểm 200 km) tốn khoảng **1,48 km/s**, gần như bằng trường hợp GTO nằm đúng trên xích đạo (1,477 km/s).
+3. Nếu cùng vệ tinh đó phóng từ Baikonur, GTO nghiêng ít nhất 46° và lần đốt này tăng lên **2,28 km/s**. Với động cơ vệ tinh Isp khoảng 300 s, tỉ số khối lượng phải tăng từ exp(1480 / 2942) ≈ 1,65 lên exp(2280 / 2942) ≈ 2,17: nhiên liệu cho lần đốt này tăng từ 40 % lên 54 % khối lượng vệ tinh lúc vào GTO.
+
+</div>
+
+<Note kind="key">
+
+Việt Nam chưa có bãi phóng; mọi vệ tinh Việt Nam đều phóng ở nước ngoài, và **cách lên quỹ đạo phụ thuộc cỡ vệ tinh**: vệ tinh viễn thông vài tấn thuê chỗ trên tên lửa lớn lên GTO, vệ tinh quan sát cỡ 100 kg đi tải phụ, CubeSat đi nhờ chương trình hợp tác.
+
+</Note>
+
+## 3.11 Thực hành
+
+Notebook giải phương trình tên lửa, tìm cách chia khối lượng tối ưu giữa các tầng, vẽ Δv cần thiết theo vĩ độ bãi phóng cho LEO, SSO và GEO, rồi bắn lại khẩu pháo Newton bằng tích phân số. Chương này không cần Earth Engine.
+
+<LabLinks notebook="labs/launch_rocket.ipynb" />
+
+**Bài tập gợi ý**
+
+1. Tên lửa hai tầng: tầng một Isp 280 s, tầng hai Isp 450 s. Nên chia khối lượng thế nào để chở được nhiều nhất lên LEO?
+2. Từ bãi phóng ở vĩ độ của Hà Nội (21° B), độ nghiêng tối thiểu là bao nhiêu? Δv GTO → GEO lớn hơn Kourou bao nhiêu?
+3. Vì sao các chuyến phóng lên quỹ đạo đồng bộ Mặt Trời từ Vandenberg bay về phía nam, trên biển Thái Bình Dương?
+4. Dùng Hình 3.4: từ một bãi phóng giả định ở 21° B, hai cơ hội phóng vào mặt phẳng ISS cách nhau bao nhiêu giờ, theo những hướng nào?
+5. Dùng Hình 3.5: đưa vệ tinh từ 500 km lên 1200 km và xoay mặt phẳng 2°. Gộp hay tách lần đổi mặt phẳng thì lợi hơn, lợi bao nhiêu m/s?
+
+## 3.12 Ôn tập
+
+<Quiz client:visible lang="vi" items={quiz} />
+
+## Tài liệu tham khảo
+
+- Curtis, H. D. (2020). *Orbital Mechanics for Engineering Students* (4th ed.), ch. 6 Orbital maneuvers, ch. 11 Rocket vehicle dynamics. Butterworth-Heinemann.
+- ESA (2012). Ariane 5's second launch of 2012 (VA206: JCSAT-13 và Vinasat-2). https://www.esa.int/Enabling_Support/Space_Transportation/Ariane_5_s_second_launch_of_2012
+- ESA (2013). Vega VV02 liftoff (Proba-V, VNREDSat-1A, ESTCube-1). https://www.esa.int/ESA_Multimedia/Images/2013/05/Vega_VV02_Liftoff
+- ESA. Vega launch vehicle. https://www.esa.int/Enabling_Support/Space_Transportation/Launch_vehicles/Vega
+- Foust, J. (2019). SpaceX revamps smallsat rideshare program. SpaceNews, 29/8/2019. https://spacenews.com/spacex-revamps-smallsat-rideshare-program/
+- JAXA. J-SSOD satellite deployment history. https://iss.jaxa.jp/en/kiboexp/jssod/history/
+- JAXA (2019). Launch result of Epsilon-4 (Innovative Satellite Technology Demonstration-1). https://global.jaxa.jp/press/2019/01/20190118_epsilon4.html
+- JAXA (2021). Launch result of Epsilon-5 (Innovative Satellite Technology Demonstration-2). https://global.jaxa.jp/press/2021/11/20211109-1_e.html
+- JAXA (2022). Launch failure of Epsilon-6. https://global.jaxa.jp/press/2022/10/20221012-2_e.html
+- Jones, H. W. (2018). The Recent Large Reduction in Space Launch Cost. 48th International Conference on Environmental Systems, ICES-2018-81. https://ntrs.nasa.gov/citations/20200001093
+- NASA (2014). SpaceX CRS-4 Mission Press Kit. https://www.nasa.gov/wp-content/uploads/2018/07/spacex_nasa_crs-4_presskit.pdf
+- NASA (2021). Weather 90% Favorable for Today's Launch (Landsat 9). https://science.nasa.gov/blogs/landsat/2021/09/27/weather-90-favorable-for-todays-launch/
+- Nguyễn Văn Tín. *Sổ tay Vệ tinh & Viễn thám*, chương 3. CC BY 4.0. https://satellite-rs-handbook.netlify.app/
+- Spaceflight Now (2026). SpaceX to launch Starlink mission on a Falcon booster's record-breaking 37th flight, 24/8/2026. https://spaceflightnow.com/2026/08/24/live-coverage-spacex-to-launch-starlink-mission-on-a-falcon-boosters-record-breaking-37th-flight/
+- SpaceX. Falcon 9. https://www.spacex.com/vehicles/falcon-9 (xem 5/11/2026).
+- SpaceX (2025). Falcon User's Guide. https://www.spacex.com/assets/media/falcon-users-guide-2025-05-09.pdf
+- SpaceX. Starlink mission, 2/4/2026; Transporter-1 (24/1/2021); Transporter-18 (1/10/2026). https://www.spacex.com/launches/
+- SpaceX. Rideshare. https://rideshare.spacex.com/ (xem 5/11/2026).
+- Sutton, G. P., & Biblarz, O. (2017). *Rocket Propulsion Elements* (9th ed.). Wiley.
+- VnEconomy (2026). Dự kiến thời điểm phóng vệ tinh LOTUSat-1 lên quỹ đạo, 20/5/2026. https://vneconomy.vn/du-kien-thoi-diem-phong-ve-tinh-lotusat-1-len-quy-dao.htm
+- Wertz, J. R., & Larson, W. J. (Eds.) (1999). *Space Mission Analysis and Design* (3rd ed.). Microcosm / Kluwer.

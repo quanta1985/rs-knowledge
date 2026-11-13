@@ -1,0 +1,606 @@
+---
+title: LEO constellations & Starlink
+n: 6
+summary: More than eleven thousand Starlink satellites fly at about 470 km to bring the Internet anywhere with a few tens of milliseconds of delay. This chapter goes from why they fly low, the system architecture, orbital shells, user terminals and inter-satellite lasers, to Direct-to-Cell, competing constellations, Starlink in Viet Nam and the price in space debris, computed on a real orbital snapshot seen from Hanoi.
+objectives:
+  - Explain why satellite Internet moved from GEO to LEO, and why LEO needs thousands of satellites.
+  - Trace a packet through the user terminal, satellite, gateway and PoP, as a bent pipe or over inter-satellite lasers.
+  - Read Starlink's orbital shells from a real snapshot and the Walker notation i:T/P/F; estimate the satellites needed for continuous coverage.
+  - Explain handover, obstructions and Doppler at the user terminal; compute laser-path latency versus fibre.
+  - Explain why ordinary phones can reach a satellite (Direct-to-Cell) and its limits.
+  - Compare Starlink with OneWeb, Amazon Leo (Kuiper), Qianfan and Guowang; state the status of Starlink in Viet Nam and the open debates.
+updated: "2026-11-06"
+---
+import Term from '../../../components/Term.astro';
+import Depth from '../../../components/Depth.astro';
+import Figure from '../../../components/Figure.astro';
+import Formula from '../../../components/Formula.astro';
+import LabLinks from '../../../components/LabLinks.astro';
+import Note from '../../../components/Note.astro';
+import Stats from '../../../components/Stats.astro';
+import Steps from '../../../components/Steps.astro';
+import Tiles from '../../../components/Tiles.astro';
+import Predict from '../../../islands/Predict.tsx';
+import ConstellationGlobe from '../../../islands/ConstellationGlobe.tsx';
+import ConstellationLatency from '../../../islands/ConstellationLatency.tsx';
+import ConstellationArchitecture from '../../../islands/ConstellationArchitecture.tsx';
+import ConstellationShells from '../../../islands/ConstellationShells.tsx';
+import ConstellationWalker from '../../../islands/ConstellationWalker.tsx';
+import ConstellationCount from '../../../islands/ConstellationCount.tsx';
+import ConstellationHandover from '../../../islands/ConstellationHandover.tsx';
+import ConstellationIsl from '../../../islands/ConstellationIsl.tsx';
+import ConstellationHistory from '../../../islands/ConstellationHistory.tsx';
+import ConstellationD2C from '../../../islands/ConstellationD2C.tsx';
+import ConstellationFleets from '../../../islands/ConstellationFleets.tsx';
+import ConstellationGateways from '../../../islands/ConstellationGateways.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/constellations.json';
+
+<Figure
+  title="Figure 6.1 — Satellite Internet constellations seen from Viet Nam"
+  try="Pick All to see the five constellations at once, then pick Starlink alone and filter the 43°, 53°, 70° and 97° shells: which shell puts the most satellites in the sky over Hanoi? Raise the minimum elevation from 25° to 40°. Switch to OneWeb (1200 km): why fewer satellites but a wider visible area? Press Play ×300 to watch them move."
+  source="CelesTrak GP (OMM) elements, groups starlink, oneweb, kuiper (retrieved 4 Nov 2026 18:41 UTC), qianfan and hulianwang (Guowang, retrieved 5 Nov 2026); reference time 16:00 UTC on 4 Nov 2026. Keplerian propagation plus J2 secular drift (src/lib/gnss.ts), no drag; visible counts match SGP4 in the chapter notebook. Altitude = semi-major axis − 6378 km. Every object in each group is counted, including satellites still raising or lowering their orbit. Imagery © Esri, Maxar, Earthstar Geographics."
+>
+  <ConstellationGlobe client:visible lang="en" />
+</Figure>
+
+<Predict client:visible lang="en"
+  title="How many Starlink satellites are in the sky over Hanoi?"
+  q="At 23:00 on 4 Nov 2026 (Viet Nam time), how many Starlink satellites are above 25° elevation for someone in Hanoi?"
+  options={['About 4', 'About 40', 'About 400', 'About 4000']} answer={1}
+  why="39 satellites (128 counting from 10° elevation). Of 11,181 Starlink objects only about 0.3 % are high enough in the sky of one point. Over 24 hours the count ranges from 28 to 64, with a mean of 42.1." />
+
+## 6.1 Why satellite Internet moved to LEO
+
+Internet via <Term id="geostationary-orbit">geostationary</Term> (GEO) satellites has existed for a long time. VINASAT-1 and VINASAT-2 serve all of Viet Nam from 35,786 km. But GEO has two hard limits.
+
+- **Latency.** A packet goes up to the satellite, down to a ground station, and the reply takes the same path back: four times 35,786 km. Video calls, games and financial trading all feel "laggy".
+- **Capacity per km².** A GEO satellite sees almost half the Earth, so its bandwidth is shared by a whole continent.
+
+In <Term id="leo">low Earth orbit (LEO)</Term> the satellites are about 65 times closer (35,786 / 550 km). Each satellite sees an area only a few hundred kilometres in radius, so the same band can be **reused** in thousands of places at once. The price: each satellite is overhead for only a few minutes (Chapter 2), so continuous coverage needs a great many satellites and the network must keep handing users over to the next one. Such a constellation is called a <Term id="megaconstellation">megaconstellation</Term>.
+
+<Predict client:visible lang="en"
+  title="How long is a round trip via a geostationary satellite?"
+  q="You send a packet up to a geostationary satellite straight overhead, down to a ground station, and the reply takes the same way back. Ignoring processing, what is the minimum in milliseconds?"
+  slider={{ min: 0, max: 1000, step: 10, unit: 'ms' }} answer={480} tol={30}
+  why="4 × 35,786 km / 299,792 km/s = 477.5 ms. With a satellite at 480 km overhead, the same path takes only 6.4 ms." />
+
+<Formula label="Minimum round-trip time via a satellite at zenith" tex="RTT_{min} = \frac{4h}{c}" where="
+RTT_{min} :: minimum round-trip time, propagation only (s)
+h :: satellite altitude (km)
+c :: speed of light, 299,792 km/s
+" />
+
+<Stats items={[
+  { v: '477.5', u: 'ms', l: 'minimum round trip via GEO (35,786 km)' },
+  { v: '6.4', u: 'ms', l: 'minimum round trip via LEO at 480 km' },
+  { v: '37', u: 'dB', l: 'less free-space loss at zenith' },
+]} caption="From geometry, light time only (scripts/constellation_numbers.ts)." />
+
+Flying close also helps the <Term id="link-budget">link budget</Term>: from 480 km instead of 35,786 km, free-space loss is 20·log₁₀(35,786 / 480) ≈ 37 dB smaller. That is why a pizza-box-sized <Term id="user-terminal">user terminal</Term> still reaches high data rates, which Chapter 5 showed is hard with a geostationary satellite.
+
+<Figure
+  title="Figure 6.2 — Minimum round-trip time from Hanoi: fibre, LEO and GEO"
+  try="Compare Singapore with Frankfurt: on a short route fibre and LEO are close; on a long route LEO wins clearly. Drag the cable route factor from 1.5 to 1.0 (a cable as straight as the great circle). Pick São Paulo: why does GEO need two hops?"
+  source="Spherical geometry, radius 6378 km. Fibre: great-circle distance × route factor (assumed, default 1.5) × glass index 1.468. LEO: straight up to the shell, along the great circle at shell height over lasers, straight down (a lower bound ignoring switching and the number of laser hops). GEO: one bent-pipe satellite at the longitude both ends see highest; two hops through a relay at the midpoint if either end sees it below 5°. Light time only, no queuing or processing (src/lib/constellation.ts)."
+>
+  <ConstellationLatency client:visible lang="en" />
+</Figure>
+
+<Note kind="myth">
+
+**Misconception:** "LEO Internet is faster because high-frequency signals travel faster." **In fact:** radio waves of every frequency travel at the speed of light. LEO beats GEO only because the **path is shorter**. Against fibre, LEO wins only on long routes, where light in vacuum (1.47 times faster than in glass) makes up for the trip up to the satellite and back down.
+
+</Note>
+
+<Depth level="advanced" title="Not a new idea">
+
+Iridium (66 satellites at about 780 km in near-polar orbits) has had inter-satellite links since the late 1990s, and Teledesic once planned hundreds of broadband satellites. Both ran into launch and manufacturing costs. Starlink differs because SpaceX launches on its own reusable rockets (Chapter 3) and builds satellites on a production line: 122 launches carried Starlink satellites in 2025 (section 6.7).
+
+</Depth>
+
+<Note kind="key">
+
+<mark class="key">A LEO constellation trades the number of satellites for low latency and frequency reuse.</mark> A subscriber never talks to one satellite for long: each satellite is in the sky for only a few minutes.
+
+</Note>
+
+## 6.2 System architecture
+
+A LEO Internet system has five blocks, linking back to Chapters 4 and 5:
+
+<div class="table-wrap">
+
+| Component | Role | Technical detail (Starlink) |
+|---|---|---|
+| User terminal | Talks to the serving satellite | Ku-band <Term id="phased-array-antenna">phased array</Term>, beam steered electronically, no moving parts |
+| Satellite | Relays and routes | Ku phased arrays for users, Ka (and E-band from V2 Mini) for gateways, <Term id="inter-satellite-link">inter-satellite lasers</Term>, Hall thrusters |
+| <Term id="gateway-station">Gateway</Term> | Connects satellites to the terrestrial network | Several tracking dishes, sited near fibre |
+| <Term id="constellations-pop">PoP</Term> | Exit to the Internet | In a data centre; decides the user's IP address and apparent location |
+| Global scheduler | Pairs users with satellites and beams | Measurement studies see the network reallocate about every 15 seconds (section 6.5) |
+
+</div>
+
+According to SpaceX's FCC-licensed filings, user links use Ku band (down 10.7–12.7 GHz, up 14.0–14.5 GHz) and gateway links use Ka band (down about 17.8–19.3 GHz, up about 27.5–30 GHz). From V2 Mini on, SpaceX added E-band (71–76 and 81–86 GHz) on gateway links for more capacity.
+
+A packet can travel two ways. If the user and a gateway both see the same satellite, the satellite simply "bends" the signal from uplink to downlink: a <Term id="constellations-bent-pipe">bent pipe</Term>. If the user is far from every gateway (mid-ocean, in an aircraft, near the poles), the satellite passes the packet to other satellites by laser until one of them sees a gateway.
+
+<Figure
+  title="Figure 6.3 — A packet's path: user terminal, satellite, gateway, PoP"
+  try="Click each block to read its role. Switch to Via lasers: how many milliseconds does a 2000 km laser path add? Lower the user elevation to 25° and compare with 90°. Raise the gateway → PoP fibre to 1150 km (Hanoi – Ho Chi Minh City is 1145 km on the great circle) to see that terrestrial fibre adds delay too."
+  source="Schematic. Slant ranges on a spherical Earth for a satellite at 480 km; laser and fibre lengths chosen by the reader; fibre with index 1.468. Bands from SpaceX's FCC filings (FCC 21-48, FCC 22-91); E-band per SpaceX (Feb 2023); lasers per Brashears (SpaceX), SPIE Photonics West, Jan 2024; gateway and PoP sites in Viet Nam per the Authority of Telecommunications (MOST). Propagation time only."
+>
+  <ConstellationArchitecture client:visible lang="en" />
+</Figure>
+
+<Steps title="A packet from Hanoi to the Internet (bent pipe)" items={[
+  { tag: '0 s', t: 'The scheduler allocates', d: 'The global scheduler has assigned the terminal to one satellite and beam for the current 15-second slot.' },
+  { tag: 'Ku ↑', t: 'Terminal transmits to the satellite', d: 'The phased array steers to a satellite above 25°; at 480 km the range is 480 km (zenith) to 995 km (25° elevation), i.e. 1.6–3.3 ms.' },
+  { tag: 'Ka ↓', t: 'Satellite relays down to a gateway', d: 'If it sees a gateway (for example Phu Tho) it relays straight down; otherwise the packet goes over lasers first.' },
+  { tag: 'fibre', t: 'Gateway → PoP', d: 'Terrestrial fibre carries the packet to the PoP, where the Starlink network meets the Internet.' },
+  { tag: 'IP', t: 'Out to the Internet and back', d: 'The reply takes the reverse path; processing, queuing and the terrestrial network add to the total.' },
+]} />
+
+<Note kind="key">
+
+<mark class="key">A bent pipe works only when the user and a gateway see the same satellite; inter-satellite lasers remove that constraint.</mark> That is why gateways must be spread wherever customers are, while ships and aircraft depend on lasers.
+
+</Note>
+
+## 6.3 Satellites and orbital shells
+
+Starlink satellites have gone through several generations. The milestones below come from SpaceX and the SATCAT object catalogue:
+
+<div class="table-wrap">
+
+| Generation | From | What was new |
+|---|---|---|
+| v0.9 (test) | May 2019 | First batch of 60; flat-panel design stacked inside the fairing |
+| v1.0 | Nov 2019 | Ka band added for gateways |
+| v1.5 | 2021 | Inter-satellite lasers |
+| V2 Mini | Feb 2023 | Argon Hall thrusters with 2.4 times the thrust and 1.5 times the specific impulse of the previous generation (SpaceX); E-band added |
+| Launched on Starship | Sep 2026 | 26 Starlink satellites launched from Starbase on 28 Sep 2026 (SATCAT) |
+
+</div>
+
+For <Term id="orbital-shell">orbital shells</Term>, the FCC licensed Gen1 (modified in 2021, FCC 21-48) with 4,408 satellites: the main shell at 550 km and 53° (72 planes × 22 satellites), plus shells at 540 km/53.2°, 570 km/70° and 560 km/97.6° to cover high latitudes and the poles. In December 2022 the FCC partly granted Gen2 (FCC 22-91): 7,500 satellites at 525, 530 and 535 km with inclinations of 53°, 43° and 33°. The 43° and 33° shells add density at low latitudes, which helps regions such as Viet Nam. On 1 Jan 2026 SpaceX announced it would lower about 4,400 satellites from about 550 km to about 480 km during 2026, because there are fewer debris objects and planned constellations below 500 km.
+
+The snapshot of 4 Nov 2026 holds 11,181 Starlink objects. Grouped by inclination, the shells stand out:
+
+<div class="table-wrap">
+
+| Constellation | Shell (inclination) | Objects | Median altitude |
+|---|---|---|---|
+| Starlink | 53° | 4558 | 463 km |
+| Starlink | 43° | 3257 | 483 km |
+| Starlink | 97° (near-polar, Sun-synchronous) | 1482 | 466 km |
+| Starlink | 70° | 838 | 475 km |
+| Starlink | below 400 km (raising, lowering or re-entering) | 1046 | 356 km |
+| OneWeb | 87.9° | 648 | 1202 km |
+| Kuiper | 51.9° | 391 | 630 km |
+| Qianfan | 89° | 256 | 1068 km |
+| Guowang | 50° and 86.5° | 171 and 60 | 1149 and 1168 km |
+
+</div>
+
+<Figure
+  title="Figure 6.4 — Orbital shells in the snapshot: altitude versus inclination"
+  try="Pick Starlink: the hollow rings (licensed shells) sit at 525–570 km; where are the real satellites? Find the band below 400 km: what are those satellites doing? Pick Kuiper and compare its three licensed rings with the single real cluster at 630 km."
+  source="CelesTrak GP elements (as Figure 6.1). Each mark is one object; duplicates within a 0.25° × 4 km cell are merged for speed. Hollow rings: shells in FCC 21-48 and FCC 22-91 (Starlink), FCC 20-102 (Kuiper), 1200 km 87.9° (OneWeb)."
+>
+  <ConstellationShells client:visible lang="en" />
+</Figure>
+
+<Steps title="Life of a Starlink satellite" items={[
+  { tag: 'launch', t: 'Falcon 9 releases a whole stack in a low orbit', d: 'The satellites separate like a bright "train" in the night sky; the snapshot has 1,046 objects below 400 km, median 356 km.' },
+  { tag: 'raise', t: 'They raise their own orbit with Hall thrusters', d: 'Over several weeks. A satellite that fails at this stage re-enters quickly because drag is strong.' },
+  { tag: 'operate', t: 'In the right shell and plane', d: 'Station-keeping, and avoiding collisions when a close approach is predicted.' },
+  { tag: 'lower', t: 'End of life: deliberate deorbit', d: 'Burns up in the atmosphere; 671 Starlink satellites re-entered in 2025 (SATCAT).' },
+]} />
+
+<Note kind="key">
+
+<mark class="key">Inclination decides where satellites crowd: a satellite spends most of its time near the latitude equal to its inclination.</mark> The 53° shell is densest at 40–53° latitude (US, Europe); the 43° shell adds capacity for the tropics such as Viet Nam; the 70° and 97° shells cover high latitudes and the poles.
+
+</Note>
+
+## 6.4 Designing a constellation: Walker and the number of satellites
+
+Almost every large constellation follows a template proposed by J. G. Walker: T satellites on P circular orbital planes with the same altitude and inclination i, planes evenly spaced in right ascension of the ascending node, T/P satellites evenly spaced in each plane, and a phase offset of F·360°/T between neighbouring planes. The <Term id="walker-constellation">Walker constellation</Term> notation is **i: T/P/F**. Galileo is 56°: 24/3/1 (plus spares); a Starlink-like 53° shell, 1584/72/1, has 22 satellites per plane.
+
+Two forms are common: **delta**, with planes spread over the full 360° (moderate inclination: GPS, Galileo, Starlink), and **star**, with near-polar planes spread over 180° (Iridium), so that ascending and descending passes do not overlap.
+
+<Figure
+  title="Figure 6.5 — Designing a Walker constellation and its coverage over 24 hours"
+  try="Start with 36 satellites: Hanoi is covered only 17.6 % of the time. Add planes and satellites per plane until the time strip has no red left. Pick the Iridium-like preset and switch to Delta: what happens? Set the inclination to 30° and pick the 60° N point."
+  source="Two-body circular orbits without J2 (the node drifts a few degrees per day, not enough to change coverage statistics much). A satellite is in view when the Earth central angle is ≤ λ from altitude and minimum elevation (spherical Earth). Sampled every 60–180 seconds over 24 hours. Presets are illustrative configurations, not the real ephemerides of each system. Imagery © Esri, Maxar, Earthstar Geographics."
+>
+  <ConstellationWalker client:visible lang="en" />
+</Figure>
+
+Three lessons from Figure 6.5 at Hanoi:
+
+1. **36 satellites at 550 km** (6 planes × 6) cover only **17.6 %** of the time, with gaps of up to 65 minutes: a low satellite sees a very small area.
+2. **The Iridium-like pattern** (66 satellites at 780 km, 86.4°, star) covers **100 %**, with 1.4 satellites in view on average: just enough to always have one.
+3. **A Starlink-like shell** (1584 satellites at 550 km, 53°) also covers 100 %, but with **7.7** in view on average: many times more than coverage needs, because the goal is **capacity**.
+
+<Formula label="Half-angle of one satellite's footprint" tex="\lambda = \arccos\!\left(\frac{R\cos\varepsilon}{R+h}\right) - \varepsilon" where="
+\lambda :: Earth central angle from the sub-satellite point to the footprint edge (ground radius R·λ, λ in radians)
+R :: Earth radius, 6378 km
+h :: satellite altitude
+\varepsilon :: user minimum elevation
+" />
+
+At 480 km with ε = 25°: λ = 7.6°, a footprint radius of about **841 km**. At 1200 km (OneWeb) with the same ε: λ = 15.3°, radius 1702 km. A geostationary satellite with ε = 5°: λ = 76.3°.
+
+<Predict client:visible lang="en"
+  title="How many satellites to always have one over every point?"
+  q="At 550 km, users can only use satellites above 25° elevation. For every point on Earth to always see at least one satellite, roughly how many satellites are needed?"
+  options={['About 30', 'About 300', 'About 3000', 'About 30,000']} answer={1}
+  why="The area lower bound is 185 (sphere area divided by one footprint, if footprints tiled perfectly, which they cannot). The polar streets-of-coverage estimate gives 24 × 15 = 360. Starlink has thousands because it needs capacity, not just coverage." />
+
+A spherical-cap footprint has area 2πR²(1 − cos λ). Dividing the Earth's 4πR² by it gives a **lower bound**: you cannot do with fewer, and in practice you need more, because round caps do not tile. A closer estimate for polar orbits uses <Term id="streets-of-coverage">streets of coverage</Term>: satellites in one plane join their footprints into a continuous street, and enough planes close the gaps at the equator.
+
+<Formula label="Lower bound on satellites for global coverage" tex="N_{min} = \frac{4\pi R^2}{2\pi R^2 (1-\cos\lambda)} = \frac{2}{1-\cos\lambda}" where="
+N_{min} :: fewest satellites if footprints tiled without overlap (not achievable)
+\lambda :: footprint half-angle
+" />
+
+<Figure
+  title="Figure 6.6 — Minimum satellites for continuous global coverage versus altitude"
+  try="Drag the altitude from 300 km to 36,000 km: how does the count fall? Compare the 25° curve with the 10° curve. Find the Iridium point: how many satellites does the streets estimate give at 780 km with an 8.2° mask?"
+  source="Area lower bound 2/(1 − cos λ). Polar streets of coverage after Adams & Rider (1987): S satellites per plane give a street half-width c = arccos(cos λ / cos(π/S)); P planes satisfy (P − 1)(c + λ) + 2c ≥ π; S chosen for the smallest T = S·P. Spherical Earth. Real systems for reference: Iridium 66 operational satellites, OneWeb 648 Gen1 satellites, GPS 24 nominal slots (needs 4 in view, not 1), 3 GEO."
+>
+  <ConstellationCount client:visible lang="en" />
+</Figure>
+
+This simple estimate gives exactly **66 = 11 × 6** for Iridium (780 km, 8.2° mask), the real system's operational count. At 550 km with a 25° mask about 360 are needed; at 480 km about 448.
+
+<Depth level="advanced" title="Streets of coverage for polar orbits">
+
+With S satellites evenly spaced in a plane, neighbouring footprints overlap when π/S < λ, and together they form a street of half-width c:
+
+<Formula label="Street half-width and the full-coverage condition" tex="c = \arccos\!\left(\frac{\cos\lambda}{\cos(\pi/S)}\right), \qquad (P-1)(c+\lambda) + 2c \ge \pi" where="
+c :: street half-width (central angle)
+S :: satellites per plane
+P :: number of planes
+" />
+
+Co-rotating planes can be c + λ apart if phased by half a slot; only the two counter-rotating planes at the seam must stay 2c apart. A larger S widens the street but costs satellites per plane; the best solution is the S that minimises S·P.
+
+</Depth>
+
+<Note kind="why" label="Link to remote sensing">
+
+Constellations are also how remote sensing shortens revisit time. The two Sentinel-2 satellites fly the same orbit 180° apart, bringing the revisit at the equator from 10 days to 5 (Figure 2.9). Planet runs hundreds of small PlanetScope satellites to image almost all land every day, and small SAR constellations image at night and through cloud (Chapter 16). It is the same Walker problem: more satellites, denser imagery in time.
+
+</Note>
+
+## 6.5 User terminal and handover
+
+The Starlink terminal is a Ku-band phased array (Chapter 5) with many small radiating elements whose phases are set so that the whole array forms one narrow beam. It does not turn mechanically to track a satellite; it **steers its beam electronically**. Each time the global scheduler reallocates, the terminal may be moved to another satellite: a <Term id="constellations-handover">handover</Term>. Independent measurement studies (Tanveer et al. 2023; Mohan et al. 2024) see latency step changes at the same seconds of every minute, **15 seconds** apart, and explain them by a scheduler that reallocates user–satellite–gateway paths on that cycle. SpaceX has not published the algorithm.
+
+- **Field of view and obstructions.** The terminal needs a wide, clear patch of sky. The Starlink app draws an "obstruction map" from past dropouts. Trees or tall buildings blocking part of the sky cause short dropouts whenever the assigned satellite is behind them.
+- **Doppler and timing.** A satellite at 480 km flies at about 7.6 km/s. At 11.7 GHz the Doppler shift reaches about 250 kHz at 25° elevation. Terminal and satellite know each other's orbits, so they pre-compensate Doppler and the changing delay.
+- **Capacity is shared per cell.** Each beam serves one cell on the ground. In a crowded cell each user gets less at peak hours.
+- **Rain.** In Ku band, very heavy rain slows the link or causes short dropouts (Chapter 5).
+
+<Formula label="Doppler shift" tex="f_D = -\frac{\dot{\rho}}{c}\, f" where="
+f_D :: Doppler shift (Hz)
+\dot{\rho} :: range rate to the satellite (positive when it moves away)
+f :: carrier frequency
+" />
+
+<Predict client:visible lang="en"
+  title="Trees block part of the eastern sky: how much outage?"
+  q="A row of trees blocks azimuths 45–135° (east) below 60° elevation. The scheduler spreads load across satellites and does NOT know your obstruction map. Over 10 minutes in Hanoi, roughly what share of the time is lost?"
+  options={['0 %', 'About 20 %', 'About 50 %', 'Nearly 100 %']} answer={1}
+  why="The simulation on the real snapshot loses 20 % of the 15-second slots. If the scheduler knows the obstructions, this drops to 0 %, because another satellite is always in the clear sky. If the scheduler always picks the highest satellite, this low obstruction causes no outage either." />
+
+<Figure
+  title="Figure 6.7 — The sky over Hanoi: the serving satellite changes every 15 seconds"
+  try="Keep the defaults (trees to the east, load sharing, scheduler unaware): count the red slots in the strip. Turn on Knows obstruction map: the red slots disappear. Pick Highest satellite: how often does the satellite change? Read the Doppler while the serving satellite rises and while it sets."
+  source="CelesTrak GP elements, starlink group (as Figure 6.1), propagated with src/lib/gnss.ts; each 15-second slot uses positions at its start. The selection rules are illustrative: SpaceX's real scheduler (load, beams, power) is not public; the 15-second cycle follows Tanveer et al. (2023). Obstructions are assumed. Doppler from the range rate (1-second difference) at 11.7 GHz."
+>
+  <ConstellationHandover client:visible lang="en" />
+</Figure>
+
+With the "highest satellite" rule, the first 10 minutes of the snapshot change satellite **21 times in 39 reallocations**, about once every half minute. With load sharing, almost every 15-second slot brings a new satellite.
+
+<Note kind="myth">
+
+**Misconception:** "A Starlink dish must point exactly at one satellite, like a TV dish pointed at VINASAT." **In fact:** the terminal steers its beam electronically to another satellite every few tens of seconds. What it needs is not a precise direction but **a wide, unobstructed patch of sky**.
+
+</Note>
+
+<Note kind="key">
+
+<mark class="key">In LEO the network, not the terminal, decides which satellite you talk to, and it reconsiders about every 15 seconds.</mark>
+
+</Note>
+
+## 6.6 Inter-satellite lasers: a mesh of light in orbit
+
+In January 2024, SpaceX engineer Travis Brashears said the Starlink network had more than **9,000 lasers**, each link sustaining 100 Gbit/s, able to connect satellites more than 5,400 km apart, and carrying more than **42 PB per day** for customers with link uptime above 99 %. 42 PB per day is an average of 3.89 Tbit/s. Lasers make it possible to:
+
+- serve ships, aircraft, polar regions and remote islands with no gateway in a shared view;
+- carry traffic to a gateway or PoP elsewhere;
+- cut latency on long routes: light in vacuum is about 1.47 times faster than in optical fibre, and a laser path can stay closer to the great circle than a real cable route.
+
+<Formula label="One-way delay: fibre versus vacuum" tex="t_{fibre} = \frac{k\, d\, n}{c}, \qquad t_{space} = \frac{L_{path}}{c}" where="
+d :: great-circle distance between the two cities
+k :: cable route factor (how much longer than the great circle; 1.0 is an ideal straight cable)
+n :: refractive index of the fibre, about 1.468
+L_{path} :: length of the vacuum path (up to the satellite, laser hops, down)
+" />
+
+<Predict client:visible lang="en"
+  title="Hanoi – Frankfurt: lasers or fibre?"
+  q="Suppose a cable ran exactly along the Hanoi – Frankfurt great circle (8730 km). The path over the Starlink laser mesh must go up and down and zigzag through 38 satellites. Which is faster?"
+  options={['The straight cable, clearly', 'About the same', 'Lasers, by about 12 ms round trip', 'Lasers, twice as fast']} answer={2}
+  why="The laser path is 10,976 km long (1.26 times the great circle) but in vacuum: 73.2 ms round trip. The ideal straight cable: 85.5 ms, because light is 1.468 times slower in glass. A real cable is more roundabout (assumed factor 1.5): 128.3 ms." />
+
+<Figure
+  title="Figure 6.8 — Hanoi to distant cities over the 53° shell's laser mesh"
+  try="Pick Frankfurt, then Los Angeles: how much longer than the great circle is the laser path? Pick Singapore: why does the laser advantage nearly vanish against a straight cable? Change the time to +30 and +60 min: the path changes because the satellites have moved."
+  source="4558 satellites of the 53° shell in the CelesTrak snapshot (as Figure 6.1). Illustrative laser mesh: each satellite links to its 4 nearest neighbours within 5400 km whose line of sight stays above 80 km (Starlink's real topology is not public). Shortest light-time path (Dijkstra), up/down links at ≥ 25° elevation. Fibre: great circle × route factor × 1.468. Bent pipe: Hanoi up to a satellite at 60°, down to the Phu Tho gateway at 40°, then fibre ×1.5 (province-level gateway location). Light time only (src/lib/constellation.ts). Imagery © Esri, Maxar, Earthstar Geographics."
+>
+  <ConstellationIsl client:visible lang="en" />
+</Figure>
+
+<div class="worked">
+
+#### Example: Hanoi – Frankfurt
+
+1. Great-circle distance: **8730 km**.
+2. Fibre with route factor 1.5: 8730 × 1.5 × 1.468 / 299,792 = 64.1 ms one way, **128.3 ms** round trip.
+3. LEO lower bound at 480 km (straight up, along the great circle at shell height, straight down): (2 × 480 + 8730 × 6858 / 6378) / 299,792 = 34.5 ms, **69.0 ms** round trip.
+4. Illustrative laser mesh on the real snapshot (Figure 6.8): 38 satellites, path 10,976 km, **73.2 ms** round trip, only 4.2 ms above the lower bound.
+5. Bent pipe down to the Phu Tho gateway, then fibre ×1.5: **135.9 ms** round trip.
+6. GEO, one hop: **526 ms** round trip, more than 7 times the laser path.
+
+This is light time. Real networks add processing, queuing and switching, so measured latency is always higher.
+
+</div>
+
+<Note kind="key">
+
+<mark class="key">Lasers beat fibre on long routes because light in vacuum is 1.47 times faster than in glass; on short routes the trip up to the satellite and down erases that advantage.</mark>
+
+</Note>
+
+## 6.7 Performance and scale
+
+<Stats items={[
+  { v: '11,209', l: 'Starlink satellites still in orbit (SATCAT, 5 Nov 2026)' },
+  { v: '13,024', l: 'Starlink satellites launched since 2019' },
+  { v: '122', l: 'launches carrying Starlink satellites in 2025' },
+  { v: '12', u: 'million+', l: 'customers in more than 160 countries and territories (SpaceX, June 2026)' },
+]} caption="The first three are counted from the CelesTrak SATCAT; customers per SpaceX." />
+
+<div class="table-wrap">
+
+| Metric | Value | Source, date |
+|---|---|---|
+| Median peak-hour latency in the US | 25.7 ms | Starlink Network Update, Jul 2025 (data Jun 2025) |
+| Median peak-hour download speed in the US | about 200 Mbit/s | Starlink Network Update, Jul 2025 |
+| Total capacity launched | about 450 Tbit/s | Starlink Network Update, Jul 2025 |
+| Active customers | more than 12 million, 160+ countries and territories | SpaceX, 4 Jun 2026 |
+
+</div>
+
+The measured latency (25.7 ms) is much larger than the 6.4 ms of geometry because packets also pass a gateway, fibre to the PoP, routers and peak-hour queues.
+
+<Figure
+  title="Figure 6.9 — Starlink satellites launched and re-entered per year"
+  try="Compare 2024 and 2025: how much did launches grow, and re-entries? Pick Re-entered: why did the number burning up jump from 2024? Click 2026 to read how many are still in orbit."
+  source="CelesTrak SATCAT, every payload named STARLINK, retrieved 5 Nov 2026; 2026 counts up to the launch of 31 Oct 2026. Launches = distinct international designators YYYY-NNN carrying Starlink satellites. In orbit at year end = cumulative launched minus re-entered."
+>
+  <ConstellationHistory client:visible lang="en" />
+</Figure>
+
+In 2025, 3,169 Starlink satellites were launched and 671 re-entered. Re-entries grew because the early batches reached end of life and were deorbited, while high solar activity thickened the upper atmosphere (Chapter 4).
+
+<Note kind="myth">
+
+**Misconception:** "More satellites means every user gets faster." **In fact:** capacity is limited **per cell** on the ground and by the licensed spectrum. A crowded cell is still slow at peak hours with dozens of satellites overhead; that is why Starlink sometimes pauses new sign-ups in busy areas.
+
+</Note>
+
+## 6.8 Direct-to-Cell: a base station in the sky
+
+<Term id="constellations-direct-to-cell">Direct-to-Cell</Term> lets an ordinary LTE phone, with no special hardware, connect straight to a satellite. The satellite carries an LTE base station (eNodeB) and a large phased array and uses the mobile spectrum of a partner operator (first T-Mobile in the US). SpaceX launched the first Direct-to-Cell satellites in early 2024 and has called the service Starlink Mobile since March 2026. In September 2025 SpaceX bought EchoStar's AWS-4 and H-block spectrum (about US$17 billion) for its next Direct-to-Cell generation. On the standards side, 3GPP added non-terrestrial networks (NTN) in Release 17 (2022).
+
+The hardest part is the **uplink budget**: a phone has an antenna of about 0 dBi and transmits about 0.2 W, far below a Starlink terminal. The shortfall must be made up by the gain of the satellite antenna, that is, its **area**. The direct competitor AST SpaceMobile goes to the extreme: each BlueBird Block 1 satellite unfolds a 64 m² array, and the first BlueBird Block 2 (Dec 2025) about 223 m².
+
+<Formula label="Uplink budget (in dB)" tex="\frac{C}{N_0} = P_t + G_t - L_{fs} - L_{other} + G_r - 10\log_{10} T_{sys} - 10\log_{10} k" where="
+P_t + G_t :: phone transmit power and antenna gain (EIRP), about −7 dBW
+L_{fs} :: free-space path loss, 20·log10(4πd/λ)
+G_r :: satellite antenna gain, 10·log10(4πAη/λ²) for area A and efficiency η
+T_{sys} :: satellite receiver system noise temperature (K)
+k :: Boltzmann constant, 10·log10 k = −228.6 dBW/(K·Hz)
+" />
+
+<Figure
+  title="Figure 6.10 — Why a phone can talk to a satellite: a very large satellite antenna"
+  try="Start with 0.25 m²: the signal is below the noise (negative SNR). Pick 64 m², then 223 m²: how many dB does the SNR gain, and how does the served cell shrink? Lower the elevation to 25°. Read the Doppler at 1.9 GHz and compare it with the 15 kHz LTE subcarrier spacing."
+  source="Computed in src/lib/constellation.ts (d2cUplink). Fixed assumptions: phone 0.2 W, 0 dBi antenna, 1.9 GHz; satellite receiver T_sys 500 K, antenna efficiency 0.6, 3 dB other losses; one user occupying the whole channel (Shannon limit, not a real data rate). 0.25 m² and 1 m² are illustrative; 64 m² and about 223 m² are the arrays of BlueBird Block 1 and 2 (AST SpaceMobile). Beamwidth 70·λ/D with D = √A. Doppler for an overhead pass."
+>
+  <ConstellationD2C client:visible lang="en" />
+</Figure>
+
+At 520 km and 40° elevation, with the assumptions of Figure 6.10:
+
+- a 0.25 m² antenna gives an SNR of **−12.3 dB** in a 5 MHz channel, a Shannon limit of only 0.41 Mbit/s, and a 22.1° beam covering a cell about 203 km across;
+- a 64 m² antenna gives **+11.8 dB**, a Shannon limit of about 20 Mbit/s, a 1.4° beam and a cell only about 13 km across.
+
+A large antenna both lifts the signal above the noise and splits the ground into many small cells for frequency reuse. **Doppler** is the second challenge: at 1.9 GHz a satellite at 480 km shifts the carrier by about 41 kHz at 25° elevation, more than the 15 kHz LTE subcarrier spacing, so the base station in orbit must pre-compensate Doppler for the beam centre.
+
+<Note kind="key">
+
+<mark class="key">The phone cannot change, so every shortfall in the link budget has to be made up by a giant antenna on the satellite.</mark> That is why Direct-to-Cell has moved from texting to slow data and has not replaced the Starlink dish.
+
+</Note>
+
+## 6.9 Other broadband constellations
+
+<Figure
+  title="Figure 6.11 — In orbit versus licensed or filed"
+  try="Click each row: which constellation is close to its planned size? What share of its 3,236 satellites has Kuiper launched? Why is the horizontal axis logarithmic?"
+  source="In orbit: CelesTrak snapshot (Starlink, OneWeb, Kuiper 4 Nov 2026; Qianfan, Guowang 5 Nov 2026), every object in the group. Planned size: FCC 21-48 and FCC 22-91 (Starlink), FCC 20-102 (Kuiper), OneWeb Gen1 (648), ITU filings as reported (Qianfan over 15,000, Guowang 12,992), MDA order (Telesat Lightspeed 198). Telesat Lightspeed is not in the CelesTrak groups retrieved."
+>
+  <ConstellationFleets client:visible lang="en" />
+</Figure>
+
+<div class="table-wrap">
+
+| System | Orbit | In snapshot | Licensed/filed size | Notes |
+|---|---|---|---|---|
+| Eutelsat OneWeb | about 1200 km, 87.9° | 651 | 648 Gen1 | Bent pipe, Ku users / Ka gateways; enterprise, government, maritime |
+| Amazon Leo (formerly Kuiper, renamed Nov 2025) | 590/610/630 km | 391 | 3236 (FCC 20-102) | Ka band; in June 2026 the FCC waived the half-constellation milestone of 30 Jul 2026 but lowered spectrum priority for later launches |
+| Qianfan (Thousand Sails) | about 1070 km, 89° | 256 | over 15,000 (ITU filing) | Commercial, Shanghai; deploying |
+| Guowang | about 1150 km, 50° and 86.5° | 235 | 12,992 (ITU filing) | Chinese state network; deploying |
+| Telesat Lightspeed | LEO | 0 | 198 (MDA order, 2023) | Enterprise, aviation, maritime; with lasers |
+| Iridium NEXT | about 780 km, 86.4° | — | 66 operational | L band, voice and narrowband data, IoT; inter-satellite links |
+| SES O3b mPOWER | MEO 8062 km | — | — | Medium latency, high capacity for enterprises and ships |
+
+</div>
+
+<Tiles
+  items={[
+    { t: 'Starlink', d: '11,181 objects · 463–483 km · 43–97° · broadband' },
+    { t: 'OneWeb', d: '651 objects · 1202 km · 87.9° · broadband' },
+    { t: 'Amazon Leo (Kuiper)', d: '391 objects · 630 km · 51.9° · deploying' },
+    { t: 'Qianfan + Guowang', d: '256 + 235 objects · 1050–1170 km · deploying' },
+  ]}
+  sum="Lower means less delay and less loss, but more satellites"
+  note="Object counts from the CelesTrak snapshot of 4–5 Nov 2026"
+  caption="LEO broadband constellations and their main shells."
+/>
+
+<Note kind="key">
+
+<mark class="key">An ITU filing or a licence is only a priority claim on spectrum and orbit; the count in orbit is the real capability.</mark> OneWeb has completed Gen1; Amazon Leo is at about 12 % of 3,236; Qianfan and Guowang are below 2 % of their filed size.
+
+</Note>
+
+## 6.10 Starlink in Viet Nam
+
+<Steps title="Legal and deployment milestones" items={[
+  { tag: '19 Feb 2025', t: 'Resolution 193/2025/QH15', d: 'The National Assembly allowed special pilot mechanisms for science, technology and digital transformation, the legal basis for piloting LEO satellite Internet.' },
+  { tag: 'Mar 2025', t: 'Decision 659/QD-TTg', d: 'A controlled five-year pilot of SpaceX LEO satellite telecom services ending before 1 Jan 2031, up to 600,000 subscribers, with no limit on foreign ownership.' },
+  { tag: '13 Feb 2026', t: 'Spectrum and telecom licences', d: 'The Radio Frequency Department issued the spectrum licence; the Ministry of Science and Technology issued the telecom licence to Starlink Services Vietnam Co., Ltd. (Hanoi).' },
+  { tag: 'network', t: '4 gateways and 1 PoP in the country', d: 'Gateways in Phu Tho, Da Nang and Ho Chi Minh City; PoP in Tan Thuan ward, Ho Chi Minh City (Authority of Telecommunications).' },
+  { tag: '13 Aug 2026', t: 'Orders open', d: 'Starlink began taking orders from local customers through its website.' },
+]} />
+
+News reports give the date of Decision 659/QD-TTg as 23 or 26 March 2025. The clearest beneficiaries are places that fibre and mobile networks reach with difficulty: mountains, islands, offshore fishing boats, oil platforms, and emergencies when storms or floods damage ground infrastructure.
+
+Gateways and a PoP inside the country have a technical consequence: Vietnamese users' traffic can go straight down to a Vietnamese gateway (bent pipe) when both see one satellite. At 480 km with a 25° mask at both ends, the user and the gateway must be no more than **1682 km** apart. Truong Sa Lon island is 620 km from the Ho Chi Minh City gateway and Phu Lam island (Hoang Sa) 450 km from Da Nang: both archipelagos are within bent-pipe reach.
+
+<Figure
+  title="Figure 6.12 — Bent-pipe reach of the Starlink gateways in Viet Nam"
+  try="Pick Truong Sa Lon, Phu Lam island and Lung Cu: all go straight through one satellite. Pick Ship in the Pacific: it needs lasers. Raise the minimum elevation to 40°: how much does the teal area shrink? Click the map to test any point."
+  source="Bent-pipe reach = 2λ (formula in section 6.4) with the same minimum elevation at user and gateway, spherical Earth. Gateway positions are approximate province-level locations (Phu Tho, Da Nang, Ho Chi Minh City with 2 stations) per the Authority of Telecommunications, not true coordinates. Imagery © Esri, Maxar, Earthstar Geographics."
+>
+  <ConstellationGateways client:visible lang="en" />
+</Figure>
+
+<Note kind="key">
+
+<mark class="key">Four domestic gateways are enough for every point on Viet Nam's mainland and on the Hoang Sa and Truong Sa archipelagos to connect through a single satellite; only ships beyond about 1700 km need lasers.</mark>
+
+</Note>
+
+## 6.11 Open debates
+
+On <Term id="space-debris">space debris</Term>, ESA's Space Environment Report 2025 counts about **40,000 tracked objects** in orbit, including about **11,000 active spacecraft**, and estimates more than **1.2 million fragments** of 1–10 cm, large enough to destroy a satellite.
+
+<Tiles
+  items={[
+    { t: 'Tracked', d: '≈ 40,000 objects' },
+    { t: 'Active', d: '≈ 11,000 spacecraft' },
+    { t: '1–10 cm', d: '> 1.2 million fragments (estimated)' },
+    { t: 'LEO speed', d: '≈ 7.5 km/s: a 1 cm fragment hits like a bullet' },
+  ]}
+  caption="The orbital environment per ESA's Space Environment Report 2025 (data to the end of 2024)."
+/>
+
+Every time two objects pass close by is a <Term id="conjunction">conjunction</Term>; when the collision probability crosses a threshold, a satellite with thrusters manoeuvres away. The long-term risk is the <Term id="kessler-syndrome">Kessler syndrome</Term>: collisions create fragments that cause more collisions. Altitude is therefore a safety choice: below about 500 km, atmospheric drag brings dead satellites and debris down quickly (<Term id="orbital-decay">orbital decay</Term>, Chapter 4). SpaceX says lowering Starlink to about 480 km lets a failed satellite re-enter within a few months. OneWeb, Qianfan and Guowang fly above 1000 km where drag is almost absent, so they must actively deorbit retired satellites.
+
+<Tiles
+  items={[
+    { t: 'Astronomy', d: 'Streaks on long-exposure images; LOFAR (2023) detected unintended radio emission at 110–188 MHz from Starlink satellites. The IAU set up the Centre for the Protection of the Dark and Quiet Sky (CPS).' },
+    { t: 'Orbital density', d: 'Collision risk depends on tens of thousands of satellites from many operators avoiding each other.' },
+    { t: 'Atmosphere', d: 'Hundreds of satellites burn up every year (671 Starlink in 2025), leaving aluminium oxide high up; the effect on the ozone layer is being studied.' },
+    { t: 'Spectrum and competition', d: 'ITU Article 22 limits EPFD so LEO systems do not interfere with GEO; disputes between constellations; the dominant role of one company.' },
+    { t: 'Sovereignty and security', d: 'Many countries require domestic gateways and PoPs to manage traffic, as Viet Nam does.' },
+  ]}
+  caption="Five groups of open questions around megaconstellations."
+/>
+
+On spectrum, LEO constellations use Ku, Ka and higher bands (Chapter 5), the same as geostationary satellites. To avoid interference, the ITU Radio Regulations (Article 22) cap the equivalent power flux density (EPFD) that a non-geostationary system may produce; a LEO satellite switches off or steers its beam away when it is close to the line from a ground station to the geostationary arc. In Viet Nam this happens under the very sky of VINASAT-1 and VINASAT-2.
+
+<Note kind="warn">
+
+Starlink dims its satellites with sunshades, reflective films and attitude changes, but the number of satellites keeps growing (Figure 6.9). The astronomy problem does not go away; it shifts from "a few bright satellites" to "very many faint ones".
+
+</Note>
+
+<Note kind="key" label="Chapter summary">
+
+- User ↔ satellite: Ku; satellite ↔ gateway: Ka and E-band; satellite ↔ satellite: 100 Gbit/s lasers.
+- LEO gives a propagation delay of a few ms (about 25 ms measured) but needs thousands of satellites and constant handovers (about every 15 seconds).
+- Capacity is limited per cell; Direct-to-Cell relies on huge satellite antennas to make up for the phone.
+- In Viet Nam: a pilot until before 1 Jan 2031, up to 600,000 subscribers, 4 gateways and 1 PoP in the country, orders open since 13 Aug 2026.
+
+</Note>
+
+## 6.12 Hands-on
+
+The notebook loads the chapter's orbital snapshot, plots the Starlink, OneWeb and Kuiper shells by inclination and altitude, propagates all 11,181 Starlink satellites with SGP4 to count those above Hanoi over 24 hours, then builds a Walker constellation and the streets-of-coverage formula from scratch.
+
+<LabLinks notebook="labs/constellations_walker.ipynb" />
+
+**Suggested exercises**
+
+1. In Figure 6.5, find the smallest delta constellation at 550 km, 53°, 25° mask that covers Hanoi 100 % of the time. Compare with the 360 of Figure 6.6 (global coverage).
+2. In Figure 6.1, pick Kuiper: why are there moments with no satellite above 25° over Hanoi? With the full 3,236 satellites of the licence, would that still happen?
+3. Use Figure 6.2 to find the cable route factor at which fibre to Tokyo is as fast as LEO. Check with Figure 6.8.
+4. In Figure 6.7, set the tall building to the south–west and load sharing: compare the outage slots with and without the obstruction map.
+5. In Figure 6.10, find the smallest antenna area that gives a positive SNR at 520 km, 25° elevation, in a 5 MHz channel.
+
+## 6.13 Review
+
+<Quiz client:visible lang="en" items={quiz} />
+
+## References
+
+- Adams, W. S., & Rider, L. (1987). Circular polar constellations providing continuous single or multiple coverage above a specified latitude. *Journal of the Astronautical Sciences*, 35(2), 155–192.
+- Authority of Telecommunications, Ministry of Science and Technology (2025). Press briefing on the Starlink pilot (4 gateways, Tan Thuan PoP); reported by Thanh Tra newspaper. https://thanhtra.com.vn/chuyen-doi-so-DFC98D38D/starlink-thi-diem-tai-viet-nam-gia-tu-85-usdthang-bao-dam-canh-tranh-binh-dang-5122c3e29.html
+- Brashears, T. (SpaceX) (2024). Talk at SPIE Photonics West, Jan 2024; reported by PCMag, Starlink's laser system is beaming 42 million GB of data per day. https://www.pcmag.com/news/starlinks-laser-system-is-beaming-42-million-gb-of-data-per-day
+- Di Vruno, F., et al. (2023). Unintended electromagnetic radiation from Starlink satellites detected with LOFAR between 110 and 188 MHz. *Astronomy & Astrophysics*, 676, A75.
+- Drive Tesla Canada (2026). Starlink surges to 12 million subscribers (after SpaceX's post on X, 4 Jun 2026). https://driveteslacanada.ca/news/starlink-12-million-subscribers-price-hikes/
+- EchoStar (2025). EchoStar announces spectrum sale and commercial agreement with SpaceX (8 Sep 2025). https://ir.echostar.com/node/32686
+- ESA Space Debris Office (2025). *ESA's Annual Space Environment Report 2025*. https://www.esa.int/Space_Safety/Space_Debris/ESA_Space_Environment_Report_2025
+- Euronews (2026). SpaceX to lower thousands of Starlink satellites in 2026 as collisions rise, company says (3 Jan 2026), after M. Nicolls (SpaceX). https://euronews.com/next/2026/01/03/spacex-to-lower-thousands-of-starlink-satellites-in-2026-as-collisions-rise-company-says
+- FCC (2020). *Kuiper Systems LLC — Order and Authorization* (FCC 20-102): 3,236 satellites at 590, 610 and 630 km. https://www.fcc.gov
+- FCC (2021). *Granting SpaceX's Satellite Broadband Modification Application* (FCC 21-48), modifying the Gen1 Starlink licence. https://www.fcc.gov
+- FCC (2022). *Space Exploration Holdings, LLC — Order and Authorization* (FCC 22-91), partial grant of Gen2 Starlink: 7,500 satellites at 525, 530 and 535 km. https://www.fcc.gov
+- Ferreira, J. P., et al. (2024). Potential ozone depletion from satellite demise during atmospheric reentry in the era of mega-constellations. *Geophysical Research Letters*, 51, e2024GL109280.
+- ITU (2024). *Radio Regulations*, Article 22 (EPFD limits for non-geostationary systems). https://www.itu.int/pub/R-REG-RR
+- Kelso, T. S. *CelesTrak*: GP data and SATCAT. https://celestrak.org
+- Kessler, D. J., & Cour-Palais, B. G. (1978). Collision frequency of artificial satellites: The creation of a debris belt. *Journal of Geophysical Research*, 83(A6), 2637–2646.
+- Light Reading (2026). Starlink goes live in Vietnam as SpaceX signs VinSpace launch contract (17 Aug 2026). https://www.lightreading.com/satellite/starlink-goes-live-in-vietnam-as-spacex-signs-vinspace-launch-contract
+- Mohan, N., et al. (2024). A multifaceted look at Starlink performance. *Proceedings of the ACM Web Conference 2024*. https://arxiv.org/abs/2310.09242
+- Nguyễn Văn Tín. *Sổ tay Vệ tinh & Viễn thám*, chapter 6. CC BY 4.0. https://satellite-rs-handbook.netlify.app/
+- Rider, L. (1985). Optimized polar orbit constellations for redundant earth coverage. *Journal of the Astronautical Sciences*, 33(2), 147–161.
+- SatNews (2025). AST SpaceMobile deploys BlueBird 6, largest commercial array in LEO (24 Dec 2025). https://satnews.com/2025/12/24/ast-spacemobile-deploys-bluebird-6-largest-commercial-array-in-leo
+- Spaceflight Now (2023). SpaceX unveils first batch of larger upgraded Starlink satellites (26 Feb 2023). https://spaceflightnow.com/2023/02/26/spacex-unveils-first-batch-of-larger-upgraded-starlink-satellites/
+- Starlink (2025). *Starlink Network Update* (Jul 2025). https://starlink.com/updates/network-update
+- Tanveer, H. B., Puchol, M., Singh, R., Bianchi, A., & Nithyanand, R. (2023). Making sense of constellations: Methodologies for understanding Starlink's scheduling algorithms. *CoNEXT 2023 Companion*. https://arxiv.org/abs/2307.00402
+- Tesla North (2026). SpaceX makes Starlink Mobile official as subscriber base hits 10 million (3 Mar 2026). https://teslanorth.com/2026/03/03/spacex-makes-starlink-mobile-official-as-subscriber-base-hits-10-million/
+- VnEconomy (2025). Vietnam to allow pilot rollout of Starlink internet service (26 Mar 2025), Decision 659/QD-TTg. https://en.vneconomy.vn/vietnam-to-allow-pilot-rollout-of-starlink-internet-service.htm
+- VTC News (2026). Starlink licensed to deploy up to 600,000 terminals in Viet Nam (14 Feb 2026, in Vietnamese). https://vtcnews.vn/internet-ve-tinh-starlink-duoc-cap-phep-trien-khai-toi-da-600-000-thiet-bi-tai-viet-nam-ar1003263.html
+- Walker, J. G. (1984). Satellite constellations. *Journal of the British Interplanetary Society*, 37, 559–571.
+- Wertz, J. R. (Ed.) (2001). *Mission Geometry; Orbit and Constellation Design and Management*. Microcosm Press / Kluwer.

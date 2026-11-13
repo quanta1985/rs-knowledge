@@ -1,0 +1,592 @@
+---
+title: GNSS & định vị
+n: 7
+summary: Điện thoại biết mình đang ở đâu bằng cách đo thời gian tín hiệu từ những vệ tinh cách 20 000 km. Chương này giải thích khoảng cách giả, bốn hệ GPS, Galileo, GLONASS, BeiDou nhìn từ Việt Nam, bốn nguồn sai số và ngân sách sai số, DOP, cách RTK, PPP, SBAS đưa độ chính xác từ vài mét xuống vài centimet, GNSS trên điện thoại, và những giới hạn như phố cao tầng, gây nhiễu, giả mạo.
+objectives:
+  - Giải thích vì sao máy thu đo khoảng cách giả và vì sao cần ít nhất 4 vệ tinh.
+  - Phân biệt bốn hệ GNSS toàn cầu và hai hệ khu vực theo quỹ đạo và tín hiệu; đọc được số vệ tinh nhìn thấy từ Hà Nội.
+  - Tính trễ điện ly, trễ đối lưu và đường đi thừa do đa đường; biết cách khử từng loại.
+  - Lập ngân sách sai số (UERE) và nhân với DOP để ước lượng sai số vị trí.
+  - So sánh RTK, PPP và SBAS về nguyên lý, độ chính xác, thời gian hội tụ và vùng phục vụ ở Việt Nam.
+  - Biết GNSS trên điện thoại khác máy thu trắc địa ở đâu, và những giới hạn của GNSS (trong nhà, đô thị, gây nhiễu, giả mạo).
+updated: "2026-11-05"
+---
+import Term from '../../../components/Term.astro';
+import Depth from '../../../components/Depth.astro';
+import Figure from '../../../components/Figure.astro';
+import LabLinks from '../../../components/LabLinks.astro';
+import Note from '../../../components/Note.astro';
+import Tiles from '../../../components/Tiles.astro';
+import Formula from '../../../components/Formula.astro';
+import Stats from '../../../components/Stats.astro';
+import Steps from '../../../components/Steps.astro';
+import Predict from '../../../islands/Predict.tsx';
+import GnssTrilat from '../../../islands/GnssTrilat.tsx';
+import GnssGlobe from '../../../islands/GnssGlobe.tsx';
+import GnssDop from '../../../islands/GnssDop.tsx';
+import GnssAtmos from '../../../islands/GnssAtmos.tsx';
+import GnssMultipath from '../../../islands/GnssMultipath.tsx';
+import GnssSkyDop from '../../../islands/GnssSkyDop.tsx';
+import GnssBudget from '../../../islands/GnssBudget.tsx';
+import GnssAugment from '../../../islands/GnssAugment.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/gnss.json';
+
+<Figure
+  title="Hình 7.1 — Bầu trời GNSS nhìn từ một máy thu: bốn chòm sao, sky plot và DOP"
+  try="Bật thêm GLONASS và BeiDou: tổng số vệ tinh và PDOP thay đổi thế nào? Kéo góc che lên 30° (giống đứng giữa phố hẹp). Chọn Tromsø: vì sao bầu trời phía bắc trống? Chọn Quito trên xích đạo rồi bấm Chạy ở 3000×."
+  source="Phần tử quỹ đạo GP (OMM) của CelesTrak, nhóm gps-ops, galileo, glo-ops, beidou, lấy ngày 04/11/2026; mốc 05:00 UTC ngày 04/11/2026. Truyền quỹ đạo Kepler cộng trôi thế kỷ do J2; so với SGP4 sai trung vị 13–21 km, tối đa 83 km sau 6 giờ (dưới 0,2° hướng nhìn). Tính mọi vật thể trong nhóm, chưa lọc trạng thái hoạt động. DOP với một đồng hồ máy thu chung cho mọi hệ. Xếp loại DOP theo quy ước thường dùng (≤ 1, 2, 5, 10), không phải tiêu chuẩn. Ảnh nền © Esri, Maxar, Earthstar Geographics."
+>
+  <GnssGlobe client:visible lang="vi" />
+</Figure>
+
+## 7.1 Nguyên lý đo khoảng cách giả
+
+<Term id="gnss">GNSS</Term> không đo vị trí trực tiếp. Mỗi vệ tinh mang đồng hồ nguyên tử và liên tục phát tín hiệu cho biết "tôi là ai, tôi đang ở đâu, bây giờ là mấy giờ". Máy thu so thời điểm phát với thời điểm nhận, nhân với tốc độ ánh sáng để ra khoảng cách. Vì đồng hồ máy thu (một tinh thể thạch anh rẻ tiền) không đồng bộ với đồng hồ vệ tinh, khoảng cách này còn chứa một sai số chung, nên gọi là <Term id="pseudorange">khoảng cách giả</Term>.
+
+<Stats items={[
+  { v: '67–86', u: 'ms', l: 'thời gian tín hiệu GPS đi tới mặt đất (thiên đỉnh → chân trời)' },
+  { v: '299,8', u: 'm', l: 'sai số khoảng cách khi đồng hồ lệch 1 µs' },
+  { v: '4', l: 'số vệ tinh tối thiểu: x, y, z và sai số đồng hồ δt' },
+]} caption="Thời gian truyền tính cho độ cao 20 200 km; c = 299 792,458 km/s (scripts/gnss_numbers.ts)." />
+
+<Predict client:visible lang="vi"
+  title="Đồng hồ lệch 1 micro giây thì sai bao nhiêu mét?"
+  q="Đồng hồ máy thu chạy nhanh 1 µs (một phần triệu giây). Khoảng cách giả tới mỗi vệ tinh sai bao nhiêu?"
+  slider={{ min: 0, max: 1000, step: 10, unit: 'm' }} answer={300} tol={30}
+  why="Tín hiệu đi 299 792,458 km mỗi giây, nên 1 µs ứng với 299,8 m và 1 ns ứng với 0,30 m. Muốn sai vài mét, thời gian phải đúng tới vài nano giây: đó là lý do vệ tinh cần đồng hồ nguyên tử." />
+
+Phương trình khoảng cách giả tới vệ tinh thứ i gom mọi thứ máy thu đo được vào một dòng:
+
+<Formula label="Phương trình khoảng cách giả" tex="\rho_i = \sqrt{(x_i - x)^2 + (y_i - y)^2 + (z_i - z)^2} + c\,\delta t + I_i + T_i + \varepsilon_i" where="
+\rho_i :: khoảng cách giả đo được tới vệ tinh i (m)
+x,\ y,\ z :: vị trí máy thu cần tìm
+x_i,\ y_i,\ z_i :: vị trí vệ tinh lúc phát, tính từ lịch vệ tinh quảng bá
+c\,\delta t :: sai số đồng hồ máy thu đổi ra mét, chung cho mọi vệ tinh
+I_i,\ T_i :: trễ tầng điện ly và tầng đối lưu trên đường truyền
+\varepsilon_i :: đa đường, nhiễu máy thu và phần sai số đồng hồ, quỹ đạo vệ tinh còn lại
+" />
+
+<Note kind="key">
+
+Có **bốn ẩn số**: x, y, z và δt. Vì thế cần ít nhất **bốn vệ tinh**. <mark class="key">Vệ tinh thứ tư không để "chính xác hơn" mà để giải ra sai số đồng hồ của chính máy thu.</mark>
+
+</Note>
+
+Hình 7.2 thu gọn bài toán xuống mặt phẳng: hai tọa độ cộng một sai số đồng hồ là ba ẩn, nên cần ba vệ tinh. Khi δt ≠ 0, mọi vòng tròn cùng phình ra một lượng c·δt và không còn cắt nhau tại một điểm.
+
+<Figure
+  title="Hình 7.2 — Định vị bằng khoảng cách giả: vì sao cần thêm một vệ tinh cho đồng hồ"
+  try="Đặt δt = 12 µs, chọn ẩn số 'x, y' rồi bấm Giải: vị trí sai bao nhiêu? Chuyển sang 'x, y, c·δt': sai số còn bao nhiêu và δt ước lượng có đúng 12 µs không? Giảm còn 2 vệ tinh thì sao?"
+  source="Mô phỏng 2D, không có nhiễu: ρᵢ = khoảng cách thật + c·δt, c = 299 792,458 km/s. Giải bằng Gauss–Newton xuất phát từ tâm khung (src/lib/gnss.ts, solve2d)."
+>
+  <GnssTrilat client:visible lang="vi" />
+</Figure>
+
+Bên trong một máy thu, từ lúc bật tới lúc có tọa độ, có sáu bước:
+
+<Steps title="Máy thu tính vị trí như thế nào" items={[
+  { tag: 'Bắt', t: 'Bắt tín hiệu', d: 'So tín hiệu nhận được với bản sao mã của từng vệ tinh (tương quan), dò cả độ lệch Doppler do vệ tinh chuyển động.' },
+  { tag: 'Bám', t: 'Bám mã và sóng mang', d: 'Vòng khóa mã giữ đỉnh tương quan, vòng khóa pha giữ sóng mang; từ đó đọc được thời điểm phát của từng bit.' },
+  { tag: 'Giải mã', t: 'Đọc bản tin dẫn đường', d: 'Lịch vệ tinh quảng bá (quỹ đạo, hiệu chỉnh đồng hồ vệ tinh) và mô hình điện ly. GPS L1 C/A phát 50 bit/s, bộ lịch vệ tinh lặp lại mỗi 30 giây, nên nếu không có trợ giúp phải chờ tới khoảng nửa phút.' },
+  { tag: 'Đo', t: 'Tạo khoảng cách giả', d: 'Thời điểm nhận (theo đồng hồ máy thu) trừ thời điểm phát (theo đồng hồ vệ tinh), nhân c.' },
+  { tag: 'Sửa', t: 'Hiệu chỉnh', d: 'Trừ sai số đồng hồ vệ tinh, trễ điện ly (mô hình hoặc hai tần số), trễ đối lưu (mô hình).' },
+  { tag: 'Giải', t: 'Giải bình phương nhỏ nhất', d: 'Tìm x, y, z, δt khớp nhất với mọi khoảng cách giả, lặp vài vòng cho tới khi hội tụ.' },
+]} />
+
+<div class="worked">
+
+#### Ví dụ: tín hiệu GPS đi mất bao lâu?
+
+1. Vệ tinh GPS bay ở độ cao khoảng 20 200 km. Khi nó ở thiên đỉnh: t = 20 200 / 299 792 ≈ **67,4 ms**.
+2. Khi nó ở sát chân trời, khoảng cách là √((6378 + 20 200)² − 6378²) ≈ 25 800 km, tức **86,1 ms**.
+3. Máy thu phải đo khoảng 70–90 ms này đúng tới vài nano giây, tức một phần mười triệu.
+
+</div>
+
+<Note kind="myth">
+
+**"Điện thoại gửi tín hiệu lên vệ tinh, vệ tinh tính rồi báo lại vị trí."** Sai. GNSS chỉ truyền **một chiều**, từ vệ tinh xuống. Máy thu chỉ nghe; vị trí được tính ngay trong máy. Vệ tinh không biết có ai đang dùng nó, nên số người dùng là không giới hạn và GNSS tự nó không "theo dõi" được ai. Nếu vị trí của bạn bị chia sẻ, đó là do ứng dụng gửi qua mạng di động, không phải do GNSS.
+
+</Note>
+
+<Depth level="advanced" title="Tuyến tính hóa và lời giải bình phương nhỏ nhất">
+
+Phương trình khoảng cách là phi tuyến. Bắt đầu từ một vị trí gần đúng x₀ (có thể là tâm Trái Đất), khai triển Taylor bậc một:
+
+<Formula label="Mô hình tuyến tính hóa" tex="\Delta\boldsymbol{\rho} = H\,\Delta\mathbf{x}, \qquad H_i = \begin{bmatrix} -\mathbf{e}_i^{\mathsf T} & 1 \end{bmatrix}, \qquad \Delta\mathbf{x} = (H^{\mathsf T}H)^{-1}H^{\mathsf T}\Delta\boldsymbol{\rho}" where="
+\Delta\boldsymbol{\rho} :: hiệu khoảng cách giả đo được trừ khoảng cách tính từ x₀
+\mathbf{e}_i :: vectơ đơn vị từ máy thu tới vệ tinh i
+\Delta\mathbf{x} :: hiệu chỉnh cho (x, y, z, c·δt)
+" />
+
+Cộng Δx vào x₀ rồi lặp lại (phương pháp Gauss–Newton). Vì vệ tinh ở xa, chỉ 3–5 vòng là hội tụ, như Hình 7.2 cho thấy. Ma trận (HᵀH)⁻¹ cũng chính là nơi sinh ra DOP ở mục 7.4.
+
+</Depth>
+
+## 7.2 Bốn hệ GNSS toàn cầu và các hệ khu vực
+
+Bốn hệ đều đặt phần lớn vệ tinh trên quỹ đạo trung bình (MEO), độ nghiêng khoảng 55–65°, chu kỳ 11–14 giờ. Bảng dưới tính từ phần tử quỹ đạo CelesTrak lúc 05:00 UTC ngày 04/11/2026 (độ cao trung vị suy từ chuyển động trung bình):
+
+<div class="table-wrap">
+
+| Hệ | Quản lý | Vật thể trong nhóm CelesTrak | Độ cao MEO | Độ nghiêng | Chu kỳ | Tần số chính |
+|---|---|---|---|---|---|---|
+| GPS | Mỹ | 32 | 20 182 km | 54,9° | 718,0 phút | L1 1575,42 · L2 1227,60 · L5 1176,45 MHz |
+| GLONASS | Nga | 26 | 19 130 km | 65,1° | 675,7 phút | L1 ~1602 · L2 ~1246 MHz (FDMA), L3 1202,025 MHz |
+| Galileo | Liên minh châu Âu | 32 | 23 222 km | 55,6° | 844,7 phút | E1 1575,42 · E5a 1176,45 · E5b 1207,14 · E6 1278,75 MHz |
+| BeiDou | Trung Quốc | 53 (32 MEO, 12 IGSO, 9 GEO) | 21 528 km | 54,4° | 773,2 phút | B1C 1575,42 · B1I 1561,098 · B2a 1176,45 · B3I 1268,52 MHz |
+
+</div>
+
+Số vật thể là mọi vệ tinh có trong nhóm CelesTrak, **chưa lọc trạng thái hoạt động**: có chiếc đang bảo dưỡng, thử nghiệm hoặc đã nghỉ, nên số vệ tinh "dùng được" thực tế ít hơn. Các hệ cố ý dùng chung tần số trung tâm (1575,42 MHz và 1176,45 MHz) để một ăng-ten, một máy thu bắt được cả bốn. GLONASS là ngoại lệ lịch sử: mỗi vệ tinh phát trên một tần số hơi khác (FDMA), nên máy thu phải xử lý thêm độ trễ phụ thuộc tần số.
+
+BeiDou khác ba hệ còn lại ở chỗ có thêm vệ tinh **địa tĩnh (GEO)** và **quỹ đạo nghiêng đồng bộ địa (IGSO)** đặt trên châu Á. Với Việt Nam đây là lợi thế: trong 21 vệ tinh GEO/IGSO của ảnh chụp, **13 chiếc ở trên góc cao 10° tại Hà Nội suốt 24 giờ**.
+
+<Stats items={[
+  { v: '54', l: 'vệ tinh 4 hệ trên góc che 10° ở Hà Nội, 12:00 ngày 04/11/2026' },
+  { v: '13', l: 'vệ tinh BeiDou GEO/IGSO luôn ở trên 10° tại Hà Nội' },
+  { v: '0,69', l: 'PDOP trung vị 24 giờ ở Hà Nội, 4 hệ, góc che 10° (GPS riêng: 1,81)' },
+]} caption="Tính từ bộ phần tử CelesTrak của chương (scripts/gnss_numbers.ts); chưa lọc vệ tinh ngừng hoạt động." />
+
+<Predict client:visible lang="vi"
+  title="Bao nhiêu vệ tinh GPS trên bầu trời Hà Nội?"
+  q="Lúc 12:00 trưa 04/11/2026, với góc che 10°, máy thu ở Hà Nội thấy bao nhiêu vệ tinh GPS (trong 32 vật thể)?"
+  options={['Khoảng 4', 'Khoảng 8', 'Khoảng 16', 'Cả 32']} answer={1}
+  why="8 vệ tinh. Chưa tới một phần tư chòm sao vì nửa kia ở phía bên kia Trái Đất và nhiều chiếc thấp dưới 10°. Thêm Galileo, GLONASS và BeiDou, con số lên 54." />
+
+Ở thời điểm mặc định của Hình 7.1 (GPS + Galileo, góc che 10°), máy thu Hà Nội thấy 18 vệ tinh và PDOP là 1,11. Bầu trời Tromsø có một "lỗ" phía bắc vì không quỹ đạo nào nghiêng quá 65°: vệ tinh không bao giờ bay qua trên cực.
+
+### Hệ khu vực: QZSS và NavIC
+
+Hai hệ khu vực bổ sung cho bốn hệ toàn cầu ở châu Á:
+
+- **QZSS** (Nhật Bản) dùng vệ tinh quỹ đạo nghiêng đồng bộ địa, vẽ hình số 8 trên Đông Á – Úc, cộng một vệ tinh địa tĩnh. Tín hiệu tương thích GPS, nên với máy thu nó như "thêm vài vệ tinh GPS ở trên cao". QZSS còn phát hai dịch vụ hiệu chỉnh: **CLAS** (centimet, chỉ cho Nhật Bản) và **MADOCA-PPP** (cho châu Á – Châu Đại Dương, có cả Việt Nam), xem mục 7.5.
+- **NavIC** (Ấn Độ) dùng vệ tinh địa tĩnh và nghiêng đồng bộ địa, phủ Ấn Độ và vùng quanh nó; Việt Nam nằm ngoài vùng phục vụ chính.
+
+Từ khi máy thu theo dõi cùng lúc nhiều hệ (<Term id="gnss-multi">đa hệ, multi-GNSS</Term>), số vệ tinh dùng được tăng từ khoảng 8 lên vài chục. Hình 7.3 cho thấy cái lợi đó lớn nhất ở đâu.
+
+<Figure
+  title="Hình 7.3 — PDOP theo góc che: một hệ và bốn hệ"
+  try="Kéo góc che từ 10° lên 30°. Với GPS, PDOP trung vị tăng mấy lần? Có lúc nào không định vị được không? So với đường 4 hệ. Đổi sang TP.HCM và Tromsø."
+  source="Cùng bộ phần tử CelesTrak như Hình 7.1; 96 thời điểm cách nhau 15 phút từ 05:00 UTC ngày 04/11/2026. PDOP với một đồng hồ máy thu chung (giả định đã biết độ lệch thời gian giữa các hệ); tính mọi vật thể trong nhóm CelesTrak, chưa lọc trạng thái hoạt động."
+>
+  <GnssDop client:visible lang="vi" />
+</Figure>
+
+Ba điều đọc được từ Hình 7.3 tại Hà Nội:
+
+1. Chỉ GPS, góc che 10°: trung bình **9,2** vệ tinh, PDOP trung vị **1,81**, xấu nhất 2,73.
+2. Góc che 30° (giống một con phố hẹp): GPS còn trung bình 5,5 vệ tinh, PDOP trung vị **4,38**, và có lúc chỉ còn 3 vệ tinh, không định vị được.
+3. Dùng cả bốn hệ, góc che 30° vẫn còn trung bình 36,7 vệ tinh và PDOP trung vị **1,37**, tốt hơn cả GPS ở góc che 10°.
+
+<Note kind="key">
+
+<mark class="key">Đa hệ có lợi nhất ở nơi bầu trời bị che: đô thị, thung lũng hẹp, rừng.</mark> Ngoài đồng trống, một hệ đã đủ hình học tốt.
+
+</Note>
+
+<Depth level="ref" title="Độ lệch thời gian giữa các hệ">
+
+Mỗi hệ có thang thời gian riêng (GPST, GST, GLONASST, BDT). Máy thu đa hệ hoặc thêm một ẩn đồng hồ cho mỗi hệ (mỗi hệ thêm "tốn" một vệ tinh), hoặc dùng độ lệch được phát quảng bá, như GGTO giữa Galileo và GPS. Hình 7.1 và 7.3 dùng một ẩn đồng hồ chung, nên DOP đa hệ thật lớn hơn một chút so với hình.
+
+</Depth>
+
+## 7.3 Bốn nguồn sai số chính
+
+Khoảng cách giả chứa khoảng cách thật cộng một loạt sai số. Bốn nhóm lớn nhất là đồng hồ và quỹ đạo vệ tinh, tầng điện ly, tầng đối lưu và đa đường. Mỗi nhóm có một cách khử riêng.
+
+<Tiles
+  items={[
+    { t: 'Đồng hồ & quỹ đạo vệ tinh', d: '≤ 2,0 m (95 %, GPS SPS 2020)' },
+    { t: 'Tầng điện ly', d: '8–16 m trên L1 (50–100 TECU)' },
+    { t: 'Tầng đối lưu', d: '2,3 m thiên đỉnh · 4,6 m ở 30°' },
+    { t: 'Đa đường', d: 'thường dưới 2–3 m; NLOS hàng chục m' },
+  ]}
+  sum="Khoảng cách giả = khoảng cách thật + c·δt + các sai số trên"
+  note="Hai tần số khử điện ly · mô hình khử phần lớn đối lưu · ăng-ten, vị trí đặt và thuật toán giảm đa đường"
+  caption="Bốn nhóm sai số và độ lớn điển hình. Điện ly và đối lưu tính theo công thức bên dưới; đồng hồ & quỹ đạo theo chuẩn hiệu năng GPS SPS (2020); đa đường theo ESA Navipedia."
+/>
+
+### Đồng hồ và quỹ đạo vệ tinh
+
+Vệ tinh GPS mang đồng hồ nguyên tử rubidi hoặc xêzi; Galileo mang thêm maser hydro thụ động. Dù vậy, vị trí và đồng hồ vệ tinh mà máy thu dùng là **dự báo** do trạm điều khiển tính rồi tải lên, nên vẫn lệch một chút so với thực tế. Chuẩn hiệu năng GPS năm 2020 cam kết sai số khoảng cách do tín hiệu vệ tinh (SIS URE) không quá **2,0 m** (95 %, trung bình toàn cầu, mọi tuổi dữ liệu); thực tế thường nhỏ hơn nhiều. Sản phẩm hậu xử lý của IGS chính xác tới vài centimet, và đó là nền của PPP (mục 7.5).
+
+### Trễ tầng điện ly
+
+Tầng điện ly (khoảng 60–1000 km) chứa điện tử tự do do bức xạ Mặt Trời ion hóa. Tín hiệu mã bị chậm lại một lượng tỉ lệ với <Term id="tec">tổng hàm lượng điện tử</Term> dọc đường truyền và tỉ lệ nghịch với bình phương tần số:
+
+<Formula label="Trễ điện ly bậc một (trên mã)" tex="I = \frac{40{,}3\ \mathrm{TEC}}{f^2}\ \ [\mathrm{m}], \qquad 1\ \mathrm{TECU} = 10^{16}\ \mathrm{e/m^2} \;\Rightarrow\; I_{L1} = 0{,}162\ \mathrm{m/TECU}" where="
+\mathrm{TEC} :: số điện tử trong cột 1 m² dọc đường truyền (điện tử/m²)
+f :: tần số sóng mang (Hz); L1 = 1575,42 MHz
+40{,}3 :: hằng số từ chiết suất plasma (m³/s²)
+" />
+
+Ban ngày ở vùng nhiệt đới, vào những năm Mặt Trời hoạt động mạnh, TEC thẳng đứng có thể lên 50–100 TECU, tức **8,1–16,2 m** trên L1. Vệ tinh ở góc ngẩng 30° nhìn qua lớp điện ly xiên hơn, TEC trên đường truyền lớn gấp 1,75 lần: 50 TECU thẳng đứng thành 14,2 m. Việt Nam nằm dưới đỉnh phía bắc của <Term id="gnss-eia">dị thường điện ly xích đạo</Term>, một trong những vùng có TEC cao nhất thế giới, và hiện tượng nhấp nháy (scintillation) sau hoàng hôn có thể làm máy thu mất tín hiệu. Tháng 10/2024, NASA và NOAA thông báo Mặt Trời đã vào giai đoạn cực đại của chu kỳ 25; nhấp nháy vẫn có thể mạnh vài năm sau đỉnh.
+
+Máy thu một tần số dùng mô hình điện ly phát kèm bản tin: GPS dùng mô hình Klobuchar, ước tính chỉ khử được **khoảng 50 %** sai số điện ly (RMS); Galileo dùng NeQuick-G. Cách triệt để hơn là đo trên hai tần số:
+
+<Predict client:visible lang="vi"
+  title="Tầng điện ly làm L5 chậm hơn L1 bao nhiêu lần?"
+  q="L1 = 1575,42 MHz, L5 = 1176,45 MHz. Với cùng một TEC, trễ điện ly trên L5 so với L1 là:"
+  options={['Như nhau', 'Khoảng 1,3 lần', 'Khoảng 1,8 lần', 'Khoảng 3 lần']} answer={2}
+  why="Trễ tỉ lệ 1/f², nên tỉ số là (1575,42 / 1176,45)² = 1,793. Chính vì trễ khác nhau theo tần số, đo trên hai tần số cho phép giải ra và loại bỏ nó." />
+
+<Formula label="Tổ hợp không điện ly (ionosphere-free)" tex="P_{IF} = \frac{f_1^2 P_1 - f_2^2 P_2}{f_1^2 - f_2^2} \approx 2{,}26\,P_{L1} - 1{,}26\,P_{L5}" where="
+P_1,\ P_2 :: khoảng cách giả trên hai tần số f_1, f_2 (m)
+P_{IF} :: khoảng cách giả đã khử trễ điện ly bậc một
+" />
+
+Trễ điện ly bậc một (trên 99 % tổng trễ) triệt tiêu hoàn toàn. Cái giá là nhiễu tăng: với L1/L5, hệ số là 2,26 và −1,26, nên nhiễu đo của P_IF lớn khoảng **2,59 lần** nhiễu một tần số (nếu hai nhiễu độc lập và bằng nhau). Vì vậy hai tần số có lợi nhất khi nhiễu đo nhỏ: tín hiệu L5 tốc độ chip cao, ăng-ten tốt, ít đa đường.
+
+<Figure
+  title="Hình 7.4 — Trễ khí quyển trên đường truyền nghiêng"
+  try="Đặt TEC = 100 TECU, góc ngẩng 15°: trễ L1 bao nhiêu mét? Tổ hợp không điện ly còn lại gì? Kéo góc ngẩng từ 90° xuống 5° và xem trễ đối lưu tăng nhanh hơn trễ điện ly ở góc thấp. Đổi Hà Nội sang Sa Pa."
+  source="I = 40,3·TEC/f² với hệ số nghiêng lớp mỏng ở 350 km. Trễ khô thiên đỉnh theo Saastamoinen (1972); áp suất Sa Pa 840 hPa là giả định khí quyển chuẩn ở 1,6 km, không phải số đo. Trễ ướt thiên đỉnh là giả định (Navipedia: vài chục centimet). Hàm ánh xạ đối lưu 1/sin E. Mã: src/lib/gnss.ts."
+>
+  <GnssAtmos client:visible lang="vi" />
+</Figure>
+
+### Trễ tầng đối lưu
+
+Tầng khí quyển thấp (0 – khoảng 12 km) làm chậm **mọi tần số như nhau**, nên đo hai tần số không khử được. Trễ gồm phần **khô** (thủy tĩnh, khoảng 90 %) phụ thuộc áp suất, và phần **ướt** do hơi nước. Phần khô ở thiên đỉnh tính được rất tốt từ áp suất mặt đất:
+
+<Formula label="Trễ đối lưu: mô hình Saastamoinen và hàm ánh xạ" tex="T(E) \approx \big(\mathrm{ZHD} + \mathrm{ZWD}\big)\,m(E), \qquad \mathrm{ZHD} = \frac{0{,}0022768\,P}{1 - 0{,}00266\cos 2\varphi - 0{,}00028\,H}, \qquad m(E) \approx \frac{1}{\sin E}" where="
+P :: áp suất mặt đất (hPa)
+\varphi,\ H :: vĩ độ và độ cao trạm (km)
+\mathrm{ZHD},\ \mathrm{ZWD} :: trễ khô và trễ ướt ở thiên đỉnh (m)
+m(E) :: hàm ánh xạ theo góc ngẩng E; 1/sin E đúng tới khoảng 15°
+" />
+
+Tại Hà Nội, áp suất 1013,25 hPa, trễ khô thiên đỉnh là **2,31 m**; ở Sa Pa (1,6 km, giả định khoảng 840 hPa) còn 1,92 m. Ở góc ngẩng 30°, đường truyền dài gấp đôi, trễ là 4,62 m. Ở 5°, hàm 1/sin E cho gấp 11,5 lần, khoảng 26 m (các hàm ánh xạ chuẩn như Niell cho số nhỏ hơn một chút). Phần ướt chỉ vài chục centimet nhưng biến động mạnh, nhất là mùa mưa ở Việt Nam, và là sai số khó nhất còn lại của RTK, PPP. Ngược lại, chính vì đo được, trễ ướt ở các trạm CORS trở thành nguồn dữ liệu hơi nước cho dự báo thời tiết (mục 7.7).
+
+<Predict client:visible lang="vi"
+  title="Trễ đối lưu ở góc ngẩng 30°"
+  q="Trễ khô thiên đỉnh ở Hà Nội là 2,31 m. Với hàm ánh xạ 1/sin E, vệ tinh ở góc ngẩng 30° chịu trễ khô bao nhiêu?"
+  slider={{ min: 0, max: 15, step: 0.1, unit: 'm' }} answer={4.62} tol={0.4}
+  why="1/sin 30° = 2, nên trễ là 2 × 2,31 = 4,62 m. Nếu bỏ qua, khoảng cách giả tới vệ tinh thấp dài ra gần 5 m: đó là lý do mọi máy thu đều có mô hình đối lưu và nhiều máy đặt góc che 10–15°." />
+
+### Đa đường
+
+Tín hiệu phản xạ từ tường kính, mặt nước, mặt đường tới ăng-ten cùng với tín hiệu trực tiếp. <Term id="multipath">Đa đường</Term> không thể mô hình hóa từ xa vì phụ thuộc môi trường quanh từng ăng-ten. Theo ESA Navipedia, sai số đa đường trên mã thường **dưới 2–3 m**, nhưng về lý thuyết có thể lớn tới 1,5 chip mã. Trên pha sóng mang, nó không vượt một phần tư bước sóng (khoảng 5 cm trên L1) và thường dưới 1 cm.
+
+Trường hợp xấu nhất trong phố cao tầng là <Term id="gnss-nlos">NLOS</Term>: tia trực tiếp bị nhà che, máy thu chỉ nhận tia phản xạ. Khi đó khoảng cách giả dài thêm nguyên đường đi thừa, có thể hàng chục mét, và không có tia trực tiếp nào để "kéo" lại. Hình 7.5 tính đường đi thừa cho một mặt cắt phố.
+
+<Formula label="Đường đi thừa khi phản xạ trên tường thẳng đứng" tex="\Delta s = 2\,d\cos E" where="
+d :: khoảng cách ngang từ ăng-ten tới bức tường phản xạ (m)
+E :: góc ngẩng của vệ tinh
+" />
+
+<Figure
+  title="Hình 7.5 — Đa đường và NLOS trong một con phố"
+  try="Chọn 'Phố cao tầng': vì sao máy thu vẫn có tín hiệu dù tia trực tiếp bị che, và khoảng cách giả sai bao nhiêu? Chọn 'Phố hẹp, nhà thấp' rồi kéo máy thu ra giữa phố. Trong 'Đại lộ', hạ góc ngẩng xuống 25°: đường thừa có vượt 1,5 chip L5 (44 m) không?"
+  source="Mô hình hình học 2D: vệ tinh nằm trong mặt phẳng vuông góc với phố, phản xạ gương trên tường bên phải, ăng-ten cao 1,5 m. Chip L1 C/A = c/1,023 MHz = 293,1 m; chip L5 = c/10,23 MHz = 29,3 m (IS-GPS-200, IS-GPS-705). Các mặt cắt phố là minh họa, không phải phố thật. Mã: src/lib/gnss.ts, canyon."
+>
+  <GnssMultipath client:visible lang="vi" />
+</Figure>
+
+Hình 7.5 cho ba trường hợp: chỉ tia trực tiếp (tốt), trực tiếp cộng phản xạ (đa đường, sai một phần của đường thừa), và chỉ tia phản xạ (NLOS, sai nguyên đường thừa, ví dụ **16,1 m** trong mặt cắt phố cao tầng). Tín hiệu có chip ngắn như L5 (29,3 m) có lợi: phản xạ trễ hơn khoảng 1,5 chip (44 m) gần như không còn làm lệch bộ tương quan, trong khi với L1 C/A (293 m) mọi phản xạ trong phố đều nằm trong vùng ảnh hưởng. <mark>Đa đường chỉ giảm được tại chỗ: ăng-ten tốt, chỗ đặt thoáng, tín hiệu chip ngắn và thuật toán loại bỏ vệ tinh nghi NLOS.</mark>
+
+<Note kind="tip">
+
+Đặt ăng-ten trắc địa xa tường, mái tôn, mặt nước; dùng ăng-ten có mặt chắn (choke ring) cho trạm cố định; và đặt góc che 10–15° để bỏ các tia thấp vừa dễ phản xạ vừa chịu nhiều khí quyển.
+
+</Note>
+
+## 7.4 DOP: hình học quyết định độ chính xác
+
+Cùng một sai số khoảng cách, vị trí tính ra có thể tốt hay xấu tùy vệ tinh nằm ở đâu trên bầu trời. Nếu các vệ tinh dồn về một phía, các mặt cầu cắt nhau rất xiên và một sai số nhỏ đẩy giao điểm đi xa. <Term id="dop">DOP</Term> đo mức khuếch đại đó, và nhân với <Term id="gnss-uere">UERE</Term>, sai số khoảng cách tương đương của người dùng:
+
+<Formula label="Sai số vị trí = hình học × sai số khoảng cách" tex="\sigma_{H} = \mathrm{HDOP}\cdot\sigma_{\mathrm{UERE}}, \qquad \sigma_{V} = \mathrm{VDOP}\cdot\sigma_{\mathrm{UERE}}" where="
+\sigma_{\mathrm{UERE}} :: độ lệch chuẩn sai số khoảng cách giả (m), giống nhau cho mọi vệ tinh
+\sigma_H,\ \sigma_V :: sai số vị trí ngang và đứng (1σ)
+" />
+
+DOP tính từ ma trận thiết kế H của mục 7.1, viết trong hệ tọa độ địa phương Đông – Bắc – Lên (E, N, U) cộng cột đồng hồ:
+
+<Formula label="DOP từ ma trận Q" tex="Q = (H^{\mathsf T}H)^{-1}, \quad \mathrm{GDOP} = \sqrt{\operatorname{tr} Q}, \quad \mathrm{PDOP} = \sqrt{q_{EE} + q_{NN} + q_{UU}}, \quad \mathrm{HDOP} = \sqrt{q_{EE} + q_{NN}}, \quad \mathrm{VDOP} = \sqrt{q_{UU}}, \quad \mathrm{TDOP} = \sqrt{q_{TT}}" where="
+H_i :: hàng thứ i: (−cos E sin A, −cos E cos A, −sin E, 1) với góc phương vị A, góc ngẩng E
+q_{EE},\ q_{NN},\ q_{UU},\ q_{TT} :: phần tử chéo của Q cho Đông, Bắc, Lên và đồng hồ
+" />
+
+PDOP cho vị trí 3D, HDOP cho mặt bằng, VDOP cho độ cao, TDOP cho đồng hồ, GDOP gộp tất cả. Gần như ở mọi nơi VDOP lớn hơn HDOP, vì không có vệ tinh nào ở dưới chân trời để "kẹp" độ cao từ phía dưới: ở Hà Nội, GPS góc che 10°, HDOP trung vị 24 giờ là 0,89 còn VDOP là 1,56. Bảng xếp loại dưới là quy ước thường dùng, không phải tiêu chuẩn:
+
+<div class="table-wrap">
+
+| DOP | Xếp loại | Dùng được cho |
+|---|---|---|
+| ≤ 1 | Lý tưởng | Mọi ứng dụng |
+| 1–2 | Tốt | Đo đạc, dẫn đường chính xác |
+| 2–5 | Trung bình | Bản đồ dân dụng, dẫn đường xe |
+| 5–10 | Yếu | Chỉ định hướng thô |
+| > 10 | Không đáng tin | Nên bỏ |
+
+</div>
+
+<Figure
+  title="Hình 7.6 — DOP trên sky plot: kéo vệ tinh, xem hình học đổi sai số"
+  try="Chọn 'Khe phố Bắc–Nam': HDOP tăng mấy lần so với 'Trời thoáng', và elip sai số dài theo hướng nào? Kéo một vệ tinh ra phía Đông thấp: elip co lại ra sao? Chọn 'Dồn một góc trời' rồi nâng góc che lên 30°."
+  source="Ba bầu trời 8 vệ tinh đặt tay (minh họa, không phải một thời điểm thật). DOP từ Q = (HᵀH)⁻¹ trong hệ Đông–Bắc–Lên; elip là sai số ngang 1σ: bán trục = √(trị riêng của khối EN của Q) × UERE. Mã: src/lib/gnss.ts, dopQ và enEllipse."
+>
+  <GnssSkyDop client:visible lang="vi" />
+</Figure>
+
+<div class="worked">
+
+#### Ví dụ: cùng một điện thoại, hai con phố
+
+1. Sai số khoảng cách của điện thoại khoảng 3 m (UERE). Bầu trời thoáng trong Hình 7.6 có HDOP **0,99**, nên sai số ngang 1σ ≈ 0,99 × 3 = **3,0 m**.
+2. Giữa khe phố Bắc–Nam, hai vệ tinh thấp ở phía Đông và Tây bị che, HDOP lên **6,61**: sai số ngang 1σ ≈ 6,61 × 3 = **19,8 m**, chưa kể đa đường.
+3. Elip sai số dài theo hướng Đông–Tây (trục lớn ở phương vị 89°), đúng hướng thiếu vệ tinh. Đó là lý do điểm GPS trong phố hẹp thường "nhảy" sang phố bên cạnh chứ không chạy dọc phố.
+
+</div>
+
+<Predict client:visible lang="vi"
+  title="HDOP tăng 4 lần thì sao?"
+  q="UERE vẫn là 3 m, nhưng HDOP tăng từ 1,2 lên 4,8. Sai số ngang 1σ là bao nhiêu mét?"
+  slider={{ min: 0, max: 30, step: 0.5, unit: 'm' }} answer={14.4} tol={1.5}
+  why="σ_H = HDOP × UERE = 4,8 × 3 = 14,4 m, gấp bốn lần 3,6 m lúc đầu. DOP nhân thẳng sai số khoảng cách: hình học xấu biến một điện thoại tốt thành một điện thoại tồi." />
+
+### Từ ngân sách sai số tới sai số vị trí
+
+UERE là tổng hợp các sai số độc lập của mục 7.3, cộng theo căn tổng bình phương:
+
+<Formula label="Ngân sách sai số khoảng cách (UERE)" tex="\sigma_{\mathrm{UERE}} = \sqrt{\sigma_{\mathrm{sat}}^2 + \sigma_{\mathrm{iono}}^2 + \sigma_{\mathrm{tropo}}^2 + \sigma_{\mathrm{mp+noise}}^2}" where="
+\sigma_{\mathrm{sat}} :: đồng hồ và quỹ đạo vệ tinh: 2,0 m (95 %) / 1,96 ≈ 1,02 m (GPS SPS 2020)
+\sigma_{\mathrm{iono}} :: phần còn lại sau mô hình Klobuchar (một tần số) hoặc 0 (hai tần số)
+\sigma_{\mathrm{tropo}} :: phần ướt không mô hình hóa, 0,1 m ở thiên đỉnh × 1/sin E
+\sigma_{\mathrm{mp+noise}} :: phụ thuộc môi trường; nhân 2,59 khi dùng tổ hợp không điện ly
+" />
+
+<Figure
+  title="Hình 7.7 — Ngân sách sai số: UERE nhân DOP thành sai số vị trí"
+  try="Máy thu một tần số, TEC 30 TECU: thành phần nào chiếm phần lớn UERE²? Chuyển sang hai tần số: sai số ngang 95 % giảm còn bao nhiêu? Bây giờ chọn 'Phố cao tầng' và 'GPS · 30°': vì sao hai tần số lại tệ hơn một tần số?"
+  source="Đồng hồ & quỹ đạo: SIS URE ≤ 2,0 m (95 %) theo GPS SPS Performance Standard 2020, đổi ra 1σ. Điện ly: I = 40,3·TEC/f² × hệ số nghiêng, mô hình Klobuchar khử khoảng 50 % (ESA Navipedia). Đối lưu: trễ ướt thiên đỉnh 0,1 m (giá trị danh định Navipedia) để nguyên × 1/sin E. Đa đường + nhiễu: 0,5 / 2 / 5 m là giả định minh họa (Navipedia: thường dưới 2–3 m). HDOP/VDOP: trung vị 24 giờ ở Hà Nội từ bộ phần tử CelesTrak 04/11/2026. Ngang 95 % ≈ 2 × σ_H (2DRMS)."
+>
+  <GnssBudget client:visible lang="vi" />
+</Figure>
+
+Với máy thu một tần số ngoài trời thoáng ở Hà Nội (TEC 30 TECU, góc ngẩng điển hình 45°, GPS, góc che 10°), tầng điện ly còn lại 3,28 m và chiếm phần lớn UERE (3,48 m). Sai số ngang 95 % khoảng **6,2 m**, đứng **10,6 m**, nằm trong chuẩn GPS SPS (≤ 8 m ngang, ≤ 13 m đứng, trung bình toàn cầu). Chuyển sang hai tần số, UERE còn 1,65 m và sai số ngang 95 % còn **3,0 m**. Nhưng trong phố cao tầng (đa đường 5 m, góc che 30°), tổ hợp không điện ly nhân đa đường lên 2,59 lần và cho kết quả **tệ hơn** một tần số (41,8 m so với 19,5 m ngang 95 %).
+
+<Note kind="key">
+
+<mark class="key">Sai số vị trí = DOP × UERE.</mark> Muốn tốt hơn thì giảm một trong hai: thêm vệ tinh và giảm góc che để có DOP nhỏ, hoặc khử sai số khoảng cách bằng hai tần số, mô hình và hiệu chỉnh (mục 7.5). Ở nơi đa đường nặng, khử điện ly không giúp được, phải xử lý đa đường trước.
+
+</Note>
+
+## 7.5 RTK, PPP và SBAS
+
+Định vị độc lập bằng mã (như điện thoại thông thường) đạt vài mét. Muốn tốt hơn phải khử các sai số ở mục 7.3, bằng một trong ba cách: lấy hiệu với một trạm gần (RTK), dùng quỹ đạo và đồng hồ vệ tinh chính xác toàn cầu (PPP), hoặc nhận hiệu chỉnh khu vực qua vệ tinh địa tĩnh (SBAS).
+
+<div class="table-wrap">
+
+| Kỹ thuật | Nguyên lý | Cần gì | Độ chính xác ngang | Thời gian |
+|---|---|---|---|---|
+| Định vị độc lập (mã) | Giải 4 ẩn từ khoảng cách giả | Một máy thu | ≤ 8 m (95 %, chuẩn GPS SPS) | Tức thì |
+| <Term id="sbas">SBAS</Term> | Vệ tinh địa tĩnh phát hiệu chỉnh khu vực và thông tin tin cậy | Máy thu hỗ trợ SBAS, trong vùng phục vụ | ≤ 3 m (95 %, EGNOS dịch vụ mở) | Tức thì |
+| <Term id="ppp">PPP</Term> | Quỹ đạo, đồng hồ vệ tinh chính xác toàn cầu, mô hình hóa mọi sai số | Máy thu hai tần số, sản phẩm hiệu chỉnh | 0,2–0,3 m (95 %, HAS, B2b, MADOCA) | Vài phút tới 30 phút |
+| <Term id="rtk">RTK</Term> | Lấy hiệu với trạm gốc gần, đo <Term id="carrier-phase">pha sóng mang</Term> | Trạm gốc hoặc mạng CORS cách vài chục km, kết nối dữ liệu | 2–4 cm (VNGEONET, đo thử) | Sau khi cố định số nguyên |
+
+</div>
+
+<Figure
+  title="Hình 7.8 — Độ chính xác công bố của các cách định vị, và chúng có phục vụ Việt Nam không"
+  try="Bấm từng dòng. Vì sao Galileo HAS có độ chính xác tốt nhưng ghi 'không chính thức' ở Việt Nam? BeiDou PPP-B2b phủ tới đâu? So thời gian hội tụ của PPP với RTK."
+  source="GPS SPS Performance Standard 5th ed. (2020); EGNOS Open Service SDD; BDS Open Service Performance Standard v3.0 (2021), vùng phục vụ theo trình bày của BeiDou tại ICG-17 (2023); QZSS: thông báo của Văn phòng Nội các Nhật Bản và mục tiêu MADOCA (ICG 2022); Galileo HAS SDD Issue 1.0 (01/2023); VNGEONET: Báo Tài nguyên & Môi trường, 10/12/2019. Mỗi số đi kèm thống kê riêng (95 % hoặc đo thử), nên chỉ so sánh được ở bậc độ lớn."
+>
+  <GnssAugment client:visible lang="vi" />
+</Figure>
+
+### 7.5.1 RTK: lấy hiệu với một trạm gần
+
+RTK mạnh vì trạm gốc và máy đo ở gần nhau chịu gần như cùng sai số đồng hồ vệ tinh, điện ly và đối lưu; lấy hiệu là khử. Thêm vào đó, RTK dùng <Term id="carrier-phase">pha sóng mang</Term> (bước sóng 19 cm trên L1) chứ không chỉ mã, nên sau khi biết số nguyên chu kỳ, độ chính xác lên tới centimet.
+
+<Steps title="RTK hoạt động thế nào" items={[
+  { tag: '1', t: 'Trạm gốc biết tọa độ chính xác', d: 'Ăng-ten đặt trên mốc đã đo, quan sát cùng các vệ tinh với máy di động (rover).' },
+  { tag: '2', t: 'Gửi số đo hoặc hiệu chỉnh', d: 'Trạm gốc phát số liệu theo chuẩn RTCM, thường qua Internet bằng giao thức NTRIP hoặc qua radio.' },
+  { tag: '3', t: 'Lấy hiệu kép', d: 'Rover lấy hiệu giữa hai máy thu và giữa hai vệ tinh: sai số đồng hồ của cả vệ tinh lẫn máy thu triệt tiêu, khí quyển gần như triệt tiêu.' },
+  { tag: '4', t: 'Cố định số nguyên', d: 'Giải số nguyên chu kỳ của pha sóng mang. Trước khi cố định là lời giải "float" (dm); sau khi cố định là "fix" (cm).' },
+  { tag: '5', t: 'Định vị liên tục', d: 'Vị trí cm cập nhật mỗi giây, miễn là còn giữ khóa pha và còn nhận hiệu chỉnh.' },
+]} />
+
+Càng xa trạm gốc, khí quyển giữa hai nơi càng khác nhau và độ chính xác giảm. **RTK mạng** giải bài toán này: nhiều trạm tham chiếu hoạt động liên tục (<Term id="gnss-cors">CORS</Term>) tạo thành lưới, máy chủ nội suy sai số và gửi cho rover một "trạm gốc ảo" (VRS) ngay cạnh nó.
+
+Ở Việt Nam, mạng trạm định vị vệ tinh quốc gia **VNGEONET** do Cục Đo đạc, Bản đồ và Thông tin địa lý Việt Nam vận hành. Theo Bộ Tài nguyên và Môi trường (12/2019), mạng gồm **65 trạm CORS**: 24 trạm Geodetic CORS cách nhau 150–200 km làm khung cho hệ tọa độ quốc gia, và 41 trạm NRTK CORS cách nhau 50–80 km ở ba vùng (đồng bằng Bắc Bộ và Thanh Hóa, miền Trung và Tây Nguyên, Nam Bộ), với độ chính xác đo thử RTK **2–4 cm**. Cùng thời điểm, Cục có kế hoạch xây thêm khoảng 90–100 trạm NRTK. Ngoài mạng quốc gia còn có mạng CORS thương mại và mạng riêng của tỉnh, doanh nghiệp.
+
+<Stats items={[
+  { v: '65', l: 'trạm CORS của VNGEONET (24 Geodetic + 41 NRTK), 2019' },
+  { v: '2–4', u: 'cm', l: 'độ chính xác RTK đo thử trên mạng VNGEONET' },
+  { v: '50–80', u: 'km', l: 'khoảng cách giữa các trạm NRTK' },
+]} caption="Nguồn: Báo Tài nguyên & Môi trường (Bộ TN&MT), 10/12/2019. Số trạm hiện nay có thể khác; kiểm tra với Cục Đo đạc, Bản đồ và Thông tin địa lý Việt Nam." />
+
+<Note kind="warn">
+
+Hiệu chỉnh RTK cho ra tọa độ trong **khung của trạm gốc**. Lẫn giữa VN-2000 và ITRF/WGS84 làm lệch từ hàng chục centimet tới vài mét (Chương 10). Luôn ghi rõ khung tọa độ và kỷ nguyên khi giao nộp số liệu.
+
+</Note>
+
+### 7.5.2 PPP: một máy thu, hiệu chỉnh toàn cầu
+
+<Term id="ppp">PPP</Term> không cần trạm gốc gần. Nó dùng quỹ đạo và đồng hồ vệ tinh chính xác (từ IGS hoặc nhà cung cấp dịch vụ), tổ hợp không điện ly trên mã và pha, rồi ước lượng mọi thứ còn lại.
+
+<Steps title="PPP hoạt động thế nào" items={[
+  { tag: '1', t: 'Mạng toàn cầu tính sản phẩm', d: 'Vài chục tới vài trăm trạm khắp thế giới tính quỹ đạo, đồng hồ vệ tinh chính xác và độ lệch tín hiệu (bias).' },
+  { tag: '2', t: 'Phát hiệu chỉnh', d: 'Qua Internet, hoặc ngay trên tín hiệu vệ tinh: Galileo E6 (HAS), BeiDou B2b, QZSS L6 (MADOCA, CLAS).' },
+  { tag: '3', t: 'Khử điện ly', d: 'Máy thu hai tần số dùng tổ hợp không điện ly trên mã và pha sóng mang.' },
+  { tag: '4', t: 'Ước lượng cùng lúc', d: 'Vị trí, đồng hồ máy thu, trễ đối lưu ướt và số nguyên mơ hồ của pha.' },
+  { tag: '5', t: 'Hội tụ', d: 'Lời giải tốt dần theo thời gian vì hình học vệ tinh thay đổi. Cố định được số nguyên (PPP-AR) hoặc có thêm hiệu chỉnh khí quyển khu vực (PPP-RTK) thì hội tụ nhanh hơn.' },
+]} />
+
+Ngày càng nhiều hiệu chỉnh PPP được phát **miễn phí ngay từ vệ tinh**:
+
+- **Galileo HAS** (High Accuracy Service): dịch vụ ban đầu khai trương ngày 24/01/2023. Mục tiêu mức dịch vụ 1 là ngang 20 cm, đứng 40 cm (95 %), hội tụ 300 giây; với Galileo + GPS, giá trị điển hình là ngang ≤ 15 cm, đứng ≤ 20 cm (68 %). Nhưng tài liệu định nghĩa dịch vụ (SDD Issue 1.0) **loại vùng 90°–180°Đ, 60°N–60°B khỏi cam kết**, tức là có cả Việt Nam: người dùng ở đây vẫn dùng được, chỉ không được bảo đảm hiệu năng.
+- **BeiDou PPP-B2b**: phát qua ba vệ tinh GEO của BeiDou-3. Chuẩn hiệu năng (v3.0, 2021) cam kết ngang ≤ 0,3 m, đứng ≤ 0,6 m (95 %), hội tụ ≤ 30 phút, trong vùng 10°–55°B, 75°–135°Đ. Phần lớn Việt Nam nằm trong vùng này, trừ cực nam (Cà Mau khoảng 8,6°B) và quần đảo Trường Sa.
+- **QZSS MADOCA-PPP**: chính thức từ 01/04/2024, phủ châu Á – Châu Đại Dương, mục tiêu ngang dưới 30 cm (95 %); phát qua Internet từ 01/07/2024. **CLAS** đạt centimet nhưng chỉ cho Nhật Bản.
+
+<Stats items={[
+  { v: '20', u: 'cm', l: 'Galileo HAS: mục tiêu ngang 95 %, hội tụ 300 s' },
+  { v: '0,3', u: 'm', l: 'BeiDou PPP-B2b: ngang 95 %, hội tụ ≤ 30 phút' },
+  { v: '30', u: 'cm', l: 'QZSS MADOCA-PPP: mục tiêu ngang 95 %' },
+]} caption="Galileo HAS SDD 1.0 (2023); BDS OS Performance Standard v3.0 (2021); mục tiêu MADOCA (ICG 2022). Đây là cam kết hoặc mục tiêu, không phải số đo ở Việt Nam." />
+
+PPP là lựa chọn rẻ cho nông nghiệp chính xác, giám sát công trình và tàu thuyền ở vùng xa trạm CORS, đổi lại phải chờ hội tụ.
+
+<Note kind="key">
+
+Ba cách tăng cường đổi chỗ cho nhau giữa độ chính xác, thời gian và hạ tầng: **RTK** cho centimet gần như ngay nhưng cần trạm gốc trong vài chục km; **PPP** cho vài decimet ở bất kỳ đâu nhưng phải chờ hội tụ; **SBAS** cho vài mét tức thì, kèm thông tin tin cậy, nhưng chỉ trong vùng phục vụ.
+
+</Note>
+
+### 7.5.3 SBAS: hiệu chỉnh khu vực qua vệ tinh địa tĩnh
+
+<Term id="sbas">SBAS</Term> được làm cho hàng không: ngoài hiệu chỉnh, nó phát **thông tin tin cậy** (integrity), tức là báo cho máy bay biết khi nào không được tin vệ tinh nào.
+
+<Steps title="SBAS hoạt động thế nào" items={[
+  { tag: '1', t: 'Mạng trạm tham chiếu', d: 'Hàng chục trạm trên một châu lục theo dõi mọi vệ tinh GNSS.' },
+  { tag: '2', t: 'Trạm chủ tính hiệu chỉnh', d: 'Hiệu chỉnh quỹ đạo, đồng hồ vệ tinh và lưới trễ điện ly, kèm giới hạn sai số cho từng vệ tinh.' },
+  { tag: '3', t: 'Phát lên vệ tinh địa tĩnh', d: 'Vệ tinh GEO phát lại trên tần số L1 với dạng tín hiệu giống GPS.' },
+  { tag: '4', t: 'Máy thu áp dụng', d: 'Không cần Internet; máy thu chỉ cần bật SBAS và ở trong vùng phục vụ.' },
+]} />
+
+Các hệ SBAS hiện có: WAAS (Mỹ), EGNOS (châu Âu), MSAS (Nhật Bản), GAGAN (Ấn Độ), BDSBAS (Trung Quốc), KASS (Hàn Quốc), SouthPAN (Úc, New Zealand). Dịch vụ mở của EGNOS cam kết ngang ≤ 3 m, đứng ≤ 4 m (95 %, ở vị trí người dùng xấu nhất). Tín hiệu GEO của GAGAN hay BDSBAS có thể thu được ở Việt Nam, nhưng **chưa hệ SBAS nào có vùng phục vụ chính thức phủ Việt Nam**, nên ở đây SBAS chỉ nên coi là tăng cường không chính thức.
+
+<Note kind="why" label="Liên quan tới viễn thám">
+
+Mỗi vệ tinh viễn thám như Sentinel-1, Sentinel-2 đều mang máy thu GNSS hai tần số để xác định quỹ đạo chính xác: không biết vệ tinh ở đâu thì không biết pixel ở đâu. Dưới mặt đất, điểm khống chế ảnh (GCP) để nắn ảnh và kiểm tra DEM (Chương 17) cũng đo bằng RTK.
+
+</Note>
+
+## 7.6 GNSS trên điện thoại và kết hợp cảm biến
+
+Điện thoại có ăng-ten nhỏ, phân cực tuyến tính và nằm sát tay người, nên tín hiệu yếu và nhiều đa đường. Bốn thay đổi làm điện thoại tiến gần máy thu chuyên dụng:
+
+<Tiles
+  items={[
+    { t: 'Đa hệ', d: 'GPS + Galileo + GLONASS + BeiDou (+ QZSS): vài chục vệ tinh thay vì khoảng 8' },
+    { t: 'Hai tần số L1 + L5', d: 'Từ 2018 (Xiaomi Mi 8, chip Broadcom BCM47755): chip L5 ngắn gấp 10 lần, chống đa đường tốt hơn' },
+    { t: 'A-GNSS', d: 'Mạng di động gửi sẵn lịch vệ tinh và vị trí gần đúng: có vị trí sau vài giây' },
+    { t: 'Số đo thô', d: 'Từ Android 7 (API 24, 2016), ứng dụng đọc được số đo thô và tự tính khoảng cách giả' },
+  ]}
+  caption="Bốn bước tiến của GNSS điện thoại. Nguồn: EUSPA (2017) về số đo thô trên Android; IS-GPS-705 về tốc độ chip L5."
+/>
+
+- **Hai tần số.** Tín hiệu L5 có tốc độ chip 10,23 MHz, gấp 10 lần mã C/A trên L1, nên chip chỉ dài 29,3 m thay vì 293 m. Đỉnh tương quan sắc hơn, phân biệt tốt hơn tín hiệu phản xạ (Hình 7.5); kết hợp với L1 còn khử được điện ly ở nơi thoáng.
+- **A-GNSS.** Không có trợ giúp, máy thu phải tự đọc bản tin 50 bit/s, mất tới khoảng 30 giây. Với A-GNSS, lịch vệ tinh tải qua mạng di động, thời gian có vị trí đầu tiên giảm xuống vài giây.
+- **Số đo thô.** Ứng dụng đọc được thời điểm nhận tín hiệu, Doppler, C/N0 và, trên một số máy, pha sóng mang. Điều này mở đường cho PPP và RTK trên điện thoại, và cho các ứng dụng kiểm tra như GPSTest.
+
+<Note kind="myth">
+
+**"GPS trên điện thoại cần Internet (3G/4G) mới chạy."** Sai. Máy thu GNSS chỉ cần tín hiệu vệ tinh, nên vẫn định vị được giữa biển hay trên núi không có sóng. Internet chỉ giúp **A-GNSS** (có vị trí nhanh hơn) và tải **bản đồ**; muốn dẫn đường không mạng, hãy tải bản đồ ngoại tuyến trước.
+
+</Note>
+
+Trong đường hầm, dưới cầu vượt hay giữa nhà cao tầng, điện thoại không chỉ dựa vào GNSS:
+
+<Steps title="Kết hợp cảm biến khi tín hiệu yếu" items={[
+  { tag: 'GNSS', t: 'Vị trí tuyệt đối khi có tín hiệu', d: 'Vị trí và vận tốc từ vệ tinh, kèm ước lượng độ tin cậy.' },
+  { tag: 'IMU', t: 'Lấp chỗ trống bằng quán tính', d: 'Gia tốc kế và con quay tính tiếp quãng đường, hướng đi (dead reckoning) khi vào hầm; sai số tăng dần theo thời gian.' },
+  { tag: 'Áp kế', t: 'Độ cao tầng nhà', d: 'Khí áp kế đo chênh độ cao vài mét, bù cho VDOP lớn.' },
+  { tag: 'Wi-Fi', t: 'Định vị trong nhà', d: 'Dấu vân tay Wi-Fi, Bluetooth, mạng di động thay GNSS trong nhà.' },
+  { tag: 'Bản đồ', t: 'Bám đường (map matching)', d: 'Chiếu điểm GNSS lên mạng đường, thường bằng mô hình Markov ẩn, để xe không "chạy" trên nóc nhà.' },
+]} />
+
+Dữ liệu GNSS từ điện thoại là đầu vào chính của phân tích di chuyển (xe công nghệ, giao thông, du lịch). Điểm GNSS trong đô thị thường lệch 3–15 m, nên trước khi phân tích phải bám đường. Phương pháp kinh điển dùng mô hình Markov ẩn, coi đoạn đường là trạng thái ẩn và điểm GNSS là quan sát có nhiễu (Newson và Krumm, 2009).
+
+## 7.7 Ứng dụng và giới hạn
+
+Ngoài định vị và dẫn đường, GNSS là hạ tầng vô hình của nhiều hệ thống:
+
+- **Đồng bộ thời gian**: trạm gốc 4G/5G, lưới điện, sàn giao dịch, trung tâm dữ liệu lấy giờ chuẩn từ GNSS. Đây là ứng dụng mà nhiều người không biết mình phụ thuộc vào.
+- **Đo đạc và giám sát biến dạng**: trạm CORS đo chuyển dịch kiến tạo và sụt lún cỡ milimet mỗi năm, làm mốc kiểm tra cho InSAR (Chương 16); máy thu cố định giám sát đập, cầu, sườn dốc sạt lở. Ở đồng bằng sông Cửu Long và Hà Nội, GNSS và InSAR cùng đo lún đất.
+- **Khí tượng GNSS**: trễ đối lưu ướt đo ở trạm CORS đổi ra lượng hơi nước tích tụ (PWV) đưa vào mô hình dự báo mưa. Vệ tinh che khuất vô tuyến (radio occultation) như COSMIC-2 đo hồ sơ nhiệt độ, độ ẩm khí quyển từ tín hiệu GNSS bị bẻ cong.
+- **Phản xạ GNSS (GNSS-R)**: chòm 8 vệ tinh nhỏ CYGNSS của NASA đo tín hiệu GPS phản xạ trên mặt biển để ước tính gió trong bão, và trên đất liền để ước tính độ ẩm đất, vùng ngập.
+- **Nông nghiệp chính xác, máy tự lái**: máy kéo, máy cấy, drone phun thuốc dùng RTK centimet.
+
+<Stats items={[
+  { v: '−158,5', u: 'dBW', l: 'công suất tối thiểu của tín hiệu GPS L1 C/A tới mặt đất, khoảng 1,4 × 10⁻¹⁶ W' },
+  { v: '02/2022', l: 'mốc EASA ghi nhận gây nhiễu và giả mạo GNSS bắt đầu tăng mạnh quanh các vùng xung đột' },
+]} caption="IS-GPS-200 (công suất thu tối thiểu); EASA Safety Information Bulletin 2022-02R3 (05/07/2024)." />
+
+Tín hiệu GNSS tới mặt đất cực yếu, thấp hơn cả nhiễu nền. Vì vậy nó dễ bị **gây nhiễu (jamming)**: một thiết bị phát công suất nhỏ đủ làm máy thu trong bán kính lớn mất tín hiệu; và **giả mạo (spoofing)**: phát tín hiệu giả để máy thu tính ra vị trí, thời gian sai. Bản tin an toàn của Cơ quan An toàn Hàng không châu Âu (EASA SIB 2022-02R3, 07/2024) ghi nhận gây nhiễu và giả mạo tăng từ tháng 2/2022, nhất là quanh Biển Đen, biển Baltic, Đông Địa Trung Hải, Trung Đông và Bắc Cực, và nhấn mạnh giả mạo nguy hiểm hơn gây nhiễu vì khó phát hiện.
+
+<Note kind="warn">
+
+Biện pháp chống: máy thu đa tần, đa hệ; xác thực bản tin dẫn đường (Galileo OSNMA); ăng-ten nhiều phần tử chống nhiễu; và kết hợp IMU để phát hiện vị trí "nhảy" bất thường. Với hạ tầng quan trọng (thời gian cho lưới điện, viễn thông), luôn có nguồn dự phòng không dựa vào GNSS.
+
+</Note>
+
+Những nơi GNSS **không** làm tốt:
+
+- **Trong nhà, hầm, gara ngầm**: tín hiệu không xuyên được; cần Wi-Fi, Bluetooth, UWB.
+- **Đô thị dày đặc**: đa đường, NLOS và góc che cao (mục 7.3, 7.4); cần đa hệ, L5 và IMU.
+- **Dưới tán rừng dày**: tín hiệu suy hao, sai số tăng.
+- **Độ cao**: kém hơn mặt bằng (VDOP > HDOP), và là độ cao trên ellipsoid WGS84, không phải độ cao so với mực nước biển (Chương 10 về hệ tọa độ và VN-2000).
+- **Bão từ và nhấp nháy điện ly** ở vùng xích đạo sau hoàng hôn: máy thu mất khóa, RTK/PPP mất cố định số nguyên.
+
+<Note kind="key">
+
+<mark class="key">GNSS chính xác và miễn phí nhưng mong manh: tín hiệu yếu tới mức một thiết bị nhỏ cũng che hoặc giả được.</mark> Hệ thống nào cần vị trí hay thời gian đáng tin phải có nguồn dự phòng.
+
+</Note>
+
+## 7.8 Thực hành
+
+Notebook tải bộ phần tử quỹ đạo của chương, truyền quỹ đạo bằng SGP4, đếm vệ tinh nhìn thấy và tính DOP ở Hà Nội trong 24 giờ, vẽ sky plot, rồi tự viết lời giải bình phương nhỏ nhất cho vị trí 3D từ khoảng cách giả mô phỏng (có sai số đồng hồ và nhiễu).
+
+<LabLinks notebook="labs/gnss_positioning.ipynb" />
+
+**Bài tập gợi ý**
+
+1. Trong Hình 7.2, đặt máy thu ra ngoài tam giác S1–S2–S3 và giải lại. Vòng lặp cần bao nhiêu bước? Vì sao hình học này xấu hơn?
+2. Tính trễ điện ly trên L1 và L5 khi TEC = 30 TECU. Sau tổ hợp không điện ly, nhiễu tăng bao nhiêu lần?
+3. Trong Hình 7.6, tự đặt 5 vệ tinh để HDOP nhỏ nhất. Bạn rút ra quy tắc gì?
+4. Mở ứng dụng hiển thị vệ tinh (ví dụ GPSTest trên Android) ở sân trường rồi giữa hai tòa nhà. So số vệ tinh mỗi hệ với Hình 7.1 và ghi lại HDOP mà ứng dụng báo.
+
+## 7.9 Ôn tập
+
+<Quiz client:visible lang="vi" items={quiz} />
+
+## Tài liệu tham khảo
+
+- Bộ Tài nguyên và Môi trường, Báo Tài nguyên & Môi trường (10/12/2019). *Mạng lưới trạm định vị vệ tinh quốc gia: bước tiến mới*. https://nongnghiepmoitruong.vn/mang-luoi-tram-dinh-vi-ve-tinh-quoc-gia-buoc-tien-moi-d657262.html
+- Cabinet Office, Government of Japan. *QZSS notices: start of MADOCA-PPP operational service (01/04/2024) and Internet distribution (01/07/2024)*. https://qzss.go.jp/en/
+- China Satellite Navigation Office (2017). *BeiDou Navigation Satellite System Signal In Space Interface Control Document: Open Service Signal B1C* (version 1.0) và *B2a* (version 1.0). http://en.beidou.gov.cn
+- China Satellite Navigation Office (2021). *BeiDou Navigation Satellite System Open Service Performance Standard* (version 3.0); vùng phục vụ PPP theo trình bày tại ICG-17 (2023). https://www.unoosa.org/documents/pdf/icg/2023/ICG-17/icg17_PPP_03.pdf
+- EASA (2024). *Safety Information Bulletin 2022-02R3: Global Navigation Satellite System Outage and Alterations Leading to Communication / Navigation / Surveillance Degradation*. https://ad.easa.europa.eu/blob/EASA_SIB_2022_02_R3.pdf/SIB_2022-02R3_1
+- European Commission. *EGNOS Open Service*. https://defence-industry-space.ec.europa.eu/eu-space/egnos-satellite-navigation/egnos-open-service_en
+- European Union (2023). *European GNSS (Galileo) Open Service Signal-In-Space Interface Control Document*, Issue 2.1. https://www.gsc-europa.eu
+- EUSPA (2023). *Galileo High Accuracy Service Service Definition Document (HAS SDD)*, Issue 1.0. https://www.gsc-europa.eu/sites/default/files/sites/all/files/Galileo-HAS-SDD_v1.0.pdf
+- European GNSS Agency (2017). *Using GNSS Raw Measurements on Android Devices* (white paper). https://www.euspa.europa.eu
+- ESA Navipedia. *Klobuchar Ionospheric Model*; *Tropospheric Delay*; *Multipath*. https://gssc.esa.int/navipedia/
+- Hofmann-Wellenhof, B., Lichtenegger, H., & Wasle, E. (2008). *GNSS — Global Navigation Satellite Systems: GPS, GLONASS, Galileo, and more*. Springer.
+- Johnston, G., Riddell, A., & Hausler, G. (2017). The International GNSS Service. In P. Teunissen & O. Montenbruck (Eds.), *Springer Handbook of Global Navigation Satellite Systems* (pp. 967–982). Springer.
+- Kelso, T. S. *CelesTrak*. https://celestrak.org
+- Klobuchar, J. A. (1987). Ionospheric time-delay algorithm for single-frequency GPS users. *IEEE Transactions on Aerospace and Electronic Systems*, AES-23(3), 325–331.
+- Misra, P., & Enge, P. (2011). *Global Positioning System: Signals, Measurements, and Performance* (revised 2nd ed.). Ganga-Jamuna Press.
+- NASA & NOAA (15/10/2024). *NASA, NOAA: Sun Reaches Maximum Phase in 11-Year Solar Cycle*. https://www.nasa.gov
+- Newson, P., & Krumm, J. (2009). Hidden Markov map matching through noise and sparseness. *Proceedings of the 17th ACM SIGSPATIAL International Conference on Advances in Geographic Information Systems*, 336–343.
+- Nguyễn Văn Tín. *Sổ tay Vệ tinh & Viễn thám*, chương 7. CC BY 4.0. https://satellite-rs-handbook.netlify.app/
+- Saastamoinen, J. (1972). Atmospheric correction for the troposphere and stratosphere in radio ranging of satellites. In *The Use of Artificial Satellites for Geodesy*, Geophysical Monograph 15, 247–251. American Geophysical Union.
+- Teunissen, P. J. G., & Montenbruck, O. (Eds.) (2017). *Springer Handbook of Global Navigation Satellite Systems*. Springer.
+- U.S. Department of Defense (2020). *Global Positioning System Standard Positioning Service Performance Standard* (5th ed.). https://www.gps.gov
+- U.S. Space Force (2022). *IS-GPS-200* and *IS-GPS-705*: Navstar GPS Space Segment / Navigation User Interfaces. https://www.gps.gov

@@ -2,18 +2,18 @@
 // Buttons that open the chapter's lab in Colab (Python) and on GitHub (GEE JS script to paste).
 import { langFromUrl } from '../i18n/ui';
 
-interface Props { notebook: string; gee: string }
+interface Props { notebook: string; gee?: string }
 const { notebook, gee } = Astro.props;
 const lang = langFromUrl(Astro.url);
 const REPO = 'quanta1985/rs-knowledge';
 const colab = `https://colab.research.google.com/github/${REPO}/blob/main/${notebook}`;
-const geeUrl = `https://github.com/${REPO}/blob/main/${gee}`;
+const geeUrl = gee && `https://github.com/${REPO}/blob/main/${gee}`;
 ---
 <div class="controls" style="display:flex;flex-wrap:wrap;gap:var(--s3);margin:var(--s4) 0">
   <a class="btn primary" href={colab} target="_blank" rel="noopener">
     {lang === 'vi' ? 'Mở notebook Python trên Colab' : 'Open Python notebook in Colab'} ↗
   </a>
-  <a class="btn" href={geeUrl} target="_blank" rel="noopener">
+  {geeUrl && <a class="btn" href={geeUrl} target="_blank" rel="noopener">
     {lang === 'vi' ? 'Script GEE Code Editor (JS)' : 'GEE Code Editor script (JS)'} ↗
-  </a>
+  </a>}
 </div>

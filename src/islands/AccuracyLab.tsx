@@ -79,7 +79,7 @@ export default function AccuracyLab({ lang }: { lang: Lang }) {
   // PA and F1 from the area-weighted (Olofsson) estimates: raw sample-count PA is biased under stratified sampling
   const f1 = adj.ua.map((u, k) => (2 * u * adj.pa[k]) / (u + adj.pa[k]));
   const meanF1 = f1.filter(Number.isFinite).reduce((a, b) => a + b, 0) / Math.max(1, f1.filter(Number.isFinite).length);
-  const cell = { padding: '1px 3px', textAlign: 'right' as const, borderBottom: '1px dashed rgba(148,163,184,.22)', background: 'transparent', color: '#e2e8f0', fontWeight: 600 };
+  const cell = { padding: '1px 3px', textAlign: 'right' as const, borderBottom: '1px dashed var(--st-line)', background: 'transparent', color: 'var(--st-fg)', fontWeight: 600 };
   const abbr = (k: number) => CLASSES[k][lang].slice(0, 4);
 
   const hud = (
@@ -93,7 +93,7 @@ export default function AccuracyLab({ lang }: { lang: Lang }) {
         <thead><tr><th style={cell} />{CLASSES.map((c, j) => <th key={j} style={{ ...cell, color: c.color }}>{abbr(j)}</th>)}<th style={cell}>{T.ua}</th></tr></thead>
         <tbody>
           {m.map((r, i) => <tr key={i}><th style={{ ...cell, textAlign: 'left', color: CLASSES[i].color }}>{abbr(i)}</th>
-            {r.map((v, j) => <td key={j} style={{ ...cell, fontWeight: i === j ? 700 : 400, color: i === j ? '#4fc3cd' : v ? '#e3b25a' : '#94a3b8' }}>{v}</td>)}
+            {r.map((v, j) => <td key={j} style={{ ...cell, fontWeight: i === j ? 700 : 400, color: i === j ? 'var(--st-accent)' : v ? 'var(--st-warn)' : 'var(--st-muted)' }}>{v}</td>)}
             <td style={cell}>{pct(acc.ua[i])}</td></tr>)}
           <tr><th style={{ ...cell, textAlign: 'left' }}>{T.pa}</th>{adj.pa.map((v, j) => <td key={j} style={cell}>{pct(v)}</td>)}<td style={cell} /></tr>
         </tbody>
@@ -119,23 +119,23 @@ export default function AccuracyLab({ lang }: { lang: Lang }) {
       <MapStage lang={lang} label={T.label} quad={base.quad} overlays={overlays} hud={hud} bar={bar} height={640} />
       <div className="dark-card" style={{ gridTemplateColumns: 'minmax(0,1fr)', marginTop: 10 }}>
         <svg className="chart" viewBox={`0 0 ${W} ${H}`} width="100%" role="img" aria-label={T.chart}>
-          <text x={X0} y={14} style={{ fill: '#e2e8f0', fontWeight: 600 }}>{T.chart}</text>
+          <text x={X0} y={14} style={{ fill: 'var(--st-fg)', fontWeight: 600 }}>{T.chart}</text>
           {CLASSES.map((c, k) => {
             const y = 34 + k * RH, a = adj.area[k], ci = adj.ci95[k], ref = base.refPx[k] * PIXEL_KM2;
             return <g key={k}>
-              <text x={X0 - 8} y={y + 18} textAnchor="end" style={{ fill: c.color }}>{c[lang]}</text>
-              <rect x={X0} y={y + 4} width={xs(adj.mapArea[k]) - X0} height={10} fill={c.color} opacity={0.45} />
-              <line x1={xs(a - ci)} x2={xs(a + ci)} y1={y + 24} y2={y + 24} stroke="#e2e8f0" strokeWidth={2} />
-              <circle cx={xs(a)} cy={y + 24} r={4.5} fill="#e2e8f0" />
-              <path d={`M${xs(ref)},${y + 30}l5,9h-10z`} fill="#4fc3cd" />
+              <text x={X0 - 8} y={y + 18} textAnchor="end" style={{ fill: 'var(--st-fg)' }}>{c[lang]}</text>
+              <rect x={X0} y={y + 4} width={xs(adj.mapArea[k]) - X0} height={10} fill={c.color} opacity={0.8} />
+              <line x1={xs(a - ci)} x2={xs(a + ci)} y1={y + 24} y2={y + 24} stroke="var(--st-fg)" strokeWidth={2} />
+              <circle cx={xs(a)} cy={y + 24} r={4.5} fill="var(--st-fg)" />
+              <path d={`M${xs(ref)},${y + 30}l5,9h-10z`} fill="var(--st-accent)" />
               <text x={W - 6} y={y + 18} textAnchor="end">{nf(adj.mapArea[k])} → {nf(a)} ± {nf(ci)} km²{covered[k] ? ' ✓' : ''}</text>
             </g>;
           })}
         </svg>
-        <div className="legend" style={{ color: '#e2e8f0' }}>
-          <span><svg width="22" height="10"><rect width="22" height="10" fill="#94a3b8" opacity="0.6" /></svg> {T.mapA}</span>
-          <span><svg width="22" height="10"><line x1="0" x2="22" y1="5" y2="5" stroke="#e2e8f0" strokeWidth="2" /><circle cx="11" cy="5" r="4" fill="#e2e8f0" /></svg> {T.adj}</span>
-          <span><svg width="12" height="10"><path d="M6,0l5,9h-10z" fill="#4fc3cd" /></svg> {T.ref}</span>
+        <div className="legend" style={{ color: 'var(--st-fg)' }}>
+          <span><svg width="22" height="10"><rect width="22" height="10" fill="var(--st-muted)" opacity="0.6" /></svg> {T.mapA}</span>
+          <span><svg width="22" height="10"><line x1="0" x2="22" y1="5" y2="5" stroke="var(--st-fg)" strokeWidth="2" /><circle cx="11" cy="5" r="4" fill="var(--st-fg)" /></svg> {T.adj}</span>
+          <span><svg width="12" height="10"><path d="M6,0l5,9h-10z" fill="var(--st-accent)" /></svg> {T.ref}</span>
           <span>✓ {T.cover}</span>
         </div>
       </div>

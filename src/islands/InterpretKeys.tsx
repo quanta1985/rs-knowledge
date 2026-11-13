@@ -42,7 +42,7 @@ export default function InterpretKeys({ lang }: { lang: Lang }) {
       { k: 'MNDWI', v: nf(ndi('B3', 'B11')), tone: 'accent' },
       { k: lang === 'vi' ? 'Độ sáng (B2+B3+B4)/3' : 'Brightness (B2+B3+B4)/3', v: nf((m3('B2') + m3('B3') + m3('B4')) / 3), tone: 'warn' },
     ]}>
-      <p style={{ margin: '10px 0 0', font: '0.86rem/1.5 var(--font-body)', color: '#e2e8f0' }}>{k.text[lang]}</p>
+      <p style={{ margin: '10px 0 0', font: '0.86rem/1.5 var(--font-body)', color: 'var(--st-fg)' }}>{k.text[lang]}</p>
       <p className="muted" style={{ margin: '6px 0 0', fontSize: '0.72rem' }}>{T.ev}</p>
     </StatPanel>
   );

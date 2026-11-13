@@ -89,9 +89,9 @@ export default function FeatureSpace({ lang }: { lang: Lang }) {
         {base.pts.map((p, i) => p.x <= XR[1] && p.y <= YR[1] &&
           <circle key={i} cx={px(p.x)} cy={py(p.y)} r={1.8} fill={CLASSES[p.k].color} opacity={0.75} />)}
         {base.stats.map((s, k) => s.n > 1 && <g key={k}>
-          <polyline fill="none" stroke="#fff" strokeWidth={2.5} opacity={0.8} points={ellipse(s.mean, s.cov).map(([x, y]) => `${px(x)},${py(y)}`).join(' ')} />
+          <polyline fill="none" stroke="var(--st-bg)" strokeWidth={2.5} opacity={0.8} points={ellipse(s.mean, s.cov).map(([x, y]) => `${px(x)},${py(y)}`).join(' ')} />
           <polyline fill="none" stroke={CLASSES[k].color} strokeWidth={1.5} points={ellipse(s.mean, s.cov).map(([x, y]) => `${px(x)},${py(y)}`).join(' ')} />
-          <text x={px(s.mean[0])} y={py(s.mean[1]) + 5} textAnchor="middle" style={{ fill: '#fff', font: '700 15px sans-serif' }}>×</text>
+          <text x={px(s.mean[0])} y={py(s.mean[1]) + 5} textAnchor="middle" style={{ fill: 'var(--st-fg)', font: '700 15px sans-serif' }}>×</text>
         </g>)}
       </svg>
       <div className="hud-static">

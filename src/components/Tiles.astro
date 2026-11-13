@@ -1,0 +1,11 @@
+---
+// Concept tiles: a few soft-coloured boxes (name + one-line value) and an optional summary line below.
+interface Tile { t: string; d?: string }
+interface Props { items: Tile[]; sum?: string; note?: string; caption?: string }
+const { items, sum, note, caption } = Astro.props;
+---
+<figure class="tiles">
+  <div class="tiles-grid">{items.map((it, i) => <div class={`tile c${(i % 6) + 1}`}><b>{it.t}</b>{it.d && <span>{it.d}</span>}</div>)}</div>
+  {sum && <p class="tiles-sum"><b>{sum}</b>{note && <span>{note}</span>}</p>}
+  {caption && <figcaption class="muted" style="font-size:0.86rem;margin-top:var(--s3)">{caption}</figcaption>}
+</figure>

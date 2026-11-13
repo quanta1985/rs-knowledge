@@ -102,9 +102,9 @@ export default function FloodLab({ lang }: { lang: Lang }) {
       <svg className="hist" viewBox={`-4 -4 ${HW + 8} ${HH + 22}`} role="img" aria-label={`${T.hist} ${method === 'thr' ? 'VV' : 'ΔVV'}`}>
         {hist.map((c, i) => {
           const x0 = hmin + ((hmax - hmin) * i) / BINS, h = (c / maxC) * HH, hit = x0 < cut;
-          return <rect key={i} x={hx(x0)} width={HW / BINS - 0.6} y={HH - h} height={h} fill={hit ? `rgb(${NEW})` : '#94a3b8'} opacity={hit ? 0.95 : 0.45} />;
+          return <rect key={i} x={hx(x0)} width={HW / BINS - 0.6} y={HH - h} height={h} fill={hit ? `rgb(${NEW})` : 'var(--st-muted)'} opacity={hit ? 0.95 : 0.45} />;
         })}
-        <line x1={hx(cut)} x2={hx(cut)} y1={-4} y2={HH} stroke="#4fc3cd" strokeWidth={1.5} />
+        <line x1={hx(cut)} x2={hx(cut)} y1={-4} y2={HH} stroke="var(--st-accent)" strokeWidth={1.5} />
         <text x={0} y={HH + 13}>{hmin}</text><text x={HW} y={HH + 13} textAnchor="end">{hmax} dB</text>
         <text x={HW / 2} y={HH + 13} textAnchor="middle">{method === 'thr' ? 'VV' : 'Δ VV'}</text>
       </svg>

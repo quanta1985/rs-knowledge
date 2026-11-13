@@ -6,9 +6,9 @@
 from labkit import MD, PY, main
 
 CELLS = [
-    (MD, """# Lab 10 — Phát hiện biến động / Change detection
+    (MD, """# Lab 15 — Phát hiện biến động / Change detection
 
-**Sổ tay Viễn thám & GIS — Chương 10** · [Mở chương / Open chapter](https://quanta1985.github.io/rs-knowledge/vi/ch10-change/)
+**Sổ tay Viễn thám & GIS — Chương 15** · [Mở chương / Open chapter](https://quanta1985.github.io/rs-knowledge/vi/ch10-change/)
 
 1. Ảnh tổng hợp Landsat 2000 và 2024, hiệu NDVI / Landsat composites 2000 and 2024, NDVI difference.
 2. Năm NDVI giảm mạnh nhất cho từng pixel / Year of largest NDVI drop per pixel.
@@ -50,7 +50,7 @@ def pixels(img, x0, y1, n, res=30):
                  'affineTransform': {'scaleX': res, 'shearX': 0, 'translateX': x0, 'shearY': 0, 'scaleY': -res, 'translateY': y1}}})
     return {b: np.asarray(arr[b], float) for b in arr.dtype.names}
 
-X0, Y1, N = 573045, 2330385, 500          # khung Hình 10.1 / Figure 10.1 frame (UTM 48N, 30 m)
+X0, Y1, N = 573045, 2330385, 500          # khung Hình 15.1 / Figure 15.1 frame (UTM 48N, 30 m)
 geom = ee.Geometry.Rectangle([X0, Y1 - N * 30, X0 + N * 30, Y1], 'EPSG:32648', False)
 nd = lambda a, b: (a - b) / (a + b)
 y0 = pixels(composite(geom, 2000).select(['red', 'nir']), X0, Y1, N)
@@ -88,7 +88,7 @@ plt.title('Năm NDVI giảm > 0,3 / year of NDVI drop > 0.3'); plt.axis('off'); 
 vals, counts = np.unique(px['year'][big], return_counts=True)
 print({int(v): int(c) for v, c in zip(vals, counts)})"""),
     (MD, "## 3. Mũi Cà Mau / Ca Mau cape"),
-    (PY, """CX0, CY1 = 466095, 960345            # khung Hình 10.3 / Figure 10.3 frame
+    (PY, """CX0, CY1 = 466095, 960345            # khung Hình 15.3 / Figure 15.3 frame
 cg = ee.Geometry.Rectangle([CX0, CY1 - N * 30, CX0 + N * 30, CY1], 'EPSG:32648', False)
 c0 = pixels(composite(cg, 2000).select(['green', 'swir1']), CX0, CY1, N)
 c1 = pixels(composite(cg, 2024).select(['green', 'swir1']), CX0, CY1, N)

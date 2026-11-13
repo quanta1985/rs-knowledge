@@ -1,0 +1,10 @@
+---
+// Numbered vertical sequence (a launch timeline, a data pipeline). `tag` is a short mono marker (T+2:30, 1 km…).
+interface Step { t: string; d?: string; tag?: string }
+interface Props { items: Step[]; title?: string }
+const { items, title } = Astro.props;
+---
+<figure class="steps">
+  {title && <figcaption class="mono-label">{title}</figcaption>}
+  <ol>{items.map((s) => <li>{s.tag && <span class="steps-tag">{s.tag}</span>}<b>{s.t}</b>{s.d && <p>{s.d}</p>}</li>)}</ol>
+</figure>

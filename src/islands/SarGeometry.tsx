@@ -58,23 +58,23 @@ export default function SarGeometry({ lang }: { lang: Lang }) {
   const label = (k: string) => T[k as keyof typeof T] as string;
   const beam = (x0: number, y0: number) => {
     const L = 120, dx = Math.sin(theta * RAD) * L, dy = Math.cos(theta * RAD) * L;
-    return <line x1={x0 - dx} y1={y0 - dy} x2={x0} y2={y0} stroke="#4fc3cd" strokeWidth={1.2} opacity={0.8} markerEnd="url(#arr)" />;
+    return <line x1={x0 - dx} y1={y0 - dy} x2={x0} y2={y0} stroke="var(--st-accent)" strokeWidth={1.2} opacity={0.8} markerEnd="url(#arr)" />;
   };
 
   return (
     <div className="dark-card">
       <svg className="chart" viewBox={`0 0 ${W} 270`} width="100%" role="img" aria-label={`${T.fig}: θ ${theta}°, ${T.frontIs} ${label(eff.front)}, ${T.backIs} ${label(eff.back)}`}>
-        <defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L10,5L0,10z" fill="#4fc3cd" /></marker></defs>
+        <defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L10,5L0,10z" fill="var(--st-accent)" /></marker></defs>
         <text x={GX} y={14}>{T.ground}</text>
         {[0.15, 0.45, 0.75].map((f) => <g key={f}>{beam(px(f * xMax), pz(0) - 30)}</g>)}
-        <polyline fill="none" stroke="#e2e8f0" strokeWidth={1.5}
+        <polyline fill="none" stroke="var(--st-fg)" strokeWidth={1.5}
           points={[[0, 0], [X_FRONT, 0], [top, H], [end, 0], [xMax, 0]].map(([x, z]) => `${px(x)},${pz(z)}`).join(' ')} />
-        {pts.map(([x, z], i) => <circle key={i} cx={px(x)} cy={pz(z)} r={4} fill={lit[i] ? hue(i) : '#0b1220'} stroke={hue(i)} strokeWidth={1.5} />)}
+        {pts.map(([x, z], i) => <circle key={i} cx={px(x)} cy={pz(z)} r={4} fill={lit[i] ? hue(i) : 'var(--st-bg)'} stroke={hue(i)} strokeWidth={1.5} />)}
         <text x={GX} y={IY - 22}>{T.image}</text>
         <line x1={GX} x2={GX + GW} y1={IY} y2={IY} stroke="currentColor" opacity={0.4} />
         <text x={GX} y={IY + 22} className="muted">← {T.near}</text>
         <text x={GX + GW} y={IY + 22} textAnchor="end" className="muted">{T.far} →</text>
-        {pts.map((_, i) => <circle key={i} cx={ix(r[i])} cy={IY} r={4} fill={lit[i] ? hue(i) : '#0b1220'} stroke={hue(i)} strokeWidth={1.5} opacity={0.9} />)}
+        {pts.map((_, i) => <circle key={i} cx={ix(r[i])} cy={IY} r={4} fill={lit[i] ? hue(i) : 'var(--st-bg)'} stroke={hue(i)} strokeWidth={1.5} opacity={0.9} />)}
       </svg>
       <div className="hud-static">
         <StatPanel title={T.fig} rows={[

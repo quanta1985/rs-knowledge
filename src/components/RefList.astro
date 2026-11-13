@@ -10,7 +10,7 @@ const dir = path.join(process.cwd(), 'src/content/chapters', lang);
 const head = lang === 'vi' ? '## Tài liệu tham khảo' : '## References';
 const refs = new Map<string, { text: string; ch: Set<number> }>();
 for (const f of fs.readdirSync(dir).filter((x) => x.endsWith('.mdx')).sort()) {
-  const n = Number(f.slice(2, 4));
+  const n = CHAPTERS.find((c) => c.slug === f.replace(/\.mdx$/, ''))?.n ?? 0;
   const src = fs.readFileSync(path.join(dir, f), 'utf8').replace(/\r/g, '');
   const at = src.indexOf(`\n${head}\n`);
   if (at < 0) continue;

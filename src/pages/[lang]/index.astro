@@ -6,84 +6,72 @@ import { LANGS, t, url, type Lang } from '../../i18n/ui';
 
 export const getStaticPaths = () => LANGS.map((lang) => ({ params: { lang } }));
 const lang = Astro.params.lang as Lang;
-const entries = (await getCollection('chapters')).filter((e) => e.id.startsWith(`${lang}/`));
-const ready = new Set(entries.map((e) => e.id));
-const nFigures = entries.reduce((s, e) => s + (e.body?.match(/<Figure\b/g)?.length ?? 0), 0);
-const first = CHAPTERS.find((c) => ready.has(`${lang}/${c.slug}`));
 const vi = lang === 'vi';
-const parts: [Part, 'partA' | 'partB' | 'partC'][] = [['A', 'partA'], ['B', 'partB'], ['C', 'partC']];
+const entries = (await getCollection('chapters')).filter((e) => e.id.startsWith(`${lang}/`));
+const byId = new Map(entries.map((e) => [e.id, e]));
+const nFigures = entries.reduce((s, e) => s + (e.body?.match(/<Figure\b/g)?.length ?? 0), 0);
+const quizzes = Object.values(import.meta.glob<{ default: unknown[] }>('../../data/quiz/*.json', { eager: true }));
+const nQuiz = quizzes.reduce((s, q) => s + q.default.length, 0);
+const first = CHAPTERS.find((c) => byId.has(`${lang}/${c.slug}`));
 const pad = (n: number) => String(n).padStart(2, '0');
-const features = vi
-  ? [
-      ['Ảnh thật Việt Nam', 'Mỗi khái niệm có ví dụ trên ảnh Sentinel-1/2, Landsat, MODIS thật: Hồ Tây, sông Hồng, lúa An Giang, lũ sau bão Yagi…'],
-      ['Bản đồ & quả địa cầu tương tác', 'Phóng to, kéo ngưỡng, đổi tổ hợp màu, đo diện tích trên nền ảnh vệ tinh, tính ngay trong trình duyệt.'],
-      ['Ba tầng độ sâu', 'Cơ bản cho sinh viên, Nâng cao cho cao học, Tra cứu cho kỹ sư; chế độ Trình chiếu cho giảng viên.'],
-      ['Song ngữ & thực hành', 'Việt–Anh, thuật ngữ bấm là hiện, notebook Colab và script Google Earth Engine cho mỗi chương.'],
-    ]
-  : [
-      ['Real imagery of Viet Nam', 'Every concept has a worked example on real Sentinel-1/2, Landsat and MODIS data: West Lake, the Red River, An Giang rice, Typhoon Yagi floods…'],
-      ['Interactive maps & globe', 'Zoom, drag thresholds, change composites, measure areas over satellite basemaps, computed in your browser.'],
-      ['Three depth levels', 'Basic for undergraduates, Advanced for graduate students, Reference for practitioners; Present mode for lecturers.'],
-      ['Bilingual & hands-on', 'Vietnamese–English, tap-to-define glossary, Colab notebooks and Google Earth Engine scripts for every chapter.'],
-    ];
+const parts: { p: Part; key: 'partA' | 'partB' | 'partC'; desc: string }[] = [
+  { p: 'A', key: 'partA', desc: vi ? 'Từ quỹ đạo, phóng, vận hành đến truyền tín hiệu, chòm sao LEO và định vị GNSS.' : 'From orbits, launch and operations to signals, LEO constellations and GNSS positioning.' },
+  { p: 'B', key: 'partB', desc: vi ? 'Vật lý, cảm biến, chỉ số phổ, tiền xử lý, phân loại, biến động, radar và DEM trên ảnh thật Việt Nam.' : 'Physics, sensors, indices, pre-processing, classification, change, radar and DEMs on real imagery of Viet Nam.' },
+  { p: 'C', key: 'partC', desc: vi ? 'Case study Việt Nam, Google Earth Engine, bài thực hành và bảng tra cứu.' : 'Viet Nam case studies, Google Earth Engine, labs and reference tables.' },
+];
 const stats: [string, string][] = [
-  [`${ready.size}/${CHAPTERS.length}`, vi ? 'chương' : 'chapters'],
-  [String(nFigures), vi ? 'hình tương tác' : 'interactive figures'],
-  ['S1 · S2 · L9 · MODIS', vi ? 'dữ liệu thật' : 'real data'],
-  ['Python · GEE', vi ? 'bài thực hành' : 'labs'],
+  [String(CHAPTERS.length), vi ? 'chương' : 'chapters'],
+  [String(nFigures), vi ? 'mô phỏng & bản đồ' : 'simulations & maps'],
+  [String(nQuiz), vi ? 'câu hỏi ôn tập' : 'review questions'],
 ];
 ---
 <Base lang={lang} title={t(lang, 'siteTitle')}>
-  <main id="main">
+  <main id="main" class="home">
     <section class="home-hero">
-      <div class="home-hero-inner">
-        <div>
-          <p class="kicker">{vi ? 'Sổ tay tương tác · Song ngữ Việt – Anh' : 'Interactive handbook · Vietnamese – English'}</p>
-          <h1>{t(lang, 'siteTitle')}</h1>
-          <p class="lead">{t(lang, 'tagline')}</p>
-          <div class="cta">
-            {first && <a class="btn primary" href={url(`${lang}/${first.slug}/`)}>{vi ? 'Bắt đầu đọc' : 'Start reading'} →</a>}
-            <a class="btn ghost" href={url(`${lang}/glossary/`)}>{t(lang, 'glossary')}</a>
-          </div>
-          <dl class="home-stats">{stats.map(([v, k]) => <div><dt>{k}</dt><dd>{v}</dd></div>)}</dl>
+      <div>
+        <p class="mono-label">{vi ? 'Sổ tay tương tác · Song ngữ Việt – Anh' : 'Interactive handbook · Vietnamese – English'}</p>
+        <h1>{vi ? <>Vệ tinh, viễn thám<br />& GIS cho Việt Nam</> : <>Satellites, remote sensing<br />& GIS for Viet Nam</>}</h1>
+        <p class="lead">{t(lang, 'tagline')}</p>
+        <div class="cta">
+          {first && <a class="btn primary" href={url(`${lang}/${first.slug}/`)}>{vi ? 'Bắt đầu đọc' : 'Start reading'}</a>}
+          <a class="btn" href={url(`${lang}/ch15-labs/`)}>{vi ? 'Bài thực hành' : 'Labs'}</a>
+          <a class="btn" href={url(`${lang}/glossary/`)}>{t(lang, 'glossary')}</a>
         </div>
-        <figure class="hero-shot">
-          <img src={url('img/hero-s2-cir.webp')} width="1024" height="1024" alt={vi ? 'Ảnh Sentinel-2 hồng ngoại giả khu Hồ Tây – sông Hồng, Hà Nội, 12/02/2024' : 'Sentinel-2 false-colour infrared image of West Lake – Red River, Hanoi, 12 Feb 2024'} fetchpriority="high" />
-          <img class="inset" src={url('img/hero-s1-vv.webp')} width="1024" height="1024" alt={vi ? 'Cùng khung trên ảnh radar Sentinel-1 VV' : 'The same frame in a Sentinel-1 VV radar image'} loading="lazy" />
-          <div class="hero-hud stat-panel">
-            <p class="stat-title">Sentinel-2B · 12/02/2024</p>
-            <dl>
-              <div><dt>{vi ? 'Khung' : 'Frame'}</dt><dd>5,12 × 5,12 km</dd></div>
-              <div><dt>{vi ? 'Pixel' : 'Pixel'}</dt><dd class="tone-accent">10 m</dd></div>
-              <div><dt>{vi ? 'Tổ hợp' : 'Bands'}</dt><dd>B8 · B4 · B3</dd></div>
-            </dl>
-          </div>
-          <figcaption>{vi ? 'Hồ Tây – sông Hồng: hồng ngoại giả (Sentinel-2) và radar VV (Sentinel-1) cùng một ngày.' : 'West Lake – Red River: false-colour infrared (Sentinel-2) and VV radar (Sentinel-1) on the same day.'}</figcaption>
-        </figure>
+        <dl class="home-stats">{stats.map(([v, k]) => <div><dt>{k}</dt><dd>{v}</dd></div>)}</dl>
       </div>
+      <figure class="hero-shot">
+        <img src={url('img/hero-s2-cir.webp')} width="1024" height="1024" alt={vi ? 'Ảnh Sentinel-2 hồng ngoại giả khu Hồ Tây – sông Hồng, Hà Nội, 12/02/2024' : 'Sentinel-2 false-colour infrared image of West Lake – Red River, Hanoi, 12 Feb 2024'} fetchpriority="high" />
+        <img class="inset" src={url('img/hero-s1-vv.webp')} width="1024" height="1024" alt={vi ? 'Cùng khung trên ảnh radar Sentinel-1 VV' : 'The same frame in a Sentinel-1 VV radar image'} loading="lazy" />
+        <div class="hero-hud stat-panel">
+          <p class="stat-title">Sentinel-2B · 12/02/2024</p>
+          <dl>
+            <div><dt>{vi ? 'Khung' : 'Frame'}</dt><dd>5,12 × 5,12 km</dd></div>
+            <div><dt>Pixel</dt><dd class="tone-accent">10 m</dd></div>
+            <div><dt>{vi ? 'Tổ hợp' : 'Bands'}</dt><dd>B8 · B4 · B3</dd></div>
+          </dl>
+        </div>
+        <figcaption>{vi ? 'Hồ Tây – sông Hồng: hồng ngoại giả (Sentinel-2) và radar VV (Sentinel-1) cùng một ngày.' : 'West Lake – Red River: false-colour infrared (Sentinel-2) and VV radar (Sentinel-1) on the same day.'}</figcaption>
+      </figure>
     </section>
 
-    <div class="layout" style="display:block;max-width:1240px">
-      <section class="cards features" aria-label={vi ? 'Đặc điểm' : 'Features'}>
-        {features.map(([h, p], i) => <div class="card"><span class="feat-n">{pad(i + 1)}</span><h3>{h}</h3><p class="muted">{p}</p></div>)}
-      </section>
-      {parts.map(([p, key]) => (
-        <section aria-labelledby={`part-${p}`}>
-          <h2 id={`part-${p}`}>{t(lang, key)}</h2>
-          <div class="cards">
-            {CHAPTERS.filter((c) => c.part === p).map((c) => ready.has(`${lang}/${c.slug}`) ? (
-              <a class="card chapter ready" href={url(`${lang}/${c.slug}/`)}>
-                <span class="ch-n">{pad(c.n)}</span><strong>{c.title[lang]}</strong>
+    {parts.map(({ p, key, desc }) => (
+      <section class="part" aria-labelledby={`part-${p}`}>
+        <div class="part-head"><h2 id={`part-${p}`}>{t(lang, key)}</h2><p>{desc}</p></div>
+        <div class="cards">
+          {CHAPTERS.filter((c) => c.part === p).map((c) => {
+            const e = byId.get(`${lang}/${c.slug}`);
+            return e ? (
+              <a class="card" href={url(`${lang}/${c.slug}/`)}>
+                <span class="mono-label">{t(lang, 'chapter')} {pad(c.n)}</span><strong>{c.title[lang]}</strong><p>{e.data.summary}</p>
               </a>
             ) : (
-              <div class="card chapter planned" aria-disabled="true">
-                <span class="badge">{t(lang, 'planned')}</span>
-                <span class="ch-n">{pad(c.n)}</span><strong>{c.title[lang]}</strong>
+              <div class="card planned" aria-disabled="true">
+                <span class="mono-label">{t(lang, 'chapter')} {pad(c.n)} · {t(lang, 'planned')}</span><strong>{c.title[lang]}</strong>
               </div>
-            ))}
-          </div>
-        </section>
-      ))}
-    </div>
+            );
+          })}
+        </div>
+      </section>
+    ))}
   </main>
 </Base>

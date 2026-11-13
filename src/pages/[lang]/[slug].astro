@@ -1,43 +1,57 @@
 ---
 import { getCollection, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-import SideNav from '../../components/SideNav.astro';
-import { t, type Lang } from '../../i18n/ui';
+import H2 from '../../components/H2.astro';
+import H3 from '../../components/H3.astro';
+import { CHAPTERS } from '../../data/chapters';
+import { t, url, type Lang } from '../../i18n/ui';
 
 export async function getStaticPaths() {
   const entries = await getCollection('chapters');
   return entries.map((entry) => {
     const [lang, slug] = entry.id.split('/');
-    return { params: { lang, slug }, props: { entry } };
+    return { params: { lang, slug }, props: { entry, ready: entries.map((e) => e.id) } };
   });
 }
 
-const { entry } = Astro.props;
+const { entry, ready } = Astro.props;
 const lang = Astro.params.lang as Lang;
+const slug = Astro.params.slug;
+const vi = lang === 'vi';
 const { Content, headings } = await render(entry);
+const strip = (s: string) => s.replace(/^\d+\.\d+(\.\d+)?\s+/, '');
 const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
+const info = CHAPTERS.find((c) => c.slug === slug);
+const n = info?.n ?? entry.data.n;
+const pad = (x: number) => String(x).padStart(2, '0');
+const words = (entry.body ?? '').replace(/<[^>]+>|import .*|export .*/g, ' ').split(/\s+/).length;
+const minutes = Math.max(5, Math.round(words / 200 / 5) * 5);
+const readyCh = CHAPTERS.filter((c) => ready.includes(`${lang}/${c.slug}`));
+const i = readyCh.findIndex((c) => c.slug === slug);
+const prev = readyCh[i - 1], next = readyCh[i + 1];
 ---
-<Base lang={lang} title={entry.data.title} description={entry.data.summary} showDepth>
+<Base lang={lang} title={entry.data.title} description={entry.data.summary} showDepth current={slug}>
   <div class="layout">
-    <SideNav lang={lang} current={Astro.params.slug} />
     <main id="main" class="prose" data-pagefind-body>
       <header class="chapter-head">
-        <div class="kicker">{t(lang, 'chapter')} {entry.data.n}</div>
+        <p class="kicker mono-label">{t(lang, 'chapter')} {pad(n)}{info && ` · ${vi ? 'Phần' : 'Part'} ${info.part}`}</p>
         <h1>{entry.data.title}</h1>
-        <p class="muted">{entry.data.summary}</p>
+        <p class="lede">{entry.data.summary}</p>
+        <p class="meta"><span>⏱ ~{minutes} {vi ? 'phút' : 'min'}</span><span>{vi ? 'Cập nhật' : 'Updated'} {entry.data.updated}</span></p>
         <div class="objectives">
-          <p><strong>{lang === 'vi' ? 'Sau chương này bạn có thể:' : 'After this chapter you can:'}</strong></p>
+          <span class="mono-label">{vi ? 'Sau chương này bạn nắm được' : 'After this chapter you can'}</span>
           <ul>{entry.data.objectives.map((o) => <li>{o}</li>)}</ul>
         </div>
       </header>
-      <Content />
-      <p class="muted" style="font-size:0.85rem;margin-top:var(--s7)">
-        {lang === 'vi' ? 'Cập nhật' : 'Updated'}: {entry.data.updated}
-      </p>
+      <Content components={{ h2: H2, h3: H3 }} />
+      <nav class="chapter-nav" aria-label={vi ? 'Chương trước / sau' : 'Previous / next chapter'}>
+        {prev && <a class="prev" href={url(`${lang}/${prev.slug}/`)}><span class="mono-label">← {t(lang, 'chapter')} {pad(prev.n)}</span>{prev.title[lang]}</a>}
+        {next && <a class="next" href={url(`${lang}/${next.slug}/`)}><span class="mono-label">{t(lang, 'chapter')} {pad(next.n)} →</span>{next.title[lang]}</a>}
+      </nav>
     </main>
     <aside class="toc" aria-label={t(lang, 'onThisPage')}>
-      <p class="muted" style="font-size:0.75rem;text-transform:uppercase;letter-spacing:.06em">{t(lang, 'onThisPage')}</p>
-      <ol>{toc.map((h) => <li class={`h${h.depth}`}><a href={`#${h.slug}`}>{h.text}</a></li>)}</ol>
+      <span class="mono-label">{vi ? 'Trong chương này' : 'In this chapter'}</span>
+      <ol>{toc.map((h) => <li class={`h${h.depth}`}><a href={`#${h.slug}`}>{strip(h.text)}</a></li>)}</ol>
     </aside>
   </div>
 </Base>

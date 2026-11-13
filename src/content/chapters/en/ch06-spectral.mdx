@@ -1,6 +1,6 @@
 ---
 title: Spectral signatures & spectral indices
-n: 6
+n: 11
 summary: Every surface "reflects" light in its own way. This chapter shows how to read spectral curves, build colour composites and compute spectral indices (NDVI, NDWI, MNDWI, NDBI) on real Sentinel-2 imagery of Hanoi and An Giang.
 objectives:
   - Read and compare the reflectance curves of water, vegetation, built-up land and bare soil.
@@ -14,6 +14,9 @@ import Depth from '../../../components/Depth.astro';
 import Figure from '../../../components/Figure.astro';
 import WorkedExample from '../../../components/WorkedExample.astro';
 import LabLinks from '../../../components/LabLinks.astro';
+import Note from '../../../components/Note.astro';
+import Formula from '../../../components/Formula.astro';
+import Steps from '../../../components/Steps.astro';
 import SpectralExplorer from '../../../islands/SpectralExplorer.tsx';
 import BandComposer from '../../../islands/BandComposer.tsx';
 import IndexLab from '../../../islands/IndexLab.tsx';
@@ -21,21 +24,21 @@ import NdviSeries from '../../../islands/NdviSeries.tsx';
 import Quiz from '../../../islands/Quiz.tsx';
 import quiz from '../../../data/quiz/ch06.json';
 
-## 6.1 What is spectral reflectance?
+## 11.1 What is spectral reflectance?
 
 A leaf looks green because it absorbs most red and blue light and sends back relatively more green. The fraction of incoming energy a surface sends back, at each wavelength, is its <Term id="reflectance">spectral reflectance</Term>. Plotted against wavelength it gives a <Term id="spectral-signature">spectral signature</Term>, a kind of fingerprint of the surface.
 
 Our eyes see roughly 400–700 nm. Sentinel-2 also measures the <Term id="red-edge">red edge</Term>, <Term id="nir">near infrared (NIR)</Term> and <Term id="swir">shortwave infrared (SWIR)</Term>. These "invisible" regions are what separate surfaces that look alike to the eye.
 
 <Figure
-  title="Figure 6.1 — Spectral curves on a Sentinel-2 image of Hanoi (12 Feb 2024)"
+  title="Figure 11.1 — Spectral curves on a Sentinel-2 image of Hanoi (12 Feb 2024)"
   try="Move the pointer from West Lake to the Red River floodplain. How does the thick line (selected pixel) change at 833 nm (B8)? Switch on 'Landsat 8/9 OLI' to compare the two satellites' band positions."
   source="Copernicus Sentinel-2B Level-2A (S2_SR_HARMONIZED), scene 20240212T032849_T48QWJ, 512 × 512 pixels at 10 m. Display stretch 2–98 %. Labels of the six reference points come from image interpretation and are not field-verified."
 >
   <SpectralExplorer client:visible lang="en" />
 </Figure>
 
-Reading the six reference curves in Figure 6.1:
+Reading the six reference curves in Figure 11.1:
 
 - **Water** (West Lake, Red River): low in every band and near zero in NIR and SWIR, because water strongly absorbs infrared. The Red River is brighter than West Lake in green (0.082 versus 0.048).
 - **Vegetation** (floodplain, urban trees): low in blue and red (chlorophyll absorption), a small green peak, then a **sharp rise** through the red edge into NIR. The floodplain pixel reaches 0.431 in B8, 13 times its red reflectance (0.033).
@@ -52,9 +55,15 @@ Reading the six reference curves in Figure 6.1:
 
 </Depth>
 
-## 6.2 Sensor bands
+<Note kind="key">
 
-A sensor does not measure a continuous curve. It averages over **wavelength intervals** called <Term id="band">spectral bands</Term>. Sentinel-2 has 13 bands; Landsat 8/9 OLI has 9. Choose "Band positions" in Figure 6.1 to see Sentinel-2's bands crowd into the red edge, where Landsat has none.
+Every surface has its own spectral curve. Water is dark in NIR and SWIR, vegetation jumps from red to NIR, bare soil brightens towards SWIR: the clearest differences lie where the eye cannot see.
+
+</Note>
+
+## 11.2 Sensor bands
+
+A sensor does not measure a continuous curve. It averages over **wavelength intervals** called <Term id="band">spectral bands</Term>. Sentinel-2 has 13 bands; Landsat 8/9 OLI has 9. Choose "Band positions" in Figure 11.1 to see Sentinel-2's bands crowd into the red edge, where Landsat has none.
 
 <Depth level="ref" title="Reference: Sentinel-2 bands used in this handbook">
 
@@ -79,25 +88,39 @@ Sources: ESA, Sentinel-2 Spectral Response Functions; USGS, Landsat 8–9 OLI ba
 
 </Depth>
 
-## 6.3 Colour composites: seeing the invisible
+<Note kind="key">
+
+An image records the spectral curve only where its bands sit. Band position decides what you can see: Sentinel-2 has three red-edge bands, Landsat 8/9 has none there.
+
+</Note>
+
+## 11.3 Colour composites: seeing the invisible
 
 A screen has only three colours, red, green and blue. A <Term id="composite">colour composite</Term> assigns any three spectral bands to them. Put NIR into red and vegetation turns bright red, because NIR is where vegetation is brightest.
 
 <Figure
-  title="Figure 6.2 — Build your own composite"
+  title="Figure 11.2 — Build your own composite"
   try="Pick 'True colour', then 'False-colour infrared': the floodplain east of the Red River turns from dark green to red. Then set the stretch to 'No stretch (0–1)': the image goes almost black, because real reflectance rarely exceeds 0.3."
-  source="As Figure 6.1. Per-band stretch limits are printed under the image."
+  source="As Figure 11.1. Per-band stretch limits are printed under the image."
 >
   <BandComposer client:visible lang="en" />
 </Figure>
 
+<Note kind="key">
+
 A <Term id="stretch">contrast stretch</Term> only changes the **display**. Every calculation in the next section uses the original reflectance. When you put an image in a report, state the band combination and the stretch.
 
-## 6.4 Normalized-difference indices
+</Note>
+
+## 11.4 Normalized-difference indices
 
 Instead of looking at bands one by one, we combine two "contrasting" bands into one number:
 
-<code class="formula">Index = (A − B) / (A + B)</code>
+<Formula label="Normalized-difference index" tex="I = \frac{A - B}{A + B}" where="
+I :: index value, from −1 to 1
+A :: band where the target surface is bright
+B :: band where it is dark
+" />
 
 A is a band where the target surface is bright, B a band where it is dark. The result always lies between −1 and 1. Dividing by the sum also reduces the effect of overall brightness, such as shaded slopes or scene-to-scene differences. The best-known index is <Term id="ndvi">NDVI</Term> = (NIR − Red) / (NIR + Red).
 
@@ -106,9 +129,9 @@ A is a band where the target surface is bright, B a band where it is dark. The r
 Same formula, opposite signs: 0.86 for vegetation, −0.10 for West Lake water. Now do it for all 262,144 pixels:
 
 <Figure
-  title="Figure 6.3 — Spectral index lab"
+  title="Figure 11.3 — Spectral index lab"
   try="Choose MNDWI, press 'Otsu threshold', then switch to 'Area ≥ threshold': water shows in blue. Now pick NDWI and set the threshold to 0.40: most of West Lake disappears. Why?"
-  source="As Figure 6.1. The colour scale is fixed at −1 to +1 for every index so maps are comparable. Area = pixel count × 100 m²."
+  source="As Figure 11.1. The colour scale is fixed at −1 to +1 for every index so maps are comparable. Area = pixel count × 100 m²."
 >
   <IndexLab client:visible lang="en" initial="NDVI" />
 </Figure>
@@ -129,16 +152,30 @@ West Lake covers roughly 5 km², yet the two water indices disagree strongly on 
 
 </div>
 
-At a threshold of 0 the two indices nearly agree. A "textbook" threshold of 0.4, however, makes NDWI miss most of West Lake, because the lake's NIR is not as low as the river's. MNDWI uses SWIR, which water absorbs almost completely, and is more robust. **Lesson: no threshold fits every scene.** Look at the histogram, try an automatic threshold such as Otsu, and check the result on the image.
+At a threshold of 0 the two indices nearly agree. A "textbook" threshold of 0.4, however, makes NDWI miss most of West Lake, because the lake's NIR is not as low as the river's. MNDWI uses SWIR, which water absorbs almost completely, and is more robust.
+
+<Note kind="key">
+
+**No threshold fits every scene.** Look at the histogram, try an automatic threshold such as Otsu, and check the result on the image.
+
+</Note>
 
 Likewise, <Term id="ndbi">NDBI</Term> ≥ 0 covers 42 % of the frame and includes both roofs (0.21) and bare soil (0.12). NDBI alone cannot separate built-up land from bare soil.
 
 <Depth level="advanced" title="Limitations and improved indices">
 
 - **NDVI saturation**: as ρRed → 0, NDVI → 1 whatever the NIR, so very dense canopies become hard to tell apart (<Term id="saturation">saturation</Term>). EVI (Huete et al., 2002) reduces this:
-  <code class="formula">EVI = 2.5 · (NIR − Red) / (NIR + 6·Red − 7.5·Blue + 1)</code>
+
+<Formula label="EVI" tex="\mathrm{EVI} = \frac{2.5\,(\mathrm{NIR} - \mathrm{R})}{\mathrm{NIR} + 6\mathrm{R} - 7.5\mathrm{B} + 1}" where="
+\mathrm{NIR},\ \mathrm{R},\ \mathrm{B} :: near-infrared, red and blue reflectance
+" />
+
 - **Soil background**: where vegetation is sparse, soil makes NDVI vary. SAVI (Huete, 1988) adds a factor L (often 0.5):
-  <code class="formula">SAVI = (1 + L) · (NIR − Red) / (NIR + Red + L)</code>
+
+<Formula label="SAVI" tex="\mathrm{SAVI} = \frac{(1 + L)(\mathrm{NIR} - \mathrm{R})}{\mathrm{NIR} + \mathrm{R} + L}" where="
+L :: soil-adjustment factor, often 0.5
+" />
+
 - **Two NDWIs**: McFeeters' (1996) NDWI uses green and NIR and maps open water. Gao's (1996) NDWI uses NIR and SWIR and measures **leaf moisture**. Always state the formula when you cite it.
 - **Otsu (1979)** picks the threshold that maximises between-class variance. It works well with a clearly bimodal histogram (like MNDWI here) and poorly when one class covers very few pixels.
 - Indices computed on **surface reflectance (Level-2A)** differ from those computed on top-of-atmosphere reflectance (Level-1C). Do not mix the two.
@@ -163,32 +200,42 @@ Re-select thresholds for each scene from its histogram and check them on the ima
 
 </Depth>
 
-## 6.5 NDVI through time: three rice crops in An Giang
+## 11.5 NDVI through time: three rice crops in An Giang
 
-One image is one moment. Put many dates side by side and the crop's <Term id="phenology">phenology</Term> appears. Figure 6.4 shows NDVI for a 2 × 2 km box in Tri Ton district (An Giang), where ESA WorldCover maps 96 % of the area as cropland.
+One image is one moment. Put many dates side by side and the crop's <Term id="phenology">phenology</Term> appears. Figure 11.4 shows NDVI for a 2 × 2 km box in Tri Ton district (An Giang), where ESA WorldCover maps 96 % of the area as cropland.
 
 <Figure
-  title="Figure 6.4 — NDVI of rice fields in Tri Ton, An Giang, 2023–2024"
+  title="Figure 11.4 — NDVI of rice fields in Tri Ton, An Giang, 2023–2024"
   try="Count the NDVI peaks in 2024. Find the Jul–Sep 2024 gap and the 'sudden dips' in January 2023."
   source="Copernicus Sentinel-2 L2A 2023–2024; cropland pixels only (ESA WorldCover 2021, class 40) that are cloud-free (Cloud Score+ cs_cdf ≥ 0.6). Lines break where two acquisitions are more than 40 days apart."
 >
   <NdviSeries client:visible lang="en" />
 </Figure>
 
-Reading the 2024 series:
+<Steps title="Reading the 2024 series" items={[
+  { tag: 'Jan–Mar', t: 'Winter–spring crop', d: 'NDVI peaks around 0.93 in late January 2024, falls quickly from mid-March and reaches 0.05 on 30 March, at harvest and land preparation.' },
+  { tag: 'Apr–Jun', t: 'Summer–autumn crop', d: 'NDVI rises again from late April to about 0.89 in late May. After 18 June there is no cloud-free image until 16 September.' },
+  { tag: 'Oct–Nov', t: 'Autumn–winter crop', d: 'Peaks around 0.89 on 21 October, then drops to 0.14 on 30 November.' },
+]} />
 
-1. **Winter–spring crop**: NDVI peaks around 0.93 in late January 2024, falls quickly from mid-March and reaches 0.05 on 30 March, at harvest and land preparation.
-2. **Summer–autumn crop**: NDVI rises again from late April to about 0.89 in late May. After 18 June there is no cloud-free image until 16 September.
-3. **Autumn–winter crop**: peaks around 0.89 on 21 October, then drops to 0.14 on 30 November.
+<Note kind="warn">
 
 This is an **interpretation** based on the curve's shape and the usual cropping calendar of the Long Xuyen Quadrangle. It has not been checked against actual sowing records.
 
+</Note>
+
 Two data-quality points stand out:
 
-- **Clouds**: only 70 of 296 acquisitions were kept. The wet season leaves a gap of nearly three months. That is why radar is needed (Chapter 11).
+- **Clouds**: only 70 of 296 acquisitions were kept. The wet season leaves a gap of nearly three months. That is why radar is needed (Chapter 16).
 - **Noise**: in January 2023 NDVI jumps 0.88 → 0.67 → 0.59 → 0.91 in just 20 days. Rice cannot wilt and recover that fast. Most likely haze or thin cloud slipped through the <Term id="cloud-mask">cloud mask</Term>. These points are kept on the chart. In analysis the series is usually smoothed (for example Savitzky–Golay) or its upper envelope is used.
 
-## 6.6 Hands-on
+<Note kind="key">
+
+An NDVI series reveals phenology: in Tri Ton, the three 2024 peaks match three rice crops. Clouds leave gaps and noise, so check how many images survive and smooth the series before reading it.
+
+</Note>
+
+## 11.6 Hands-on
 
 The Python notebook pulls the same Hanoi scene from Google Earth Engine, computes the four indices, plots histograms, picks an Otsu threshold and measures water area. The GEE script does the same in the Code Editor, with map layers.
 
@@ -200,7 +247,7 @@ The Python notebook pulls the same Hanoi scene from Google Earth Engine, compute
 2. Pick 5 built-up and 5 bare-soil pixels. Find a two-band combination that separates them better than NDBI.
 3. Plot an NDVI series for a rice area in the Red River Delta. How many crops per year?
 
-## 6.7 Review
+## 11.7 Review
 
 <Quiz client:visible lang="en" items={quiz} />
 

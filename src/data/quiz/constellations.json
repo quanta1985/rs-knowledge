@@ -1,0 +1,495 @@
+[
+ {
+  "q": {
+   "vi": "Vì sao Internet qua vệ tinh LEO có độ trễ thấp hơn nhiều so với vệ tinh địa tĩnh?",
+   "en": "Why does LEO satellite Internet have much lower latency than geostationary satellites?"
+  },
+  "options": [
+   {
+    "vi": "Vì vệ tinh ở gần: khoảng 500 km thay vì 35 786 km",
+    "en": "Because the satellites are close: about 500 km instead of 35,786 km"
+   },
+   {
+    "vi": "Vì tín hiệu LEO dùng tần số cao hơn nên đi nhanh hơn",
+    "en": "Because LEO signals use higher frequencies, which travel faster"
+   },
+   {
+    "vi": "Vì vệ tinh LEO xử lý dữ liệu nhanh hơn",
+    "en": "Because LEO satellites process data faster"
+   },
+   {
+    "vi": "Vì LEO không cần trạm mặt đất",
+    "en": "Because LEO needs no ground stations"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Sóng vô tuyến ở mọi tần số đều đi với tốc độ ánh sáng. Lên xuống một vệ tinh địa tĩnh mất ít nhất 238,7 ms; lên xuống một vệ tinh ở 480 km chỉ khoảng 3,2 ms.",
+   "en": "Radio waves of every frequency travel at the speed of light. Up and down via a geostationary satellite takes at least 238.7 ms; via a satellite at 480 km only about 3.2 ms."
+  }
+ },
+ {
+  "q": {
+   "vi": "Cái giá phải trả khi đưa vệ tinh xuống thấp là gì?",
+   "en": "What is the price of flying satellites lower?"
+  },
+  "options": [
+   {
+    "vi": "Mỗi vệ tinh phủ vùng nhỏ hơn nên cần nhiều vệ tinh hơn",
+    "en": "Each satellite covers a smaller area, so many more are needed"
+   },
+   {
+    "vi": "Tín hiệu bị suy hao nhiều hơn",
+    "en": "The signal is attenuated more"
+   },
+   {
+    "vi": "Vệ tinh đứng yên trên bầu trời nên khó bắt",
+    "en": "Satellites stand still in the sky and are hard to track"
+   },
+   {
+    "vi": "Không thể dùng ăng-ten mảng pha",
+    "en": "Phased-array antennas cannot be used"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Ở 480 km với góc ngẩng tối thiểu 25°, bán kính vùng phủ chỉ khoảng 841 km, nên cần hàng trăm vệ tinh mới phủ liên tục toàn cầu; một vệ tinh địa tĩnh thấy gần một phần ba Trái Đất.",
+   "en": "At 480 km with a 25° minimum elevation the footprint radius is only about 841 km, so hundreds of satellites are needed for continuous global coverage; one geostationary satellite sees nearly a third of the Earth."
+  }
+ },
+ {
+  "q": {
+   "vi": "Ký hiệu Walker 53°: 1584/72/1 nghĩa là gì?",
+   "en": "What does the Walker notation 53°: 1584/72/1 mean?"
+  },
+  "options": [
+   {
+    "vi": "1584 vệ tinh trên 72 mặt phẳng nghiêng 53°, mỗi mặt phẳng 22 vệ tinh, hệ số pha 1",
+    "en": "1584 satellites on 72 planes inclined 53°, 22 per plane, phasing factor 1"
+   },
+   {
+    "vi": "1584 km độ cao, 72 phút chu kỳ, 1 vệ tinh",
+    "en": "1584 km altitude, 72-minute period, 1 satellite"
+   },
+   {
+    "vi": "72 vệ tinh trên 1584 mặt phẳng",
+    "en": "72 satellites on 1584 planes"
+   },
+   {
+    "vi": "1584 vệ tinh, 72 trạm mặt đất, 1 nhà khai thác",
+    "en": "1584 satellites, 72 ground stations, 1 operator"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "i: T/P/F = độ nghiêng: tổng số vệ tinh / số mặt phẳng / hệ số pha. 1584 / 72 = 22 vệ tinh mỗi mặt phẳng; vệ tinh ở mặt phẳng kề lệch 1·360°/1584.",
+   "en": "i: T/P/F = inclination: total satellites / planes / phasing. 1584 / 72 = 22 per plane; satellites in neighbouring planes are offset by 1·360°/1584."
+  }
+ },
+ {
+  "q": {
+   "vi": "Trong ảnh chụp CelesTrak ngày 04/11/2026, phần lớn vệ tinh Starlink bay ở độ cao nào?",
+   "en": "In the 4 Nov 2026 CelesTrak snapshot, at what altitude do most Starlink satellites fly?"
+  },
+  "options": [
+   {
+    "vi": "Khoảng 460–485 km",
+    "en": "About 460–485 km"
+   },
+   {
+    "vi": "Khoảng 1200 km",
+    "en": "About 1200 km"
+   },
+   {
+    "vi": "Khoảng 20 000 km",
+    "en": "About 20,000 km"
+   },
+   {
+    "vi": "Khoảng 35 786 km",
+    "en": "About 35,786 km"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Độ cao trung vị các lớp là 463–483 km: SpaceX đã hạ các vệ tinh ở khoảng 550 km xuống khoảng 480 km trong năm 2026. 1200 km là OneWeb, 20 000 km là GPS, 35 786 km là địa tĩnh.",
+   "en": "The shells' median altitudes are 463–483 km: SpaceX lowered its satellites from about 550 km to about 480 km during 2026. 1200 km is OneWeb, 20,000 km is GPS, 35,786 km is geostationary."
+  }
+ },
+ {
+  "q": {
+   "vi": "OneWeb dùng độ nghiêng khoảng 88°, Starlink có các lớp 43° và 53°. Vì sao?",
+   "en": "OneWeb uses about 88° inclination; Starlink has 43° and 53° shells. Why?"
+  },
+  "options": [
+   {
+    "vi": "Quỹ đạo gần cực phủ cả vùng cực; độ nghiêng vừa phải dồn vệ tinh về vĩ độ trung bình, nơi có nhiều người dùng",
+    "en": "Near-polar orbits cover the poles; moderate inclinations concentrate satellites over mid-latitudes, where most users are"
+   },
+   {
+    "vi": "Độ nghiêng thấp giúp vệ tinh bay nhanh hơn",
+    "en": "Low inclination makes satellites faster"
+   },
+   {
+    "vi": "Độ nghiêng cao làm giảm độ trễ",
+    "en": "High inclination reduces latency"
+   },
+   {
+    "vi": "Không có lý do, chỉ do bãi phóng",
+    "en": "No reason, it only depends on the launch site"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Vệ tinh dành nhiều thời gian nhất gần vĩ độ bằng độ nghiêng của nó. Một lớp 53° phục vụ dày nhất quanh 40–53°; lớp 43° tăng dung lượng cho vùng nhiệt đới và cận nhiệt đới như Việt Nam.",
+   "en": "A satellite spends most of its time near the latitude equal to its inclination. A 53° shell serves most densely around 40–53°; a 43° shell adds capacity for tropical and subtropical regions such as Viet Nam."
+  }
+ },
+ {
+  "q": {
+   "vi": "Liên kết laser giữa vệ tinh mang lại lợi ích gì?",
+   "en": "What do laser inter-satellite links provide?"
+  },
+  "options": [
+   {
+    "vi": "Dữ liệu đi trong chân không (nhanh hơn trong sợi quang) và phục vụ được nơi không có trạm cổng gần",
+    "en": "Data travels in vacuum (faster than in glass fibre) and areas without a nearby gateway can be served"
+   },
+   {
+    "vi": "Không cần ăng-ten ở thuê bao",
+    "en": "Users need no antenna"
+   },
+   {
+    "vi": "Vệ tinh không cần năng lượng",
+    "en": "Satellites need no power"
+   },
+   {
+    "vi": "Loại bỏ hoàn toàn độ trễ",
+    "en": "Latency disappears entirely"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Ánh sáng trong sợi quang chậm khoảng 1,47 lần so với chân không, và cáp không đi theo đường thẳng. Với chặng dài như Hà Nội – Frankfurt, cận dưới khứ hồi qua LEO (69,0 ms) thấp hơn qua cáp (128,3 ms với hệ số tuyến 1,5).",
+   "en": "Light in fibre is about 1.47 times slower than in vacuum, and cables do not run straight. On long routes such as Hanoi–Frankfurt the LEO lower bound (69.0 ms round trip) beats fibre (128.3 ms with a route factor of 1.5)."
+  }
+ },
+ {
+  "q": {
+   "vi": "Ở Hà Nội, với góc ngẩng tối thiểu 25°, trung bình có bao nhiêu vệ tinh Starlink trên bầu trời trong 24 giờ của ảnh chụp?",
+   "en": "In Hanoi, with a 25° minimum elevation, how many Starlink satellites are overhead on average over the snapshot's 24 hours?"
+  },
+  "options": [
+   {
+    "vi": "Khoảng 42",
+    "en": "About 42"
+   },
+   {
+    "vi": "Khoảng 2",
+    "en": "About 2"
+   },
+   {
+    "vi": "Khoảng 400",
+    "en": "About 400"
+   },
+   {
+    "vi": "Khoảng 4000",
+    "en": "About 4000"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Trung bình 42,1 (ít nhất 28, nhiều nhất 64). Nhiều vệ tinh cùng lúc cho phép chia thuê bao ra nhiều búp sóng và nhiều vệ tinh: chòm sao lớn chủ yếu vì dung lượng, không chỉ vì độ phủ.",
+   "en": "42.1 on average (28 to 64). Many satellites at once let users be spread over many beams and satellites: large constellations are sized for capacity, not just coverage."
+  }
+ },
+ {
+  "q": {
+   "vi": "Vì sao Sentinel-2 dùng hai vệ tinh trên cùng quỹ đạo lệch nhau 180°?",
+   "en": "Why does Sentinel-2 fly two satellites in the same orbit 180° apart?"
+  },
+  "options": [
+   {
+    "vi": "Để chu kỳ quay lại ở xích đạo giảm từ 10 xuống 5 ngày",
+    "en": "To cut the revisit at the equator from 10 to 5 days"
+   },
+   {
+    "vi": "Để chụp ảnh lập thể",
+    "en": "To take stereo images"
+   },
+   {
+    "vi": "Để một vệ tinh làm trạm chuyển tiếp cho vệ tinh kia",
+    "en": "So one satellite relays the other"
+   },
+   {
+    "vi": "Để giảm độ trễ truyền dữ liệu",
+    "en": "To reduce data latency"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Đây là một chòm sao viễn thám nhỏ: vệ tinh thứ hai đi qua đúng những vết bay vệ tinh đầu đi qua 5 ngày trước (Hình 2.9). Chòm sao hàng trăm vệ tinh nhỏ như PlanetScope đạt tới chụp hằng ngày.",
+   "en": "This is a small Earth-observation constellation: the second satellite flies the tracks the first flew five days earlier (Figure 2.9). Constellations of hundreds of small satellites such as PlanetScope reach daily imaging."
+  }
+ },
+ {
+  "q": {
+   "vi": "Vì sao các nhà khai thác siêu chòm sao chọn quỹ đạo thấp dưới khoảng 600 km từ góc độ rác vũ trụ?",
+   "en": "From a debris point of view, why do megaconstellation operators prefer orbits below about 600 km?"
+  },
+  "options": [
+   {
+    "vi": "Lực cản khí quyển kéo vệ tinh hỏng và mảnh vỡ rơi về trong vài tháng đến vài năm",
+    "en": "Atmospheric drag brings dead satellites and fragments down within months to a few years"
+   },
+   {
+    "vi": "Ở thấp không có rác vũ trụ",
+    "en": "There is no debris at low altitude"
+   },
+   {
+    "vi": "Vệ tinh thấp không thể va chạm",
+    "en": "Low satellites cannot collide"
+   },
+   {
+    "vi": "Quy định cấm bay cao hơn",
+    "en": "Regulations forbid higher orbits"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "SpaceX nêu việc hạ từ khoảng 550 km xuống 480 km rút thời gian rơi tự nhiên của vệ tinh hỏng từ hơn bốn năm xuống vài tháng. Ở 1200 km (OneWeb), lực cản gần như không còn nên vệ tinh hỏng ở lại quỹ đạo rất lâu, trừ khi được chủ động đưa xuống.",
+   "en": "SpaceX said lowering from about 550 km to 480 km cuts the natural decay time of a failed satellite from over four years to a few months. At 1200 km (OneWeb) drag is almost gone, so a dead satellite stays in orbit for a very long time unless it is actively brought down."
+  }
+ },
+ {
+  "q": {
+   "vi": "Theo ước lượng 'dải phủ' cho quỹ đạo cực, phủ liên tục toàn cầu ở 550 km với góc ngẩng 25° cần khoảng bao nhiêu vệ tinh?",
+   "en": "By the polar 'streets of coverage' estimate, about how many satellites give continuous global coverage at 550 km with a 25° minimum elevation?"
+  },
+  "options": [
+   {
+    "vi": "Khoảng 360",
+    "en": "About 360"
+   },
+   {
+    "vi": "Khoảng 24",
+    "en": "About 24"
+   },
+   {
+    "vi": "Khoảng 3600",
+    "en": "About 3600"
+   },
+   {
+    "vi": "Khoảng 36 000",
+    "en": "About 36,000"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "24 vệ tinh mỗi mặt phẳng × 15 mặt phẳng = 360; cận dưới theo diện tích là 185. Cùng phép tính cho Iridium (780 km, 8,2°) cho đúng 66 = 11 × 6, bằng số vệ tinh hoạt động của hệ thật.",
+   "en": "24 per plane × 15 planes = 360; the area lower bound is 185. The same estimate for Iridium (780 km, 8.2°) gives exactly 66 = 11 × 6, the real system's operational count."
+  }
+ },
+ {
+  "q": {
+   "vi": "Trong kiểu bent-pipe, điều kiện để gói tin từ người dùng xuống được trạm cổng là gì?",
+   "en": "In a bent-pipe link, what must hold for a user's packet to reach a gateway?"
+  },
+  "options": [
+   {
+    "vi": "Người dùng và trạm cổng cùng nhìn thấy một vệ tinh",
+    "en": "The user and the gateway both see the same satellite"
+   },
+   {
+    "vi": "Vệ tinh phải có laser",
+    "en": "The satellite must have lasers"
+   },
+   {
+    "vi": "Trạm cổng phải ở cùng thành phố",
+    "en": "The gateway must be in the same city"
+   },
+   {
+    "vi": "Vệ tinh phải ở GEO",
+    "en": "The satellite must be in GEO"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Bent-pipe chỉ chuyển tiếp lên rồi xuống, nên cả hai đầu phải cùng thấy một vệ tinh. Ở 480 km với góc ngẩng 25° ở hai đầu, hai đầu phải cách nhau không quá 1682 km.",
+   "en": "A bent pipe only relays up then down, so both ends must see one satellite. At 480 km with a 25° mask at both ends, they must be at most 1,682 km apart."
+  }
+ },
+ {
+  "q": {
+   "vi": "Các nghiên cứu đo đạc thấy mạng Starlink phân bổ lại người dùng – vệ tinh khoảng bao lâu một lần?",
+   "en": "Measurement studies see the Starlink network reallocate users to satellites about how often?"
+  },
+  "options": [
+   {
+    "vi": "Mỗi 15 giây",
+    "en": "Every 15 seconds"
+   },
+   {
+    "vi": "Mỗi giờ",
+    "en": "Every hour"
+   },
+   {
+    "vi": "Mỗi 90 phút, một vòng quỹ đạo",
+    "en": "Every 90 minutes, one orbit"
+   },
+   {
+    "vi": "Chỉ khi vệ tinh khuất chân trời",
+    "en": "Only when the satellite sets"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Độ trễ đổi bậc ở cùng các giây mỗi phút, cách nhau 15 giây (Tanveer và cộng sự 2023). SpaceX chưa công bố thuật toán.",
+   "en": "Latency steps at the same seconds of every minute, 15 seconds apart (Tanveer et al. 2023). SpaceX has not published the algorithm."
+  }
+ },
+ {
+  "q": {
+   "vi": "Mạng laser Starlink truyền hơn 42 PB mỗi ngày (SpaceX, 1/2024). Tốc độ trung bình tương ứng khoảng bao nhiêu?",
+   "en": "The Starlink laser network carries more than 42 PB per day (SpaceX, Jan 2024). What average rate is that?"
+  },
+  "options": [
+   {
+    "vi": "Khoảng 3,9 Tbit/s",
+    "en": "About 3.9 Tbit/s"
+   },
+   {
+    "vi": "Khoảng 390 Tbit/s",
+    "en": "About 390 Tbit/s"
+   },
+   {
+    "vi": "Khoảng 0,5 Tbit/s",
+    "en": "About 0.5 Tbit/s"
+   },
+   {
+    "vi": "Khoảng 42 Tbit/s",
+    "en": "About 42 Tbit/s"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "42 × 10¹⁵ byte × 8 / 86 400 s = 3,89 × 10¹² bit/s.",
+   "en": "42 × 10¹⁵ bytes × 8 / 86,400 s = 3.89 × 10¹² bit/s."
+  }
+ },
+ {
+  "q": {
+   "vi": "Vì sao đường qua laser giữa vệ tinh có thể nhanh hơn cáp quang Hà Nội – Frankfurt dù dài hơn vòng lớn 26 %?",
+   "en": "Why can the laser path beat fibre Hanoi – Frankfurt although it is 26 % longer than the great circle?"
+  },
+  "options": [
+   {
+    "vi": "Ánh sáng trong chân không nhanh hơn trong thủy tinh khoảng 1,47 lần",
+    "en": "Light in vacuum is about 1.47 times faster than in glass"
+   },
+   {
+    "vi": "Laser có tần số cao hơn",
+    "en": "Lasers have a higher frequency"
+   },
+   {
+    "vi": "Vệ tinh nén dữ liệu",
+    "en": "Satellites compress the data"
+   },
+   {
+    "vi": "Cáp quang phải đi qua GEO",
+    "en": "Fibre has to go via GEO"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Khứ hồi qua lưới laser minh họa 73,2 ms, cáp thẳng lý tưởng 85,5 ms, cáp thật (hệ số 1,5) 128,3 ms.",
+   "en": "Round trip over the illustrative laser mesh 73.2 ms, ideal straight fibre 85.5 ms, real fibre (factor 1.5) 128.3 ms."
+  }
+ },
+ {
+  "q": {
+   "vi": "Direct-to-Cell yêu cầu gì ở điện thoại của người dùng?",
+   "en": "What does Direct-to-Cell require of the user's phone?"
+  },
+  "options": [
+   {
+    "vi": "Không cần phần cứng đặc biệt: điện thoại LTE thường, dùng phổ của nhà mạng đối tác",
+    "en": "No special hardware: an ordinary LTE phone on a partner operator's spectrum"
+   },
+   {
+    "vi": "Chip mới hỗ trợ băng Ku",
+    "en": "A new Ku-band chip"
+   },
+   {
+    "vi": "Ăng-ten vệ tinh gắn ngoài",
+    "en": "An external satellite antenna"
+   },
+   {
+    "vi": "Phải là điện thoại Iridium",
+    "en": "It must be an Iridium phone"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Phần khó dồn hết lên vệ tinh: ăng-ten rất lớn để bù cho điện thoại 0,2 W, 0 dBi, và bù trước Doppler khoảng 41 kHz ở 1,9 GHz.",
+   "en": "The hard part moves to the satellite: a very large antenna to make up for a 0.2 W, 0 dBi phone, and Doppler pre-compensation of about 41 kHz at 1.9 GHz."
+  }
+ },
+ {
+  "q": {
+   "vi": "Tăng diện tích ăng-ten vệ tinh Direct-to-Cell từ 1 m² lên 64 m² làm gì?",
+   "en": "What does growing a Direct-to-Cell satellite antenna from 1 m² to 64 m² do?"
+  },
+  "options": [
+   {
+    "vi": "Tăng SNR thêm 18 dB và thu hẹp búp sóng 8 lần",
+    "en": "Adds 18 dB of SNR and narrows the beam 8 times"
+   },
+   {
+    "vi": "Giảm Doppler",
+    "en": "Reduces Doppler"
+   },
+   {
+    "vi": "Giảm khoảng cách tới điện thoại",
+    "en": "Shortens the range to the phone"
+   },
+   {
+    "vi": "Không đổi gì vì điện thoại là giới hạn",
+    "en": "Nothing, because the phone is the limit"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Độ lợi tỉ lệ với diện tích: 10·log10(64) ≈ 18 dB. Búp sóng tỉ lệ nghịch với cạnh ăng-ten √A: hẹp đi 8 lần, nên ô nhỏ hơn và dùng lại tần số được nhiều hơn.",
+   "en": "Gain is proportional to area: 10·log10(64) ≈ 18 dB. Beamwidth scales with 1/√A: 8 times narrower, so smaller cells and more frequency reuse."
+  }
+ },
+ {
+  "q": {
+   "vi": "Đảo Trường Sa Lớn cách trạm cổng TP.HCM 620 km. Người dùng ở đó có cần laser giữa vệ tinh để tới trạm cổng không (480 km, góc ngẩng 25° hai đầu)?",
+   "en": "Truong Sa Lon island is 620 km from the Ho Chi Minh City gateway. Does a user there need inter-satellite lasers to reach it (480 km, 25° mask at both ends)?"
+  },
+  "options": [
+   {
+    "vi": "Không: 620 km nằm trong tầm bent-pipe 1682 km",
+    "en": "No: 620 km is within the 1,682 km bent-pipe reach"
+   },
+   {
+    "vi": "Có: mọi đảo đều cần laser",
+    "en": "Yes: every island needs lasers"
+   },
+   {
+    "vi": "Có: vì ở trên biển",
+    "en": "Yes: because it is at sea"
+   },
+   {
+    "vi": "Không thể kết nối",
+    "en": "It cannot connect at all"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Tầm bent-pipe là 2λ = 1682 km ở 480 km với góc ngẩng 25°. Cả đảo Phú Lâm (Hoàng Sa, cách Đà Nẵng 450 km) cũng trong tầm.",
+   "en": "Bent-pipe reach is 2λ = 1,682 km at 480 km with a 25° mask. Phu Lam island (Hoang Sa, 450 km from Da Nang) is within reach too."
+  }
+ }
+]

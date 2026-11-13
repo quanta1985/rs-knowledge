@@ -6,9 +6,9 @@
 from labkit import MD, PY, main
 
 CELLS = [
-    (MD, """# Lab 4 — Bốn loại độ phân giải / The four resolutions
+    (MD, """# Lab 9 — Bốn loại độ phân giải / The four resolutions
 
-**Sổ tay Viễn thám & GIS — Chương 4** · [Mở chương / Open chapter](https://quanta1985.github.io/rs-knowledge/vi/ch04-resolution/)
+**Sổ tay Viễn thám & GIS — Chương 9** · [Mở chương / Open chapter](https://quanta1985.github.io/rs-knowledge/vi/ch04-resolution/)
 
 1. Tải cùng khung Hồ Tây từ Sentinel-2 (10 m), Landsat 9 (30 m), MODIS (250 m, 500 m) / Load the same West Lake frame from four products.
 2. So sánh diện tích NDVI < 0 / Compare the NDVI < 0 area.
@@ -80,7 +80,7 @@ plt.title('Diện tích NDVI < 0 / Area with NDVI < 0'); plt.grid(alpha=.3); plt
     (MD, """## 3. Ngưỡng pixel hỗn hợp / Mixed-pixel threshold
 
 ρ(pixel) = f · ρ(nước) + (1 − f) · ρ(thực vật). NDVI < 0 khi NIR < Đỏ / when NIR < Red."""),
-    (PY, """water = {'red': 0.038, 'nir': 0.031}   # Hồ Tây, 3x3 px (Chương 6)
+    (PY, """water = {'red': 0.038, 'nir': 0.031}   # Hồ Tây, 3x3 px (Chương 11)
 veg = {'red': 0.033, 'nir': 0.431}     # thực vật bãi bồi / floodplain vegetation
 dA, dB = water['nir'] - water['red'], veg['nir'] - veg['red']
 f_star = dB / (dB - dA)

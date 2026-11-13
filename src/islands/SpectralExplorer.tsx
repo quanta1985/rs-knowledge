@@ -69,7 +69,7 @@ export default function SpectralExplorer({ lang }: { lang: Lang }) {
       id: p.id, label: p.label[lang], color: CLASS_STYLE[p.id].color, dash: CLASS_STYLE[p.id].dash,
       marker: CLASS_STYLE[p.id].marker, points: wl.map((x, i) => [x, p.mean[i]] as [number, number]),
     })),
-    { id: 'cursor', label: T.pixel, color: '#e2e8f0', width: 3.5, marker: 'circle', points: wl.map((x, i) => [x, spec[i]] as [number, number]) },
+    { id: 'cursor', label: T.pixel, color: 'var(--st-fg)', width: 3.5, marker: 'circle', points: wl.map((x, i) => [x, spec[i]] as [number, number]) },
   ];
   const spans: Span[] = sensor === 's2'
     ? cube.bands.map((b, i) => ({ x0: S2[b].c - S2[b].w / 2, x1: S2[b].c + S2[b].w / 2, label: b.replace('B', ''), row: i % 2 }))
@@ -85,7 +85,7 @@ export default function SpectralExplorer({ lang }: { lang: Lang }) {
       { k: T.ll, v: `${nf(lat, 4)}°N ${nf(lon, 4)}°E` },
       { k: 'NDVI', v: Number.isNaN(ndvi) ? '—' : nf(ndvi, 2), tone: 'accent' },
       ...(['B3', 'B4', 'B8', 'B11'] as const).map((b) => ({ k: `${b} · ${Math.round(S2[b].c)} nm`, v: nf(spec[bandIndex(cube, b)]), tone: 'muted' as const })),
-    ]}><p style={{ margin: '6px 0 0', fontSize: '0.72rem', color: '#94a3b8', fontFamily: 'var(--font-body)' }}>{T.hint}</p></StatPanel>
+    ]}><p style={{ margin: '6px 0 0', fontSize: '0.72rem', color: 'var(--st-muted)', fontFamily: 'var(--font-body)' }}>{T.hint}</p></StatPanel>
   );
   const bar = <>
     <Pills label={T.view} value={view} onChange={setView} options={[{ v: 'tc', label: T.tc }, { v: 'fc', label: T.fc }]} />
@@ -114,7 +114,7 @@ export default function SpectralExplorer({ lang }: { lang: Lang }) {
             </button>
           ))}
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: '0.8rem' }}>
-            <svg width="26" height="12" aria-hidden="true"><line x1="1" x2="25" y1="6" y2="6" stroke="#e2e8f0" strokeWidth="3.5" /></svg>{T.pixel}
+            <svg width="26" height="12" aria-hidden="true"><line x1="1" x2="25" y1="6" y2="6" stroke="var(--st-fg)" strokeWidth="3.5" /></svg>{T.pixel}
           </span>
         </div>
       </div>

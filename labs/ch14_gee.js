@@ -1,5 +1,5 @@
 /**
- * Lab 14 — Lọc, map, reduce trong Earth Engine / Filter, map, reduce in Earth Engine · Sổ tay Viễn thám & GIS
+ * Lab 19 — Lọc, map, reduce trong Earth Engine / Filter, map, reduce in Earth Engine · Sổ tay Viễn thám & GIS
  * Dán vào https://code.earthengine.google.com và bấm Run.
  * Paste into https://code.earthengine.google.com and press Run.
  *

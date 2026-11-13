@@ -1,6 +1,6 @@
 ---
 title: Viet Nam case studies
-n: 13
+n: 18
 summary: The methods of the earlier chapters applied to real problems in Viet Nam. A map gathers nine cases, then three are worked through with numbers computed directly in Earth Engine - tree-cover loss in the Central Highlands, the Ho Chi Minh City heat island, and NO₂ across the country.
 objectives:
   - Link each real-world problem to its data, its method and the chapter that teaches it.
@@ -13,6 +13,9 @@ import Term from '../../../components/Term.astro';
 import Depth from '../../../components/Depth.astro';
 import Figure from '../../../components/Figure.astro';
 import LabLinks from '../../../components/LabLinks.astro';
+import Note from '../../../components/Note.astro';
+import Stats from '../../../components/Stats.astro';
+import Steps from '../../../components/Steps.astro';
 import CaseMap from '../../../islands/CaseMap.tsx';
 import ForestLossMap from '../../../islands/ForestLossMap.tsx';
 import UrbanHeatMap from '../../../islands/UrbanHeatMap.tsx';
@@ -21,12 +24,12 @@ import No2Series from '../../../islands/No2Series.tsx';
 import Quiz from '../../../islands/Quiz.tsx';
 import quiz from '../../../data/quiz/ch13.json';
 
-## 13.1 Map of cases
+## 18.1 Map of cases
 
 Each case answers four questions: **where, when, with which data, by which method**. Six cases have numbers computed in this handbook (marked "computed in this handbook"); the other three summarise published results.
 
 <Figure
-  title="Figure 13.1 — Nine remote-sensing cases in Viet Nam"
+  title="Figure 18.1 — Nine remote-sensing cases in Viet Nam"
   try="Click Yagi, Ca Mau and the Central Highlands in turn. Which cases use radar, which use optical images, and why? Open the suggested chapter to see the method."
   source="Coloured areas are illustrative extents with approximate boundaries (except the Hanoi and HCMC image frames and the 5 Central Highlands provinces from FAO GAUL 2015). Numbers: the chapters cited and the references at the end of this chapter. Basemap © Esri, Maxar, Earthstar Geographics."
 >
@@ -35,25 +38,35 @@ Each case answers four questions: **where, when, with which data, by which metho
 
 Look at the "Data" row in the panel. Problems that occur in the rainy season and need many dates (floods, rice) use radar. Problems that look back decades (forest, coast) use the Landsat archive, which starts in 1984. Atmospheric problems (NO₂) need a dedicated sensor, TROPOMI.
 
-## 13.2 Tree-cover loss in the Central Highlands, 2001–2025
+<Note kind="key">
+
+Each problem has the data that suits it: the rainy season and many dates call for radar, looking back decades calls for the Landsat archive, and measuring the atmosphere needs a dedicated sensor such as TROPOMI.
+
+</Note>
+
+## 18.2 Tree-cover loss in the Central Highlands, 2001–2025
 
 The <Term id="tree-cover-loss">Global Forest Change</Term> dataset of Hansen et al. (2013) classifies the whole Landsat archive to find each 30 m pixel that lost tree cover and the year it happened. It is updated every year; this chapter uses version 1.13 (to 2025).
 
-How the handbook computes it:
-
-1. "Forest in 2000" = pixels with canopy cover ≥ 30 % in 2000.
-2. "Loss" = forest-2000 pixels flagged as lost in 2001–2025.
-3. Areas are summed by year and province, within the five Central Highlands provinces as they were before the 2025 provincial reorganisation (FAO GAUL 2015).
+<Steps title="How the handbook computes it" items={[
+  { t: 'Forest in 2000', d: 'Pixels with canopy cover ≥ 30 % in 2000.' },
+  { t: 'Loss', d: 'Forest-2000 pixels flagged as lost in 2001–2025.' },
+  { t: 'Sum the areas', d: 'By year and province, within the five Central Highlands provinces as they were before the 2025 provincial reorganisation (FAO GAUL 2015).' },
+]} />
 
 <Figure
-  title="Figure 13.2 — Tree-cover loss in the Central Highlands by year and province"
+  title="Figure 18.2 — Tree-cover loss in the Central Highlands by year and province"
   try="Drag 'Show loss up to' from 2001 to 2025 and watch the losses spread. Pick each province: which lost the largest share of its 2000 tree cover? Switch to 'Forest in 2000' to compare."
   source="UMD/hansen/global_forest_change_2025_v1_13 (Hansen et al. 2013, updated to 2025). Forest in 2000: treecover2000 ≥ 30 %. Map: 0.004° grid (~440 m); a cell is shown when ≥ 5 % of its 30 m pixels were lost; colour = mean loss year. Statistics computed at 30 m in Earth Engine. Province boundaries: FAO GAUL 2015 (pre-2025). Basemap © Esri, Maxar, Earthstar Geographics."
 >
   <ForestLossMap client:visible lang="en" />
 </Figure>
 
-The five provinces had **3.16 million ha** of tree cover in 2000. In 2001–2025, **709 thousand ha** were lost, i.e. **22.5 %**.
+<Stats items={[
+  { v: '3.16', u: 'million ha', l: 'tree cover in 2000 in the five provinces' },
+  { v: '709', u: 'thousand ha', l: 'lost in 2001–2025' },
+  { v: '22.5', u: '%', l: 'share of the 2000 tree cover lost' },
+]} caption="Central Highlands, Hansen Global Forest Change v1.13, 30 % canopy threshold." />
 
 | Province | Tree cover 2000 (ha) | Lost 2001–2025 (ha) | Share |
 |---|---|---|---|
@@ -65,24 +78,31 @@ The five provinces had **3.16 million ha** of tree cover in 2000. In 2001–2025
 
 The region's peak year was 2010 (66,251 ha). By period: 281 thousand ha in 2001–2010, 356 thousand ha in 2011–2020 and 72 thousand ha in 2021–2025.
 
-**Reading the numbers correctly:**
+<Note kind="myth">
 
-- "Tree-cover loss" is **not the same as deforestation**. Hansen records every stand-replacing disturbance: clearing of natural forest, but also rotational harvest of plantations, fire and storm damage. An acacia plantation that is harvested and replanted still counts as "loss".
+"Tree-cover loss" is **not the same as deforestation**. Hansen records every stand-replacing disturbance: clearing of natural forest, but also rotational harvest of plantations, fire and storm damage. An acacia plantation that is harvested and replanted still counts as "loss".
+
+</Note>
+
+<Note kind="warn" label="Reading the numbers correctly">
+
 - Regrowth after 2000 is not subtracted, so 22.5 % is not the net decline of forest area.
 - The algorithm has been improved across updates, and the dataset documentation advises caution when comparing years before and after about 2011. Read the difference between periods above as a trend, not a conclusion.
 
+</Note>
+
 <Depth level="advanced" title="Why not a 10 % or 50 % canopy threshold?">
 
-The canopy threshold decides what counts as "forest". A low threshold adds orchards and shrubland; a high one keeps only closed forest. FAO's forest definition uses 10 %; many studies using Hansen choose 25–30 %. Changing the threshold changes both the 2000 area and the loss. Exercise 1 in section 13.6 asks you to recompute with other thresholds.
+The canopy threshold decides what counts as "forest". A low threshold adds orchards and shrubland; a high one keeps only closed forest. FAO's forest definition uses 10 %; many studies using Hansen choose 25–30 %. Changing the threshold changes both the 2000 area and the loss. Exercise 1 in section 18.6 asks you to recompute with other thresholds.
 
 </Depth>
 
-## 13.3 Ho Chi Minh City urban heat island
+## 18.3 Ho Chi Minh City urban heat island
 
 Concrete and metal roofs absorb much radiation and evaporate little water, so they get hotter than vegetation and water. This is the <Term id="urban-heat-island">urban heat island</Term>. Landsat's thermal band measures <Term id="lst">land surface temperature (LST)</Term> at 100 m (resampled to 30 m in the Level-2 product).
 
 <Figure
-  title="Figure 13.3 — Land surface temperature in Ho Chi Minh City, dry season 2024"
+  title="Figure 18.3 — Land surface temperature in Ho Chi Minh City, dry season 2024"
   try="Hover from the central districts to the Saigon River and green areas: how much does the temperature drop? Switch to 'Hot spots' and raise the threshold to 44 °C: where are the hot spots? Compare with the 'Land cover' layer."
   source="Landsat 8/9 Collection 2 Level-2, ST_B10 × 0.00341802 + 149.0 K, 42 scenes Jan–Apr 2024 (CLOUD_COVER < 30 %), clouds masked with QA_PIXEL (bits 1–4), per-pixel median, 100 m UTM 48N grid (40 × 40 km frame). Land cover: ESA WorldCover v200 (2021). Fixed colour scale 28–46 °C. Landsat courtesy of USGS. Basemap © Esri, Maxar, Earthstar Geographics."
 >
@@ -103,39 +123,57 @@ Mean by land cover in the 40 × 40 km frame:
 
 Built-up land is **4.1 °C** warmer than tree cover and **8.6 °C** warmer than water. The area with LST ≥ 42 °C is **232.5 km²**, about 15 % of the frame. The frame median is 38.4 °C; 90 % of pixels lie between 30.7 and 44.2 °C.
 
-**Caveats:**
+<Note kind="key">
+
+Surface temperature follows land cover: built-up land is hottest, water and mangroves coolest. Within one frame the two ends differ by 8.6 °C.
+
+</Note>
+
+<Note kind="warn" label="Caveats">
 
 - LST is the temperature **of the surface** at overpass time (around 10 a.m.), not the air temperature measured at weather stations. A metal roof can be tens of degrees hotter than the air.
 - The median of 42 dry-season scenes gives a "typical" picture, not the hottest day.
 - WorldCover is from 2021 while LST is from 2024, so areas built after 2021 are assigned the wrong class.
 
-## 13.4 Air quality: NO₂ from Sentinel-5P
+</Note>
+
+## 18.4 Air quality: NO₂ from Sentinel-5P
 
 NO₂ comes mainly from burning fuel (traffic, coal power plants, industry) and biomass. The TROPOMI instrument on Sentinel-5P measures the spectrum of sunlight scattered back by the atmosphere, from which the <Term id="tropospheric-no2">tropospheric NO₂ column</Term> is retrieved: the number of NO₂ molecules from the ground to the top of the troposphere per square metre. Pixels are about 5.5 × 3.5 km.
 
 <Figure
-  title="Figure 13.4 — Mean tropospheric NO₂ over Viet Nam in 2024"
+  title="Figure 18.4 — Mean tropospheric NO₂ over Viet Nam in 2024"
   try="Raise 'Hide below' to 50 µmol/m²: which areas remain? Hover over Hanoi, HCMC, Hai Phong – Quang Ninh and the north-west to compare."
   source="COPERNICUS/S5P/OFFL/L3_NO2 (TROPOMI, Earth Engine L3 product, filtered qa_value > 0.75), mean of all 2024 daily images, nearest-neighbour sample on a 0.05° grid. Fixed colour scale 0–120 µmol/m². Values over the sea and outside the country are kept to show transport. Contains modified Copernicus Sentinel data 2024. Basemap © Esri, Maxar, Earthstar Geographics."
 >
   <No2Map client:visible lang="en" />
 </Figure>
 
-2024 means within a 10 km radius: **Hanoi 83.8**, **Ho Chi Minh City 61.9** and **the Lai Chau highlands 20.2 µmol/m²**. Central Hanoi is **4.1 times** the rural mountain site.
+<Stats items={[
+  { v: '83.8', u: 'µmol/m²', l: 'Hanoi' },
+  { v: '61.9', u: 'µmol/m²', l: 'Ho Chi Minh City' },
+  { v: '20.2', u: 'µmol/m²', l: 'Lai Chau highlands' },
+]} caption="Mean NO₂ in 2024 within a 10 km radius. Central Hanoi is 4.1 times the rural mountain site." />
 
 <Figure
-  title="Figure 13.5 — Monthly NO₂ at three sites, 2019–2024"
+  title="Figure 18.5 — Monthly NO₂ at three sites, 2019–2024"
   try="Compare July and December in Hanoi. Find April 2020 on the Hanoi line: what is unusual? When does Lai Chau peak?"
-  source="As Figure 13.4; mean of daily images in each month, then spatial mean within a 10 km radius around each site."
+  source="As Figure 18.4; mean of daily images in each month, then spatial mean within a 10 km radius around each site."
 >
   <No2Series client:visible lang="en" />
 </Figure>
 
-Three readings from Figure 13.5 (monthly means over 2019–2024):
+Three readings from Figure 18.5 (monthly means over 2019–2024):
 
 1. **Season:** Hanoi peaks in December (102.9) and is lowest in July (61.1); HCMC peaks in January (84.5) and is lowest in August (41.6). In summer, strong sunlight destroys NO₂ faster and rain washes it out; in winter the lowest layer of the atmosphere is shallow, so pollutants disperse poorly. This explanation comes from general literature; the handbook does not separate the causes.
-2. **April 2020:** Hanoi reads only 58.0, against 86.9 (April 2019) and 90.6 (April 2021). This **coincides** with the nationwide social-distancing period of April 2020. Coincidence in time does not prove causation, because monthly weather also changes NO₂.
+2. **April 2020:** Hanoi reads only 58.0, against 86.9 (April 2019) and 90.6 (April 2021). This **coincides** with the nationwide social-distancing period of April 2020. <mark>Coincidence in time does not prove causation</mark>, because monthly weather also changes NO₂.
 3. **Lai Chau** is low all year but peaks in March (33.2), the end of the dry season, when field burning and biomass fires are common in the northern mountains and neighbouring countries. This is an interpretation not checked against fire data.
+
+<Note kind="key">
+
+Satellite NO₂ is good for comparing **space and trends**: which places are higher, which seasons are higher. It does not replace monitoring stations when checking against air-quality standards.
+
+</Note>
 
 <Depth level="advanced" title="A NO₂ column is not a ground-level concentration">
 
@@ -143,13 +181,15 @@ Three readings from Figure 13.5 (monthly means over 2019–2024):
 
 </Depth>
 
-## 13.5 General lessons
+## 18.5 General lessons
 
-- Start from the **question**, then choose the data: seeing through clouds (radar), a long history (Landsat) or measuring a gas (TROPOMI).
-- Every number comes with a **definition**: 30 % canopy, dry-season median LST, tropospheric NO₂ column. Change the definition and the number changes.
-- Remote-sensing results need **validation** (field data, stations, statistics) before they inform decisions.
+<Steps items={[
+  { t: 'Start from the question', d: 'Then choose the data: seeing through clouds (radar), a long history (Landsat) or measuring a gas (TROPOMI).' },
+  { t: 'Every number comes with a definition', d: '30 % canopy, dry-season median LST, tropospheric NO₂ column. Change the definition and the number changes.' },
+  { t: 'Validate before use', d: 'Remote-sensing results need validation (field data, stations, statistics) before they inform decisions.' },
+]} />
 
-## 13.6 Lab
+## 18.6 Lab
 
 The notebook recomputes tree-cover loss by province with any canopy threshold, LST by land cover for any city, and the NO₂ series for any point. The GEE script maps all three layers.
 
@@ -161,7 +201,7 @@ The notebook recomputes tree-cover loss by province with any canopy threshold, L
 2. Redo the LST-by-land-cover table for Hanoi or Da Nang. Is the built-up vs tree-cover difference similar to HCMC?
 3. Plot the NO₂ series for an industrial zone or coal power plant near you.
 
-## 13.7 Review
+## 18.7 Review
 
 <Quiz client:visible lang="en" items={quiz} />
 

@@ -6,9 +6,9 @@
 from labkit import MD, PY, main
 
 CELLS = [
-    (MD, """# Lab 11 — Radar Sentinel-1 / Sentinel-1 radar
+    (MD, """# Lab 16 — Radar Sentinel-1 / Sentinel-1 radar
 
-**Sổ tay Viễn thám & GIS — Chương 11** · [Mở chương / Open chapter](https://quanta1985.github.io/rs-knowledge/vi/ch11-sar/)
+**Sổ tay Viễn thám & GIS — Chương 16** · [Mở chương / Open chapter](https://quanta1985.github.io/rs-knowledge/vi/ch11-sar/)
 
 1. Tải VV, VH cùng khung Hồ Tây / Load VV and VH for the West Lake frame.
 2. Lọc speckle (boxcar, Lee) / Filter speckle (boxcar, Lee).
@@ -26,7 +26,7 @@ except Exception:
     ee.Authenticate()
     ee.Initialize(project=PROJECT)"""),
     (MD, "## 1. VV và VH / VV and VH"),
-    (PY, """X0, Y1, N, RES = 583980, 2331020, 512, 10   # cùng khung Chương 4, 6 / same frame as Ch. 4 and 6
+    (PY, """X0, Y1, N, RES = 583980, 2331020, 512, 10   # cùng khung Chương 9, 11 / same frame as Ch. 9 and 11
 FRAME = ee.Geometry.Rectangle([X0, Y1 - N * RES, X0 + N * RES, Y1], 'EPSG:32648', False)
 
 def s1(day, orbit):
@@ -41,7 +41,7 @@ def pixels(img):
                  'affineTransform': {'scaleX': RES, 'shearX': 0, 'translateX': X0, 'shearY': 0, 'scaleY': -RES, 'translateY': Y1}}})
     return {b: arr[b].astype('float32') for b in arr.dtype.names}
 
-ref = pixels(s1('2024-02-12', 128))   # cùng ngày ảnh Sentinel-2 Chương 6 / same day as the Ch. 6 Sentinel-2 scene
+ref = pixels(s1('2024-02-12', 128))   # cùng ngày ảnh Sentinel-2 Chương 11 / same day as the Ch. 11 Sentinel-2 scene
 fig, ax = plt.subplots(1, 2, figsize=(12, 6), layout='constrained')
 for a, b, lim in zip(ax, ['VV', 'VH'], [(-25, 5), (-32, -2)]):
     im = a.imshow(ref[b], cmap='gray', vmin=lim[0], vmax=lim[1]); a.set_title(f'{b} (dB), 2024-02-12'); a.set_axis_off()

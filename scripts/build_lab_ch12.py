@@ -6,9 +6,9 @@
 from labkit import MD, PY, main
 
 CELLS = [
-    (MD, """# Lab 12 — Mô hình số độ cao / Elevation models
+    (MD, """# Lab 17 — Mô hình số độ cao / Elevation models
 
-**Sổ tay Viễn thám & GIS — Chương 12** · [Mở chương / Open chapter](https://quanta1985.github.io/rs-knowledge/vi/ch12-dem/)
+**Sổ tay Viễn thám & GIS — Chương 17** · [Mở chương / Open chapter](https://quanta1985.github.io/rs-knowledge/vi/ch12-dem/)
 
 1. Tải Copernicus GLO-30 và SRTM cùng khung Fansipan / Load Copernicus GLO-30 and SRTM on one Fansipan grid.
 2. Độ dốc, bóng đổ, hiệu hai DEM / Slope, hillshade, DEM difference.
@@ -75,7 +75,7 @@ Chỉ thành phần độ dốc theo hướng nhìn radar mới quan trọng. / 
     ar = np.degrees(np.arctan(np.tan(np.radians(slope)) * np.cos(np.radians(aspect - look_az - 180))))
     return np.where(ar >= theta, 2, np.where(-ar > 90 - theta, 3, np.where(ar > 0, 1, 0)))   # 1 co ngắn, 2 chồng lấn, 3 bóng
 
-for name, look in [('ASC', 77.6), ('DESC', 282.4)]:   # hướng nhìn Sentinel-1 ở 22,3°N (Chương 12) / look azimuth at 22.3°N
+for name, look in [('ASC', 77.6), ('DESC', 282.4)]:   # hướng nhìn Sentinel-1 ở 22,3°N (Chương 17) / look azimuth at 22.3°N
     e = radar_effect(slope, aspect, 37, look)
     print(f'{name}: chồng lấn / layover {(e == 2).mean():.1%}, bóng / shadow {(e == 3).mean():.1%}, co ngắn / foreshortening {(e == 1).mean():.1%}')
 plt.figure(figsize=(6, 6)); plt.imshow(radar_effect(slope, aspect, 37, 77.6), cmap='magma'); plt.title('ASC θ = 37°'); plt.axis('off'); plt.show()"""),

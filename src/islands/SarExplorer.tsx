@@ -106,7 +106,7 @@ export default function SarExplorer({ lang }: { lang: Lang }) {
       <p className="stat-title" style={{ marginTop: 10 }}>{T.pts}</p>
       <svg className="hist" viewBox={`0 0 ${CW} ${CH}`} role="img" aria-label={T.pts}>
         {[-30, -20, -10, 0].map((v) => <g key={v}>
-          <line x1={xs(v)} x2={xs(v)} y1={2} y2={CH - 16} stroke="#94a3b8" opacity={0.25} />
+          <line x1={xs(v)} x2={xs(v)} y1={2} y2={CH - 16} stroke="var(--st-muted)" opacity={0.25} />
           <text x={xs(v)} y={CH - 4} textAnchor="middle">{v}</text>
         </g>)}
         {pts.map(({ p, vv, vh }, i) => {
@@ -115,7 +115,7 @@ export default function SarExplorer({ lang }: { lang: Lang }) {
             <text x={X0 - 6} y={y + 3.5} textAnchor="end">{p.label[lang].split(/[,(]/)[0]}</text>
             <line x1={xs(vh)} x2={xs(vv)} y1={y} y2={y} stroke={c} strokeWidth={2} opacity={0.6} />
             <circle cx={xs(vv)} cy={y} r={4.5} fill={c} />
-            <rect x={xs(vh) - 4} y={y - 4} width={8} height={8} fill="#0d1424" stroke={c} strokeWidth={2} />
+            <rect x={xs(vh) - 4} y={y - 4} width={8} height={8} fill="var(--st-bg)" stroke={c} strokeWidth={2} />
           </g>;
         })}
       </svg>

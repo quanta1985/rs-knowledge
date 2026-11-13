@@ -1,6 +1,6 @@
 ---
 title: Đặc trưng phổ & chỉ số phổ
-n: 6
+n: 11
 summary: Mỗi bề mặt "phản chiếu" ánh sáng theo một kiểu riêng. Chương này dạy cách đọc đường cong phổ, ghép tổ hợp màu và tính chỉ số phổ (NDVI, NDWI, MNDWI, NDBI) trên ảnh Sentinel-2 thật của Hà Nội và An Giang.
 objectives:
   - Đọc và so sánh đường cong phản xạ phổ của nước, thực vật, đô thị, đất trống.
@@ -14,6 +14,9 @@ import Depth from '../../../components/Depth.astro';
 import Figure from '../../../components/Figure.astro';
 import WorkedExample from '../../../components/WorkedExample.astro';
 import LabLinks from '../../../components/LabLinks.astro';
+import Note from '../../../components/Note.astro';
+import Formula from '../../../components/Formula.astro';
+import Steps from '../../../components/Steps.astro';
 import SpectralExplorer from '../../../islands/SpectralExplorer.tsx';
 import BandComposer from '../../../islands/BandComposer.tsx';
 import IndexLab from '../../../islands/IndexLab.tsx';
@@ -21,21 +24,21 @@ import NdviSeries from '../../../islands/NdviSeries.tsx';
 import Quiz from '../../../islands/Quiz.tsx';
 import quiz from '../../../data/quiz/ch06.json';
 
-## 6.1 Phản xạ phổ là gì?
+## 11.1 Phản xạ phổ là gì?
 
 Chiếc lá có màu xanh vì nó hấp thụ phần lớn ánh sáng đỏ và lam, chỉ hắt lại nhiều ánh sáng lục hơn. Tỷ lệ năng lượng mà bề mặt hắt lại so với năng lượng chiếu tới, tại từng bước sóng, gọi là <Term id="reflectance">phản xạ phổ</Term>. Vẽ phản xạ theo bước sóng ta được <Term id="spectral-signature">đường cong phổ</Term>, giống như "vân tay" của bề mặt.
 
 Mắt người chỉ thấy khoảng 400–700 nm. Vệ tinh Sentinel-2 đo thêm vùng <Term id="red-edge">rìa đỏ</Term>, <Term id="nir">cận hồng ngoại (NIR)</Term> và <Term id="swir">hồng ngoại sóng ngắn (SWIR)</Term>. Chính những vùng "vô hình" này giúp tách các bề mặt mà mắt thường thấy giống nhau.
 
 <Figure
-  title="Hình 6.1 — Đường cong phổ trên ảnh Sentinel-2 Hà Nội (12/02/2024)"
+  title="Hình 11.1 — Đường cong phổ trên ảnh Sentinel-2 Hà Nội (12/02/2024)"
   try="Di chuột từ Hồ Tây sang bãi bồi sông Hồng. Đường đậm (pixel đang chọn) thay đổi thế nào ở bước sóng 833 nm (B8)? Bật 'Landsat 8/9 OLI' để so vị trí kênh hai vệ tinh."
   source="Copernicus Sentinel-2B Level-2A (S2_SR_HARMONIZED), cảnh 20240212T032849_T48QWJ, 512 × 512 pixel 10 m. Kéo giãn hiển thị 2–98 %. Nhãn 6 điểm mẫu do giải đoán ảnh, chưa kiểm chứng thực địa."
 >
   <SpectralExplorer client:visible lang="vi" />
 </Figure>
 
-Đọc sáu đường mẫu trong Hình 6.1:
+Đọc sáu đường mẫu trong Hình 11.1:
 
 - **Nước** (Hồ Tây, sông Hồng): phản xạ thấp ở mọi kênh và gần bằng 0 ở NIR, SWIR, vì nước hấp thụ mạnh hồng ngoại. Nước sông Hồng sáng hơn Hồ Tây ở vùng lục (0,082 so với 0,048).
 - **Thực vật** (bãi bồi, cây xanh đô thị): thấp ở lam và đỏ (diệp lục hấp thụ), có một đỉnh nhỏ ở lục, rồi **tăng vọt** qua rìa đỏ lên NIR. Pixel bãi bồi đạt 0,431 ở B8, gấp 13 lần kênh đỏ (0,033).
@@ -52,9 +55,15 @@ Mắt người chỉ thấy khoảng 400–700 nm. Vệ tinh Sentinel-2 đo thê
 
 </Depth>
 
-## 6.2 Kênh phổ của cảm biến
+<Note kind="key">
 
-Cảm biến không đo một đường cong liên tục mà đo trung bình trong từng **khoảng bước sóng**, gọi là <Term id="band">kênh phổ</Term>. Sentinel-2 có 13 kênh, Landsat 8/9 OLI có 9 kênh. Chọn "Vị trí kênh" trong Hình 6.1 để thấy các kênh Sentinel-2 dày đặc ở rìa đỏ, nơi Landsat không có kênh nào.
+Mỗi bề mặt có một đường cong phổ riêng. Nước tối ở NIR và SWIR, thực vật tăng vọt từ đỏ sang NIR, đất trống sáng dần về SWIR: những khác biệt rõ nhất nằm ở vùng mắt không thấy.
+
+</Note>
+
+## 11.2 Kênh phổ của cảm biến
+
+Cảm biến không đo một đường cong liên tục mà đo trung bình trong từng **khoảng bước sóng**, gọi là <Term id="band">kênh phổ</Term>. Sentinel-2 có 13 kênh, Landsat 8/9 OLI có 9 kênh. Chọn "Vị trí kênh" trong Hình 11.1 để thấy các kênh Sentinel-2 dày đặc ở rìa đỏ, nơi Landsat không có kênh nào.
 
 <Depth level="ref" title="Bảng tra: kênh Sentinel-2 dùng trong sổ tay">
 
@@ -79,25 +88,39 @@ Nguồn: ESA, Sentinel-2 Spectral Response Functions; USGS, Landsat 8–9 OLI ba
 
 </Depth>
 
-## 6.3 Tổ hợp màu: nhìn thấy cái "vô hình"
+<Note kind="key">
+
+Ảnh chỉ ghi lại đường cong phổ tại vị trí các kênh. Vị trí kênh quyết định thấy được gì: Sentinel-2 có ba kênh ở rìa đỏ, Landsat 8/9 không có kênh nào ở đó.
+
+</Note>
+
+## 11.3 Tổ hợp màu: nhìn thấy cái "vô hình"
 
 Màn hình chỉ có ba màu Đỏ–Lục–Lam. <Term id="composite">Tổ hợp màu</Term> là việc chọn ba kênh phổ bất kỳ để gán vào ba màu đó. Gán NIR vào màu Đỏ thì thực vật hiện đỏ rực, vì NIR là kênh thực vật sáng nhất.
 
 <Figure
-  title="Hình 6.2 — Tự ghép tổ hợp màu"
+  title="Hình 11.2 — Tự ghép tổ hợp màu"
   try="Chọn 'Màu thật' rồi 'Hồng ngoại giả': bãi bồi phía đông sông Hồng đổi từ xanh sẫm sang đỏ. Sau đó đổi kéo giãn sang 'Không kéo giãn (0–1)': ảnh tối gần đen, vì phản xạ thực tế hiếm khi vượt 0,3."
-  source="Như Hình 6.1. Giới hạn kéo giãn của từng kênh được ghi dưới ảnh."
+  source="Như Hình 11.1. Giới hạn kéo giãn của từng kênh được ghi dưới ảnh."
 >
   <BandComposer client:visible lang="vi" />
 </Figure>
 
+<Note kind="key">
+
 <Term id="stretch">Kéo giãn tương phản</Term> chỉ thay đổi cách **hiển thị**. Mọi phép tính ở mục sau vẫn dùng phản xạ gốc. Khi đưa ảnh vào báo cáo, hãy ghi rõ tổ hợp kênh và cách kéo giãn.
 
-## 6.4 Chỉ số phổ chênh lệch chuẩn hóa
+</Note>
+
+## 11.4 Chỉ số phổ chênh lệch chuẩn hóa
 
 Thay vì nhìn từng kênh, ta gộp hai kênh "tương phản nhau" thành một con số:
 
-<code class="formula">Chỉ số = (A − B) / (A + B)</code>
+<Formula label="Chỉ số chênh lệch chuẩn hóa" tex="I = \frac{A - B}{A + B}" where="
+I :: giá trị chỉ số, từ −1 đến 1
+A :: kênh mà bề mặt cần tìm phản xạ mạnh
+B :: kênh mà bề mặt đó phản xạ yếu
+" />
 
 Chọn A là kênh bề mặt cần tìm phản xạ mạnh, B là kênh nó phản xạ yếu. Kết quả luôn nằm trong khoảng −1 đến 1. Phép chia cho tổng còn làm giảm ảnh hưởng của độ sáng chung, ví dụ sườn dốc khuất nắng hay chênh lệch giữa các cảnh. Chỉ số nổi tiếng nhất là <Term id="ndvi">NDVI</Term> = (NIR − Đỏ) / (NIR + Đỏ).
 
@@ -106,9 +129,9 @@ Chọn A là kênh bề mặt cần tìm phản xạ mạnh, B là kênh nó ph�
 Cùng công thức nhưng kết quả trái dấu: thực vật cho NDVI 0,86, nước Hồ Tây cho −0,10. Bây giờ hãy làm điều đó cho cả 262 144 pixel:
 
 <Figure
-  title="Hình 6.3 — Phòng thí nghiệm chỉ số phổ"
+  title="Hình 11.3 — Phòng thí nghiệm chỉ số phổ"
   try="Chọn MNDWI, bấm 'Ngưỡng Otsu' rồi chuyển sang 'Vùng ≥ ngưỡng': vùng nước hiện màu lam. Đổi sang NDWI và đặt ngưỡng 0,40: Hồ Tây biến mất gần hết. Vì sao?"
-  source="Như Hình 6.1. Thang màu cố định từ −1 đến +1 cho mọi chỉ số để so sánh được. Diện tích = số pixel × 100 m²."
+  source="Như Hình 11.1. Thang màu cố định từ −1 đến +1 cho mọi chỉ số để so sánh được. Diện tích = số pixel × 100 m²."
 >
   <IndexLab client:visible lang="vi" initial="NDVI" />
 </Figure>
@@ -129,16 +152,30 @@ Hồ Tây rộng khoảng 5 km², nhưng trên ảnh này hai chỉ số nước
 
 </div>
 
-Ở ngưỡng 0, hai chỉ số gần như đồng ý với nhau. Nhưng một ngưỡng "sách giáo khoa" như 0,4 làm NDWI bỏ sót gần hết Hồ Tây, vì NIR của hồ không thấp bằng sông. MNDWI dùng SWIR, kênh bị nước hấp thụ gần như hoàn toàn, nên ổn định hơn. **Bài học: không có ngưỡng chung cho mọi cảnh.** Hãy nhìn histogram, thử ngưỡng tự động như Otsu, và kiểm tra lại trên ảnh.
+Ở ngưỡng 0, hai chỉ số gần như đồng ý với nhau. Nhưng một ngưỡng "sách giáo khoa" như 0,4 làm NDWI bỏ sót gần hết Hồ Tây, vì NIR của hồ không thấp bằng sông. MNDWI dùng SWIR, kênh bị nước hấp thụ gần như hoàn toàn, nên ổn định hơn.
+
+<Note kind="key">
+
+**Không có ngưỡng chung cho mọi cảnh.** Hãy nhìn histogram, thử ngưỡng tự động như Otsu, và kiểm tra lại trên ảnh.
+
+</Note>
 
 Tương tự, <Term id="ndbi">NDBI</Term> ≥ 0 phủ 42 % khung ảnh, gồm cả mái nhà (0,21) lẫn đất trống (0,12). NDBI đơn lẻ không tách được đô thị khỏi đất trống.
 
 <Depth level="advanced" title="Giới hạn và các chỉ số cải tiến">
 
 - **Bão hòa NDVI**: khi ρĐỏ → 0, NDVI → 1 bất kể NIR. Tán lá rất dày vì vậy khó phân biệt (<Term id="saturation">bão hòa</Term>). EVI (Huete và cs., 2002) giảm hiện tượng này:
-  <code class="formula">EVI = 2,5 · (NIR − Đỏ) / (NIR + 6·Đỏ − 7,5·Lam + 1)</code>
+
+<Formula label="EVI" tex="\mathrm{EVI} = \frac{2{,}5\,(\mathrm{NIR} - \mathrm{R})}{\mathrm{NIR} + 6\mathrm{R} - 7{,}5\mathrm{B} + 1}" where="
+\mathrm{NIR},\ \mathrm{R},\ \mathrm{B} :: phản xạ kênh cận hồng ngoại, đỏ, lam
+" />
+
 - **Nền đất**: ở nơi thực vật thưa, đất làm NDVI biến động. SAVI (Huete, 1988) thêm hệ số L (thường 0,5):
-  <code class="formula">SAVI = (1 + L) · (NIR − Đỏ) / (NIR + Đỏ + L)</code>
+
+<Formula label="SAVI" tex="\mathrm{SAVI} = \frac{(1 + L)(\mathrm{NIR} - \mathrm{R})}{\mathrm{NIR} + \mathrm{R} + L}" where="
+L :: hệ số hiệu chỉnh nền đất, thường 0,5
+" />
+
 - **Trùng tên NDWI**: NDWI của McFeeters (1996) dùng Lục và NIR, đo mặt nước. NDWI của Gao (1996) dùng NIR và SWIR, đo **độ ẩm lá**. Khi trích dẫn, ghi rõ công thức.
 - **Otsu (1979)** chọn ngưỡng làm cực đại phương sai giữa hai lớp. Phương pháp hiệu quả khi histogram có hai đỉnh rõ (như MNDWI ở đây), kém khi một lớp chiếm rất ít pixel.
 - Chỉ số tính trên **phản xạ bề mặt (Level-2A)** khác với khi tính trên phản xạ đỉnh khí quyển (Level-1C). Đừng so sánh lẫn hai loại.
@@ -163,32 +200,42 @@ Ngưỡng phải chọn lại cho từng cảnh, dựa vào histogram và kiểm
 
 </Depth>
 
-## 6.5 NDVI theo thời gian: ba vụ lúa An Giang
+## 11.5 NDVI theo thời gian: ba vụ lúa An Giang
 
-Một ảnh chỉ là một khoảnh khắc. Đặt NDVI của nhiều ngày cạnh nhau, ta thấy <Term id="phenology">vật hậu</Term> của cây trồng. Hình 6.4 là NDVI của một ô 2 × 2 km ở huyện Tri Tôn (An Giang), nơi 96 % diện tích là đất canh tác theo ESA WorldCover.
+Một ảnh chỉ là một khoảnh khắc. Đặt NDVI của nhiều ngày cạnh nhau, ta thấy <Term id="phenology">vật hậu</Term> của cây trồng. Hình 11.4 là NDVI của một ô 2 × 2 km ở huyện Tri Tôn (An Giang), nơi 96 % diện tích là đất canh tác theo ESA WorldCover.
 
 <Figure
-  title="Hình 6.4 — NDVI ruộng lúa Tri Tôn, An Giang, 2023–2024"
+  title="Hình 11.4 — NDVI ruộng lúa Tri Tôn, An Giang, 2023–2024"
   try="Đếm số đỉnh NDVI trong năm 2024. Tìm khoảng trống tháng 7–9/2024 và các điểm 'tụt bất thường' tháng 1/2023."
   source="Copernicus Sentinel-2 L2A 2023–2024; chỉ lấy pixel đất canh tác (ESA WorldCover 2021, lớp 40) và không mây (Cloud Score+ cs_cdf ≥ 0,6). Đường nối bị ngắt khi hai lần chụp cách nhau quá 40 ngày."
 >
   <NdviSeries client:visible lang="vi" />
 </Figure>
 
-Cách đọc chuỗi năm 2024:
+<Steps title="Cách đọc chuỗi năm 2024" items={[
+  { tag: 'tháng 1–3', t: 'Vụ Đông Xuân', d: 'NDVI lên đỉnh khoảng 0,93 cuối tháng 1/2024, giảm nhanh từ giữa tháng 3 và xuống 0,05 ngày 30/3, lúc thu hoạch và làm đất.' },
+  { tag: 'tháng 4–6', t: 'Vụ Hè Thu', d: 'NDVI tăng lại từ cuối tháng 4 lên khoảng 0,89 cuối tháng 5. Sau ngày 18/6 không còn ảnh không mây nào cho tới 16/9.' },
+  { tag: 'tháng 10–11', t: 'Vụ Thu Đông', d: 'Đỉnh khoảng 0,89 ngày 21/10, rồi xuống 0,14 ngày 30/11.' },
+]} />
 
-1. **Vụ Đông Xuân**: NDVI lên đỉnh khoảng 0,93 cuối tháng 1/2024, giảm nhanh từ giữa tháng 3 và xuống 0,05 ngày 30/3, lúc thu hoạch và làm đất.
-2. **Vụ Hè Thu**: NDVI tăng lại từ cuối tháng 4 lên khoảng 0,89 cuối tháng 5. Sau ngày 18/6 không còn ảnh không mây nào cho tới 16/9.
-3. **Vụ Thu Đông**: đỉnh khoảng 0,89 ngày 21/10, rồi xuống 0,14 ngày 30/11.
+<Note kind="warn">
 
 Đây là cách **diễn giải** dựa trên hình dạng đường cong và lịch thời vụ phổ biến ở Tứ giác Long Xuyên, chưa đối chiếu với số liệu gieo sạ thực tế.
 
+</Note>
+
 Hai điều đáng chú ý về chất lượng dữ liệu:
 
-- **Mây**: chỉ 70 trong 296 lần chụp được giữ lại. Mùa mưa để lại khoảng trống gần 3 tháng. Đây là lý do cần đến radar (Chương 11).
+- **Mây**: chỉ 70 trong 296 lần chụp được giữ lại. Mùa mưa để lại khoảng trống gần 3 tháng. Đây là lý do cần đến radar (Chương 16).
 - **Nhiễu**: tháng 1/2023 NDVI nhảy 0,88 → 0,67 → 0,59 → 0,91 chỉ trong 20 ngày. Lúa không thể "héo rồi tươi lại" nhanh như vậy. Nhiều khả năng đây là mù hoặc mây mỏng lọt qua <Term id="cloud-mask">mặt nạ mây</Term>. Các điểm này vẫn được giữ trên đồ thị. Khi phân tích, thường làm trơn chuỗi (ví dụ Savitzky–Golay) hoặc lấy đường bao trên.
 
-## 6.6 Thực hành
+<Note kind="key">
+
+Chuỗi NDVI cho thấy vật hậu: ở Tri Tôn, ba đỉnh trong năm 2024 ứng với ba vụ lúa. Nhưng mây để lại khoảng trống và nhiễu, nên trước khi đọc hãy kiểm tra số ảnh còn lại và làm trơn chuỗi.
+
+</Note>
+
+## 11.6 Thực hành
 
 Notebook Python tải đúng cảnh ảnh Hà Nội trên từ Google Earth Engine, tính bốn chỉ số, vẽ histogram, chọn ngưỡng Otsu và tính diện tích nước. Script GEE làm cùng việc đó trong Code Editor, kèm bản đồ lớp.
 
@@ -200,7 +247,7 @@ Notebook Python tải đúng cảnh ảnh Hà Nội trên từ Google Earth Engi
 2. Chọn 5 pixel đô thị và 5 pixel đất trống. Tìm một tổ hợp hai kênh tách được hai nhóm này tốt hơn NDBI.
 3. Vẽ chuỗi NDVI cho một vùng lúa ở đồng bằng sông Hồng. Có mấy vụ mỗi năm?
 
-## 6.7 Ôn tập
+## 11.7 Ôn tập
 
 <Quiz client:visible lang="vi" items={quiz} />
 

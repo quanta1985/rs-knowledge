@@ -256,8 +256,211 @@
   ],
   "answer": 0,
   "why": {
-   "vi": "Đây là số liệu Sentinel-2 năm 2022–2024 ở Chương 4. Radar (Chương 11) không bị giới hạn này.",
-   "en": "This is the Sentinel-2 2022–2024 figure from Chapter 4; radar (Chapter 11) is free of this limit."
+   "vi": "Đây là số liệu Sentinel-2 năm 2022–2024 ở Chương 4. Radar (Chương 16) không bị giới hạn này.",
+   "en": "This is the Sentinel-2 2022–2024 figure from Chapter 9; radar (Chapter 16) is free of this limit."
+  }
+ },
+ {
+  "q": {
+   "vi": "Theo định luật Kepler II, vệ tinh trên quỹ đạo elip bay nhanh nhất ở đâu?",
+   "en": "By Kepler's second law, where is a satellite on an elliptical orbit fastest?"
+  },
+  "options": [
+   {
+    "vi": "Ở cận địa",
+    "en": "At perigee"
+   },
+   {
+    "vi": "Ở viễn địa",
+    "en": "At apogee"
+   },
+   {
+    "vi": "Ở nút lên",
+    "en": "At the ascending node"
+   },
+   {
+    "vi": "Nhanh như nhau ở mọi điểm",
+    "en": "Equally fast everywhere"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Diện tích quét đều theo thời gian: gần Trái Đất thì cung phải dài hơn trong cùng khoảng thời gian. Với GTO, 10,19 km/s ở cận địa so với 1,60 km/s ở viễn địa.",
+   "en": "Equal areas in equal times: close to the Earth the arc must be longer in the same time. On a GTO, 10.19 km/s at perigee versus 1.60 km/s at apogee."
+  }
+ },
+ {
+  "q": {
+   "vi": "RAAN (Ω) là gì?",
+   "en": "What is the RAAN (Ω)?"
+  },
+  "options": [
+   {
+    "vi": "Góc từ điểm xuân phân tới nút lên, đo trên mặt phẳng xích đạo",
+    "en": "Angle from the vernal equinox to the ascending node, in the equatorial plane"
+   },
+   {
+    "vi": "Góc từ nút lên tới cận địa",
+    "en": "Angle from the ascending node to perigee"
+   },
+   {
+    "vi": "Góc giữa mặt phẳng quỹ đạo và xích đạo",
+    "en": "Angle between the orbit plane and the equator"
+   },
+   {
+    "vi": "Khoảng cách cận địa",
+    "en": "The perigee distance"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Ω xoay cả mặt phẳng quỹ đạo quanh trục cực. Góc từ nút lên tới cận địa là ω; góc giữa hai mặt phẳng là i.",
+   "en": "Ω turns the whole orbit plane around the polar axis. The node-to-perigee angle is ω; the angle between the planes is i."
+  }
+ },
+ {
+  "q": {
+   "vi": "Trường chuyển động trung bình của một TLE là 14,648 vòng/ngày. Chu kỳ quỹ đạo là bao nhiêu?",
+   "en": "A TLE's mean motion field reads 14.648 rev/day. What is the orbital period?"
+  },
+  "options": [
+   {
+    "vi": "Khoảng 98,3 phút",
+    "en": "About 98.3 minutes"
+   },
+   {
+    "vi": "Khoảng 14,6 giờ",
+    "en": "About 14.6 hours"
+   },
+   {
+    "vi": "Khoảng 146 phút",
+    "en": "About 146 minutes"
+   },
+   {
+    "vi": "Không tính được nếu thiếu độ cao",
+    "en": "Cannot be computed without the altitude"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "T = 1440 / 14,648 = 98,3 phút. Kepler III ngược ra a ≈ 7056 km, tức độ cao khoảng 678 km (VNREDSat-1).",
+   "en": "T = 1440 / 14.648 = 98.3 min. Inverting Kepler III gives a ≈ 7056 km, an altitude of about 678 km (VNREDSat-1)."
+  }
+ },
+ {
+  "q": {
+   "vi": "Vì sao quỹ đạo Molniya có độ nghiêng 63,4°?",
+   "en": "Why do Molniya orbits use a 63.4° inclination?"
+  },
+  "options": [
+   {
+    "vi": "Tại đó J2 không làm cận địa trôi, viễn địa luôn ở Bắc bán cầu",
+    "en": "J2 does not move perigee there, so apogee stays over the northern hemisphere"
+   },
+   {
+    "vi": "Đó là vĩ độ của Moskva",
+    "en": "It is Moscow's latitude"
+   },
+   {
+    "vi": "Để đồng bộ với Mặt Trời",
+    "en": "To be sun-synchronous"
+   },
+   {
+    "vi": "Để tránh vành đai bức xạ",
+    "en": "To avoid the radiation belts"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Tốc độ trôi cận địa tỉ lệ với 5cos²i − 1, bằng 0 khi i = 63,4° hoặc 116,6° (độ nghiêng tới hạn).",
+   "en": "Perigee drift is proportional to 5cos²i − 1, which vanishes at i = 63.4° or 116.6° (the critical inclination)."
+  }
+ },
+ {
+  "q": {
+   "vi": "Một vệ tinh nhỏ không động cơ (Cd·A/m = 0,02 m²/kg) ở 400 km tự rơi sau khoảng bao lâu?",
+   "en": "A small satellite without propulsion (Cd·A/m = 0.02 m²/kg) at 400 km re-enters after roughly how long?"
+  },
+  "options": [
+   {
+    "vi": "Từ vài tháng tới khoảng 1,5 năm, tùy hoạt động Mặt Trời",
+    "en": "From a few months to about 1.5 years, depending on solar activity"
+   },
+   {
+    "vi": "Vài ngày",
+    "en": "A few days"
+   },
+   {
+    "vi": "Khoảng 100 năm",
+    "en": "About 100 years"
+   },
+   {
+    "vi": "Không bao giờ",
+    "en": "Never"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Với mật độ NRLMSIS: 79 ngày khi Mặt Trời mạnh, 1,5 năm khi Mặt Trời yên. Ở 800 km con số là 46–930 năm.",
+   "en": "With NRLMSIS density: 79 days for an active Sun, 1.5 years for a quiet Sun. At 800 km it is 46–930 years."
+  }
+ },
+ {
+  "q": {
+   "vi": "Phân biệt chu kỳ lặp và thời gian quay lại: câu nào đúng?",
+   "en": "Repeat cycle versus revisit: which statement is right?"
+  },
+  "options": [
+   {
+    "vi": "Thời gian quay lại có thể ngắn hơn chu kỳ lặp nhờ nhiều vệ tinh hoặc chụp nghiêng",
+    "en": "Revisit can be shorter than the repeat cycle thanks to more satellites or off-nadir pointing"
+   },
+   {
+    "vi": "Hai khái niệm là một",
+    "en": "They are the same thing"
+   },
+   {
+    "vi": "Chu kỳ lặp luôn ngắn hơn thời gian quay lại",
+    "en": "The repeat cycle is always shorter than the revisit"
+   },
+   {
+    "vi": "Thời gian quay lại chỉ phụ thuộc độ cao",
+    "en": "Revisit depends only on altitude"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "Chu kỳ lặp là tính chất của quỹ đạo (Sentinel-2: 10 ngày). Hai vệ tinh lệch 180° cho thời gian quay lại 5 ngày ở xích đạo.",
+   "en": "The repeat cycle is a property of the orbit (Sentinel-2: 10 days). Two satellites 180° apart give a 5-day revisit at the equator."
+  }
+ },
+ {
+  "q": {
+   "vi": "Một vệ tinh địa tĩnh nhìn thấy khoảng bao nhiêu phần bề mặt Trái Đất (góc ngẩng 0°)?",
+   "en": "About how much of the Earth's surface does a geostationary satellite see (0° elevation)?"
+  },
+  "options": [
+   {
+    "vi": "Khoảng 42 %",
+    "en": "About 42 %"
+   },
+   {
+    "vi": "Khoảng 100 %",
+    "en": "About 100 %"
+   },
+   {
+    "vi": "Khoảng 5 %",
+    "en": "About 5 %"
+   },
+   {
+    "vi": "Đúng 50 %",
+    "en": "Exactly 50 %"
+   }
+  ],
+  "answer": 0,
+  "why": {
+   "vi": "λ = arccos(6378/42 164) = 81,3°, phần chỏm cầu (1 − cos λ)/2 = 42,4 %. Không bao giờ được 50 % vì vệ tinh ở khoảng cách hữu hạn.",
+   "en": "λ = arccos(6378/42,164) = 81.3°, cap fraction (1 − cos λ)/2 = 42.4 %. Never 50 %, because the satellite is at a finite distance."
   }
  }
 ]

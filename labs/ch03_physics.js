@@ -1,5 +1,5 @@
 /**
- * Lab 3 — Nhiệt độ bề mặt từ Landsat 9 / Landsat 9 surface temperature · Sổ tay Viễn thám & GIS
+ * Lab 8 — Nhiệt độ bề mặt từ Landsat 9 / Landsat 9 surface temperature · Sổ tay Viễn thám & GIS
  * Dán vào https://code.earthengine.google.com và bấm Run. / Paste into the Code Editor and press Run.
  *
  * Landsat courtesy of USGS.

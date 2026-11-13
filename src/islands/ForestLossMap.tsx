@@ -94,7 +94,7 @@ export default function ForestLossMap({ lang }: { lang: Lang }) {
       <svg className="hist" viewBox={`0 0 ${CW} ${CH + 16}`} role="img" aria-label={T.chart}>
         {annual.map((a, i) => {
           const h = (a / maxA) * CH, on = meta.years[i] <= upto;
-          return <rect key={i} x={i * bw + 0.5} width={bw - 1} y={CH - h} height={h} fill={on ? `rgb(${colormap(VIRIDIS, i / 24)})` : '#94a3b8'} opacity={on ? 1 : 0.3} />;
+          return <rect key={i} x={i * bw + 0.5} width={bw - 1} y={CH - h} height={h} fill={on ? `rgb(${colormap(VIRIDIS, i / 24)})` : 'var(--st-muted)'} opacity={on ? 1 : 0.3} />;
         })}
         {[2001, 2010, 2020, 2025].map((y, i, a) => <text key={y} x={(y - 2001 + 0.5) * bw} y={CH + 12} textAnchor={i === 0 ? 'start' : i === a.length - 1 ? 'end' : 'middle'}>{y}</text>)}
       </svg>
@@ -104,7 +104,7 @@ export default function ForestLossMap({ lang }: { lang: Lang }) {
     <Pills label={T.view} value={view} onChange={setView} options={[{ v: 'year', label: T.year }, { v: 'share', label: T.share }, { v: 'forest', label: T.forest }]} />
     <Slider label={T.upto} value={upto} min={2001} max={2025} onChange={setUpto} />
     <label className="ctl"><span className="ctl-label">{T.prov}</span>
-      <select value={prov} onChange={(e) => setProv(e.target.value)} style={{ minHeight: 32, borderRadius: 8, background: '#0d1424', color: '#e2e8f0', border: '1px solid rgba(148,163,184,.3)' }}>
+      <select value={prov} onChange={(e) => setProv(e.target.value)} style={{ minHeight: 32, borderRadius: 8, background: 'var(--st-bg)', color: 'var(--st-fg)', border: '1px solid var(--st-line)' }}>
         <option value="all">{T.all}</option>
         {meta.provinces.map((p) => <option key={p.id} value={p.id}>{p.name[lang]}</option>)}
       </select>

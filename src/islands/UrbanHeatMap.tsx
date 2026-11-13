@@ -73,9 +73,9 @@ export default function UrbanHeatMap({ lang }: { lang: Lang }) {
       { k: `${T.hotA} (${thr} °C)`, v: `${nf((hotCount * meta.resolution_m ** 2) / 1e6)} km²`, tone: 'bad' },
     ]}>
       <p className="stat-title" style={{ marginTop: 10 }}>{T.cls}</p>
-      <dl>{classes.map((c) => <div key={c.key}><dt><Key color={c.c}>{c[lang]}</Key></dt><dd>{nf(meta.class_mean_c[c.key])} °C <span style={{ color: '#94a3b8', fontWeight: 400 }}>({nf(meta.class_share_pct[c.key], 0)} %)</span></dd></div>)}</dl>
+      <dl>{classes.map((c) => <div key={c.key}><dt><Key color={c.c}>{c[lang]}</Key></dt><dd>{nf(meta.class_mean_c[c.key])} °C <span style={{ color: 'var(--st-muted)', fontWeight: 400 }}>({nf(meta.class_share_pct[c.key], 0)} %)</span></dd></div>)}</dl>
       {view === 'lst' && <><div style={{ height: 10, borderRadius: 3, background: gradient, marginTop: 8 }} aria-hidden="true" />
-        <div className="num" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: '#94a3b8' }}><span>≤ {LIM[0]} °C</span><span>≥ {LIM[1]} °C</span></div></>}
+        <div className="num" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: 'var(--st-muted)' }}><span>≤ {LIM[0]} °C</span><span>≥ {LIM[1]} °C</span></div></>}
     </StatPanel>
   );
   const bar = <>

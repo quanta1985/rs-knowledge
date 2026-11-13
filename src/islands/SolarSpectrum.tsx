@@ -55,19 +55,19 @@ export default function SolarSpectrum({ lang }: { lang: Lang }) {
         {ticks.map((v) => <text key={v} x={x(v)} y={H - M.b + 16} textAnchor="middle">{v}</text>)}
         <text x={(M.l + W - M.r) / 2} y={H - M.b + 32} textAnchor="middle">{T.x}</text>
         <text transform={`translate(12 ${(M.t + H - M.b) / 2}) rotate(-90)`} textAnchor="middle">{T.y}</text>
-        <polygon points={gap} fill="#f7867a" opacity={0.25} />
-        <polyline points={line(1)} fill="none" stroke="#e3b25a" strokeWidth={1.5} />
-        <polyline points={line(2)} fill="none" stroke="#4fc3cd" strokeWidth={1.5} />
+        <polygon points={gap} fill="var(--st-bad)" opacity={0.25} />
+        <polyline points={line(1)} fill="none" stroke="var(--st-warn)" strokeWidth={1.5} />
+        <polyline points={line(2)} fill="none" stroke="var(--st-accent)" strokeWidth={1.5} />
         {BANDS[sensor].map((b) => (
           <g key={b.id}>
-            <rect x={x(b.lo)} width={Math.max(1.5, x(b.hi) - x(b.lo))} y={H - M.b + 42} height={16} fill={b === band ? '#f7867a' : '#94a3b8'} opacity={0.85} />
-            <rect x={x(b.lo)} width={Math.max(1.5, x(b.hi) - x(b.lo))} y={M.t} height={H - M.b - M.t} fill="#94a3b8" opacity={0.07} />
+            <rect x={x(b.lo)} width={Math.max(1.5, x(b.hi) - x(b.lo))} y={H - M.b + 42} height={16} fill={b === band ? 'var(--st-bad)' : 'var(--st-muted)'} opacity={0.85} />
+            <rect x={x(b.lo)} width={Math.max(1.5, x(b.hi) - x(b.lo))} y={M.t} height={H - M.b - M.t} fill="var(--st-muted)" opacity={0.07} />
           </g>
         ))}
         {BANDS[sensor].filter((b, i, a) => i === 0 || x(b.lo) - x(a[i - 1].lo) > 14).map((b) => (
           <text key={b.id} x={x((b.lo + b.hi) / 2)} y={H - M.b + 72} textAnchor="middle" style={{ fontSize: 10 }}>{b.id}</text>
         ))}
-        <line x1={x(row[0])} x2={x(row[0])} y1={M.t} y2={H - M.b + 58} stroke="#f7867a" />
+        <line x1={x(row[0])} x2={x(row[0])} y1={M.t} y2={H - M.b + 58} stroke="var(--st-bad)" />
       </svg>
       <div className="hud-static">
         <StatPanel title={T.title} rows={[
@@ -78,8 +78,8 @@ export default function SolarSpectrum({ lang }: { lang: Lang }) {
           { k: T.band, v: band ? `${sensor === 's2' ? 'Sentinel-2' : 'OLI'} ${band.id}` : T.none, tone: 'muted' },
         ]}>
           <p style={{ margin: '8px 0 0', fontSize: '0.75rem' }}>
-            <span style={{ color: '#e3b25a' }}>━ {T.etr}</span><br /><span style={{ color: '#4fc3cd' }}>━ {T.glob}</span><br />
-            <span style={{ color: '#f7867a' }}>▇ {T.abs}</span></p>
+            <span style={{ color: 'var(--st-warn)' }}>━ {T.etr}</span><br /><span style={{ color: 'var(--st-accent)' }}>━ {T.glob}</span><br />
+            <span style={{ color: 'var(--st-bad)' }}>▇ {T.abs}</span></p>
           <p className="muted" style={{ margin: '6px 0 0', fontSize: '0.72rem' }}>{T.hover}</p>
         </StatPanel>
       </div>

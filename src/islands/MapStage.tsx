@@ -31,11 +31,12 @@ const STYLE: StyleSpecification = {
   ],
 };
 
-const SOVEREIGN: { lon: number; lat: number; sea?: boolean; name: Record<Lang, string> }[] = [
-  { lon: 112.0, lat: 16.5, name: { vi: 'Quần đảo Hoàng Sa (Việt Nam)', en: 'Hoang Sa archipelago (Viet Nam)' } },
-  { lon: 114.3, lat: 10.0, name: { vi: 'Quần đảo Trường Sa (Việt Nam)', en: 'Truong Sa archipelago (Viet Nam)' } },
-  { lon: 113.0, lat: 13.5, sea: true, name: { vi: 'Biển Đông', en: 'East Sea' } },
+const SOVEREIGN: { lon: number; lat: number; sea?: boolean; name: Record<Lang, string>; short: Record<Lang, string> }[] = [
+  { lon: 112.0, lat: 16.5, name: { vi: 'Quần đảo Hoàng Sa (Việt Nam)', en: 'Hoang Sa archipelago (Viet Nam)' }, short: { vi: 'Hoàng Sa (Việt Nam)', en: 'Hoang Sa (Viet Nam)' } },
+  { lon: 114.3, lat: 10.0, name: { vi: 'Quần đảo Trường Sa (Việt Nam)', en: 'Truong Sa archipelago (Viet Nam)' }, short: { vi: 'Trường Sa (Việt Nam)', en: 'Truong Sa (Viet Nam)' } },
+  { lon: 113.0, lat: 13.5, sea: true, name: { vi: 'Biển Đông', en: 'East Sea' }, short: { vi: 'Biển Đông', en: 'East Sea' } },
 ];
+const SOV_FULL_ZOOM = 4; // below this (world/region views) the full names collide: short names, no sea label
 
 const GESTURE = {
   vi: { 'CooperativeGesturesHandler.WindowsHelpText': 'Giữ Ctrl và cuộn chuột để phóng to/thu nhỏ bản đồ',
@@ -159,7 +160,14 @@ export default function MapStage({ lang, label, quad, bounds, overlays = [], hud
     if (!ready || !m) return;
     let live = true;
     const made: { remove: () => void }[] = [];
-    const show = () => made.forEach((x) => ((x as unknown as { getElement: () => HTMLElement }).getElement().style.display = m.getZoom() < 9 ? '' : 'none'));
+    const show = () => {
+      const z = m.getZoom();
+      made.forEach((x, i) => {
+        const el = (x as unknown as { getElement: () => HTMLElement }).getElement(), s = SOVEREIGN[i];
+        el.style.display = z >= 9 || (s.sea && z < SOV_FULL_ZOOM) ? 'none' : '';
+        el.textContent = (z < SOV_FULL_ZOOM ? s.short : s.name)[lang];
+      });
+    };
     import('maplibre-gl').then(({ Marker }) => {
       if (!live) return;
       for (const s of SOVEREIGN) {

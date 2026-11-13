@@ -1,64 +1,145 @@
 ---
-title: Tổng quan viễn thám & hệ thống vệ tinh
+title: Tổng quan hệ thống vệ tinh & viễn thám
 n: 1
-summary: Viễn thám là đo đạc từ xa. Chương này đi theo đường đi của năng lượng từ nguồn đến người dùng, giới thiệu bốn phân đoạn của một hệ thống vệ tinh và những vệ tinh quan sát Trái Đất đang bay trên đầu chúng ta, kèm vị trí tính từ phần tử quỹ đạo thật và khung ảnh thật quanh Hà Nội.
+summary: Bức tranh lớn trước khi đi vào chi tiết. Vì sao vệ tinh không rơi, bốn phân đoạn của một hệ thống vệ tinh, các họ sứ mệnh và quỹ đạo của chúng, quy mô ngành vũ trụ đo bằng danh mục vệ tinh thật, vòng đời một sứ mệnh và các mốc lịch sử của thế giới và Việt Nam. Cuối chương đi theo đường năng lượng của viễn thám và đo kích thước một cảnh ảnh thật quanh Hà Nội.
 objectives:
-  - Định nghĩa viễn thám; phân biệt cảm biến thụ động và chủ động.
-  - Mô tả 7 khâu của chuỗi viễn thám và 4 phân đoạn của một hệ thống vệ tinh.
-  - Kể tên các vệ tinh quan sát Trái Đất dữ liệu mở chính và đọc được độ cao, độ nghiêng, chu kỳ của chúng.
-  - So sánh diện tích một cảnh ảnh của các cảm biến với kích thước đối tượng cần nghiên cứu.
-  - Biết các mốc chính của viễn thám thế giới và Việt Nam.
-updated: "2026-11-04"
+  - Giải thích vì sao vệ tinh "luôn rơi mà không chạm đất" và tính được vận tốc vòng tròn ở một độ cao.
+  - Mô tả bốn phân đoạn của một hệ thống vệ tinh (phóng, không gian, mặt đất, người dùng) với ví dụ Việt Nam.
+  - Phân biệt các họ sứ mệnh (viễn thông, định vị, quan sát Trái Đất, khí tượng, khoa học) và vùng quỹ đạo điển hình của chúng.
+  - Đọc được quy mô ngành từ số liệu danh mục vệ tinh và báo cáo kinh tế vũ trụ.
+  - Kể các pha trong vòng đời một sứ mệnh và các mốc lịch sử chính, kể cả của Việt Nam.
+  - Định nghĩa viễn thám, phân biệt cảm biến thụ động và chủ động, so sánh diện tích một cảnh ảnh của các cảm biến.
+updated: "2026-11-05"
 ---
 import Term from '../../../components/Term.astro';
 import Depth from '../../../components/Depth.astro';
 import Figure from '../../../components/Figure.astro';
 import LabLinks from '../../../components/LabLinks.astro';
+import Note from '../../../components/Note.astro';
+import Tiles from '../../../components/Tiles.astro';
+import Stats from '../../../components/Stats.astro';
+import Steps from '../../../components/Steps.astro';
+import Formula from '../../../components/Formula.astro';
+import Predict from '../../../islands/Predict.tsx';
+import SatNow from '../../../islands/SatNow.tsx';
+import FallAround from '../../../islands/FallAround.tsx';
+import SatSegments from '../../../islands/SatSegments.tsx';
+import MissionMix from '../../../islands/MissionMix.tsx';
+import LaunchHistory from '../../../islands/LaunchHistory.tsx';
+import HistoryTimeline from '../../../islands/HistoryTimeline.tsx';
 import RsChain from '../../../islands/RsChain.tsx';
 import EoMissions from '../../../islands/EoMissions.tsx';
 import FootprintMap from '../../../islands/FootprintMap.tsx';
 import Quiz from '../../../islands/Quiz.tsx';
 import quiz from '../../../data/quiz/ch01.json';
 
-<p class="muted" style="font-size:0.9rem">Chương này phỏng theo chương 1 và chương 8 của <a href="https://satellite-rs-handbook.netlify.app/" rel="noopener"><em>Sổ tay Vệ tinh & Viễn thám</em></a> (Nguyễn Văn Tín, giấy phép CC BY 4.0). Phần bốn phân đoạn, các mốc lịch sử và sơ đồ chuỗi viễn thám dựa trên bản gốc. Các hình tương tác, số liệu quỹ đạo và khung ảnh thật là phần bổ sung của sổ tay này.</p>
-
-## 1.1 Viễn thám là gì
-
-<Term id="remote-sensing">Viễn thám</Term> là thu thập thông tin về một đối tượng mà **không chạm vào nó**. Trong sổ tay này, "đối tượng" là mặt đất, mặt nước, cây cối và thành phố. "Không chạm" nghĩa là đo năng lượng điện từ từ vệ tinh cách đó vài trăm km.
-
-Theo cách trình bày kinh điển của Trung tâm Viễn thám Canada (CCRS), mọi hệ viễn thám gồm 7 khâu, từ nguồn năng lượng đến ứng dụng. Có hai cách lấy năng lượng:
-
-- <Term id="passive-sensor">Cảm biến thụ động</Term> đo năng lượng có sẵn: ánh sáng Mặt Trời phản xạ (Sentinel-2, Landsat) hoặc bức xạ nhiệt do chính bề mặt phát ra (kênh nhiệt Landsat).
-- <Term id="active-sensor">Cảm biến chủ động</Term> tự phát năng lượng rồi đo phần dội về. Radar Sentinel-1 (Chương 11) là ví dụ: chụp được ban đêm và xuyên mây.
-
 <Figure
-  title="Hình 1.1 — Chuỗi viễn thám 7 khâu, với ví dụ thật trong sổ tay"
-  try="Bấm lần lượt Quang học → Nhiệt → Radar. Ở chế độ Nhiệt, vì sao khâu 1 và 2 bị làm mờ? Bấm khâu 3 để xem ví dụ số liệu Hà Nội của từng loại."
-  source="Sơ đồ theo 7 khâu của CCRS (Natural Resources Canada, Fundamentals of Remote Sensing), phỏng theo Sổ tay Vệ tinh & Viễn thám (CC BY 4.0). Số liệu ví dụ lấy từ Chương 3, 6 và 11 của sổ tay này."
+  title="Hình 1.1 — Gần 17 000 vệ tinh đang hoạt động quanh Trái Đất"
+  try="Để màu theo 'Vùng quỹ đạo' và bấm 'Thu nhỏ' (−): vòng GEO cam nằm xa gấp bao nhiêu lần lớp LEO xanh? Chọn 'Hiện: MEO' để thấy các chòm sao định vị. Đổi sang 'Họ sứ mệnh': họ nào chiếm gần hết LEO?"
+  source="Phần tử quỹ đạo trung bình (GP/OMM) của mọi vật thể trong nhóm 'active' của CelesTrak, lấy ngày 05/11/2026; họ sứ mệnh theo các nhóm mục đích của CelesTrak (scripts/data/export_ch01_satnow.py). Truyền quỹ đạo Kepler có trôi J2 (src/lib/gnss.ts), sai vài chục km sau một ngày: chỉ để minh họa. Ảnh nền © Esri, Maxar, Earthstar Geographics."
 >
-  <RsChain client:visible lang="vi" />
+  <SatNow client:visible lang="vi" />
 </Figure>
 
-Ánh sáng đi qua khí quyển **hai lần** (xuống và lên), nên ảnh quang học luôn lẫn ảnh hưởng của khí quyển (Chương 3, 7). Năng lượng nhiệt chỉ đi một lần, từ bề mặt lên. Radar cũng đi hai lần, nhưng khí quyển gần như trong suốt với sóng vi ba.
+<Stats items={[
+  { v: '16 873', l: 'vệ tinh đang hoạt động có phần tử quỹ đạo (CelesTrak, 05/11/2026)' },
+  { v: '95,2', u: '%', l: 'trong số đó bay ở quỹ đạo thấp LEO, dưới 2000 km' },
+  { v: '66,4', u: '%', l: 'là vệ tinh Starlink (11 207 chiếc)' },
+  { v: '315', l: 'lần phóng lên quỹ đạo năm 2025, nhiều nhất từ trước đến nay' },
+]} caption="Đếm từ ảnh chụp danh mục CelesTrak (GP và SATCAT) ngày 05/11/2026; số này đổi hằng tuần." />
+
+## 1.1 Vệ tinh là gì, vì sao nó không rơi
+
+**Vệ tinh nhân tạo** là vật thể con người đưa lên và giữ chuyển động quanh Trái Đất nhờ chính lực hấp dẫn. Nghe lạ, nhưng vệ tinh **luôn đang rơi** về phía Trái Đất. Nó không chạm đất vì bay ngang đủ nhanh: trong lúc rơi xuống một đoạn, mặt đất cong bên dưới cũng "lùi" xuống đúng một đoạn như thế.
+
+<Predict client:visible lang="vi"
+  title="Trên ISS còn bao nhiêu trọng lực?"
+  q="Trạm Vũ trụ Quốc tế bay ở khoảng 420 km. Gia tốc trọng trường ở đó bằng bao nhiêu phần trăm so với mặt đất?"
+  slider={{ min: 0, max: 100, step: 1, unit: '%' }} answer={88} tol={4}
+  why="Trọng lực giảm theo bình phương khoảng cách tới tâm Trái Đất: (6371 / 6791)² ≈ 0,88, tức còn khoảng 88 %. Phi hành gia lơ lửng không phải vì hết trọng lực, mà vì họ và trạm cùng rơi tự do với cùng một gia tốc." />
+
+Ý tưởng này có từ thí nghiệm tưởng tượng "khẩu pháo của Newton": bắn viên đạn từ đỉnh núi càng nhanh thì nó rơi càng xa, đến một vận tốc nào đó thì nó rơi vòng quanh Trái Đất mãi mãi. Chương 3 giải bài toán khẩu pháo bằng tích phân số. Ở đây ta chỉ nhìn **một giây** của chuyển động đó.
+
+<Figure
+  title="Hình 1.2 — Một giây trên quỹ đạo: rơi xuống bao nhiêu, mặt cầu cong đi bao nhiêu"
+  try="Ở 6 km/s, vệ tinh rơi 4,35 m trong một giây nhưng mặt cầu chỉ cong đi 2,66 m: nó mất độ cao. Bấm nút v = 7,67 km/s: hai con số bằng nhau. Kéo lên 9 km/s rồi chọn 60 s."
+  source="Trái Đất cầu bán kính 6371 km, μ = 398 600,4 km³/s², độ cao 400 km; rơi = ½·g·t² với g = μ/r², độ cong = r − √(r² − (v·t)²) (src/lib/overview.ts, fallDrops)."
+>
+  <FallAround client:visible lang="vi" />
+</Figure>
+
+Ở 400 km, trọng lực kéo vệ tinh xuống **4,35 m** mỗi giây đầu. Nếu nó bay ngang **7,67 km/s**, sau một giây mặt cầu ở độ cao đó cũng cong xuống đúng 4,35 m. Vệ tinh rơi mãi, nhưng độ cao không đổi: đó là quỹ đạo tròn. Điều kiện "rơi bằng cong" cho ngay công thức vận tốc vòng tròn:
+
+<Formula label="Vận tốc vòng tròn và chu kỳ" tex="v = \sqrt{\frac{\mu}{r}}, \qquad T = 2\pi\sqrt{\frac{r^{3}}{\mu}}, \qquad r = R_E + h" where="
+v :: vận tốc ngang cần để giữ quỹ đạo tròn (km/s)
+\mu :: hằng số hấp dẫn của Trái Đất, 398 600,4 km³/s²
+r :: khoảng cách tới tâm Trái Đất: bán kính 6371 km cộng độ cao h
+T :: chu kỳ, thời gian bay một vòng
+" />
+
+<Stats items={[
+  { v: '7,67', u: 'km/s', l: 'vận tốc vòng tròn ở 400 km, khoảng 27 600 km/h' },
+  { v: '92,4', u: 'phút', l: 'một vòng quanh Trái Đất ở 400 km' },
+  { v: '88', u: '%', l: 'trọng lực còn lại ở độ cao ISS (420 km)' },
+]} />
+
+<Note kind="myth">
+
+"Trên quỹ đạo không có trọng lực nên phi hành gia lơ lửng." **Sai.** Ở độ cao ISS trọng lực vẫn còn khoảng 88 %. Chính trọng lực là thứ giữ trạm trên quỹ đạo. Mọi vật trong trạm cùng rơi tự do với cùng gia tốc, nên không có gì đè lên sàn: đó là trạng thái <Term id="ch01-microgravity">vi trọng lực</Term>.
+
+</Note>
+
+<Note kind="key">
+
+<mark class="key">Vệ tinh không "bay lơ lửng" mà rơi tự do liên tục, với vận tốc ngang đủ lớn để mặt đất cong đi kịp.</mark> Càng xa Trái Đất, trọng lực càng yếu nên vận tốc cần càng nhỏ và chu kỳ càng dài. Chương 2 tính chính xác các quỹ đạo, Chương 3 tính tên lửa cần bao nhiêu nhiên liệu để đạt vận tốc đó.
+
+</Note>
 
 ## 1.2 Bốn phân đoạn của một hệ thống vệ tinh
 
-Một vệ tinh không tự làm ra bản đồ. Nó là một mắt xích trong hệ thống bốn phân đoạn:
+Một vệ tinh không tự làm ra bản đồ hay cuộc gọi. Nó là một mắt xích trong hệ thống gồm bốn **phân đoạn** (segment):
+
+- **Phân đoạn phóng**: tên lửa đưa vệ tinh lên quỹ đạo ban đầu, từ một bãi phóng. Nhiều vệ tinh nhỏ đi chung một chuyến (<Term id="rideshare">phóng ghép</Term>). Chương 3.
+- **Phân đoạn không gian**: bản thân vệ tinh, gồm <Term id="satellite-bus">nền tảng (bus)</Term> giữ cho vệ tinh sống (điện, tư thế, nhiệt, máy tính, liên lạc) và <Term id="payload">tải hữu ích (payload)</Term> làm nhiệm vụ (camera, radar, bộ phát). Chương 4.
+- **Phân đoạn mặt đất**: trung tâm điều khiển gửi lệnh và nhận số liệu sức khỏe vệ tinh (<Term id="ttc">TT&C</Term>), các <Term id="ground-station">trạm mặt đất</Term> thu dữ liệu, hệ thống xử lý, lưu trữ, phân phối. Với viễn thông còn có <Term id="gateway-station">trạm cổng (gateway)</Term> nối vệ tinh với mạng mặt đất. Chương 5.
+- **Phân đoạn người dùng**: thiết bị và con người dùng dịch vụ: chip GNSS trong điện thoại, chảo thu truyền hình, <Term id="user-terminal">thiết bị đầu cuối</Term> Starlink, và kỹ sư GIS mở ảnh trong Earth Engine.
+
+<Figure
+  title="Hình 1.3 — Bốn phân đoạn và các luồng giữa chúng, với ví dụ Việt Nam"
+  try="Ở chế độ 'Quan sát Trái Đất', luồng nào không có? Đổi sang 'Định vị': vì sao mũi tên từ mặt đất tới người dùng biến mất? Bấm từng khối ở chế độ 'Viễn thông' để xem VINASAT được điều khiển từ đâu."
+  source="Sơ đồ khái niệm. Ví dụ: VNREDSat-1 theo eoPortal (ESA) và Airbus; GPS theo gps.gov; VINASAT theo Bộ Thông tin và Truyền thông, VNPT (2012). Ngày phóng theo danh mục SATCAT của CelesTrak."
+>
+  <SatSegments client:visible lang="vi" />
+</Figure>
+
+Viễn thám thường đi theo đường **vệ tinh → trạm mặt đất → xử lý → người dùng**: ảnh phải xuống trạm và qua xử lý mới thành sản phẩm. Định vị và viễn thông thì khác: người dùng nhận tín hiệu **trực tiếp** từ vệ tinh. Máy thu GNSS chỉ nghe, không phát, nên một hệ GPS phục vụ được số người dùng không giới hạn.
 
 <div class="table-wrap">
 
-| Phân đoạn | Gồm những gì | Ví dụ với Sentinel-2 |
-|---|---|---|
-| Phóng | Tên lửa, bãi phóng | Sentinel-2A phóng bằng tên lửa Vega từ Kourou (Guyane thuộc Pháp) năm 2015 |
-| Không gian | **Bus** (khung, nguồn điện, điều khiển tư thế, nhiệt, liên lạc) và **payload** (thiết bị làm nhiệm vụ) | Payload là máy chụp đa phổ MSI, 13 kênh |
-| Mặt đất | Trung tâm điều khiển, trạm anten thu dữ liệu, hệ thống xử lý và lưu trữ | <Term id="ground-segment">Phân đoạn mặt đất</Term> của ESA tạo sản phẩm L1C và L2A |
-| Người dùng | Người và phần mềm dùng dữ liệu | Bạn, khi mở ảnh trong Earth Engine hoặc QGIS |
+| Phân đoạn | Gồm những gì | Ví dụ Sentinel-2 | Ví dụ Việt Nam |
+|---|---|---|---|
+| Phóng | Tên lửa, bãi phóng, dịch vụ phóng ghép | Sentinel-2A phóng bằng Vega từ Kourou năm 2015 | VNREDSat-1 đi chung chuyến Vega VV02 với Proba-V (07/05/2013) |
+| Không gian | Bus + payload | Payload là máy chụp đa phổ MSI, 13 kênh | VNREDSat-1 khoảng 130 kg, camera NAOMI 2,5 m / 10 m |
+| Mặt đất | Điều khiển (TT&C), trạm thu, xử lý, lưu trữ | <Term id="ground-segment">Phân đoạn mặt đất</Term> của ESA tạo sản phẩm L1C, L2A | Trạm điều khiển băng S ở Hòa Lạc; Đài điều khiển vệ tinh Quế Dương (VINASAT) |
+| Người dùng | Người và phần mềm dùng dữ liệu, dịch vụ | Bạn, khi mở ảnh trong Earth Engine hoặc QGIS | Cơ quan tài nguyên, môi trường, nông nghiệp; thuê bao truyền hình vệ tinh |
 
 </div>
 
+<Note kind="why" label="Vì sao vệ tinh viễn thám phải lưu ảnh rồi mới gửi?">
+
+Một vệ tinh ở 700 km chỉ "thấy" một trạm mặt đất trong tối đa khoảng **12 phút** mỗi lượt bay qua đỉnh đầu (góc ngẩng tối thiểu 5°), và không phải vòng nào cũng đi qua gần trạm. Phần lớn thời gian nó chụp ở nơi không có trạm, nên ảnh được lưu trong bộ nhớ trên khoang và "xả" xuống khi qua trạm. Đó là lý do các cơ quan vũ trụ xây mạng trạm ở vùng cực, nơi vệ tinh quỹ đạo cực đi qua gần như mọi vòng.
+
+</Note>
+
 Người dùng thường chỉ thấy phân đoạn cuối. Nhưng chất lượng dữ liệu phụ thuộc cả bốn: quỹ đạo do tên lửa và động cơ duy trì, cảm biến được hiệu chuẩn trên quỹ đạo, và mặt đất quyết định <Term id="data-level">cấp xử lý</Term> mà bạn tải về.
 
-<Depth level="ref" title="Bảng tra: các cấp xử lý dữ liệu">
+<Note kind="key">
+
+<mark class="key">Một sự cố ở bất kỳ phân đoạn nào cũng làm hỏng dịch vụ</mark>: tên lửa hỏng thì mất vệ tinh, bus hỏng thì payload vô dụng, trạm điều khiển lỗi thì vệ tinh còn sống mà không ai ra lệnh được. Từ 09/11/2021 đến 25/03/2022, VNREDSat-1 phải dừng chụp hơn 4 tháng vì lỗi phần cứng lưu trữ dữ liệu vận hành và điều khiển; kỹ sư phải khôi phục các máy chủ điều khiển thì vệ tinh mới chụp lại được (Tuổi Trẻ, 2025).
+
+</Note>
+
+<Depth level="ref" title="Bảng tra: các cấp xử lý dữ liệu viễn thám">
 
 <div class="table-wrap">
 
@@ -71,16 +152,81 @@ Người dùng thường chỉ thấy phân đoạn cuối. Nhưng chất lượ
 
 </div>
 
-Các chương 4, 6 và 11 dùng L2A, Collection 2 Level-2 và GRD. Chương 7 so sánh L1C với L2A.
+Các chương 9, 11 và 16 dùng L2A, Collection 2 Level-2 và GRD. Chương 12 so sánh L1C với L2A.
 
 </Depth>
 
-## 1.3 Những vệ tinh đang bay trên đầu chúng ta
+## 1.3 Các họ sứ mệnh và quỹ đạo của chúng
 
-Hình 1.2 đặt 11 vệ tinh quan sát Trái Đất lên quả địa cầu. Vị trí tính từ **phần tử quỹ đạo thật** do CelesTrak công bố ngày 3–4/11/2026, nên bạn thấy chúng đúng chỗ tại thời điểm đó.
+Vệ tinh được chia theo việc chúng làm. Mỗi việc cần một kiểu quỹ đạo riêng, vì độ cao quyết định vệ tinh nhìn thấy bao nhiêu mặt đất, nhìn chi tiết đến đâu và tín hiệu đi mất bao lâu.
+
+<Tiles
+  items={[
+    { t: 'Viễn thông', d: 'GEO 35 786 km; LEO 340–1200 km' },
+    { t: 'Định vị (GNSS)', d: 'MEO 19 100–23 200 km' },
+    { t: 'Quan sát Trái Đất', d: 'LEO đồng bộ Mặt Trời 450–800 km' },
+    { t: 'Khí tượng', d: 'GEO và LEO cực' },
+    { t: 'Khoa học, thám hiểm', d: 'Đủ loại, kể cả điểm Lagrange' },
+    { t: 'Quân sự, thử nghiệm', d: 'Mọi vùng quỹ đạo' },
+  ]}
+  sum="Bốn vùng quỹ đạo: LEO < 2000 km · MEO 2000–35 786 km · GEO 35 786 km · HEO elip dẹt"
+/>
+
+Các vùng quỹ đạo được gọi theo độ cao: <Term id="leo">quỹ đạo thấp (LEO)</Term> dưới 2000 km, <Term id="ch01-meo">quỹ đạo tầm trung (MEO)</Term> từ 2000 km đến dưới GEO, quỹ đạo địa tĩnh GEO ở 35 786 km, và <Term id="ch01-heo">quỹ đạo elip cao (HEO)</Term> có viễn điểm rất xa.
+
+<div class="table-wrap">
+
+| Họ sứ mệnh | Quỹ đạo điển hình | Ví dụ | Điểm kỹ thuật đáng chú ý |
+|---|---|---|---|
+| Viễn thông | GEO; LEO | VINASAT-1/2, Intelsat; Starlink, OneWeb | GEO: 3 vệ tinh phủ gần hết Trái Đất (trừ vùng cực) nhưng tín hiệu đi lên đi xuống mất khoảng 239 ms. LEO: trễ thấp nhưng cần hàng nghìn vệ tinh (Chương 6) |
+| Định vị | MEO | GPS, GLONASS, Galileo, BeiDou | Phát tín hiệu thời gian từ đồng hồ nguyên tử; máy thu chỉ nghe (Chương 7) |
+| Quan sát Trái Đất | LEO đồng bộ Mặt Trời | Landsat, Sentinel, VNREDSat-1, PlanetScope | Quang học, nhiệt, radar; lượng dữ liệu lớn, cần đường xuống băng X hoặc Ka (Chương 5) |
+| Khí tượng | GEO và LEO cực | Himawari-9, GOES; NOAA-20/21, MetOp | GEO chụp toàn đĩa liên tục để theo dõi mây; LEO đo chi tiết hơn và phủ cả vùng cực |
+| Khoa học | Rất đa dạng | ISS, Hubble, GRACE-FO; JWST ở điểm L2 | Yêu cầu ổn định và chính xác rất cao |
+
+</div>
+
+Quỹ đạo **địa tĩnh** (<Term id="geostationary-orbit">GEO</Term>) là trường hợp đặc biệt: chu kỳ bằng đúng một ngày sao (23 giờ 56 phút 4 giây), nằm trong mặt phẳng xích đạo, nên vệ tinh đứng yên so với một điểm trên mặt đất. Thay T = 86 164 s vào công thức chu kỳ ở mục 1.1:
+
+<Formula label="Bán kính quỹ đạo địa tĩnh" tex="r_{GEO} = \sqrt[3]{\frac{\mu\,T_{s}^{2}}{4\pi^{2}}} \approx 42\,164\ \text{km}, \qquad h_{GEO} = r_{GEO} - R_{eq} \approx 35\,786\ \text{km}" where="
+T_{s} :: một ngày sao, 86 164,1 s: thời gian Trái Đất tự quay đúng một vòng
+R_{eq} :: bán kính xích đạo, 6378,137 km
+" />
+
+<Note kind="myth">
+
+"Vệ tinh địa tĩnh đứng yên trong không gian." **Sai.** Nó bay **3,07 km/s** trên vòng tròn bán kính 42 164 km, chỉ là bay đúng nhịp Trái Đất tự quay nên nhìn từ mặt đất thấy đứng yên. Chảo thu truyền hình nhờ vậy không phải xoay theo. VINASAT-1 giữ vị trí ở 132° Đông, VINASAT-2 ở 131,8° Đông.
+
+</Note>
+
+<Predict client:visible lang="vi"
+  title="Họ nào đông nhất?"
+  q="Trong gần 17 000 vệ tinh đang hoạt động, họ sứ mệnh nào chiếm nhiều nhất?"
+  options={['Quan sát Trái Đất', 'Viễn thông', 'Định vị (GNSS)', 'Khí tượng']} answer={1}
+  why="Viễn thông áp đảo: 13 485 vệ tinh, khoảng 80 %, phần lớn là Starlink. Các hệ định vị toàn cầu chỉ cần khoảng 30 vệ tinh mỗi hệ ở MEO, nên cả họ định vị chỉ có 169 vệ tinh. CelesTrak xếp 470 vệ tinh vào nhóm quan sát Trái Đất; con số thật cao hơn vì nhiều vệ tinh chụp ảnh thương mại chưa được xếp nhóm." />
 
 <Figure
-  title="Hình 1.2 — Các vệ tinh quan sát Trái Đất dữ liệu mở và VNREDSat-1"
+  title="Hình 1.4 — Vệ tinh đang hoạt động theo họ sứ mệnh và vùng quỹ đạo"
+  try="Bấm 'Định vị (GNSS)': vùng nào chiếm phần lớn? Bấm 'Khí tượng' và 'Quan sát Trái Đất': họ nào có vệ tinh ở GEO? Vì sao thanh 'Chưa xếp nhóm' lại dài?"
+  source="Cùng ảnh chụp CelesTrak ngày 05/11/2026 như Hình 1.1. Họ sứ mệnh = nhóm mục đích đầu tiên của CelesTrak chứa vệ tinh (thứ tự ưu tiên trong scripts/data/export_ch01_satnow.py). Vùng quỹ đạo tính từ cận điểm và viễn điểm (src/lib/overview.ts, orbitClass)."
+>
+  <MissionMix client:visible lang="vi" />
+</Figure>
+
+Hình 1.4 cho thấy một điều quan trọng với người làm viễn thám: **vệ tinh quan sát Trái Đất chỉ là phần nhỏ** của bầu trời hiện nay. LEO đông nghẹt vì các chòm sao Internet, còn mỗi hệ GNSS chỉ cần vài chục vệ tinh ở MEO. Khoảng 2600 vệ tinh "chưa xếp nhóm" gồm vệ tinh quân sự, thử nghiệm công nghệ và nhiều vệ tinh thương mại (kể cả vệ tinh chụp ảnh Trung Quốc như Jilin-1, Gaofen) mà CelesTrak chưa đưa vào nhóm mục đích nào.
+
+<Note kind="key">
+
+<mark class="key">Nhiệm vụ quyết định quỹ đạo.</mark> Viễn thông cần phủ rộng hoặc trễ thấp (GEO hoặc LEO dày đặc), định vị cần nhiều vệ tinh nhìn thấy cùng lúc ở khắp nơi (MEO), quan sát Trái Đất cần nhìn gần với ánh sáng đều (LEO đồng bộ Mặt Trời), khí tượng cần cả nhìn liên tục (GEO) lẫn nhìn chi tiết (LEO cực).
+
+</Note>
+
+### Cận cảnh: các vệ tinh quan sát Trái Đất dữ liệu mở
+
+Hình 1.5 đặt 11 vệ tinh quan sát Trái Đất mà sổ tay dùng nhiều nhất lên quả địa cầu, cũng từ **phần tử quỹ đạo thật** của CelesTrak.
+
+<Figure
+  title="Hình 1.5 — Các vệ tinh quan sát Trái Đất dữ liệu mở và VNREDSat-1"
   try="Chọn nhóm 'Radar' rồi 'Quang học'. Các vệ tinh có độ nghiêng gần nhau hay khác xa nhau? Chọn VNREDSat-1 và so 'Độ nghiêng' với 'Độ nghiêng SSO (J2)'."
   source="Phần tử quỹ đạo trung bình (GP/OMM) từ CelesTrak, lấy ngày 04/11/2026. Sổ tay truyền quỹ đạo như quỹ đạo tròn có trôi nút do J2, sai số cỡ chục km sau một ngày; chỉ để minh họa, không dùng dự báo lượt bay. Ảnh nền © Esri, Maxar, Earthstar Geographics."
 >
@@ -105,7 +251,7 @@ ESA công bố độ cao trung bình của Sentinel-2 là 786 km. Chênh lệch 
 </div>
 
 <details>
-<summary>Bảng số liệu: 11 vệ tinh trong Hình 1.2</summary>
+<summary>Bảng số liệu: 11 vệ tinh trong Hình 1.5</summary>
 
 <div class="table-wrap">
 
@@ -125,13 +271,167 @@ ESA công bố độ cao trung bình của Sentinel-2 là 786 km. Chênh lệch 
 
 </details>
 
-## 1.4 Một cảnh ảnh rộng bao nhiêu?
+VNREDSat-1 do Trung tâm Vũ trụ Việt Nam (VNSC) vận hành. Phần tử quỹ đạo tháng 11/2026 cho thấy một điều thú vị: độ nghiêng thật 97,89° **thấp hơn** độ nghiêng đồng bộ Mặt Trời ở độ cao đó (98,10°). Theo công thức J2 (Chương 2), mặt phẳng quỹ đạo quay 0,961°/ngày thay vì 0,986°/ngày. Mặt phẳng quỹ đạo chậm hơn Mặt Trời, nên giờ bay qua **sớm dần**, khoảng 36 phút mỗi năm nếu không hiệu chỉnh. Đây là ước tính từ một bộ phần tử, sổ tay không có số liệu vận hành của VNSC để kiểm chứng.
+
+<Depth level="advanced" title="Terra cũng đang trôi">
+
+Terra (mang MODIS) có độ nghiêng 97,93°, cũng thấp hơn độ nghiêng đồng bộ Mặt Trời (98,14°). NASA đã ngừng duy trì quỹ đạo của Terra khi vệ tinh bước vào giai đoạn cuối sứ mệnh, nên giờ bay qua của nó sớm dần. Khi so sánh chuỗi dài nhiều năm của MODIS Terra, cần nhớ góc chiếu sáng không còn cố định như thời đầu.
+
+</Depth>
+
+## 1.4 Chuỗi giá trị và quy mô ngành vũ trụ
+
+Ngành vũ trụ thường được chia làm hai nửa, <Term id="ch01-upstream">thượng nguồn</Term> và <Term id="ch01-downstream">hạ nguồn</Term>:
+
+<Tiles
+  items={[
+    { t: 'Thượng nguồn (upstream)', d: 'Thiết kế, chế tạo vệ tinh và linh kiện; dịch vụ phóng; xây hạ tầng mặt đất. Vốn lớn, ít công ty.' },
+    { t: 'Hạ nguồn (downstream)', d: 'Vận hành vệ tinh và bán dịch vụ: băng thông, truyền hình, tín hiệu định vị, ảnh và dịch vụ giá trị gia tăng (phân tích, bản đồ, cảnh báo).' },
+  ]}
+  sum="Người làm viễn thám và GIS đứng ở cuối hạ nguồn: biến dữ liệu thành thông tin"
+/>
+
+Theo báo cáo *The Space Report 2025 Q2* của Space Foundation, kinh tế vũ trụ toàn cầu năm 2024 đạt khoảng **613 tỷ USD**, tăng 7,8 % so với năm trước. Khu vực thương mại chiếm 78 %, ngân sách các chính phủ chiếm 22 % còn lại. Con số này gồm cả hàng hóa và dịch vụ dùng vệ tinh (như thiết bị thu GNSS), nên các tổ chức khác nhau công bố các con số khác nhau; hãy luôn đọc định nghĩa trước khi so sánh.
+
+<Term id="ch01-satcat">Danh mục vệ tinh SATCAT</Term> ghi lại mọi vật thể con người đưa lên quỹ đạo. Đếm số mã quốc tế khác nhau mỗi năm cho ta số lần phóng thành công:
+
+<Predict client:visible lang="vi"
+  title="Năm 2025 có bao nhiêu lần phóng?"
+  q="Thời Chiến tranh Lạnh, nhiều nhất là 129 lần phóng lên quỹ đạo một năm (1984). Năm 2025 có bao nhiêu lần?"
+  slider={{ min: 50, max: 500, step: 5 }} answer={315} tol={25}
+  why="315 lần, tăng 24 % so với 254 lần năm 2024 và gấp 6 lần mức đáy 52 lần năm 2005. Số vệ tinh đưa lên còn tăng nhanh hơn: 4495 vệ tinh năm 2025, vì một chuyến Falcon 9 chở vài chục vệ tinh Starlink." />
+
+<Figure
+  title="Hình 1.6 — Số lần phóng lên quỹ đạo và số vệ tinh đưa lên mỗi năm, 1957–2026"
+  try="Chọn 'Lần phóng' rồi kéo thanh trượt từ 1984 tới 2005: vì sao số lần phóng giảm? Đổi sang 'Vệ tinh (payload)' và so năm 2019 với 2020. Đọc 'Vệ tinh / lần phóng' của năm 1990 và năm 2025."
+  source="Danh mục SATCAT của CelesTrak, lấy ngày 05/11/2026 (scripts/data/export_ch01_satnow.py). Lần phóng = số mã quốc tế YYYY-NNN khác nhau theo năm phóng; phóng thất bại không được lập danh mục. Năm 2026 tính đến lần phóng cuối trong danh mục (02/11/2026)."
+>
+  <LaunchHistory client:visible lang="vi" />
+</Figure>
+
+Đường cong có ba đoạn rõ rệt. Từ 1957 đến cuối thập niên 1980, Liên Xô và Mỹ phóng đều đặn trên 100 lần mỗi năm. Sau khi Liên Xô tan rã, số lần phóng giảm, xuống đáy **52 lần năm 2005**. Từ khoảng 2016, tên lửa tái sử dụng và các chòm sao vệ tinh nhỏ đẩy cả hai đường lên dốc đứng: 69 % số vệ tinh từng được phóng tính đến hết 2025 đã lên quỹ đạo trong mười năm 2016–2025.
+
+<Stats items={[
+  { v: '315', l: 'lần phóng lên quỹ đạo năm 2025 (254 lần năm 2024)' },
+  { v: '4495', l: 'vệ tinh được đưa lên trong năm 2025' },
+  { v: '35 167', l: 'vật thể đang được theo dõi trên quỹ đạo, trong đó 12 536 mảnh vỡ' },
+]} caption="Đếm từ SATCAT của CelesTrak ngày 05/11/2026. Vật thể theo dõi được thường lớn hơn khoảng 10 cm; mảnh nhỏ hơn không có trong danh mục." />
+
+<Note kind="warn">
+
+Trên quỹ đạo có 20 321 vật thể là vệ tinh (đang hoạt động hoặc đã chết), 2302 tầng tên lửa và 12 536 mảnh vỡ được theo dõi. Mỗi vụ va chạm tạo thêm hàng nghìn mảnh, nên các nhà vận hành phải liên tục tránh va chạm và đưa vệ tinh hết hạn ra khỏi quỹ đạo. <Term id="space-debris">Rác vũ trụ</Term> được bàn ở Chương 6.
+
+</Note>
+
+## 1.5 Vòng đời một sứ mệnh
+
+Các cơ quan vũ trụ chia một dự án vệ tinh thành các <Term id="ch01-mission-phase">pha</Term>, mỗi pha kết thúc bằng một kỳ đánh giá (review) để quyết định có đi tiếp hay không. NASA đặt tên Pre-A, A đến F; ESA dùng 0, A đến F với nội dung tương tự. Biết các pha giúp bạn đọc đúng các thông cáo kiểu "sứ mệnh vừa qua Critical Design Review" hay "vệ tinh đang trong giai đoạn commissioning".
+
+<Steps title="Các pha của một sứ mệnh (NASA, ESA)" items={[
+  { tag: 'Pre-A / 0', t: 'Ý tưởng', d: 'Nhu cầu người dùng, các phương án sứ mệnh. Kết thúc bằng đánh giá ý tưởng sứ mệnh (MCR ở NASA, MDR ở ESA).' },
+  { tag: 'A', t: 'Khả thi', d: 'Chọn phương án, ước tính chi phí, rủi ro, đặt yêu cầu hệ thống (SRR).' },
+  { tag: 'B', t: 'Thiết kế sơ bộ', d: 'Chọn công nghệ, thiết kế từng phân hệ. Kết thúc bằng Preliminary Design Review (PDR).' },
+  { tag: 'C', t: 'Thiết kế chi tiết', d: 'Bản vẽ chi tiết, chế tạo và thử mẫu linh kiện. Kết thúc bằng Critical Design Review (CDR).' },
+  { tag: 'D', t: 'Chế tạo, tích hợp, thử nghiệm, phóng', d: 'Lắp ráp, tích hợp và thử nghiệm (AIT): rung, chân không nhiệt, tương thích điện từ. Đánh giá sẵn sàng bay rồi phóng.' },
+  { tag: 'LEOP', t: 'Phóng và kiểm tra trên quỹ đạo', d: 'Vài ngày đầu sau phóng (LEOP), rồi vài tuần đến vài tháng hiệu chuẩn, kiểm tra (commissioning). NASA xếp vào cuối pha D, ESA vào đầu pha E.' },
+  { tag: 'E', t: 'Khai thác', d: 'Vận hành thường xuyên, cung cấp dữ liệu, dịch vụ. Có thể được kéo dài nhiều lần nếu vệ tinh còn tốt.' },
+  { tag: 'F', t: 'Kết thúc', d: 'Thụ động hóa (xả nhiên liệu, ngắt pin), hạ quỹ đạo để cháy trong khí quyển, hoặc đẩy lên quỹ đạo nghĩa địa với vệ tinh GEO.' },
+]} />
+
+<Note kind="key">
+
+<mark class="key">Phần lớn thời gian và tiền của một sứ mệnh tiêu trước khi phóng</mark>; pha E mới là lúc người dùng nhận được dữ liệu. Các công ty "NewSpace" như Planet hay SpaceX rút ngắn vòng đời bằng cách sản xuất hàng loạt vệ tinh giống nhau và chấp nhận rủi ro cao hơn cho từng chiếc.
+
+</Note>
+
+<div class="worked">
+
+#### Ví dụ: vòng đời của VNREDSat-1
+
+1. **08/2010**: Việt Nam ký hợp đồng với EADS Astrium (Pháp) chế tạo vệ tinh và các trạm mặt đất (eoPortal).
+2. **07/05/2013**: phóng bằng tên lửa Vega, tức **33 tháng** sau hợp đồng, rất nhanh so với một vệ tinh nhà nước cỡ lớn vì dùng nền tảng có sẵn.
+3. **04/09/2013**: kết thúc kiểm tra trên quỹ đạo, phía Pháp bàn giao quyền điều khiển cho Việt Nam.
+4. Tuổi thọ thiết kế **5 năm**, tức đến 2018. Năm 2021 và cuối 2023 vệ tinh phải dừng vì lỗi hệ thống điều khiển; đến 05/2025 hoạt động lại bình thường (Tuổi Trẻ, 2025).
+5. Tháng 11/2026 vệ tinh đã bay **13,5 năm**, gần gấp ba tuổi thọ thiết kế: một pha E kéo dài điển hình.
+
+</div>
+
+<Depth level="ref" title="Bảng tra: các kỳ đánh giá chính">
+
+<div class="table-wrap">
+
+| Pha | NASA (NPR 7120.5) | ESA (ECSS-M-ST-10C) |
+|---|---|---|
+| Pre-A / 0 | Mission Concept Review (MCR) | Mission Definition Review (MDR) |
+| A | System Requirements Review (SRR), Mission/System Definition Review (MDR/SDR) | Preliminary Requirements Review (PRR) |
+| B | Preliminary Design Review (PDR) | System Requirements Review (SRR), PDR |
+| C | Critical Design Review (CDR) | CDR |
+| D | System Integration Review, Operational Readiness Review, Flight Readiness Review | Qualification Review, Acceptance Review, Flight/Launch Readiness Review |
+| E | Post-Launch Assessment Review, Decommissioning Review | Commissioning Result Review, End-of-Life Review |
+| F | Disposal Readiness Review | Mission Close-out Review |
+
+</div>
+
+Thời hạn đưa vệ tinh LEO ra khỏi quỹ đạo sau khi hết nhiệm vụ: hướng dẫn quốc tế lâu nay là 25 năm (IADC); từ 2022 Ủy ban Truyền thông Liên bang Mỹ (FCC) yêu cầu 5 năm với vệ tinh được FCC cấp phép.
+
+</Depth>
+
+## 1.6 Các mốc lịch sử, và Việt Nam trên quỹ đạo
+
+<Figure
+  title="Hình 1.7 — Các mốc chính của thế giới và Việt Nam"
+  try="Bấm lần lượt các mốc Việt Nam (cột phải). Vệ tinh nào của Việt Nam còn đang hoạt động? Mốc nào của thế giới mở ra kỷ nguyên ảnh vệ tinh miễn phí?"
+  source="Ngày phóng (UTC) theo danh mục SATCAT của CelesTrak; NanoDragon theo Tuổi Trẻ (09/11/2021); PicoDragon theo VNSC; Landsat miễn phí theo Woodcock và cs. (2008); trạng thái VNREDSat-1 theo eoPortal và Tuổi Trẻ (2025)."
+>
+  <HistoryTimeline client:visible lang="vi" />
+</Figure>
+
+Việt Nam có người bay vào vũ trụ từ rất sớm: **Phạm Tuân** bay trên Soyuz 37 ngày 23/07/1980, là người châu Á đầu tiên lên vũ trụ. Vệ tinh đầu tiên của Việt Nam là vệ tinh viễn thông **VINASAT-1** (2008), tiếp theo là **VINASAT-2** (2012). **VNREDSat-1** (2013) là vệ tinh quan sát Trái Đất đầu tiên. Trung tâm Vũ trụ Việt Nam tự chế tạo các vệ tinh nhỏ **PicoDragon** (2013), **MicroDragon** (2019) và **NanoDragon** (2021). Năm 2026, PocketQube giáo dục **VEGAFLY-1** do một nhóm Việt Nam chế tạo đi chung chuyến Transporter-16.
+
+<Note kind="example" label="Việt Nam hôm nay">
+
+Danh mục SATCAT ngày 02/11/2026 ghi bốn vệ tinh của Việt Nam còn hoạt động: VINASAT-1, VINASAT-2, VNREDSat-1 và VEGAFLY-1. MicroDragon đã rơi về khí quyển ngày 01/10/2024. **LOTUSat-1**, vệ tinh radar khẩu độ tổng hợp băng X do NEC (Nhật Bản) chế tạo theo hợp đồng năm 2020, chưa có trong danh mục: lịch phóng đã lùi nhiều lần, một phần vì sự cố trong quá trình phát triển tên lửa Epsilon S.
+
+</Note>
+
+## 1.7 Từ vệ tinh đến viễn thám
+
+Từ đây sổ tay tập trung vào một họ sứ mệnh: **quan sát Trái Đất**. <Term id="remote-sensing">Viễn thám</Term> là thu thập thông tin về một đối tượng mà **không chạm vào nó**. Trong sổ tay này, "đối tượng" là mặt đất, mặt nước, cây cối và thành phố. "Không chạm" nghĩa là đo năng lượng điện từ từ vệ tinh cách đó vài trăm km.
+
+Theo cách trình bày kinh điển của Trung tâm Viễn thám Canada (CCRS), mọi hệ viễn thám gồm 7 khâu, từ nguồn năng lượng đến ứng dụng. Có hai cách lấy năng lượng:
+
+- <Term id="passive-sensor">Cảm biến thụ động</Term> đo năng lượng có sẵn: ánh sáng Mặt Trời phản xạ (Sentinel-2, Landsat) hoặc bức xạ nhiệt do chính bề mặt phát ra (kênh nhiệt Landsat).
+- <Term id="active-sensor">Cảm biến chủ động</Term> tự phát năng lượng rồi đo phần dội về. Radar Sentinel-1 (Chương 16) là ví dụ: chụp được ban đêm và xuyên mây.
+
+<Predict client:visible lang="vi"
+  title="Năng lượng đi qua khí quyển mấy lần?"
+  q="Với ảnh nhiệt (như kênh nhiệt của Landsat), năng lượng mà cảm biến đo được đi qua khí quyển mấy lần?"
+  options={['Không lần nào', 'Một lần', 'Hai lần', 'Ba lần']} answer={1}
+  why="Một lần: bức xạ nhiệt do chính bề mặt phát ra rồi đi thẳng lên vệ tinh. Ánh sáng Mặt Trời trong ảnh quang học đi hai lần, xuống rồi lên. Radar cũng đi hai lần nhưng khí quyển gần như trong suốt với sóng vi ba." />
+
+<Figure
+  title="Hình 1.8 — Chuỗi viễn thám 7 khâu, với ví dụ thật trong sổ tay"
+  try="Bấm lần lượt Quang học → Nhiệt → Radar. Ở chế độ Nhiệt, vì sao khâu 1 và 2 bị làm mờ? Bấm khâu 3 để xem ví dụ số liệu Hà Nội của từng loại."
+  source="Sơ đồ theo 7 khâu của CCRS (Natural Resources Canada, Fundamentals of Remote Sensing), phỏng theo Sổ tay Vệ tinh & Viễn thám (CC BY 4.0). Số liệu ví dụ lấy từ Chương 8, 11 và 16 của sổ tay này."
+>
+  <RsChain client:visible lang="vi" />
+</Figure>
+
+Ánh sáng đi qua khí quyển **hai lần** (xuống và lên), nên ảnh quang học luôn lẫn ảnh hưởng của khí quyển (Chương 8, 12). Năng lượng nhiệt chỉ đi một lần, từ bề mặt lên. Radar cũng đi hai lần, nhưng khí quyển gần như trong suốt với sóng vi ba.
+
+<Note kind="key">
+
+<mark class="key">Thụ động đo năng lượng có sẵn, chủ động tự phát rồi đo tiếng vọng.</mark> Vì vậy radar chụp được ban đêm và xuyên mây, điều rất quan trọng ở Việt Nam, nơi mùa mưa nhiều tháng liền gần như không có ảnh quang học sạch mây.
+
+</Note>
+
+## 1.8 Một cảnh ảnh rộng bao nhiêu?
 
 Mỗi lần chụp, cảm biến ghi một dải đất rộng bằng <Term id="swath">dải chụp</Term> của nó. Nhà cung cấp cắt dải này thành các **cảnh** hoặc **ô** (tile) để phân phối. Kích thước cảnh quyết định bạn cần bao nhiêu ảnh để phủ vùng nghiên cứu.
 
 <Figure
-  title="Hình 1.3 — Khung ảnh thật của ba cảm biến quanh Hà Nội"
-  try="Bấm 'Phóng tới' từng khung. Khung Hồ Tây mà Chương 4, 6, 11 dùng nằm ở đâu trong ô Sentinel-2? Một cảnh Landsat lớn gấp bao nhiêu lần khung đó?"
+  title="Hình 1.9 — Khung ảnh thật của ba cảm biến quanh Hà Nội"
+  try="Bấm 'Phóng tới' từng khung. Khung Hồ Tây mà Chương 9, 11, 16 dùng nằm ở đâu trong ô Sentinel-2? Một cảnh Landsat lớn gấp bao nhiêu lần khung đó?"
   source="Đường bao (system:footprint) của các cảnh thật trong Earth Engine: Sentinel-2 L2A ô T48QWJ 12/02/2024; Landsat 9 hàng 127/45 22/12/2023; Sentinel-1A IW GRD quỹ đạo 128 12/02/2024. VNREDSat-1: hình vuông 17,5 km theo dải chụp danh nghĩa, không phải cảnh thật. Diện tích tính trên ellipsoid. Ảnh nền © Esri, Maxar, Earthstar Geographics."
 >
   <FootprintMap client:visible lang="vi" />
@@ -149,34 +449,15 @@ Mỗi lần chụp, cảm biến ghi một dải đất rộng bằng <Term id="
 
 </div>
 
-Một cảnh Landsat kéo dài khoảng 190 km, từ vùng núi phía bắc xuống quá Hà Nội. Một ảnh VNREDSat-1 chỉ phủ một phần nội thành, nhưng chi tiết hơn 4 lần (2,5 m so với 10 m). Đánh đổi giữa dải chụp và độ phân giải được bàn kỹ ở Chương 4.
+Một cảnh Landsat kéo dài khoảng 190 km, từ vùng núi phía bắc xuống quá Hà Nội. Một ảnh VNREDSat-1 chỉ phủ một phần nội thành, nhưng chi tiết hơn 4 lần (2,5 m so với 10 m). Đánh đổi giữa dải chụp và độ phân giải được bàn kỹ ở Chương 9.
 
-## 1.5 Các mốc lịch sử và viễn thám ở Việt Nam
+<Note kind="key">
 
-<div class="table-wrap">
+<mark class="key">Dải chụp rộng thì phủ nhanh nhưng thô, dải chụp hẹp thì chi tiết nhưng phải chụp nhiều lần.</mark> Trước khi chọn ảnh, hãy so kích thước cảnh với kích thước đối tượng: một tỉnh cần vài ô Sentinel-2, một khu đô thị có thể chỉ cần một phần nhỏ của một ô.
 
-| Năm | Mốc |
-|---|---|
-| 1957 | Sputnik 1 (Liên Xô), vệ tinh nhân tạo đầu tiên |
-| 1972 | Landsat 1 phóng, mở đầu chuỗi ảnh quan sát mặt đất liên tục dài nhất |
-| 1978 | Seasat, vệ tinh dân sự đầu tiên mang radar SAR |
-| 2008 | USGS mở miễn phí toàn bộ kho ảnh Landsat |
-| 2013 | **VNREDSat-1** phóng ngày 7/5, vệ tinh quan sát Trái Đất đầu tiên của Việt Nam |
-| 2014–2015 | Sentinel-1A (radar) và Sentinel-2A (đa phổ), dữ liệu miễn phí và mở |
+</Note>
 
-</div>
-
-Nguồn: Sổ tay Vệ tinh & Viễn thám (CC BY 4.0).
-
-VNREDSat-1 do Trung tâm Vũ trụ Việt Nam (VNSC) quản lý, chụp ảnh toàn sắc 2,5 m và đa phổ 10 m. Phần tử quỹ đạo tháng 11/2026 cho thấy một điều thú vị: độ nghiêng thật 97,89° **thấp hơn** độ nghiêng đồng bộ Mặt Trời ở độ cao đó (98,10°). Theo công thức J2 (Chương 2), mặt phẳng quỹ đạo quay 0,961°/ngày thay vì 0,986°/ngày. Mặt phẳng quỹ đạo chậm hơn Mặt Trời, nên giờ bay qua **sớm dần**, khoảng 36 phút mỗi năm nếu không hiệu chỉnh. Đây là ước tính từ một bộ phần tử, sổ tay không có số liệu vận hành của VNSC để kiểm chứng.
-
-<Depth level="advanced" title="Terra cũng đang trôi">
-
-Terra (mang MODIS) có độ nghiêng 97,93°, cũng thấp hơn độ nghiêng đồng bộ Mặt Trời (98,14°). NASA đã ngừng duy trì quỹ đạo của Terra khi vệ tinh bước vào giai đoạn cuối sứ mệnh, nên giờ bay qua của nó sớm dần. Khi so sánh chuỗi dài nhiều năm của MODIS Terra, cần nhớ góc chiếu sáng không còn cố định như thời đầu.
-
-</Depth>
-
-## 1.6 Thực hành
+## 1.9 Thực hành
 
 Notebook đọc phần tử quỹ đạo từ CelesTrak, tính độ cao và chu kỳ, rồi đếm số ảnh Sentinel-2, Landsat 9 và Sentinel-1 chụp Hà Nội năm 2024 trong Earth Engine. Script GEE vẽ khung các cảnh ảnh phủ một điểm bạn chọn.
 
@@ -187,17 +468,27 @@ Notebook đọc phần tử quỹ đạo từ CelesTrak, tính độ cao và chu
 1. Đổi điểm sang tỉnh của bạn. Cần bao nhiêu ô Sentinel-2 để phủ toàn tỉnh?
 2. Tìm trên CelesTrak một vệ tinh quan sát Trái Đất khác (ví dụ PlanetScope hoặc ICEYE). Tính độ cao từ chuyển động trung bình.
 3. Vì sao ảnh nhiệt chỉ đi qua khí quyển một lần, còn ảnh quang học đi qua hai lần?
+4. Dùng công thức ở mục 1.1, tính vận tốc vòng tròn và chu kỳ của một vệ tinh Starlink ở 550 km. So với ISS ở 420 km.
+5. Mô tả bốn phân đoạn của VINASAT-1 và cho mỗi phân đoạn một ví dụ sự cố có thể làm gián đoạn dịch vụ truyền hình.
 
-## 1.7 Ôn tập
+## 1.10 Ôn tập
 
 <Quiz client:visible lang="vi" items={quiz} />
 
 ## Tài liệu tham khảo
 
+- Airbus Defence and Space. *VNREDSat-1*. https://www.airbus.com
 - CCRS (Canada Centre for Remote Sensing). *Fundamentals of Remote Sensing* (tài liệu hướng dẫn trực tuyến). Natural Resources Canada.
 - Drusch, M. và cs. (2012). Sentinel-2: ESA's optical high-resolution mission for GMES operational services. *Remote Sensing of Environment*, 120, 25–36.
-- Kelso, T. S. *CelesTrak*: dữ liệu phần tử quỹ đạo GP. https://celestrak.org
+- ECSS (2009). *ECSS-M-ST-10C Rev. 1: Space project management, project planning and implementation*. ESA.
+- eoPortal (ESA). *VNREDSat-1*. https://www.eoportal.org/satellite-missions/vnredsat-1
+- FCC (2022). *Space Innovation; Mitigation of Orbital Debris in the New Space Age*, Second Report and Order (quy tắc 5 năm).
+- Kelso, T. S. *CelesTrak*: dữ liệu phần tử quỹ đạo GP và danh mục SATCAT. https://celestrak.org
 - Lillesand, T. M., Kiefer, R. W., & Chipman, J. W. (2015). *Remote Sensing and Image Interpretation* (7th ed.). Wiley.
+- NASA (2016). *NASA Systems Engineering Handbook*, NASA/SP-2016-6105 Rev 2; NPR 7120.5: *NASA Space Flight Program and Project Management Requirements*.
 - Nguyễn Văn Tín. *Sổ tay Vệ tinh & Viễn thám*. CC BY 4.0. https://satellite-rs-handbook.netlify.app/
+- Space Foundation (2025). *The Space Report 2025 Q2* (thông cáo ngày 22/07/2025).
 - Torres, R. và cs. (2012). GMES Sentinel-1 mission. *Remote Sensing of Environment*, 120, 9–24.
+- Tuổi Trẻ News (02/05/2025). Vietnam's Earth observation satellite VNREDSat-1 resumes normal operations.
+- Woodcock, C. E. và cs. (2008). Free access to Landsat imagery. *Science*, 320(5879), 1011.
 - Wulder, M. A. và cs. (2019). Current status of Landsat program, science, and applications. *Remote Sensing of Environment*, 225, 127–147.

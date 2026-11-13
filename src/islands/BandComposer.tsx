@@ -53,8 +53,8 @@ export default function BandComposer({ lang }: { lang: Lang }) {
     <StatPanel title={`${preset ? preset.name[lang] : T.custom} · R ${rgb[0]} G ${rgb[1]} B ${rgb[2]}`}
       rows={out.limits.map((l, i) => ({ k: <span><i aria-hidden="true" style={{ display: 'inline-block', width: 9, height: 9, borderRadius: 2, marginRight: 6, background: GUN[i] }} />{[T.r, T.g, T.b][i]} ({rgb[i]})</span>,
         v: `${nf(l.lo)}–${nf(l.hi)}`, tone: 'accent' as const }))}>
-      {preset && <p style={{ margin: '8px 0 0', fontSize: '0.8rem', lineHeight: 1.5, fontFamily: 'var(--font-body)' }}><b style={{ color: '#4fc3cd' }}>{T.read}:</b> {preset.read[lang]}</p>}
-      <p style={{ margin: '6px 0 0', fontSize: '0.7rem', color: '#94a3b8' }}>{T.lim}</p>
+      {preset && <p style={{ margin: '8px 0 0', fontSize: '0.8rem', lineHeight: 1.5, fontFamily: 'var(--font-body)' }}><b style={{ color: 'var(--st-accent)' }}>{T.read}:</b> {preset.read[lang]}</p>}
+      <p style={{ margin: '6px 0 0', fontSize: '0.7rem', color: 'var(--st-muted)' }}>{T.lim}</p>
     </StatPanel>
   );
   const bar = <>

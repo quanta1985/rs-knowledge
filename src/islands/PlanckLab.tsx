@@ -3,7 +3,7 @@ import type { Lang } from '../i18n/ui';
 import { bandFraction, planck, SIGMA, WIEN_UM_K } from '../lib/planck';
 import { Pills, Slider, StatPanel } from './VizUi';
 
-// Presets: Sun (IAU nominal effective temperature), a flaming fire, and two Hanoi surfaces measured by Landsat 9 on 22 Dec 2023 (§3.5).
+// Presets: Sun (IAU nominal effective temperature), a flaming fire, and two Hanoi surfaces measured by Landsat 9 on 22 Dec 2023 (§8.5).
 const PRESETS = [
   { id: 'sun', k: 5772, label: { vi: 'Mặt Trời 5772 K', en: 'Sun 5772 K' } },
   { id: 'fire', k: 1000, label: { vi: 'Đám cháy ~1000 K', en: 'Fire ~1000 K' } },
@@ -38,18 +38,18 @@ export default function PlanckLab({ lang }: { lang: Lang }) {
   return (
     <div className="dark-card">
       <svg className="chart" viewBox={`0 0 ${W} ${H}`} width="100%" role="img" aria-label={`${T.fig}: ${nf(k, 0)} K`}>
-        {TIRS.map(([a, b]) => <rect key={a} x={lx(a)} width={lx(b) - lx(a)} y={M.t} height={H - M.b - M.t} fill="#f7867a" opacity={0.25} />)}
+        {TIRS.map(([a, b]) => <rect key={a} x={lx(a)} width={lx(b) - lx(a)} y={M.t} height={H - M.b - M.t} fill="var(--st-bad)" opacity={0.25} />)}
         <rect x={lx(0.4)} width={lx(0.7) - lx(0.4)} y={M.t} height={H - M.b - M.t} fill="url(#vis)" opacity={0.35} />
         <defs><linearGradient id="vis"><stop offset="0" stopColor="#7c3aed" /><stop offset="0.5" stopColor="#22c55e" /><stop offset="1" stopColor="#ef4444" /></linearGradient></defs>
         {[1e-2, 1, 1e2, 1e4, 1e6, 1e8].map((v) => <g key={v}><line x1={M.l} x2={W - M.r} y1={ly(v)} y2={ly(v)} opacity={0.15} /><text x={M.l - 6} y={ly(v) + 4} textAnchor="end">{`10${String(Math.log10(v)).replace('-', '⁻').split('').map((c) => '⁰¹²³⁴⁵⁶⁷⁸⁹'[+c] ?? c).join('')}`}</text></g>)}
         {[0.1, 0.3, 1, 3, 10, 30, 100].map((v) => <g key={v}><line x1={lx(v)} x2={lx(v)} y1={M.t} y2={H - M.b} opacity={0.15} /><text x={lx(v)} y={H - M.b + 16} textAnchor="middle">{nf(v, v < 1 ? 1 : 0)}</text></g>)}
         <text x={(M.l + W - M.r) / 2} y={H - 6} textAnchor="middle">{T.x}</text>
         <text transform={`translate(14 ${(M.t + H - M.b) / 2}) rotate(-90)`} textAnchor="middle">{T.y}</text>
-        <polyline points={curve(5772)} fill="none" stroke="#e3b25a" strokeWidth={1} opacity={0.5} />
+        <polyline points={curve(5772)} fill="none" stroke="var(--st-warn)" strokeWidth={1} opacity={0.5} />
         <polyline points={curve(300)} fill="none" stroke="#56B4E9" strokeWidth={1} opacity={0.5} />
-        <polyline points={curve(k)} fill="none" stroke="#4fc3cd" strokeWidth={2.5} />
-        <line x1={lx(peak)} x2={lx(peak)} y1={ly(planck(peak, k))} y2={H - M.b} stroke="#f7867a" strokeDasharray="4 3" />
-        <circle cx={lx(peak)} cy={ly(planck(peak, k))} r={5} fill="#f7867a" />
+        <polyline points={curve(k)} fill="none" stroke="var(--st-accent)" strokeWidth={2.5} />
+        <line x1={lx(peak)} x2={lx(peak)} y1={ly(planck(peak, k))} y2={H - M.b} stroke="var(--st-bad)" strokeDasharray="4 3" />
+        <circle cx={lx(peak)} cy={ly(planck(peak, k))} r={5} fill="var(--st-bad)" />
       </svg>
       <div className="hud-static">
         <StatPanel title={T.title} rows={[
@@ -60,7 +60,7 @@ export default function PlanckLab({ lang }: { lang: Lang }) {
           { k: T.win, v: `${nf(100 * bandFraction(8, 14, k), 1)} %` },
         ]}>
           <p className="muted" style={{ margin: '8px 0 0', fontSize: '0.72rem' }}>{T.ref}</p>
-          <p style={{ margin: '4px 0 0', fontSize: '0.72rem', color: '#f7867a' }}>▇ {T.tirs}</p>
+          <p style={{ margin: '4px 0 0', fontSize: '0.72rem', color: 'var(--st-bad)' }}>▇ {T.tirs}</p>
         </StatPanel>
       </div>
       <div className="bar-static">

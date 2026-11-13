@@ -1,0 +1,606 @@
+---
+title: Chòm sao vệ tinh LEO & Starlink
+n: 6
+summary: Hơn mười một nghìn vệ tinh Starlink bay ở khoảng 470 km để đưa Internet tới mọi nơi với độ trễ vài chục mili giây. Chương này đi từ lý do phải bay thấp, kiến trúc hệ thống, các lớp quỹ đạo, chảo người dùng và laser giữa vệ tinh, tới Direct-to-Cell, các chòm sao cạnh tranh, Starlink ở Việt Nam và cái giá về rác vũ trụ, tính trên ảnh chụp quỹ đạo thật nhìn từ Hà Nội.
+objectives:
+  - Giải thích vì sao Internet vệ tinh chuyển từ GEO xuống LEO, và vì sao LEO cần hàng nghìn vệ tinh.
+  - Mô tả đường đi của một gói tin qua chảo người dùng, vệ tinh, trạm cổng và PoP, theo kiểu bent-pipe hoặc qua laser giữa vệ tinh.
+  - Đọc các lớp quỹ đạo của Starlink từ ảnh chụp thật và ký hiệu Walker i:T/P/F; ước lượng số vệ tinh cần để phủ liên tục.
+  - Giải thích handover, vật cản và Doppler ở chảo người dùng; tính độ trễ qua laser so với cáp quang.
+  - Giải thích vì sao điện thoại thường kết nối được với vệ tinh (Direct-to-Cell) và nêu giới hạn của nó.
+  - So sánh Starlink với OneWeb, Amazon Leo (Kuiper), Qianfan, Guowang; nêu tình trạng Starlink ở Việt Nam và các vấn đề còn tranh luận.
+updated: "2026-11-06"
+---
+import Term from '../../../components/Term.astro';
+import Depth from '../../../components/Depth.astro';
+import Figure from '../../../components/Figure.astro';
+import Formula from '../../../components/Formula.astro';
+import LabLinks from '../../../components/LabLinks.astro';
+import Note from '../../../components/Note.astro';
+import Stats from '../../../components/Stats.astro';
+import Steps from '../../../components/Steps.astro';
+import Tiles from '../../../components/Tiles.astro';
+import Predict from '../../../islands/Predict.tsx';
+import ConstellationGlobe from '../../../islands/ConstellationGlobe.tsx';
+import ConstellationLatency from '../../../islands/ConstellationLatency.tsx';
+import ConstellationArchitecture from '../../../islands/ConstellationArchitecture.tsx';
+import ConstellationShells from '../../../islands/ConstellationShells.tsx';
+import ConstellationWalker from '../../../islands/ConstellationWalker.tsx';
+import ConstellationCount from '../../../islands/ConstellationCount.tsx';
+import ConstellationHandover from '../../../islands/ConstellationHandover.tsx';
+import ConstellationIsl from '../../../islands/ConstellationIsl.tsx';
+import ConstellationHistory from '../../../islands/ConstellationHistory.tsx';
+import ConstellationD2C from '../../../islands/ConstellationD2C.tsx';
+import ConstellationFleets from '../../../islands/ConstellationFleets.tsx';
+import ConstellationGateways from '../../../islands/ConstellationGateways.tsx';
+import Quiz from '../../../islands/Quiz.tsx';
+import quiz from '../../../data/quiz/constellations.json';
+
+<Figure
+  title="Hình 6.1 — Các chòm sao Internet vệ tinh nhìn từ Việt Nam"
+  try="Chọn Tất cả để thấy năm chòm sao cùng lúc, rồi chọn riêng Starlink và lọc từng lớp 43°, 53°, 70°, 97°: lớp nào cho nhiều vệ tinh nhất trên bầu trời Hà Nội? Kéo góc ngẩng tối thiểu từ 25° lên 40°. Chuyển sang OneWeb (1200 km): vì sao ít vệ tinh hơn mà vùng nhìn thấy lại rộng hơn? Bấm Chạy ×300 để xem vệ tinh bay."
+  source="Phần tử quỹ đạo GP (OMM) của CelesTrak, nhóm starlink, oneweb, kuiper (lấy 04/11/2026 18:41 UTC), qianfan và hulianwang (Guowang, lấy 05/11/2026); mốc thời gian 16:00 UTC ngày 04/11/2026. Truyền quỹ đạo Kepler cộng trôi thế kỷ do J2 (src/lib/gnss.ts), không tính lực cản; số vệ tinh nhìn thấy trùng với SGP4 trong notebook của chương. Độ cao = bán trục lớn − 6378 km. Tính mọi vật thể trong nhóm, kể cả vệ tinh đang nâng hoặc hạ quỹ đạo. Ảnh nền © Esri, Maxar, Earthstar Geographics."
+>
+  <ConstellationGlobe client:visible lang="vi" />
+</Figure>
+
+<Predict client:visible lang="vi"
+  title="Bao nhiêu vệ tinh Starlink trên bầu trời Hà Nội?"
+  q="Lúc 23:00 ngày 04/11/2026 (giờ Việt Nam), có bao nhiêu vệ tinh Starlink ở góc ngẩng trên 25° so với một người ở Hà Nội?"
+  options={['Khoảng 4', 'Khoảng 40', 'Khoảng 400', 'Khoảng 4000']} answer={1}
+  why="39 vệ tinh (128 vệ tinh nếu tính từ góc ngẩng 10°). Trong 11 181 vật thể Starlink, chỉ khoảng 0,3 % ở đủ cao trên bầu trời một điểm. Trong 24 giờ, con số này dao động 28–64, trung bình 42,1." />
+
+## 6.1 Vì sao Internet vệ tinh chuyển xuống LEO
+
+Internet qua vệ tinh <Term id="geostationary-orbit">địa tĩnh</Term> (GEO) đã có từ lâu. VINASAT-1 và VINASAT-2 phục vụ cả Việt Nam từ độ cao 35 786 km. Nhưng GEO có hai giới hạn cứng.
+
+- **Độ trễ.** Một gói tin đi lên vệ tinh, xuống trạm mặt đất, rồi phản hồi đi đường ngược lại: bốn lần quãng đường 35 786 km. Gọi video, chơi game, giao dịch tài chính đều thấy "trễ".
+- **Dung lượng trên mỗi km².** Một vệ tinh GEO nhìn thấy gần nửa Trái Đất, nên băng thông của nó phải chia cho cả một lục địa.
+
+Ở <Term id="leo">quỹ đạo thấp (LEO)</Term>, vệ tinh ở gần hơn khoảng 65 lần (35 786 / 550 km). Mỗi vệ tinh chỉ thấy một vùng bán kính vài trăm kilômét, nên cùng một dải tần được **dùng lại** ở hàng nghìn nơi trên thế giới cùng lúc. Cái giá phải trả: mỗi vệ tinh chỉ ở trên đầu người dùng vài phút (Chương 2), nên muốn phủ liên tục phải có rất nhiều vệ tinh, và mạng phải liên tục chuyển người dùng sang vệ tinh kế tiếp. Một chòm sao như vậy gọi là <Term id="megaconstellation">siêu chòm sao</Term>.
+
+<Predict client:visible lang="vi"
+  title="Khứ hồi qua vệ tinh địa tĩnh mất bao lâu?"
+  q="Bạn gửi một gói tin lên vệ tinh địa tĩnh ngay trên đầu, xuống trạm mặt đất, rồi phản hồi đi đường ngược lại. Không tính thời gian xử lý, mất ít nhất bao nhiêu mili giây?"
+  slider={{ min: 0, max: 1000, step: 10, unit: 'ms' }} answer={480} tol={30}
+  why="4 × 35 786 km / 299 792 km/s = 477,5 ms. Với vệ tinh ở 480 km ngay trên đầu, cùng đường đi chỉ mất 6,4 ms." />
+
+<Formula label="Thời gian khứ hồi tối thiểu qua một vệ tinh ở thiên đỉnh" tex="RTT_{min} = \frac{4h}{c}" where="
+RTT_{min} :: thời gian khứ hồi tối thiểu, chỉ tính lan truyền (s)
+h :: độ cao vệ tinh (km)
+c :: tốc độ ánh sáng, 299 792 km/s
+" />
+
+<Stats items={[
+  { v: '477,5', u: 'ms', l: 'khứ hồi tối thiểu qua GEO (35 786 km)' },
+  { v: '6,4', u: 'ms', l: 'khứ hồi tối thiểu qua LEO 480 km' },
+  { v: '37', u: 'dB', l: 'suy hao không gian tự do ít hơn ở thiên đỉnh' },
+]} caption="Tính từ hình học, chỉ thời gian ánh sáng (scripts/constellation_numbers.ts)." />
+
+Đi gần vệ tinh còn có lợi về <Term id="link-budget">ngân sách đường truyền</Term>: từ 480 km thay vì 35 786 km, suy hao không gian tự do nhỏ hơn 20·log₁₀(35 786 / 480) ≈ 37 dB. Nhờ vậy một <Term id="user-terminal">chảo người dùng</Term> cỡ hộp pizza vẫn đạt tốc độ cao, điều mà Chương 5 cho thấy là khó với vệ tinh địa tĩnh.
+
+<Figure
+  title="Hình 6.2 — Thời gian khứ hồi tối thiểu từ Hà Nội: cáp quang, LEO và GEO"
+  try="So Singapore với Frankfurt: với đường ngắn, cáp quang và LEO gần nhau; với đường dài, LEO có lợi hơn hẳn. Kéo hệ số tuyến cáp từ 1,5 xuống 1,0 (cáp thẳng như vòng lớn). Chọn São Paulo: vì sao GEO cần hai chặng?"
+  source="Hình học cầu bán kính 6378 km. Cáp: khoảng cách vòng lớn × hệ số tuyến (giả định, mặc định 1,5) × chiết suất 1,468. LEO: lên thẳng độ cao vỏ, đi theo vòng lớn ở độ cao đó bằng laser, xuống thẳng (cận dưới, bỏ qua chuyển mạch và số chặng laser). GEO: một vệ tinh bent-pipe ở kinh độ mà cả hai đầu thấy cao nhất, hai chặng qua trạm chuyển tiếp ở điểm giữa nếu một trong hai đầu thấy dưới 5°. Chỉ thời gian ánh sáng, không có xếp hàng hay xử lý (src/lib/constellation.ts)."
+>
+  <ConstellationLatency client:visible lang="vi" />
+</Figure>
+
+<Note kind="myth">
+
+**Hiểu sai:** "Internet LEO nhanh hơn vì sóng ở tần số cao đi nhanh hơn." **Thực tế:** sóng vô tuyến ở mọi tần số đều đi với tốc độ ánh sáng. LEO nhanh hơn GEO chỉ vì **quãng đường ngắn hơn**. So với cáp quang, LEO chỉ thắng trên tuyến dài, nơi ánh sáng trong chân không (nhanh hơn trong thủy tinh 1,47 lần) bù được đoạn lên xuống vệ tinh.
+
+</Note>
+
+<Depth level="advanced" title="Ý tưởng không mới">
+
+Iridium (66 vệ tinh ở khoảng 780 km, quỹ đạo gần cực) đã có liên kết giữa vệ tinh từ cuối thập niên 1990, và Teledesic từng định phóng hàng trăm vệ tinh băng rộng. Cả hai vấp phải chi phí phóng và chế tạo vệ tinh. Điều khác ở Starlink là SpaceX tự phóng bằng tên lửa tái sử dụng (Chương 3) và chế tạo vệ tinh theo dây chuyền: năm 2025 có 122 chuyến phóng mang vệ tinh Starlink (mục 6.7).
+
+</Depth>
+
+<Note kind="key">
+
+<mark class="key">Một chòm sao LEO đánh đổi số lượng vệ tinh lấy độ trễ thấp và dung lượng dùng lại tần số.</mark> Thuê bao không bao giờ nói chuyện mãi với một vệ tinh: mỗi vệ tinh chỉ ở trên bầu trời vài phút.
+
+</Note>
+
+## 6.2 Kiến trúc hệ thống
+
+Một hệ Internet vệ tinh LEO có năm khối, nối với những gì Chương 4 và 5 đã giới thiệu:
+
+<div class="table-wrap">
+
+| Thành phần | Vai trò | Chi tiết kỹ thuật (Starlink) |
+|---|---|---|
+| Chảo người dùng | Thu phát với vệ tinh đang phục vụ | <Term id="phased-array-antenna">Ăng-ten mảng pha</Term> băng Ku, lái búp sóng bằng điện tử, không quay cơ khí |
+| Vệ tinh | Chuyển tiếp và định tuyến | Mảng pha Ku cho người dùng, Ka (và E-band từ V2 Mini) cho trạm cổng, <Term id="inter-satellite-link">laser giữa vệ tinh</Term>, động cơ Hall |
+| <Term id="gateway-station">Trạm cổng (gateway)</Term> | Nối vệ tinh với mạng mặt đất | Nhiều chảo parabol bám vệ tinh, đặt gần cáp quang |
+| <Term id="constellations-pop">PoP</Term> | Cửa ra Internet | Đặt ở trung tâm dữ liệu; quyết định địa chỉ IP và vị trí "địa lý" của người dùng |
+| Bộ lập lịch toàn cầu | Ghép người dùng với vệ tinh và búp sóng | Các nghiên cứu đo đạc thấy mạng phân bổ lại khoảng mỗi 15 giây (mục 6.5) |
+
+</div>
+
+Theo hồ sơ của SpaceX được FCC cấp phép, đường người dùng dùng băng Ku (xuống 10,7–12,7 GHz, lên 14,0–14,5 GHz); đường trạm cổng dùng băng Ka (xuống khoảng 17,8–19,3 GHz, lên khoảng 27,5–30 GHz). Từ thế hệ V2 Mini, SpaceX bổ sung băng E (71–76 và 81–86 GHz) cho đường trạm cổng để tăng dung lượng.
+
+Gói tin có hai cách đi. Nếu người dùng và một trạm cổng cùng nhìn thấy một vệ tinh, vệ tinh chỉ "bẻ" tín hiệu từ đường lên xuống đường xuống: đó là kiểu <Term id="constellations-bent-pipe">bent-pipe</Term> (ống uốn). Nếu người dùng ở xa mọi trạm cổng (giữa đại dương, trên máy bay, vùng cực), vệ tinh chuyển gói tin sang vệ tinh khác bằng laser cho tới khi gặp một vệ tinh nhìn thấy trạm cổng.
+
+<Figure
+  title="Hình 6.3 — Đường đi của một gói tin: chảo người dùng, vệ tinh, trạm cổng, PoP"
+  try="Bấm từng khối để đọc vai trò. Chuyển sang Qua laser: đường đi dài thêm bao nhiêu mili giây khi chặng laser dài 2000 km? Hạ góc ngẩng người dùng xuống 25° rồi so với 90°. Tăng cáp gateway → PoP lên 1150 km (Hà Nội – TP.HCM theo vòng lớn là 1145 km) để thấy cáp mặt đất cũng góp vào độ trễ."
+  source="Sơ đồ minh họa. Khoảng cách nghiêng tính trên Trái Đất cầu cho vệ tinh ở 480 km; chặng laser và cáp do người đọc chọn; cáp tính với chiết suất 1,468. Băng tần theo hồ sơ FCC của SpaceX (FCC 21-48, FCC 22-91); E-band theo SpaceX (2/2023); laser theo Brashears (SpaceX), SPIE Photonics West 1/2024; vị trí trạm cổng và PoP ở Việt Nam theo Cục Viễn thông (Bộ KH&CN). Chỉ thời gian lan truyền."
+>
+  <ConstellationArchitecture client:visible lang="vi" />
+</Figure>
+
+<Steps title="Một gói tin từ Hà Nội ra Internet (kiểu bent-pipe)" items={[
+  { tag: '0 s', t: 'Bộ lập lịch phân bổ', d: 'Bộ lập lịch toàn cầu đã gán chảo cho một vệ tinh và một búp sóng trong khe 15 giây hiện tại.' },
+  { tag: 'Ku ↑', t: 'Chảo phát lên vệ tinh', d: 'Mảng pha lái búp sóng tới vệ tinh ở góc ngẩng trên 25°; ở 480 km, khoảng cách từ 480 km (thiên đỉnh) tới 995 km (góc ngẩng 25°), tức 1,6–3,3 ms.' },
+  { tag: 'Ka ↓', t: 'Vệ tinh chuyển xuống trạm cổng', d: 'Nếu cùng thấy một trạm cổng (ví dụ Phú Thọ), vệ tinh chuyển thẳng xuống; nếu không, đi qua laser trước.' },
+  { tag: 'cáp', t: 'Trạm cổng → PoP', d: 'Cáp quang mặt đất đưa gói tin tới PoP, nơi mạng Starlink nối vào Internet.' },
+  { tag: 'IP', t: 'Ra Internet và quay về', d: 'Phản hồi đi đường ngược lại; tổng thời gian còn cộng xử lý, xếp hàng và đoạn mạng mặt đất.' },
+]} />
+
+<Note kind="key">
+
+<mark class="key">Bent-pipe chỉ chạy được khi người dùng và trạm cổng cùng thấy một vệ tinh; laser giữa vệ tinh gỡ ràng buộc đó.</mark> Vì vậy trạm cổng phải rải khắp nơi có khách hàng, còn tàu biển và máy bay phụ thuộc vào laser.
+
+</Note>
+
+## 6.3 Vệ tinh và các lớp quỹ đạo
+
+Vệ tinh Starlink đã qua nhiều thế hệ. Các mốc dưới đây lấy từ SpaceX và danh mục vật thể SATCAT:
+
+<div class="table-wrap">
+
+| Thế hệ | Từ | Điểm mới |
+|---|---|---|
+| v0.9 (thử nghiệm) | 5/2019 | Lô 60 vệ tinh đầu tiên; thiết kế tấm phẳng xếp chồng trong mũi tên lửa |
+| v1.0 | 11/2019 | Thêm băng Ka cho trạm cổng |
+| v1.5 | 2021 | Laser giữa vệ tinh |
+| V2 Mini | 2/2023 | Động cơ Hall dùng argon, lực đẩy 2,4 lần và xung lượng riêng 1,5 lần thế hệ trước (SpaceX); thêm băng E |
+| Phóng bằng Starship | 9/2026 | 26 vệ tinh Starlink phóng từ Starbase ngày 28/9/2026 (SATCAT) |
+
+</div>
+
+Về <Term id="orbital-shell">lớp quỹ đạo</Term>, FCC cấp phép thế hệ 1 (sửa đổi năm 2021, FCC 21-48) với 4408 vệ tinh: lớp chính 550 km nghiêng 53° (72 mặt phẳng × 22 vệ tinh), cùng các lớp 540 km nghiêng 53,2°, 570 km nghiêng 70° và 560 km nghiêng 97,6° để phủ vĩ độ cao và vùng cực. Tháng 12/2022, FCC cấp một phần thế hệ 2 (FCC 22-91): 7500 vệ tinh ở 525, 530 và 535 km với độ nghiêng 53°, 43° và 33°. Lớp 43° và 33° tăng mật độ ở vĩ độ thấp, có lợi cho khu vực như Việt Nam. Ngày 01/01/2026, SpaceX thông báo hạ khoảng 4400 vệ tinh từ khoảng 550 km xuống khoảng 480 km trong năm 2026, vì dưới 500 km có ít rác vũ trụ và ít chòm sao dự kiến hơn.
+
+Ảnh chụp ngày 04/11/2026 có 11 181 vật thể Starlink. Nhóm theo độ nghiêng, ta thấy rõ các lớp:
+
+<div class="table-wrap">
+
+| Chòm sao | Lớp (độ nghiêng) | Số vật thể | Độ cao trung vị |
+|---|---|---|---|
+| Starlink | 53° | 4558 | 463 km |
+| Starlink | 43° | 3257 | 483 km |
+| Starlink | 97° (gần cực, đồng bộ Mặt Trời) | 1482 | 466 km |
+| Starlink | 70° | 838 | 475 km |
+| Starlink | dưới 400 km (đang nâng, hạ quỹ đạo hoặc sắp rơi) | 1046 | 356 km |
+| OneWeb | 87,9° | 648 | 1202 km |
+| Kuiper | 51,9° | 391 | 630 km |
+| Qianfan | 89° | 256 | 1068 km |
+| Guowang | 50° và 86,5° | 171 và 60 | 1149 và 1168 km |
+
+</div>
+
+<Figure
+  title="Hình 6.4 — Các lớp quỹ đạo trong ảnh chụp: độ cao theo độ nghiêng"
+  try="Chọn Starlink: các vòng rỗng (lớp trong giấy phép) nằm ở 525–570 km, còn đám vệ tinh thật ở đâu? Tìm dải vệ tinh dưới 400 km: chúng đang làm gì? Chọn Kuiper và so ba vòng giấy phép với đám thật duy nhất ở 630 km."
+  source="Phần tử quỹ đạo GP của CelesTrak (như Hình 6.1). Mỗi điểm là một vật thể, gộp các điểm trùng trong ô 0,25° × 4 km cho nhẹ. Vòng rỗng: lớp theo FCC 21-48 và FCC 22-91 (Starlink), FCC 20-102 (Kuiper), 1200 km 87,9° (OneWeb)."
+>
+  <ConstellationShells client:visible lang="vi" />
+</Figure>
+
+<Steps title="Vòng đời một vệ tinh Starlink" items={[
+  { tag: 'phóng', t: 'Falcon 9 thả cả chồng vệ tinh ở quỹ đạo thấp', d: 'Vệ tinh tách ra như một "đoàn tàu" sáng trên trời đêm; ảnh chụp có 1046 vật thể dưới 400 km, trung vị 356 km.' },
+  { tag: 'nâng', t: 'Tự nâng quỹ đạo bằng động cơ Hall', d: 'Trong nhiều tuần. Chiếc nào hỏng ở giai đoạn này rơi nhanh nhờ lực cản lớn.' },
+  { tag: 'khai thác', t: 'Vào đúng lớp và mặt phẳng', d: 'Giữ quỹ đạo, né va chạm khi có cảnh báo tiếp cận gần.' },
+  { tag: 'hạ', t: 'Cuối đời: chủ động hạ quỹ đạo', d: 'Cháy hết trong khí quyển; năm 2025 có 671 vệ tinh Starlink rơi về (SATCAT).' },
+]} />
+
+<Note kind="key">
+
+<mark class="key">Độ nghiêng quyết định vệ tinh dồn về đâu: một vệ tinh dành nhiều thời gian nhất gần vĩ độ bằng độ nghiêng của nó.</mark> Lớp 53° dày đặc nhất quanh vĩ độ 40–53° (Mỹ, châu Âu); lớp 43° tăng dung lượng cho vùng nhiệt đới như Việt Nam; lớp 70° và 97° phủ vùng vĩ độ cao và hai cực.
+
+</Note>
+
+## 6.4 Thiết kế chòm sao: Walker và số vệ tinh cần thiết
+
+Gần như mọi chòm sao lớn đều theo một khuôn do J. G. Walker đề xuất: T vệ tinh trên P mặt phẳng quỹ đạo tròn cùng độ cao và độ nghiêng i, các mặt phẳng cách đều theo kinh độ nút lên, mỗi mặt phẳng T/P vệ tinh cách đều, và vệ tinh ở mặt phẳng kề lệch pha F·360°/T. Ký hiệu <Term id="walker-constellation">chòm sao Walker</Term> là **i: T/P/F**. Galileo là 56°: 24/3/1 (cộng vệ tinh dự phòng); một lớp Starlink kiểu 53°: 1584/72/1 có 22 vệ tinh trên mỗi mặt phẳng.
+
+Hai dạng thường gặp: **delta** trải các mặt phẳng trên cả 360° (độ nghiêng vừa phải, như GPS, Galileo, Starlink) và **star** trải trên 180° với quỹ đạo gần cực (Iridium), để vệ tinh đi lên ở nửa này và đi xuống ở nửa kia không chồng lên nhau.
+
+<Figure
+  title="Hình 6.5 — Thiết kế một chòm sao Walker và độ phủ trong 24 giờ"
+  try="Bắt đầu với 36 vệ tinh: Hà Nội chỉ được phủ 17,6 % thời gian. Tăng số mặt phẳng và số vệ tinh mỗi mặt phẳng tới khi dải thời gian không còn khoảng đỏ. Chọn mẫu kiểu Iridium rồi đổi sang dạng Delta: điều gì xảy ra? Đặt độ nghiêng 30° rồi chọn điểm 60° B."
+  source="Quỹ đạo tròn hai vật thể, không có J2 (nút trôi vài độ mỗi ngày, không đổi đáng kể thống kê độ phủ). Thấy vệ tinh khi góc ở tâm Trái Đất ≤ λ tính từ độ cao và góc ngẩng tối thiểu (Trái Đất cầu). Lấy mẫu mỗi 60–180 giây trong 24 giờ. Các mẫu là cấu hình minh họa, không phải lịch quỹ đạo thật của từng hệ. Ảnh nền © Esri, Maxar, Earthstar Geographics."
+>
+  <ConstellationWalker client:visible lang="vi" />
+</Figure>
+
+Ba điều rút ra từ Hình 6.5 tại Hà Nội:
+
+1. **36 vệ tinh ở 550 km** (6 mặt phẳng × 6) chỉ phủ **17,6 %** thời gian, có lúc trống liền 65 phút: vệ tinh thấp nhìn được vùng rất nhỏ.
+2. **Kiểu Iridium** (66 vệ tinh ở 780 km, 86,4°, dạng star) phủ **100 %**, trung bình 1,4 vệ tinh trên bầu trời: vừa đủ để luôn có một.
+3. **Một lớp kiểu Starlink** (1584 vệ tinh ở 550 km, 53°) cũng phủ 100 % nhưng có trung bình **7,7** vệ tinh: thừa nhiều lần cho độ phủ, vì mục tiêu là **dung lượng**.
+
+<Formula label="Nửa góc ở tâm của vùng phủ một vệ tinh" tex="\lambda = \arccos\!\left(\frac{R\cos\varepsilon}{R+h}\right) - \varepsilon" where="
+\lambda :: góc ở tâm Trái Đất từ điểm dưới vệ tinh tới mép vùng phủ (bán kính trên mặt đất R·λ, λ tính bằng radian)
+R :: bán kính Trái Đất, 6378 km
+h :: độ cao vệ tinh
+\varepsilon :: góc ngẩng tối thiểu của thuê bao
+" />
+
+Ở 480 km với ε = 25°: λ = 7,6°, bán kính vùng phủ khoảng **841 km**. Ở 1200 km (OneWeb) với cùng ε: λ = 15,3°, bán kính 1702 km. Vệ tinh địa tĩnh với ε = 5°: λ = 76,3°.
+
+<Predict client:visible lang="vi"
+  title="Bao nhiêu vệ tinh để luôn có một vệ tinh trên mọi điểm?"
+  q="Ở độ cao 550 km, thuê bao chỉ dùng được vệ tinh trên góc ngẩng 25°. Để mọi điểm trên Trái Đất luôn thấy ít nhất một vệ tinh, cần khoảng bao nhiêu vệ tinh?"
+  options={['Khoảng 30', 'Khoảng 300', 'Khoảng 3000', 'Khoảng 30 000']} answer={1}
+  why="Cận dưới theo diện tích là 185 (diện tích mặt cầu chia diện tích một vùng phủ, nếu các vùng phủ xếp khít, điều không thể). Ước lượng dải phủ cho quỹ đạo cực cho 24 × 15 = 360. Starlink có hàng nghìn vệ tinh vì cần dung lượng, không chỉ độ phủ." />
+
+Một vùng phủ hình chỏm cầu có diện tích 2πR²(1 − cos λ). Chia diện tích Trái Đất 4πR² cho nó ra một **cận dưới**: không thể ít hơn, và thực tế phải nhiều hơn vì các chỏm cầu tròn không xếp khít. Một ước lượng sát thực tế hơn cho quỹ đạo cực dùng <Term id="streets-of-coverage">dải phủ</Term>: các vệ tinh trên cùng mặt phẳng nối vùng phủ thành một dải liên tục, và đủ mặt phẳng thì các dải phủ kín xích đạo.
+
+<Formula label="Cận dưới số vệ tinh để phủ toàn cầu" tex="N_{min} = \frac{4\pi R^2}{2\pi R^2 (1-\cos\lambda)} = \frac{2}{1-\cos\lambda}" where="
+N_{min} :: số vệ tinh ít nhất nếu các vùng phủ xếp khít không chồng (không đạt được)
+\lambda :: nửa góc ở tâm của vùng phủ
+" />
+
+<Figure
+  title="Hình 6.6 — Số vệ tinh tối thiểu để phủ liên tục toàn cầu theo độ cao"
+  try="Kéo độ cao từ 300 km lên 36 000 km: số vệ tinh giảm thế nào? So đường 25° với đường 10°. Tìm điểm Iridium: ước lượng dải phủ ở 780 km với góc ngẩng 8,2° cho bao nhiêu vệ tinh?"
+  source="Cận dưới diện tích 2/(1 − cos λ). Dải phủ cho quỹ đạo cực theo Adams & Rider (1987): S vệ tinh mỗi mặt phẳng cho dải nửa rộng c = arccos(cos λ / cos(π/S)); P mặt phẳng thỏa (P − 1)(c + λ) + 2c ≥ π; chọn S cho T = S·P nhỏ nhất. Trái Đất cầu. Hệ thật để tham khảo: Iridium 66 vệ tinh hoạt động, OneWeb 648 vệ tinh thế hệ 1, GPS 24 khe danh nghĩa (cần thấy 4 vệ tinh, không phải 1), 3 GEO."
+>
+  <ConstellationCount client:visible lang="vi" />
+</Figure>
+
+Phép ước lượng đơn giản này cho đúng **66 = 11 × 6** cho Iridium (780 km, góc ngẩng 8,2°), bằng số vệ tinh hoạt động của hệ thật. Ở 550 km, góc ngẩng 25°, cần khoảng 360; hạ xuống 480 km thì khoảng 448.
+
+<Depth level="advanced" title="Dải phủ cho quỹ đạo cực">
+
+Với S vệ tinh cách đều trên một mặt phẳng, hai vùng phủ kề nhau chồng lên nhau khi π/S < λ, và chúng tạo thành một dải có nửa bề rộng c:
+
+<Formula label="Nửa bề rộng dải phủ và điều kiện phủ kín" tex="c = \arccos\!\left(\frac{\cos\lambda}{\cos(\pi/S)}\right), \qquad (P-1)(c+\lambda) + 2c \ge \pi" where="
+c :: nửa bề rộng dải phủ (góc ở tâm)
+S :: số vệ tinh trên một mặt phẳng
+P :: số mặt phẳng
+" />
+
+Các mặt phẳng cùng chiều quay có thể đặt cách nhau c + λ nếu lệch pha nửa khoảng cách vệ tinh; riêng hai mặt phẳng ngược chiều ở "đường nối" (seam) chỉ được cách nhau 2c. Tăng S làm dải rộng ra nhưng tốn vệ tinh trên mỗi mặt phẳng; lời giải tốt nhất là S cho tích S·P nhỏ nhất.
+
+</Depth>
+
+<Note kind="why" label="Liên quan tới viễn thám">
+
+Chòm sao cũng là cách viễn thám rút ngắn thời gian quay lại. Hai vệ tinh Sentinel-2 bay cùng quỹ đạo, lệch nhau 180°, đưa chu kỳ quay lại ở xích đạo từ 10 ngày xuống 5 ngày (Hình 2.9). Planet vận hành hàng trăm vệ tinh nhỏ PlanetScope để chụp gần như toàn bộ đất liền mỗi ngày, và các chòm sao radar SAR nhỏ chụp được cả ban đêm và qua mây (Chương 16). Cùng một bài toán Walker: nhiều vệ tinh hơn thì ảnh dày hơn theo thời gian.
+
+</Note>
+
+## 6.5 Chảo người dùng và chuyển vùng (handover)
+
+Chảo Starlink là một ăng-ten mảng pha băng Ku (Chương 5) với rất nhiều phần tử phát xạ nhỏ, mỗi phần tử được chỉnh pha để cả mảng tạo thành một búp sóng hẹp. Chảo không xoay cơ khí để bám vệ tinh mà **lái búp sóng bằng điện tử**. Mỗi khi bộ lập lịch toàn cầu phân bổ lại, chảo có thể được chuyển sang một vệ tinh khác: đó là <Term id="constellations-handover">chuyển vùng (handover)</Term>. Các nghiên cứu đo đạc độc lập (Tanveer và cộng sự 2023; Mohan và cộng sự 2024) thấy độ trễ đổi bậc đều đặn ở cùng các giây mỗi phút, cách nhau **15 giây**, và giải thích bằng một bộ lập lịch phân bổ lại người dùng – vệ tinh – trạm cổng theo chu kỳ đó. SpaceX chưa công bố thuật toán.
+
+- **Trường nhìn và vật cản.** Chảo cần một khoảng trời rộng, không bị che. Ứng dụng Starlink vẽ "bản đồ vật cản" từ các lần mất kết nối. Cây hoặc nhà cao che một phần bầu trời gây rớt mạng ngắn mỗi khi vệ tinh được phân bổ nằm sau vật cản.
+- **Doppler và căn thời gian.** Vệ tinh ở 480 km bay khoảng 7,6 km/s. Ở 11,7 GHz, dịch tần Doppler tới khoảng 250 kHz khi vệ tinh ở góc ngẩng 25°. Chảo và vệ tinh biết trước quỹ đạo của nhau nên bù Doppler và độ trễ thay đổi.
+- **Băng thông chia theo ô.** Mỗi búp sóng phục vụ một ô trên mặt đất. Ô nào nhiều người dùng thì tốc độ mỗi người giảm vào giờ cao điểm.
+- **Mưa.** Ở băng Ku, mưa rất to gây giảm tốc độ hoặc rớt mạng ngắn (Chương 5).
+
+<Formula label="Dịch tần Doppler" tex="f_D = -\frac{\dot{\rho}}{c}\, f" where="
+f_D :: dịch tần Doppler (Hz)
+\dot{\rho} :: tốc độ thay đổi khoảng cách tới vệ tinh (dương khi vệ tinh đi xa)
+f :: tần số sóng mang
+" />
+
+<Predict client:visible lang="vi"
+  title="Cây che một góc trời phía đông thì mất kết nối bao lâu?"
+  q="Một hàng cây che phương vị 45–135° (phía đông) dưới góc ngẩng 60°. Bộ lập lịch chia tải giữa các vệ tinh và KHÔNG biết bản đồ vật cản của bạn. Trong 10 phút ở Hà Nội, khoảng bao nhiêu phần thời gian bị mất kết nối?"
+  options={['0 %', 'Khoảng 20 %', 'Khoảng 50 %', 'Gần 100 %']} answer={1}
+  why="Mô phỏng trên ảnh chụp thật cho 20 % số khe 15 giây bị mất kết nối. Nếu bộ lập lịch biết vật cản, con số về 0 %, vì luôn còn vệ tinh khác ở phần trời thoáng. Nếu bộ lập lịch luôn chọn vệ tinh cao nhất, vật cản thấp này cũng không gây mất kết nối." />
+
+<Figure
+  title="Hình 6.7 — Bầu trời Hà Nội: vệ tinh phục vụ đổi mỗi 15 giây"
+  try="Để mặc định (cây phía đông, chia tải, bộ lập lịch không biết vật cản): đếm khe đỏ trên dải. Bật Biết bản đồ vật cản: khe đỏ biến mất. Chọn Vệ tinh cao nhất: bao lâu thì đổi vệ tinh một lần? Đọc Doppler khi vệ tinh phục vụ đang lên và khi đang xuống."
+  source="Phần tử quỹ đạo GP của CelesTrak, nhóm starlink (như Hình 6.1), truyền bằng src/lib/gnss.ts; mỗi khe 15 giây dùng vị trí ở đầu khe. Quy tắc chọn vệ tinh là minh họa: thuật toán thật của SpaceX (tải, búp sóng, năng lượng) chưa công bố; chu kỳ 15 giây theo Tanveer và cộng sự (2023). Vật cản là giả định. Doppler từ tốc độ thay đổi khoảng cách (sai phân 1 giây) ở 11,7 GHz."
+>
+  <ConstellationHandover client:visible lang="vi" />
+</Figure>
+
+Với quy tắc "chọn vệ tinh cao nhất", mô phỏng 10 phút đầu tiên của ảnh chụp đổi vệ tinh **21 lần trong 39 lần phân bổ lại**, tức khoảng nửa phút một lần. Với quy tắc chia tải, gần như mỗi khe 15 giây là một vệ tinh mới.
+
+<Note kind="myth">
+
+**Hiểu sai:** "Chảo Starlink phải chĩa đúng vào một vệ tinh, như chảo truyền hình chĩa vào VINASAT." **Thực tế:** chảo lái búp sóng bằng điện tử sang vệ tinh khác mỗi vài chục giây. Thứ nó cần không phải một hướng chính xác mà là **một khoảng trời rộng không bị che**.
+
+</Note>
+
+<Note kind="key">
+
+<mark class="key">Với LEO, mạng chứ không phải chảo quyết định bạn nói chuyện với vệ tinh nào, và quyết định đó đổi lại sau mỗi khoảng 15 giây.</mark>
+
+</Note>
+
+## 6.6 Laser liên vệ tinh: mạng lưới ánh sáng trên quỹ đạo
+
+Tháng 1/2024, kỹ sư SpaceX Travis Brashears cho biết mạng Starlink có hơn **9000 laser**, mỗi liên kết duy trì 100 Gbit/s, nối được hai vệ tinh cách nhau hơn 5400 km, và truyền hơn **42 PB mỗi ngày** cho khách hàng, với thời gian liên kết hoạt động trên 99 %. 42 PB mỗi ngày tương đương trung bình 3,89 Tbit/s. Laser cho phép:
+
+- phục vụ tàu biển, máy bay, vùng cực, đảo xa không có trạm cổng trong tầm nhìn chung;
+- đưa lưu lượng tới trạm cổng hoặc PoP ở nơi khác;
+- rút ngắn độ trễ trên tuyến dài: ánh sáng trong chân không nhanh hơn trong sợi quang khoảng 1,47 lần, và đường laser có thể gần với vòng lớn hơn tuyến cáp thật.
+
+<Formula label="Độ trễ một chiều: cáp quang so với chân không" tex="t_{fibre} = \frac{k\, d\, n}{c}, \qquad t_{space} = \frac{L_{path}}{c}" where="
+d :: khoảng cách vòng lớn giữa hai thành phố
+k :: hệ số tuyến cáp (cáp dài hơn vòng lớn bao nhiêu lần; 1,0 là cáp thẳng lý tưởng)
+n :: chiết suất sợi quang, khoảng 1,468
+L_{path} :: chiều dài đường đi trong chân không (lên vệ tinh, các chặng laser, xuống)
+" />
+
+<Predict client:visible lang="vi"
+  title="Hà Nội – Frankfurt: laser hay cáp quang?"
+  q="Giả sử có một sợi cáp đi thẳng đúng theo vòng lớn Hà Nội – Frankfurt (8730 km). Đường qua lưới laser Starlink phải lên xuống vệ tinh và đi zíc zắc qua 38 vệ tinh. Cái nào nhanh hơn?"
+  options={['Cáp thẳng nhanh hơn rõ', 'Gần như bằng nhau', 'Laser nhanh hơn khoảng 12 ms khứ hồi', 'Laser nhanh hơn gấp đôi']} answer={2}
+  why="Đường laser dài 10 976 km (1,26 lần vòng lớn) nhưng đi trong chân không: khứ hồi 73,2 ms. Cáp thẳng lý tưởng: 85,5 ms vì ánh sáng chậm đi 1,468 lần trong thủy tinh. Cáp thật vòng vèo hơn (giả định hệ số 1,5): 128,3 ms." />
+
+<Figure
+  title="Hình 6.8 — Hà Nội tới các thành phố xa qua lưới laser của lớp 53°"
+  try="Chọn Frankfurt rồi Los Angeles: đường laser dài hơn vòng lớn bao nhiêu phần trăm? Chọn Singapore: vì sao lợi thế của laser gần như biến mất so với cáp thẳng? Đổi thời điểm +30 và +60 phút: đường đi thay đổi vì vệ tinh đã bay đi."
+  source="4558 vệ tinh lớp 53° trong ảnh chụp CelesTrak (như Hình 6.1). Lưới laser minh họa: mỗi vệ tinh nối với 4 vệ tinh gần nhất trong 5400 km mà tia không xuống dưới 80 km (topology thật của Starlink chưa công bố). Đường ngắn nhất theo thời gian ánh sáng (Dijkstra), lên/xuống ở góc ngẩng ≥ 25°. Cáp: vòng lớn × hệ số tuyến × 1,468. Bent-pipe: Hà Nội lên vệ tinh ở 60°, xuống trạm cổng Phú Thọ ở 40°, rồi cáp ×1,5 (vị trí trạm cổng cấp tỉnh). Chỉ thời gian ánh sáng (src/lib/constellation.ts). Ảnh nền © Esri, Maxar, Earthstar Geographics."
+>
+  <ConstellationIsl client:visible lang="vi" />
+</Figure>
+
+<div class="worked">
+
+#### Ví dụ: Hà Nội – Frankfurt
+
+1. Khoảng cách vòng lớn: **8730 km**.
+2. Cáp quang, hệ số tuyến 1,5: 8730 × 1,5 × 1,468 / 299 792 = 64,1 ms một chiều, khứ hồi **128,3 ms**.
+3. Cận dưới LEO 480 km (lên thẳng, đi theo vòng lớn ở độ cao vỏ, xuống thẳng): (2 × 480 + 8730 × 6858 / 6378) / 299 792 = 34,5 ms, khứ hồi **69,0 ms**.
+4. Lưới laser minh họa trên ảnh chụp thật (Hình 6.8): 38 vệ tinh, đường dài 10 976 km, khứ hồi **73,2 ms**, chỉ hơn cận dưới 4,2 ms.
+5. Bent-pipe xuống trạm cổng Phú Thọ rồi đi cáp ×1,5: khứ hồi **135,9 ms**.
+6. GEO một chặng: khứ hồi **526 ms**, gấp hơn 7 lần đường laser.
+
+Đây là thời gian ánh sáng. Mạng thật cộng thêm xử lý, xếp hàng và chuyển mạch, nên độ trễ đo được luôn lớn hơn.
+
+</div>
+
+<Note kind="key">
+
+<mark class="key">Laser thắng cáp quang trên tuyến dài vì ánh sáng trong chân không nhanh hơn trong thủy tinh 1,47 lần; trên tuyến ngắn, đoạn lên xuống vệ tinh xóa mất lợi thế đó.</mark>
+
+</Note>
+
+## 6.7 Hiệu năng và quy mô
+
+<Stats items={[
+  { v: '11 209', l: 'vệ tinh Starlink còn trên quỹ đạo (SATCAT, 05/11/2026)' },
+  { v: '13 024', l: 'vệ tinh Starlink đã phóng từ 2019' },
+  { v: '122', l: 'chuyến phóng mang vệ tinh Starlink năm 2025' },
+  { v: '12', u: 'triệu+', l: 'khách hàng, hơn 160 quốc gia và vùng lãnh thổ (SpaceX, 6/2026)' },
+]} caption="Ba số đầu đếm từ danh mục SATCAT của CelesTrak; số khách hàng theo SpaceX." />
+
+<div class="table-wrap">
+
+| Chỉ số | Giá trị | Nguồn, thời điểm |
+|---|---|---|
+| Độ trễ trung vị giờ cao điểm ở Mỹ | 25,7 ms | Starlink Network Update, 7/2025 (dữ liệu 6/2025) |
+| Tốc độ tải xuống trung vị giờ cao điểm ở Mỹ | khoảng 200 Mbit/s | Starlink Network Update, 7/2025 |
+| Tổng dung lượng đã phóng | khoảng 450 Tbit/s | Starlink Network Update, 7/2025 |
+| Khách hàng hoạt động | hơn 12 triệu, hơn 160 quốc gia và vùng lãnh thổ | SpaceX, 4/6/2026 |
+
+</div>
+
+Số đo độ trễ thực (25,7 ms) lớn hơn nhiều so với 6,4 ms của hình học vì gói tin còn đi qua trạm cổng, cáp tới PoP, bộ định tuyến và xếp hàng trong giờ cao điểm.
+
+<Figure
+  title="Hình 6.9 — Vệ tinh Starlink phóng lên và rơi về mỗi năm"
+  try="So năm 2024 và 2025: số phóng lên tăng bao nhiêu, số rơi về tăng bao nhiêu? Chọn Rơi về: vì sao số vệ tinh cháy trong khí quyển tăng vọt từ 2024? Bấm năm 2026 để đọc số còn trên quỹ đạo."
+  source="Danh mục SATCAT của CelesTrak, mọi vật thể loại tải trọng (payload) có tên STARLINK, lấy 05/11/2026; năm 2026 tính đến lần phóng 31/10/2026. Số chuyến phóng = số ký hiệu quốc tế YYYY-NNN khác nhau có mang vệ tinh Starlink. Số còn trên quỹ đạo cuối năm = cộng dồn phóng lên trừ rơi về."
+>
+  <ConstellationHistory client:visible lang="vi" />
+</Figure>
+
+Năm 2025, 3169 vệ tinh Starlink được phóng lên và 671 vệ tinh rơi về. Số rơi về tăng vì các lô đầu đã hết đời và được chủ động hạ quỹ đạo, cộng với hoạt động Mặt Trời mạnh làm khí quyển trên cao dày lên (Chương 4).
+
+<Note kind="myth">
+
+**Hiểu sai:** "Càng nhiều vệ tinh thì mỗi người dùng càng nhanh." **Thực tế:** dung lượng bị giới hạn **theo ô** trên mặt đất và theo phổ tần được cấp. Một ô đông thuê bao vẫn chậm vào giờ cao điểm dù trên trời có hàng chục vệ tinh; đó là lý do Starlink có lúc tạm ngưng nhận đăng ký mới ở những vùng đông khách.
+
+</Note>
+
+## 6.8 Direct-to-Cell: vệ tinh làm trạm gốc trên trời
+
+<Term id="constellations-direct-to-cell">Direct-to-Cell</Term> cho phép điện thoại LTE thông thường, không cần phần cứng đặc biệt, kết nối trực tiếp với vệ tinh. Vệ tinh mang một trạm gốc LTE (eNodeB) và một ăng-ten mảng pha lớn, dùng phổ di động của nhà mạng đối tác (ban đầu là T-Mobile ở Mỹ). SpaceX phóng những vệ tinh Direct-to-Cell đầu tiên đầu năm 2024 và gọi dịch vụ là Starlink Mobile từ tháng 3/2026. Tháng 9/2025, SpaceX mua phổ AWS-4 và H-block của EchoStar (khoảng 17 tỷ USD) cho thế hệ Direct-to-Cell sau. Về chuẩn, 3GPP đưa mạng phi mặt đất (NTN) vào Release 17 (2022).
+
+Thử thách lớn nhất là **ngân sách đường lên**: điện thoại có ăng-ten khoảng 0 dBi và công suất phát cỡ 0,2 W, kém chảo Starlink rất nhiều. Phần còn thiếu phải bù bằng độ lợi của ăng-ten vệ tinh, tức **diện tích ăng-ten**. Đối thủ trực tiếp AST SpaceMobile đi tới cực đoan: mỗi vệ tinh BlueBird khối 1 mở ra mảng ăng-ten 64 m², BlueBird khối 2 đầu tiên (12/2025) khoảng 223 m².
+
+<Formula label="Ngân sách đường lên (đơn vị dB)" tex="\frac{C}{N_0} = P_t + G_t - L_{fs} - L_{other} + G_r - 10\log_{10} T_{sys} - 10\log_{10} k" where="
+P_t + G_t :: công suất và độ lợi ăng-ten điện thoại (EIRP), khoảng −7 dBW
+L_{fs} :: suy hao không gian tự do, 20·log10(4πd/λ)
+G_r :: độ lợi ăng-ten vệ tinh, 10·log10(4πAη/λ²) với diện tích A và hiệu suất η
+T_{sys} :: nhiệt độ tạp âm hệ thống máy thu vệ tinh (K)
+k :: hằng số Boltzmann, 10·log10 k = −228,6 dBW/(K·Hz)
+" />
+
+<Figure
+  title="Hình 6.10 — Vì sao điện thoại nói chuyện được với vệ tinh: ăng-ten vệ tinh rất lớn"
+  try="Bắt đầu với 0,25 m²: tín hiệu nằm dưới tạp âm (SNR âm). Chọn 64 m² rồi 223 m²: SNR tăng bao nhiêu dB, và ô phục vụ hẹp lại thế nào? Hạ góc ngẩng xuống 25°. Đọc Doppler ở 1,9 GHz rồi so với khoảng cách sóng mang con LTE 15 kHz."
+  source="Tính trong src/lib/constellation.ts (d2cUplink). Giả định cố định: điện thoại 0,2 W, ăng-ten 0 dBi, 1,9 GHz; máy thu vệ tinh T_sys 500 K, hiệu suất ăng-ten 0,6, tổn hao khác 3 dB; một người dùng chiếm cả kênh (giới hạn Shannon, không phải tốc độ thật). 0,25 m² và 1 m² là minh họa; 64 m² và khoảng 223 m² là mảng của BlueBird khối 1 và 2 (AST SpaceMobile). Bề rộng búp 70·λ/D với D = √A. Doppler cho vệ tinh bay qua thiên đỉnh."
+>
+  <ConstellationD2C client:visible lang="vi" />
+</Figure>
+
+Ở 520 km và góc ngẩng 40°, với các giả định của Hình 6.10:
+
+- ăng-ten 0,25 m²: SNR trong kênh 5 MHz là **−12,3 dB**, giới hạn Shannon chỉ 0,41 Mbit/s, và búp sóng rộng 22,1° phủ một ô đường kính khoảng 203 km;
+- ăng-ten 64 m²: SNR **+11,8 dB**, giới hạn Shannon khoảng 20 Mbit/s, búp sóng 1,4°, ô chỉ khoảng 13 km.
+
+Ăng-ten lớn vừa kéo tín hiệu lên trên tạp âm, vừa chia mặt đất thành nhiều ô nhỏ để dùng lại tần số. **Doppler** là thử thách thứ hai: ở 1,9 GHz, vệ tinh 480 km gây dịch tần khoảng 41 kHz ở góc ngẩng 25°, lớn hơn khoảng cách sóng mang con LTE 15 kHz, nên trạm gốc trên vệ tinh phải bù trước Doppler theo tâm búp sóng.
+
+<Note kind="key">
+
+<mark class="key">Điện thoại không đổi được, nên mọi khoản thiếu trong ngân sách đường truyền phải bù bằng ăng-ten khổng lồ trên vệ tinh.</mark> Vì vậy Direct-to-Cell đi từ tin nhắn sang dữ liệu chậm, chứ chưa thay được chảo Starlink.
+
+</Note>
+
+## 6.9 Các chòm vệ tinh băng rộng khác
+
+<Figure
+  title="Hình 6.11 — Trên quỹ đạo so với cấp phép hoặc đăng ký"
+  try="Bấm từng hàng: chòm sao nào đã triển khai gần đủ quy mô? Kuiper đã phóng được bao nhiêu phần trăm của 3236? Vì sao thang ngang là thang log?"
+  source="Trên quỹ đạo: ảnh chụp CelesTrak (Starlink, OneWeb, Kuiper 04/11/2026; Qianfan, Guowang 05/11/2026), đếm mọi vật thể trong nhóm. Quy mô: FCC 21-48 và FCC 22-91 (Starlink), FCC 20-102 (Kuiper), OneWeb thế hệ 1 (648), hồ sơ ITU theo tin báo (Qianfan hơn 15 000, Guowang 12 992), đơn hàng MDA (Telesat Lightspeed 198). Telesat Lightspeed chưa có trong các nhóm CelesTrak đã lấy."
+>
+  <ConstellationFleets client:visible lang="vi" />
+</Figure>
+
+<div class="table-wrap">
+
+| Hệ thống | Quỹ đạo | Trong ảnh chụp | Quy mô cấp phép/đăng ký | Đặc điểm |
+|---|---|---|---|---|
+| Eutelsat OneWeb | khoảng 1200 km, 87,9° | 651 | 648 thế hệ 1 | Bent-pipe, Ku người dùng / Ka trạm cổng; khách doanh nghiệp, chính phủ, hàng hải |
+| Amazon Leo (tên cũ Kuiper, đổi 11/2025) | 590/610/630 km | 391 | 3236 (FCC 20-102) | Băng Ka; tháng 6/2026 FCC miễn mốc phóng một nửa chòm sao trước 30/7/2026 nhưng hạ ưu tiên phổ cho phần phóng sau |
+| Qianfan (Thiên Phàm) | khoảng 1070 km, 89° | 256 | hơn 15 000 (hồ sơ ITU) | Thương mại, Thượng Hải; đang triển khai |
+| Guowang (Quốc Võng) | khoảng 1150 km, 50° và 86,5° | 235 | 12 992 (hồ sơ ITU) | Mạng nhà nước Trung Quốc; đang triển khai |
+| Telesat Lightspeed | LEO | 0 | 198 (đặt hàng MDA, 2023) | Doanh nghiệp, hàng không, hàng hải; có laser |
+| Iridium NEXT | khoảng 780 km, 86,4° | — | 66 vệ tinh hoạt động | Băng L, thoại và dữ liệu hẹp, IoT; có liên kết giữa vệ tinh |
+| SES O3b mPOWER | MEO 8062 km | — | — | Độ trễ trung bình, dung lượng lớn cho doanh nghiệp và tàu biển |
+
+</div>
+
+<Tiles
+  items={[
+    { t: 'Starlink', d: '11 181 vật thể · 463–483 km · 43–97° · băng rộng' },
+    { t: 'OneWeb', d: '651 vật thể · 1202 km · 87,9° · băng rộng' },
+    { t: 'Amazon Leo (Kuiper)', d: '391 vật thể · 630 km · 51,9° · đang triển khai' },
+    { t: 'Qianfan + Guowang', d: '256 + 235 vật thể · 1050–1170 km · đang triển khai' },
+  ]}
+  sum="Càng thấp: trễ càng ít, suy hao càng nhỏ, nhưng càng cần nhiều vệ tinh"
+  note="Số vật thể theo ảnh chụp CelesTrak 04–05/11/2026"
+  caption="Các chòm sao băng rộng LEO và lớp quỹ đạo chính của chúng."
+/>
+
+<Note kind="key">
+
+<mark class="key">Hồ sơ ITU và giấy phép chỉ là quyền ưu tiên về phổ và quỹ đạo; con số trên quỹ đạo mới là năng lực thật.</mark> OneWeb đã đủ thế hệ 1; Amazon Leo mới đạt khoảng 12 % của 3236; Qianfan và Guowang chưa tới 2 % quy mô đăng ký.
+
+</Note>
+
+## 6.10 Starlink ở Việt Nam
+
+<Steps title="Các mốc pháp lý và triển khai" items={[
+  { tag: '19/02/2025', t: 'Nghị quyết 193/2025/QH15', d: 'Quốc hội cho phép thí điểm một số cơ chế đặc biệt cho khoa học, công nghệ và chuyển đổi số, làm căn cứ cho thí điểm Internet vệ tinh LEO.' },
+  { tag: '3/2025', t: 'Quyết định 659/QĐ-TTg', d: 'Thí điểm có kiểm soát dịch vụ viễn thông vệ tinh LEO của SpaceX trong 5 năm, kết thúc trước 01/01/2031, tối đa 600 000 thuê bao, không giới hạn tỷ lệ sở hữu nước ngoài.' },
+  { tag: '13/02/2026', t: 'Giấy phép tần số và giấy phép viễn thông', d: 'Cục Tần số vô tuyến điện cấp phép tần số; Bộ Khoa học và Công nghệ cấp giấy phép viễn thông cho Công ty TNHH Starlink Services Việt Nam (trụ sở Hà Nội).' },
+  { tag: 'hạ tầng', t: '4 trạm cổng và 1 PoP trong nước', d: 'Trạm cổng ở Phú Thọ, Đà Nẵng và TP.HCM; PoP ở phường Tân Thuận, TP.HCM (Cục Viễn thông).' },
+  { tag: '13/8/2026', t: 'Nhận đặt hàng', d: 'Starlink bắt đầu nhận đơn của khách hàng trong nước qua website.' },
+]} />
+
+Ngày ban hành Quyết định 659/QĐ-TTg được các báo ghi là 23/3 hoặc 26/3/2025. Những nơi hưởng lợi rõ nhất là các vùng cáp quang và di động khó tới: miền núi, hải đảo, tàu cá xa bờ, giàn khoan, và các tình huống khẩn cấp khi hạ tầng mặt đất bị bão lũ làm hỏng.
+
+Trạm cổng và PoP đặt trong nước có một hệ quả kỹ thuật: lưu lượng của người dùng Việt Nam có thể xuống trạm cổng Việt Nam trực tiếp (bent-pipe) nếu cùng tầm nhìn với một vệ tinh. Ở 480 km với góc ngẩng 25° ở cả hai đầu, người dùng và trạm cổng phải cách nhau không quá **1682 km**. Đảo Trường Sa Lớn cách trạm cổng TP.HCM 620 km, đảo Phú Lâm (Hoàng Sa) cách Đà Nẵng 450 km: cả hai quần đảo đều nằm trong tầm bent-pipe.
+
+<Figure
+  title="Hình 6.12 — Tầm bent-pipe của các trạm cổng Starlink ở Việt Nam"
+  try="Chọn Trường Sa Lớn, Đảo Phú Lâm, Lũng Cú: đều đi thẳng được qua một vệ tinh. Chọn Tàu ở Thái Bình Dương: cần laser. Tăng góc ngẩng tối thiểu lên 40°: vùng xanh co lại bao nhiêu? Bấm lên bản đồ để thử một điểm bất kỳ."
+  source="Tầm bent-pipe = 2λ (Formula của mục 6.4) cho người dùng và trạm cổng cùng góc ngẩng tối thiểu, Trái Đất cầu. Vị trí trạm cổng là vị trí cấp tỉnh gần đúng (Phú Thọ, Đà Nẵng, TP.HCM có 2 trạm) theo Cục Viễn thông, không phải tọa độ thật. Ảnh nền © Esri, Maxar, Earthstar Geographics."
+>
+  <ConstellationGateways client:visible lang="vi" />
+</Figure>
+
+<Note kind="key">
+
+<mark class="key">Bốn trạm cổng trong nước đủ để mọi điểm trên đất liền và hai quần đảo Hoàng Sa, Trường Sa của Việt Nam nối thẳng qua một vệ tinh; tàu đi xa hơn khoảng 1700 km mới cần laser.</mark>
+
+</Note>
+
+## 6.11 Các vấn đề còn tranh luận
+
+Về <Term id="space-debris">rác vũ trụ</Term>, Báo cáo Môi trường Vũ trụ 2025 của ESA ghi nhận khoảng **40 000 vật thể** được theo dõi trên quỹ đạo, trong đó khoảng **11 000 tàu vũ trụ đang hoạt động**, và ước tính hơn **1,2 triệu mảnh** từ 1 tới 10 cm, đủ lớn để phá hủy một vệ tinh.
+
+<Tiles
+  items={[
+    { t: 'Theo dõi được', d: '≈ 40 000 vật thể' },
+    { t: 'Đang hoạt động', d: '≈ 11 000 tàu vũ trụ' },
+    { t: '1–10 cm', d: '> 1,2 triệu mảnh (ước tính)' },
+    { t: 'Vận tốc ở LEO', d: '≈ 7,5 km/s: mảnh 1 cm như một viên đạn' },
+  ]}
+  caption="Môi trường quỹ đạo theo ESA Space Environment Report 2025 (dữ liệu đến hết năm 2024)."
+/>
+
+Mỗi lần hai vật thể đi qua sát nhau là một <Term id="conjunction">tiếp cận gần</Term>; khi xác suất va chạm vượt ngưỡng, vệ tinh có động cơ sẽ cơ động tránh. Nguy cơ dài hạn là <Term id="kessler-syndrome">hội chứng Kessler</Term>: va chạm sinh mảnh vỡ, mảnh vỡ lại gây thêm va chạm. Vì vậy độ cao là một lựa chọn an toàn: dưới khoảng 500 km, lực cản khí quyển kéo vệ tinh hỏng và mảnh vỡ rơi về nhanh (<Term id="orbital-decay">suy giảm quỹ đạo</Term>, Chương 4). SpaceX nêu việc hạ Starlink xuống khoảng 480 km giúp vệ tinh hỏng rơi về trong vài tháng. OneWeb, Qianfan và Guowang ở trên 1000 km thì gần như không còn lực cản, nên phải chủ động đưa vệ tinh hết hạn xuống.
+
+<Tiles
+  items={[
+    { t: 'Thiên văn học', d: 'Vệt sáng trên ảnh phơi sáng lâu; LOFAR (2023) đo được bức xạ vô tuyến ngoài ý muốn 110–188 MHz từ vệ tinh Starlink. IAU lập Trung tâm Bảo vệ Bầu trời Tối và Yên tĩnh (CPS).' },
+    { t: 'Mật độ quỹ đạo', d: 'Rủi ro va chạm phụ thuộc khả năng tự né của hàng chục nghìn vệ tinh thuộc nhiều nhà khai thác.' },
+    { t: 'Khí quyển', d: 'Hàng trăm vệ tinh cháy mỗi năm (671 Starlink năm 2025) để lại oxit nhôm ở tầng cao; tác động tới tầng ôzôn đang được nghiên cứu.' },
+    { t: 'Phổ tần và cạnh tranh', d: 'ITU (Điều 22) giới hạn EPFD để hệ LEO không gây nhiễu GEO; tranh chấp giữa các chòm sao; vai trò áp đảo của một công ty.' },
+    { t: 'Chủ quyền và an ninh', d: 'Nhiều quốc gia yêu cầu trạm cổng và PoP trong nước để quản lý lưu lượng, như Việt Nam.' },
+  ]}
+  caption="Năm nhóm vấn đề đang tranh luận quanh các siêu chòm sao."
+/>
+
+Về phổ tần, chòm sao LEO dùng các băng Ku, Ka và cao hơn (Chương 5), cùng băng với vệ tinh địa tĩnh. Để không gây nhiễu, Thể lệ Vô tuyến điện của ITU (Điều 22) giới hạn mật độ thông lượng công suất tương đương (EPFD) mà hệ phi địa tĩnh được tạo ra; vệ tinh LEO tắt hoặc lái búp sóng ra xa khi nó nằm gần đường nhìn từ trạm mặt đất tới vành đai địa tĩnh. Ở Việt Nam, điều này nằm dưới vòm trời của chính VINASAT-1 và VINASAT-2.
+
+<Note kind="warn">
+
+Vệ tinh Starlink giảm độ sáng bằng tấm che nắng, màng phản xạ và điều chỉnh tư thế, nhưng số vệ tinh vẫn tăng (Hình 6.9). Bài toán thiên văn không biến mất, nó chỉ chuyển từ "từng vệ tinh sáng" sang "rất nhiều vệ tinh mờ".
+
+</Note>
+
+<Note kind="key" label="Tóm tắt chương">
+
+- Người dùng ↔ vệ tinh: Ku; vệ tinh ↔ trạm cổng: Ka và E-band; vệ tinh ↔ vệ tinh: laser 100 Gbit/s.
+- LEO cho độ trễ lan truyền vài ms (đo được khoảng 25 ms) nhưng cần hàng nghìn vệ tinh và chuyển vùng liên tục (khoảng mỗi 15 giây).
+- Dung lượng bị giới hạn theo ô; Direct-to-Cell dựa vào ăng-ten vệ tinh khổng lồ để bù cho điện thoại.
+- Ở Việt Nam: thí điểm tới trước 01/01/2031, tối đa 600 000 thuê bao, 4 trạm cổng và 1 PoP trong nước, nhận đặt hàng từ 13/8/2026.
+
+</Note>
+
+## 6.12 Thực hành
+
+Notebook tải ảnh chụp quỹ đạo của chương, vẽ các lớp Starlink, OneWeb, Kuiper theo độ nghiêng và độ cao, truyền quỹ đạo 11 181 vệ tinh Starlink bằng SGP4 để đếm vệ tinh trên bầu trời Hà Nội trong 24 giờ, rồi tự viết chòm sao Walker và công thức dải phủ.
+
+<LabLinks notebook="labs/constellations_walker.ipynb" />
+
+**Bài tập gợi ý**
+
+1. Trong Hình 6.5, tìm chòm sao delta ít vệ tinh nhất ở 550 km, 53°, góc ngẩng 25° phủ Hà Nội 100 % thời gian. So với 360 của Hình 6.6 (phủ toàn cầu).
+2. Trong Hình 6.1, chọn Kuiper: vì sao có lúc không có vệ tinh nào trên 25° ở Hà Nội? Khi chòm sao đủ 3236 vệ tinh theo giấy phép, điều đó còn xảy ra không?
+3. Dùng Hình 6.2, tìm hệ số tuyến cáp để cáp quang tới Tokyo nhanh bằng LEO. Kiểm tra lại bằng Hình 6.8.
+4. Trong Hình 6.7, đặt vật cản Nhà cao phía nam–tây và quy tắc chia tải: so số khe mất kết nối khi bộ lập lịch biết và không biết vật cản.
+5. Trong Hình 6.10, tìm diện tích ăng-ten nhỏ nhất để SNR dương ở 520 km, góc ngẩng 25°, kênh 5 MHz.
+
+## 6.13 Ôn tập
+
+<Quiz client:visible lang="vi" items={quiz} />
+
+## Tài liệu tham khảo
+
+- Adams, W. S., & Rider, L. (1987). Circular polar constellations providing continuous single or multiple coverage above a specified latitude. *Journal of the Astronautical Sciences*, 35(2), 155–192.
+- Brashears, T. (SpaceX) (2024). Trình bày tại SPIE Photonics West, 1/2024; tường thuật: PCMag, Starlink's laser system is beaming 42 million GB of data per day. https://www.pcmag.com/news/starlinks-laser-system-is-beaming-42-million-gb-of-data-per-day
+- Cục Viễn thông, Bộ Khoa học và Công nghệ (2025). Họp báo về thí điểm Starlink (4 trạm cổng, PoP Tân Thuận); tường thuật: Báo Thanh tra. https://thanhtra.com.vn/chuyen-doi-so-DFC98D38D/starlink-thi-diem-tai-viet-nam-gia-tu-85-usdthang-bao-dam-canh-tranh-binh-dang-5122c3e29.html
+- Di Vruno, F., et al. (2023). Unintended electromagnetic radiation from Starlink satellites detected with LOFAR between 110 and 188 MHz. *Astronomy & Astrophysics*, 676, A75.
+- EchoStar (2025). EchoStar announces spectrum sale and commercial agreement with SpaceX (8/9/2025). https://ir.echostar.com/node/32686
+- ESA Space Debris Office (2025). *ESA's Annual Space Environment Report 2025*. https://www.esa.int/Space_Safety/Space_Debris/ESA_Space_Environment_Report_2025
+- FCC (2020). *Kuiper Systems LLC — Order and Authorization* (FCC 20-102): 3236 vệ tinh ở 590, 610 và 630 km. https://www.fcc.gov
+- FCC (2021). *Granting SpaceX's Satellite Broadband Modification Application* (FCC 21-48), sửa đổi giấy phép Starlink thế hệ 1. https://www.fcc.gov
+- FCC (2022). *Space Exploration Holdings, LLC — Order and Authorization* (FCC 22-91), cấp một phần giấy phép Starlink thế hệ 2: 7500 vệ tinh ở 525, 530 và 535 km. https://www.fcc.gov
+- Drive Tesla Canada (2026). Starlink surges to 12 million subscribers (theo bài đăng của SpaceX trên X ngày 4/6/2026). https://driveteslacanada.ca/news/starlink-12-million-subscribers-price-hikes/
+- Euronews (2026). SpaceX to lower thousands of Starlink satellites in 2026 as collisions rise, company says (3/1/2026), theo M. Nicolls (SpaceX). https://euronews.com/next/2026/01/03/spacex-to-lower-thousands-of-starlink-satellites-in-2026-as-collisions-rise-company-says
+- Ferreira, J. P., et al. (2024). Potential ozone depletion from satellite demise during atmospheric reentry in the era of mega-constellations. *Geophysical Research Letters*, 51, e2024GL109280.
+- ITU (2024). *Radio Regulations*, Article 22 (giới hạn EPFD cho hệ vệ tinh phi địa tĩnh). https://www.itu.int/pub/R-REG-RR
+- Kelso, T. S. *CelesTrak*: GP data và SATCAT. https://celestrak.org
+- Kessler, D. J., & Cour-Palais, B. G. (1978). Collision frequency of artificial satellites: The creation of a debris belt. *Journal of Geophysical Research*, 83(A6), 2637–2646.
+- Light Reading (2026). Starlink goes live in Vietnam as SpaceX signs VinSpace launch contract (17/8/2026). https://www.lightreading.com/satellite/starlink-goes-live-in-vietnam-as-spacex-signs-vinspace-launch-contract
+- Mohan, N., et al. (2024). A multifaceted look at Starlink performance. *Proceedings of the ACM Web Conference 2024*. https://arxiv.org/abs/2310.09242
+- Nguyễn Văn Tín. *Sổ tay Vệ tinh & Viễn thám*, chương 6. CC BY 4.0. https://satellite-rs-handbook.netlify.app/
+- Rider, L. (1985). Optimized polar orbit constellations for redundant earth coverage. *Journal of the Astronautical Sciences*, 33(2), 147–161.
+- SatNews (2025). AST SpaceMobile deploys BlueBird 6, largest commercial array in LEO (24/12/2025). https://satnews.com/2025/12/24/ast-spacemobile-deploys-bluebird-6-largest-commercial-array-in-leo
+- Spaceflight Now (2023). SpaceX unveils first batch of larger upgraded Starlink satellites (26/2/2023). https://spaceflightnow.com/2023/02/26/spacex-unveils-first-batch-of-larger-upgraded-starlink-satellites/
+- Starlink (2025). *Starlink Network Update* (7/2025). https://starlink.com/updates/network-update
+- Tanveer, H. B., Puchol, M., Singh, R., Bianchi, A., & Nithyanand, R. (2023). Making sense of constellations: Methodologies for understanding Starlink's scheduling algorithms. *CoNEXT 2023 Companion*. https://arxiv.org/abs/2307.00402
+- VnEconomy (2025). Vietnam to allow pilot rollout of Starlink internet service (26/3/2025), Quyết định 659/QĐ-TTg. https://en.vneconomy.vn/vietnam-to-allow-pilot-rollout-of-starlink-internet-service.htm
+- VTC News (2026). Internet vệ tinh Starlink được cấp phép triển khai tối đa 600.000 thiết bị tại Việt Nam (14/02/2026). https://vtcnews.vn/internet-ve-tinh-starlink-duoc-cap-phep-trien-khai-toi-da-600-000-thiet-bi-tai-viet-nam-ar1003263.html
+- Tesla North (2026). SpaceX makes Starlink Mobile official as subscriber base hits 10 million (3/3/2026). https://teslanorth.com/2026/03/03/spacex-makes-starlink-mobile-official-as-subscriber-base-hits-10-million/
+- Walker, J. G. (1984). Satellite constellations. *Journal of the British Interplanetary Society*, 37, 559–571.
+- Wertz, J. R. (Ed.) (2001). *Mission Geometry; Orbit and Constellation Design and Management*. Microcosm Press / Kluwer.

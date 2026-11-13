@@ -1,6 +1,6 @@
 ---
 title: Chuỗi thời gian & phát hiện biến động
-n: 10
+n: 15
 summary: Kho ảnh Landsat từ năm 1984 cho phép nhìn lại một phần tư thế kỷ. Chương này so sánh Tây Hà Nội năm 2000 và 2024, theo dõi từng pixel qua 25 năm để tìm năm thay đổi, và đo bồi – xói bờ biển Mũi Cà Mau; mỗi ví dụ kèm bẫy thường gặp khi so ảnh khác thời điểm.
 objectives:
   - Nêu các điều kiện để so sánh hai ảnh khác thời điểm (cùng mùa, cùng xử lý, chuẩn hoá cảm biến).
@@ -13,28 +13,36 @@ import Term from '../../../components/Term.astro';
 import Depth from '../../../components/Depth.astro';
 import Figure from '../../../components/Figure.astro';
 import LabLinks from '../../../components/LabLinks.astro';
+import Note from '../../../components/Note.astro';
+import Stats from '../../../components/Stats.astro';
 import UrbanChange from '../../../islands/UrbanChange.tsx';
 import PixelSeries from '../../../islands/PixelSeries.tsx';
 import CoastChange from '../../../islands/CoastChange.tsx';
 import Quiz from '../../../islands/Quiz.tsx';
 import quiz from '../../../data/quiz/ch10.json';
 
-## 10.1 So sánh hai thời điểm: điều kiện cần
+## 15.1 So sánh hai thời điểm: điều kiện cần
 
 <Term id="change-detection">Phát hiện biến động</Term> trả lời câu hỏi: chỗ nào đã đổi, đổi từ gì sang gì, và vào khi nào? Kho ảnh Landsat có từ năm 1984 với Landsat 5, miễn phí từ năm 2008 (Woodcock và cs. 2008), nên ta có thể nhìn lại mọi nơi ở Việt Nam trong khoảng 40 năm.
 
 Hai ảnh chỉ so sánh được khi khác nhau **chủ yếu** vì mặt đất đã đổi. Mọi khác biệt khác đều là nhiễu:
 
 - **Mùa:** lúa mới cấy và lúa chín cho NDVI rất khác nhau dù đất không đổi. Nên so cùng mùa, hoặc dùng ảnh tổng hợp nhiều tháng.
-- **Mây và bóng mây:** cần lọc trước (Chương 7).
+- **Mây và bóng mây:** cần lọc trước (Chương 12).
 - **Cảm biến:** Landsat 5/7 (TM/ETM+) và Landsat 8/9 (OLI) có kênh phổ hơi khác nhau. Cùng một mặt đất, hai cảm biến cho chỉ số lệch nhau một chút (Roy và cs. 2016).
 
 Chương này dùng ảnh **tổng hợp trung vị**: với mỗi pixel, lấy giá trị trung vị của mọi lần chụp không mây trong khoảng 19 tháng. Trung vị loại được mây sót và làm mờ dao động mùa.
 
-## 10.2 Tây Hà Nội 2000 → 2024
+<Note kind="key">
+
+Trước khi so hai ảnh, loại các khác biệt không do mặt đất: **mùa**, **mây** và **cảm biến**. Cùng mùa (hoặc tổng hợp nhiều tháng), lọc mây kỹ, và chú ý khi đổi cảm biến.
+
+</Note>
+
+## 15.2 Tây Hà Nội 2000 → 2024
 
 <Figure
-  title="Hình 10.1 — Tây Hà Nội (Mỹ Đình – Hà Đông) năm 2000 và 2024 trên bản đồ"
+  title="Hình 15.1 — Tây Hà Nội (Mỹ Đình – Hà Đông) năm 2000 và 2024 trên bản đồ"
   try="Ở chế độ So sánh, kéo thanh 'Trộn' từ 0 lên 100 %: khu nào đổi từ xanh lục sang tím hồng? Sang 'Bản đồ biến động', chọn 'Hiệu NDBI' rồi bật/tắt 'Chuẩn hoá': diện tích thay đổi bao nhiêu?"
   source="Landsat Collection 2 Level-2. Năm 2000: Landsat 5 TM và Landsat 7 ETM+, 10/1999–4/2001 (66 cảnh, trung vị 11 lần chụp không mây mỗi pixel). Năm 2024: Landsat 8/9 OLI, 10/2023–4/2025 (98 cảnh, trung vị 31 lần). Tổng hợp trung vị sau khi lọc QA_PIXEL (mây, bóng mây, mây giãn). Tổ hợp màu SWIR1–NIR–Đỏ, kéo giãn cố định 0–0,30 / 0–0,40 / 0–0,25. Khung 15 × 15 km, pixel 30 m, UTM 48N. Landsat courtesy of USGS. Ảnh nền © Esri, Maxar, Earthstar Geographics."
 >
@@ -47,20 +55,32 @@ Trong tổ hợp SWIR1–NIR–Đỏ, thực vật có màu xanh lục, còn nh�
 
 **2. Hiệu chỉ số:** lấy NDBI 2024 trừ NDBI 2000, ngưỡng 0,15. Nếu trừ thẳng, có tới **73,25 km²** "tăng xây dựng", tức một phần ba khung, trong khi chỉ 5,14 km² giảm. Nguyên nhân: trung vị hiệu NDBI của **cả khung** là +0,094, nghĩa là gần như mọi pixel đều "tăng". Đây chủ yếu là chênh lệch giữa hai cảm biến và hai giai đoạn, không phải xây dựng thật. Trừ đi trung vị (một cách chuẩn hoá tương đối đơn giản), diện tích còn 27,34 km² tăng và 23,37 km² giảm. Hiệu NDVI ít bị lệch hơn: trung vị chỉ −0,014.
 
+<Stats items={[
+  { v: '73,25', u: 'km²', l: '"tăng xây dựng" khi trừ thẳng NDBI 2024 − 2000' },
+  { v: '+0,094', l: 'trung vị hiệu NDBI của cả khung' },
+  { v: '27,34', u: 'km²', l: '"tăng xây dựng" sau khi trừ trung vị' },
+]} caption="Hiệu chỉ số giữa hai cảm biến: phần lớn 'tăng' ban đầu là chênh lệch cảm biến và giai đoạn." />
+
+<Note kind="key">
+
+Hai ảnh khác cảm biến có thể lệch nhau trên **cả khung**. Trước khi đặt ngưỡng cho hiệu chỉ số, xem trung vị hiệu của cả khung: nếu nó khác 0 rõ rệt, phần lớn "biến động" là do cảm biến chứ không phải mặt đất.
+
+</Note>
+
 <Depth level="advanced" title="Vì sao hiệu chỉ số dễ sai khi đổi cảm biến">
 
 Kênh NIR của OLI (845–885 nm) hẹp hơn kênh NIR của TM/ETM+ (khoảng 770–900 nm), và kênh SWIR1 cũng lệch nhẹ. Roy và cs. (2016) ước lượng các hệ số chuyển đổi giữa ETM+ và OLI cho từng kênh và cho NDVI. Trong chương này, sổ tay chỉ dùng chuẩn hoá tương đối (trừ trung vị cả khung). Cách này giả định phần lớn khung **không đổi**. Giả định đó không đúng với một vùng đô thị hoá mạnh như Tây Hà Nội, nên kết quả chuẩn hoá cũng chỉ mang tính minh họa. Muốn chuẩn hơn: dùng hệ số hiệu chỉnh chéo cảm biến, hoặc chọn các pixel "bất biến" (mặt nước sâu, mái nhà cũ) làm mốc.
 
 </Depth>
 
-## 10.3 Theo dõi từng pixel qua 25 năm
+## 15.3 Theo dõi từng pixel qua 25 năm
 
-So hai thời điểm chỉ cho biết **có đổi**. Muốn biết đổi **khi nào**, cần <Term id="time-series">chuỗi thời gian</Term>. Hình 10.2 lấy NDVI trung vị của **từng năm** 2000–2024 ở phần giữa khung (7,5 × 7,5 km), rồi tìm năm NDVI giảm đột ngột.
+<mark class="key">So hai thời điểm chỉ cho biết **có đổi**. Muốn biết đổi **khi nào**, cần <Term id="time-series">chuỗi thời gian</Term>.</mark> Hình 15.2 lấy NDVI trung vị của **từng năm** 2000–2024 ở phần giữa khung (7,5 × 7,5 km), rồi tìm năm NDVI giảm đột ngột.
 
 <Figure
-  title="Hình 10.2 — Năm xảy ra giảm NDVI đột ngột và chuỗi NDVI của một pixel"
+  title="Hình 15.2 — Năm xảy ra giảm NDVI đột ngột và chuỗi NDVI của một pixel"
   try="Bấm vào vài điểm màu vàng (gãy muộn) và tím (gãy sớm) để xem chuỗi. Kéo 'F tối thiểu' từ 20 lên 60: những pixel nào biến mất? Đọc giá trị năm 2012 trong bảng số liệu và giải thích."
-  source="Landsat 5, 7, 8, 9 Collection 2 Level-2; NDVI trung vị của mọi lần chụp không mây trong từng năm dương lịch, khung 250 × 250 pixel 30 m giữa Hình 10.1. Không nối điểm qua năm thiếu dữ liệu. Năm gãy: tách chuỗi thành hai đoạn có mức trung bình khác nhau (mỗi đoạn ≥ 4 năm) sao cho tổng bình phương sai số nhỏ nhất; F so sánh với một đường thẳng. Landsat courtesy of USGS. Ảnh nền © Esri, Maxar, Earthstar Geographics."
+  source="Landsat 5, 7, 8, 9 Collection 2 Level-2; NDVI trung vị của mọi lần chụp không mây trong từng năm dương lịch, khung 250 × 250 pixel 30 m giữa Hình 15.1. Không nối điểm qua năm thiếu dữ liệu. Năm gãy: tách chuỗi thành hai đoạn có mức trung bình khác nhau (mỗi đoạn ≥ 4 năm) sao cho tổng bình phương sai số nhỏ nhất; F so sánh với một đường thẳng. Landsat courtesy of USGS. Ảnh nền © Esri, Maxar, Earthstar Geographics."
 >
   <PixelSeries client:visible lang="vi" />
 </Figure>
@@ -86,6 +106,12 @@ Trong toàn khung 56,25 km², có **6008 pixel (5,41 km²)** có bước giảm 
 - Năm **2004** có nhiều pixel nhất (1311). Một phần là do 2004 là năm **sớm nhất** thuật toán được phép chọn (cần ít nhất 4 năm trước điểm cắt). Một phần do từ 5/2003 Landsat 7 bị hỏng bộ điều chỉnh dòng quét (SLC-off), để lại các sọc không có dữ liệu.
 - Năm **2012** gần như chỉ có Landsat 7 SLC-off (Landsat 5 ngừng chụp cuối 2011, Landsat 8 phóng năm 2013). Trung vị số lần chụp không mây năm 2012 chỉ là **1**, nên NDVI năm đó rất nhiễu.
 
+<Note kind="key">
+
+Bản đồ năm gãy phản ánh cả dữ liệu lẫn thuật toán. Pixel dồn vào năm sớm nhất được phép chọn (2004) hoặc vào năm ít ảnh (2012) cần đọc thận trọng trước khi coi là biến động thật.
+
+</Note>
+
 <Depth level="advanced" title="Theil–Sen, điểm gãy và các thuật toán thực tế">
 
 **Theil–Sen** (Sen 1968): độ dốc = trung vị độ dốc của mọi cặp điểm. Một năm nhiễu (như 2012) gần như không ảnh hưởng, trong khi đường hồi quy bình phương nhỏ nhất bị kéo lệch.
@@ -94,12 +120,12 @@ Trong toàn khung 56,25 km², có **6008 pixel (5,41 km²)** có bước giảm 
 
 </Depth>
 
-## 10.4 Bồi và xói bờ biển Mũi Cà Mau
+## 15.4 Bồi và xói bờ biển Mũi Cà Mau
 
-Mũi Cà Mau là nơi đất liền Việt Nam vẫn đang thay đổi nhanh. Hình 10.3 dùng <Term id="mndwi">MNDWI</Term> (Chương 6) để tách nước và đất ở hai thời điểm, rồi so sánh.
+Mũi Cà Mau là nơi đất liền Việt Nam vẫn đang thay đổi nhanh. Hình 15.3 dùng <Term id="mndwi">MNDWI</Term> (Chương 11) để tách nước và đất ở hai thời điểm, rồi so sánh.
 
 <Figure
-  title="Hình 10.3 — Bồi tụ và xói lở bờ biển Mũi Cà Mau, 2000 → 2024"
+  title="Hình 15.3 — Bồi tụ và xói lở bờ biển Mũi Cà Mau, 2000 → 2024"
   try="Đổi giữa 2000 và 2024: bờ phía tây (vịnh Thái Lan) và bờ phía đông nam thay đổi thế nào? Ở 'Bồi / xói', chuyển 'Chỉ biển' sang 'Mọi mặt nước': diện tích tăng thêm từ đâu? Kéo ngưỡng MNDWI từ 0 xuống −0,1."
   source="Landsat Collection 2 Level-2, tổng hợp trung vị: 2000 = Landsat 5/7, 10/1999–4/2001 (63 cảnh, trung vị 22 lần chụp không mây); 2024 = Landsat 8/9, 10/2023–4/2025 (123 cảnh, trung vị 31 lần). MNDWI = (Lục − SWIR1)/(Lục + SWIR1). 'Biển' = vùng nước nối với mép khung và rộng ít nhất 18 km². Tổ hợp màu SWIR1–NIR–Lục. Khung 15 × 15 km, pixel 30 m. Landsat courtesy of USGS. Ảnh nền © Esri, Maxar, Earthstar Geographics."
 >
@@ -123,19 +149,30 @@ Kết quả rất nhạy với cách làm:
 
 "Mọi mặt nước" tính cả ao nuôi tôm trong đất liền bị đào hoặc lấp, không phải bờ biển. Ngưỡng −0,1 xếp cả bãi bùn ướt vào "nước" năm 2000, nên khi bãi bùn có rừng ngập mặn mọc lên, diện tích "bồi" tăng gấp đôi. Còn một nguồn sai nữa là **thủy triều**: ảnh chụp lúc triều thấp sẽ có nhiều bãi bùn lộ ra hơn. Ảnh trung vị làm giảm nhưng không loại hết ảnh hưởng này.
 
-## 10.5 Báo cáo biến động cho đúng
+<Note kind="key">
 
+Con số bồi – xói phụ thuộc vào ngưỡng MNDWI, vào việc tính "chỉ biển" hay "mọi mặt nước", và vào mức thủy triều lúc chụp. Ở khung này, đổi ngưỡng từ 0 sang −0,1 làm diện tích bồi tăng hơn gấp đôi (21,09 → 45,83 km²).
+
+</Note>
+
+## 15.5 Báo cáo biến động cho đúng
+
+<Note kind="key">
+
+Biến động thường là lớp hiếm. Báo cáo diện tích biến động bằng mẫu kiểm định phân tầng và khoảng tin cậy, kèm quy tắc đã dùng (chỉ số, ngưỡng), chứ không bằng cách đếm pixel.
+
+</Note>
 <Depth level="ref" title="Danh sách kiểm tra">
 
 1. Cùng mùa hoặc tổng hợp nhiều tháng; lọc mây cẩn thận.
 2. Khi đổi cảm biến: hiệu chỉnh chéo (Roy và cs. 2016) hoặc so sánh sau phân loại.
 3. Nói rõ quy tắc (chỉ số, ngưỡng) và thử độ nhạy với ngưỡng.
-4. Không báo diện tích biến động bằng cách đếm pixel. Lấy mẫu kiểm định phân tầng theo lớp biến động và ước lượng diện tích có khoảng tin cậy (Olofsson và cs. 2014, Chương 9). Biến động thường là lớp hiếm, nên rất dễ bị ước lượng sai.
+4. Không báo diện tích biến động bằng cách đếm pixel. Lấy mẫu kiểm định phân tầng theo lớp biến động và ước lượng diện tích có khoảng tin cậy (Olofsson và cs. 2014, Chương 14). Biến động thường là lớp hiếm, nên rất dễ bị ước lượng sai.
 5. Với chuỗi thời gian: không nối điểm qua khoảng trống dài, đánh dấu năm ít dữ liệu (như 2012), và cảnh giác với điểm gãy dồn về đầu hoặc cuối chuỗi.
 
 </Depth>
 
-## 10.6 Thực hành
+## 15.6 Thực hành
 
 Notebook Python tạo ảnh tổng hợp Landsat 2000 và 2024 cho một khu vực, tính hiệu NDVI, tìm năm NDVI giảm mạnh nhất cho từng pixel trong Earth Engine, và đo bồi – xói bằng MNDWI. Script GEE vẽ bản đồ năm giảm NDVI mạnh nhất cho khu vực bạn chọn; từ đó có thể chuyển sang LandTrendr.
 
@@ -143,11 +180,11 @@ Notebook Python tạo ảnh tổng hợp Landsat 2000 và 2024 cho một khu v�
 
 **Bài tập gợi ý**
 
-1. Ở Hình 10.1, chọn ngưỡng NDVI để diện tích "mất thực vật" gần bằng diện tích bạn đếm được trên ảnh nền ở một phường bạn biết.
-2. Ở Hình 10.2, tìm một pixel NDVI **tăng** (công viên mới?). Năm gãy là năm nào?
-3. Đổi khung ở Hình 10.3 trong script GEE sang cửa sông Tiền hoặc bờ biển Gò Công. Bờ ở đó bồi hay xói?
+1. Ở Hình 15.1, chọn ngưỡng NDVI để diện tích "mất thực vật" gần bằng diện tích bạn đếm được trên ảnh nền ở một phường bạn biết.
+2. Ở Hình 15.2, tìm một pixel NDVI **tăng** (công viên mới?). Năm gãy là năm nào?
+3. Đổi khung ở Hình 15.3 trong script GEE sang cửa sông Tiền hoặc bờ biển Gò Công. Bờ ở đó bồi hay xói?
 
-## 10.7 Ôn tập
+## 15.7 Ôn tập
 
 <Quiz client:visible lang="vi" items={quiz} />
 

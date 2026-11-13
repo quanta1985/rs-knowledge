@@ -1,0 +1,104 @@
+---
+// App bar with an Office-style ribbon: tabs for Part A/B/C, Reference and View; each panel holds grouped buttons.
+// The panel folds away while reading (html[data-scrolled]) and reopens as an overlay when a tab is clicked.
+import { getCollection } from 'astro:content';
+import { CHAPTERS, type Part } from '../data/chapters';
+import { t, url, type Lang } from '../i18n/ui';
+
+interface Props { lang: Lang; current?: string; showDepth?: boolean }
+const { lang, current, showDepth = false } = Astro.props;
+const other: Lang = lang === 'vi' ? 'en' : 'vi';
+const otherPath = Astro.url.pathname.replace(`/${lang}/`, `/${other}/`);
+const ready = new Set((await getCollection('chapters')).map((e) => e.id));
+const vi = lang === 'vi';
+const pad = (n: number) => String(n).padStart(2, '0');
+const parts: { p: Part; key: 'partA' | 'partB' | 'partC'; short: string }[] = [
+  { p: 'A', key: 'partA', short: vi ? 'Vệ tinh' : 'Satellites' },
+  { p: 'B', key: 'partB', short: vi ? 'Viễn thám' : 'Remote sensing' },
+  { p: 'C', key: 'partC', short: vi ? 'Ứng dụng' : 'Applications' },
+];
+const curPart = CHAPTERS.find((c) => c.slug === current)?.part ?? 'A';
+const tabs = [
+  ...parts.map(({ p, short }) => ({ id: p, k: `${vi ? 'Phần' : 'Part'} ${p}`, t: short })),
+  { id: 'ref', k: '', t: t(lang, 'depthRef') },
+  ...(showDepth ? [{ id: 'view', k: '', t: vi ? 'Hiển thị' : 'View' }] : []),
+];
+const sel = curPart;
+const icons = {
+  book: 'M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2V5Zm0 14V5',
+  search: 'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14Zm9 16-4.2-4.2',
+  home: 'm3 11 9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-9Z',
+  code: 'm8 8-5 4 5 4m8-8 5 4-5 4M14 4l-4 16',
+  sigma: 'M18 5H6l6 7-6 7h12',
+  present: 'M3 4h18v12H3zM12 16v4M8 20h8',
+  moon: 'M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z',
+};
+const Icon = (d: string) => `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
+const refItems = [
+  { href: url(`${lang}/`), label: vi ? 'Trang chủ' : 'Home', icon: icons.home },
+  { href: url(`${lang}/glossary/`), label: t(lang, 'glossary'), icon: icons.book },
+  { href: url(`${lang}/search/`), label: t(lang, 'search'), icon: icons.search },
+  { href: url(`${lang}/ch15-labs/`), label: vi ? 'Bài thực hành' : 'Labs', icon: icons.code },
+  { href: url(`${lang}/ch16-reference/`), label: vi ? 'Công thức' : 'Formulas', icon: icons.sigma },
+];
+---
+<header class="appbar">
+  <div class="appbar-top">
+    <a class="brand" href={url(`${lang}/`)}>
+      <svg width="26" height="26" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><ellipse cx="16" cy="16" rx="13" ry="7" transform="rotate(-20 16 16)"/><circle cx="16" cy="16" r="4.5" fill="currentColor" stroke="none" opacity=".25"/><circle cx="16" cy="16" r="4.5"/><circle cx="27" cy="11" r="2" fill="currentColor" stroke="none"/></svg>
+      <b>{t(lang, 'siteTitle')}</b>
+    </a>
+    <div class="rb-tabs" role="tablist" aria-label={t(lang, 'chapters')} data-rb-tabs>
+      {tabs.map((tb) => (
+        <button type="button" role="tab" class="rb-tab" id={`rbt-${tb.id}`} aria-controls={`rbp-${tb.id}`} aria-selected={String(tb.id === sel)} tabindex={tb.id === sel ? 0 : -1} data-tab={tb.id}>
+          {tb.k && <span class="k">{tb.k}</span>}<span class="t">{tb.t}</span>
+        </button>
+      ))}
+    </div>
+    <div class="rb-tools">
+      <a class="btn icon" href={url(`${lang}/search/`)} aria-label={t(lang, 'search')} title={t(lang, 'search')}><Fragment set:html={Icon(icons.search)} /></a>
+      <button type="button" class="btn icon" data-theme-toggle aria-label={t(lang, 'theme')} title={t(lang, 'theme')}><Fragment set:html={Icon(icons.moon)} /></button>
+      <a class="btn" href={otherPath} hreflang={other} lang={other}>{other.toUpperCase()}<span class="sr-only"> — {t(lang, 'otherLang')}</span></a>
+    </div>
+  </div>
+</header>
+<div class="ribbon" data-ribbon>
+    {parts.map(({ p, key }) => (
+      <div class="rb-panel" role="tabpanel" id={`rbp-${p}`} aria-labelledby={`rbt-${p}`} hidden={p !== sel}>
+        <div class="rb-group">
+          <div class="rb-items">
+            {CHAPTERS.filter((c) => c.part === p).map((c) => ready.has(`${lang}/${c.slug}`)
+              ? <a class="rb-btn" href={url(`${lang}/${c.slug}/`)} title={c.title[lang]} aria-current={c.slug === current ? 'page' : undefined}><span class="n">{pad(c.n)}</span>{c.short[lang]}</a>
+              : <span class="rb-btn planned" title={`${c.title[lang]} · ${t(lang, 'planned')}`}><span class="n">{pad(c.n)}</span>{c.short[lang]}</span>)}
+          </div>
+          <span class="rb-cap">{t(lang, key)}</span>
+        </div>
+      </div>
+    ))}
+    <div class="rb-panel" role="tabpanel" id="rbp-ref" aria-labelledby="rbt-ref" hidden>
+      <div class="rb-group">
+        <div class="rb-items">{refItems.map((r) => <a class="rb-btn" href={r.href}><Fragment set:html={Icon(r.icon)} />{r.label}</a>)}</div>
+        <span class="rb-cap">{t(lang, 'depthRef')}</span>
+      </div>
+    </div>
+    {showDepth && (
+      <div class="rb-panel" role="tabpanel" id="rbp-view" aria-labelledby="rbt-view" hidden>
+        <div class="rb-group">
+          <div class="rb-items">
+            <div class="seg" role="group" aria-label={t(lang, 'depth')} data-depth-group>
+              <button type="button" data-depth="basic">{t(lang, 'depthBasic')}</button>
+              <button type="button" data-depth="advanced">{t(lang, 'depthAdvanced')}</button>
+              <button type="button" data-depth="ref">{t(lang, 'depthRef')}</button>
+            </div>
+          </div>
+          <span class="rb-cap">{t(lang, 'depth')}</span>
+        </div>
+        <div class="rb-group">
+          <div class="rb-items">
+            <button type="button" class="rb-btn" data-present-toggle aria-pressed="false"><Fragment set:html={Icon(icons.present)} />{t(lang, 'present')}</button>
+          </div>
+          <span class="rb-cap">{vi ? 'Trình bày' : 'Display'}</span>
+        </div>
+      </div>
+    )}
+</div>

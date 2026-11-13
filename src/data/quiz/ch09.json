@@ -24,8 +24,8 @@
   ],
   "answer": 0,
   "why": {
-   "vi": "Hình 9.1 cần bạn bấm mẫu; Hình 9.3 (k-means) không cần mẫu nhưng cụm không tự có tên.",
-   "en": "Figure 9.1 needs your samples; Figure 9.3 (k-means) does not, but clusters come without names."
+   "vi": "Hình 14.1 cần bạn bấm mẫu; Hình 14.3 (k-means) không cần mẫu nhưng cụm không tự có tên.",
+   "en": "Figure 14.1 needs your samples; Figure 14.3 (k-means) does not, but clusters come without names."
   }
  },
  {

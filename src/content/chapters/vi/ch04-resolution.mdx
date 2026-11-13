@@ -1,6 +1,6 @@
 ---
 title: Bốn loại độ phân giải & cảm biến
-n: 4
+n: 9
 summary: Một ảnh vệ tinh "tốt" hay không tùy câu hỏi đặt ra. Chương này so sánh Sentinel-2, Landsat và MODIS trên cùng khung Hồ Tây để thấy pixel lớn, ít kênh, ít bit hay ít ảnh không mây làm thay đổi kết quả ra sao.
 objectives:
   - Phân biệt độ phân giải không gian, phổ, bức xạ và thời gian; nêu được giá trị của các vệ tinh phổ biến.
@@ -13,6 +13,9 @@ import Term from '../../../components/Term.astro';
 import Depth from '../../../components/Depth.astro';
 import Figure from '../../../components/Figure.astro';
 import LabLinks from '../../../components/LabLinks.astro';
+import Note from '../../../components/Note.astro';
+import Formula from '../../../components/Formula.astro';
+import Stats from '../../../components/Stats.astro';
 import SensorCompare from '../../../islands/SensorCompare.tsx';
 import AggregateLab from '../../../islands/AggregateLab.tsx';
 import MixedPixel from '../../../islands/MixedPixel.tsx';
@@ -22,7 +25,7 @@ import RevisitChart from '../../../islands/RevisitChart.tsx';
 import Quiz from '../../../islands/Quiz.tsx';
 import quiz from '../../../data/quiz/ch04.json';
 
-## 4.1 Bốn câu hỏi về một bức ảnh
+## 9.1 Bốn câu hỏi về một bức ảnh
 
 Trước khi chọn ảnh, hãy hỏi bốn câu:
 
@@ -31,7 +34,13 @@ Trước khi chọn ảnh, hãy hỏi bốn câu:
 3. **Mỗi pixel ghi được bao nhiêu mức giá trị?** Đó là <Term id="radiometric-resolution">độ phân giải bức xạ</Term>.
 4. **Bao lâu chụp lại một lần, và bao nhiêu ảnh không bị mây?** Đó là <Term id="temporal-resolution">độ phân giải thời gian</Term>.
 
-Không vệ tinh nào tốt nhất ở cả bốn mặt. Pixel nhỏ thường đi kèm <Term id="swath">dải chụp</Term> hẹp, nên vệ tinh lâu mới quay lại cùng một chỗ. Chương này dùng cùng một khung 5,12 × 5,12 km quanh Hồ Tây (Chương 6) để thấy từng đánh đổi.
+Không vệ tinh nào tốt nhất ở cả bốn mặt. Pixel nhỏ thường đi kèm <Term id="swath">dải chụp</Term> hẹp, nên vệ tinh lâu mới quay lại cùng một chỗ. Chương này dùng cùng một khung 5,12 × 5,12 km quanh Hồ Tây (Chương 11) để thấy từng đánh đổi.
+
+<Note kind="key">
+
+Bốn độ phân giải trả lời bốn câu hỏi: pixel lớn bao nhiêu, có những kênh nào, ghi được bao nhiêu mức, và bao nhiêu ảnh không mây. Không vệ tinh nào tốt nhất ở cả bốn mặt, nên chọn ảnh bắt đầu từ câu hỏi cần trả lời.
+
+</Note>
 
 <Depth level="ref" title="Bảng tra: thông số các vệ tinh hay dùng">
 
@@ -43,7 +52,7 @@ Không vệ tinh nào tốt nhất ở cả bốn mặt. Pixel nhỏ thường �
 | Landsat 8 OLI / 9 OLI-2 | 30 m (toàn sắc 15 m; nhiệt 100 m) | 9 + 2 nhiệt | 12 / 14 bit | 16 ngày mỗi vệ tinh, 8 ngày khi kết hợp | 185 km |
 | MODIS (Terra, Aqua) | 250 / 500 / 1000 m | 36 | 12 bit | 1–2 ngày | 2330 km |
 | VNREDSat-1 | 2,5 m toàn sắc; 10 m đa phổ | 4 đa phổ + 1 toàn sắc | — | Chụp theo đặt lịch | 17,5 km |
-| Sentinel-1 (radar, Chương 11) | ~5 × 20 m (chế độ IW) | Băng C, 2 phân cực | — | 12 ngày mỗi vệ tinh | 250 km |
+| Sentinel-1 (radar, Chương 16) | ~5 × 20 m (chế độ IW) | Băng C, 2 phân cực | — | 12 ngày mỗi vệ tinh | 250 km |
 
 </div>
 
@@ -51,28 +60,28 @@ Nguồn: ESA (Sentinel-2, Sentinel-1), USGS/NASA (Landsat, MODIS), VNSC (VNREDSa
 
 </Depth>
 
-## 4.2 Độ phân giải không gian
+## 9.2 Độ phân giải không gian
 
 ### Cùng một hồ, bốn cảm biến
 
-Hình 4.1 hiển thị cùng khung Hồ Tây qua bốn sản phẩm thật. Bật "Lưới pixel gốc" để thấy kích thước pixel thật của từng cảm biến.
+Hình 9.1 hiển thị cùng khung Hồ Tây qua bốn sản phẩm thật. Bật "Lưới pixel gốc" để thấy kích thước pixel thật của từng cảm biến.
 
 <Figure
-  title="Hình 4.1 — Hồ Tây qua Sentinel-2 (10 m), Landsat 9 (30 m), MODIS (250 m, 500 m)"
+  title="Hình 9.1 — Hồ Tây qua Sentinel-2 (10 m), Landsat 9 (30 m), MODIS (250 m, 500 m)"
   try="Chuyển lần lượt 10 m → 30 m → 250 m → 500 m. Ở 500 m, Hồ Tây còn lại bao nhiêu ô? Đọc 'Diện tích NDVI < 0' ở mỗi mức."
   source="Sentinel-2B L2A 12/02/2024; Landsat 9 C2 L2 22/12/2023 (cảnh trong gần nhất: tháng 1–4/2024 không có cảnh Landsat nào đủ trong); MODIS Terra MOD09GQ/MOD09GA 07/12/2023 (≥ 95 % không mây, góc nhìn ≤ 30°). Landsat và MODIS lấy mẫu lại láng giềng gần nhất về lưới UTM 48N chung góc. Kéo giãn cố định giống nhau cho mọi cảm biến."
 >
   <SensorCompare client:visible lang="vi" />
 </Figure>
 
-Diện tích có NDVI < 0 (chủ yếu là nước) **giảm dần khi pixel to lên**: 6,98 km² với Sentinel-2, 6,67 km² với Landsat, 3,59 km² với MODIS 250 m và chỉ còn 1,68 km² với MODIS 500 m. Ba sản phẩm này chụp vào ba ngày khác nhau, nên một phần khác biệt có thể do thời điểm (mực nước, mùa vụ trên bãi bồi). Để tách riêng ảnh hưởng của kích thước pixel, hãy làm thí nghiệm "sạch" hơn ở Hình 4.2.
+Diện tích có NDVI < 0 (chủ yếu là nước) **giảm dần khi pixel to lên**: 6,98 km² với Sentinel-2, 6,67 km² với Landsat, 3,59 km² với MODIS 250 m và chỉ còn 1,68 km² với MODIS 500 m. Ba sản phẩm này chụp vào ba ngày khác nhau, nên một phần khác biệt có thể do thời điểm (mực nước, mùa vụ trên bãi bồi). Để tách riêng ảnh hưởng của kích thước pixel, hãy làm thí nghiệm "sạch" hơn ở Hình 9.2.
 
 ### Thí nghiệm: gộp pixel trên cùng một ảnh
 
 Lấy ảnh Sentinel-2 10 m, tính trung bình phản xạ của từng khối 2×2, 4×4, … 64×64 pixel. Kết quả mô phỏng cảm biến có pixel 20–640 m chụp **cùng lúc**. Sau đó mới tính NDVI.
 
 <Figure
-  title="Hình 4.2 — Mô phỏng pixel thô hơn bằng cách gộp khối"
+  title="Hình 9.2 — Mô phỏng pixel thô hơn bằng cách gộp khối"
   try="Kéo thanh trượt từ 10 m lên 640 m và theo dõi đường diện tích. Ở kích thước nào diện tích bắt đầu giảm nhanh?"
   source="Mô phỏng từ ảnh Sentinel-2B L2A 12/02/2024: trung bình khối phản xạ B4 và B8, rồi tính NDVI. Đây không phải dữ liệu của cảm biến thật; cảm biến thật còn có hàm đáp ứng điểm (PSF) và góc nhìn riêng."
 >
@@ -85,18 +94,28 @@ Cùng một ảnh, cùng một thời điểm, diện tích NDVI < 0 vẫn giả
 
 Ven hồ, một pixel lớn chứa cả nước lẫn cây. Theo <Term id="linear-mixing">mô hình trộn tuyến tính</Term>, phổ của pixel bằng trung bình có trọng số của các phổ thuần:
 
-<code class="formula">ρ(pixel) = f · ρ(nước) + (1 − f) · ρ(thực vật)</code>
+<Formula label="Mô hình trộn tuyến tính hai thành phần" tex="\rho_{pixel} = f \cdot \rho_{w} + (1 - f) \cdot \rho_{v}" where="
+f :: tỷ lệ diện tích nước trong pixel
+\rho_{w} :: phổ nước thuần
+\rho_{v} :: phổ thực vật thuần
+" />
 
 Thực vật bãi bồi có NIR − Đỏ = 0,431 − 0,033 = **+0,398**. Nước Hồ Tây chỉ có 0,031 − 0,038 = **−0,007**. Muốn NDVI < 0 thì NIR < Đỏ, tức là:
 
-<code class="formula">−0,007 · f + 0,398 · (1 − f) &lt; 0  ⇒  f &gt; 0,398 / 0,405 ≈ 98,3 %</code>
+<Formula label="Điều kiện để pixel trộn có NDVI âm" tex="\begin{gathered} -0{,}007 \cdot f + 0{,}398 \cdot (1 - f) \lt 0 \\ \Rightarrow\; f \gt \frac{0{,}398}{0{,}405} \approx 98{,}3\ \% \end{gathered}" />
 
-Một pixel phải chứa **hơn 98 % nước** thì NDVI mới âm. Pixel trộn 50/50 có NDVI ≈ 0,73, không phải trung bình cộng của hai NDVI (0,38). NDVI là tỷ số nên **không cộng tuyến tính**.
+<mark>Một pixel phải chứa **hơn 98 % nước** thì NDVI mới âm.</mark>
+
+<Note kind="myth">
+
+"NDVI của pixel trộn bằng trung bình NDVI của các thành phần." Sai: pixel trộn 50/50 có NDVI ≈ 0,73, không phải trung bình cộng của hai NDVI (0,38). Phản xạ trộn tuyến tính, nhưng NDVI là tỷ số nên **không cộng tuyến tính**.
+
+</Note>
 
 <Figure
-  title="Hình 4.3 — Pixel hỗn hợp: trộn hai phổ thật"
+  title="Hình 9.3 — Pixel hỗn hợp: trộn hai phổ thật"
   try="Giữ 'Nước Hồ Tây' và 'Thực vật bãi bồi', kéo tỷ lệ nước lên 90 % rồi 99 %. Sau đó đổi thành phần 2 sang 'Mái nhà, đường phố': cần bao nhiêu % nước?"
-  source="Phổ mẫu 3×3 pixel từ ảnh Sentinel-2B 12/02/2024 (Hình 6.1). Giả định trộn tuyến tính, không tính tán xạ nhiều lần giữa các bề mặt."
+  source="Phổ mẫu 3×3 pixel từ ảnh Sentinel-2B 12/02/2024 (Hình 11.1). Giả định trộn tuyến tính, không tính tán xạ nhiều lần giữa các bề mặt."
 >
   <MixedPixel client:visible lang="vi" />
 </Figure>
@@ -111,14 +130,20 @@ Một pixel phải chứa **hơn 98 % nước** thì NDVI mới âm. Pixel trộ
 
 </Depth>
 
-## 4.3 Độ phân giải phổ
+<Note kind="key">
 
-Một máy ảnh thường chỉ có ba kênh Lam–Lục–Đỏ. Sentinel-2 có thêm rìa đỏ, NIR và SWIR. Hình 4.4 cho thấy cùng các phổ mẫu khi nhìn qua 3, 6 hoặc 10 kênh.
+Pixel càng lớn, mặt nước đo được càng nhỏ, ngay cả trên cùng một ảnh (6,98 km² ở 10 m, 2,87 km² ở 640 m). Nguyên nhân là pixel hỗn hợp: hãy chọn pixel nhỏ hơn đáng kể so với đối tượng cần đo.
+
+</Note>
+
+## 9.3 Độ phân giải phổ
+
+Một máy ảnh thường chỉ có ba kênh Lam–Lục–Đỏ. Sentinel-2 có thêm rìa đỏ, NIR và SWIR. Hình 9.4 cho thấy cùng các phổ mẫu khi nhìn qua 3, 6 hoặc 10 kênh.
 
 <Figure
-  title="Hình 4.4 — Thêm kênh phổ, tách được nhiều bề mặt hơn"
+  title="Hình 9.4 — Thêm kênh phổ, tách được nhiều bề mặt hơn"
   try="Chọn 'Máy ảnh RGB' và so 'Cây xanh đô thị' với 'Nước Hồ Tây': khoảng cách phổ gần bằng 0. Chuyển sang 10 kênh."
-  source="Mô phỏng bằng cách giữ một tập con kênh Sentinel-2 (bộ 6 kênh dùng B8A, B11, B12 thay cho NIR, SWIR1, SWIR2 của Landsat OLI). Phổ mẫu như Hình 6.1."
+  source="Mô phỏng bằng cách giữ một tập con kênh Sentinel-2 (bộ 6 kênh dùng B8A, B11, B12 thay cho NIR, SWIR1, SWIR2 của Landsat OLI). Phổ mẫu như Hình 11.1."
 >
   <SpectralSampling client:visible lang="vi" />
 </Figure>
@@ -133,40 +158,71 @@ Trong vùng khả kiến, cây xanh và nước Hồ Tây đều tối: khoảng
 
 </Depth>
 
-## 4.4 Độ phân giải bức xạ
+<Note kind="key">
+
+Thêm NIR và SWIR tách được những bề mặt trông giống nhau trong vùng khả kiến: khoảng cách phổ giữa cây xanh và nước tăng từ 0,013 (3 kênh) lên 0,356 (10 kênh). Hai loại nước thì vẫn gần nhau; muốn tách chúng cần kênh hẹp hơn hoặc dữ liệu siêu phổ.
+
+</Note>
+
+## 9.4 Độ phân giải bức xạ
 
 Cảm biến chuyển tín hiệu liên tục thành số nguyên: n bit cho 2ⁿ mức (<Term id="quantization">lượng tử hóa</Term>). Sentinel-2 MSI và Landsat 8 OLI dùng 12 bit (4096 mức), Landsat 9 OLI-2 dùng 14 bit, còn Landsat TM đời cũ chỉ 8 bit.
 
 <Figure
-  title="Hình 4.5 — Bớt bit, mất chi tiết vùng tối"
+  title="Hình 9.5 — Bớt bit, mất chi tiết vùng tối"
   try="Giảm từ 12 bit xuống 4 bit với kênh Lục và nhìn ô cam giữa Hồ Tây. Đất liền vẫn nhận ra được, còn mặt hồ thành những mảng phẳng."
   source="Mô phỏng: lượng tử hóa lại phản xạ Sentinel-2 (dải 0–1) với n bit. Dữ liệu gốc lưu ở bước 0,0001."
 >
   <Quantization client:visible lang="vi" />
 </Figure>
 
-Với kênh Lục, ô giữa Hồ Tây còn **244** mức xám ở 12 bit, **28** mức ở 8 bit, **9** mức ở 6 bit và chỉ **3** mức ở 4 bit. Bề mặt tối như nước chiếm một dải giá trị hẹp (0,04–0,06), nên mất chi tiết trước tiên. Điều này quan trọng khi nghiên cứu chất lượng nước, nơi tín hiệu cần đo rất nhỏ.
+Với kênh Lục, ô giữa Hồ Tây còn **244** mức xám ở 12 bit, **28** mức ở 8 bit, **9** mức ở 6 bit và chỉ **3** mức ở 4 bit.
 
-## 4.5 Độ phân giải thời gian
+<Stats items={[
+  { v: '244', l: 'mức xám ở 12 bit' },
+  { v: '28', l: 'mức xám ở 8 bit' },
+  { v: '9', l: 'mức xám ở 6 bit' },
+  { v: '3', l: 'mức xám ở 4 bit' },
+]} caption="Kênh Lục, ô giữa Hồ Tây (Hình 9.5, mô phỏng)." />
+
+<Note kind="key">
+
+Bề mặt tối như nước chiếm một dải giá trị hẹp (0,04–0,06), nên mất chi tiết trước tiên khi giảm bit. Điều này quan trọng khi nghiên cứu chất lượng nước, nơi tín hiệu cần đo rất nhỏ.
+
+</Note>
+
+## 9.5 Độ phân giải thời gian
 
 Hai vệ tinh Sentinel-2 chụp lại cùng một nơi khoảng 5 ngày một lần (<Term id="revisit">chu kỳ lặp</Term>), tức khoảng 6 lần mỗi tháng. Nhưng số ảnh **dùng được** phụ thuộc vào mây.
 
+<Note kind="myth">
+
+"Chu kỳ lặp 5 ngày nghĩa là cứ 5 ngày có một ảnh để dùng." Ở vùng nhiều mây thì không: mây, chứ không phải quỹ đạo, mới quyết định số ảnh dùng được (Hình 9.6).
+
+</Note>
+
 <Figure
-  title="Hình 4.6 — Số ảnh Sentinel-2 dùng được mỗi tháng: Hà Nội và An Giang"
+  title="Hình 9.6 — Số ảnh Sentinel-2 dùng được mỗi tháng: Hà Nội và An Giang"
   try="Tìm tháng ít ảnh nhất ở mỗi nơi. Nếu cần ảnh vụ lúa Đông Xuân ở miền Bắc (tháng 2–3), nên làm gì?"
   source="Sentinel-2 L2A 2019–2024, ô 2 × 2 km quanh Hồ Tây và quanh Tri Tôn (An Giang). 'Dùng được' = ≥ 90 % pixel không mây theo Cloud Score+ (cs_cdf ≥ 0,6); các tile cùng ngày gộp lại."
 >
   <RevisitChart client:visible lang="vi" />
 </Figure>
 
+<Stats items={[
+  { v: '433', l: 'ngày chụp Hà Nội, 2019–2024' },
+  { v: '92', l: 'ngày dùng được ở Hà Nội (khoảng 15 ảnh/năm)' },
+  { v: '139', l: 'ngày dùng được ở An Giang' },
+]} />
+
 Trong 6 năm, Hà Nội có 433 ngày chụp nhưng chỉ **92 ngày dùng được** (khoảng 15 ảnh/năm). An Giang có **139 ngày**. Hai miền có mùa mây khác nhau:
 
 - **Hà Nội**: tháng 2–3 tệ nhất (0,5–0,7 ảnh/tháng), phù hợp với thời kỳ mây thấp và mưa phùn cuối đông – xuân. Tháng 12 tốt nhất (2,5 ảnh/tháng).
 - **An Giang**: tháng 9 tệ nhất (0,5 ảnh/tháng), giữa mùa mưa. Tháng 12–1 tốt nhất (khoảng 3,2–3,3 ảnh/tháng).
 
-Landsat (16 ngày mỗi vệ tinh) còn khó hơn: ở Hà Nội, **không có cảnh Landsat nào trong từ tháng 1 đến tháng 4/2024**. Đó là lý do Hình 4.1 phải dùng cảnh tháng 12/2023. Khi mây là giới hạn chính, giải pháp là ghép ảnh nhiều ngày (composite), kết hợp nhiều vệ tinh (Harmonized Landsat–Sentinel), hoặc dùng radar (Chương 11).
+Landsat (16 ngày mỗi vệ tinh) còn khó hơn: ở Hà Nội, **không có cảnh Landsat nào trong từ tháng 1 đến tháng 4/2024**. Đó là lý do Hình 9.1 phải dùng cảnh tháng 12/2023. Khi mây là giới hạn chính, giải pháp là ghép ảnh nhiều ngày (composite), kết hợp nhiều vệ tinh (Harmonized Landsat–Sentinel), hoặc dùng radar (Chương 16).
 
-## 4.6 Chọn cảm biến: luôn là đánh đổi
+## 9.6 Chọn cảm biến: luôn là đánh đổi
 
 <div class="table-wrap">
 
@@ -180,7 +236,13 @@ Landsat (16 ngày mỗi vệ tinh) còn khó hơn: ở Hà Nội, **không có c
 
 </div>
 
-## 4.7 Thực hành
+<Note kind="key">
+
+Chọn cảm biến bắt đầu từ ba câu hỏi: đối tượng lớn bao nhiêu, cần theo dõi thường xuyên đến đâu, và vùng nghiên cứu nhiều mây vào mùa nào.
+
+</Note>
+
+## 9.7 Thực hành
 
 Notebook tải cùng khung Hồ Tây từ Sentinel-2, Landsat và MODIS, tính diện tích NDVI < 0 ở mỗi độ phân giải, và mô phỏng gộp pixel. Script GEE vẽ số ảnh dùng được mỗi tháng cho một điểm bất kỳ ở Việt Nam.
 
@@ -188,11 +250,11 @@ Notebook tải cùng khung Hồ Tây từ Sentinel-2, Landsat và MODIS, tính d
 
 **Bài tập gợi ý**
 
-1. Lặp lại Hình 4.6 cho nơi bạn đang sống. Tháng nào khó có ảnh nhất?
+1. Lặp lại Hình 9.6 cho nơi bạn đang sống. Tháng nào khó có ảnh nhất?
 2. Tính diện tích một hồ nhỏ (dưới 0,5 km²) bằng Sentinel-2 và Landsat. Sai khác bao nhiêu phần trăm?
 3. Dùng mô hình trộn tuyến tính để ước lượng tỷ lệ nước f cho các pixel ven Hồ Tây ở độ phân giải 30 m.
 
-## 4.8 Ôn tập
+## 9.8 Ôn tập
 
 <Quiz client:visible lang="vi" items={quiz} />
 

@@ -6,8 +6,8 @@ export type Key = { id: string; name: Bi; scene: string; preset: string; row: nu
 /** The nine classic interpretation keys, each with a real example. Positions checked against the spectra (scripts in the chapter notes). */
 export const KEYS: Key[] = [
   { id: 'tone', name: { vi: 'Tông (độ sáng)', en: 'Tone' }, scene: 'danang', preset: 'true', row: 100, col: 385, zoom: 14.5,
-    text: { vi: 'Sông Hàn tối hơn phố hai bên. Nước sông đục nên ở kênh nhìn thấy không tối hẳn, nhưng ở cận hồng ngoại nước hấp thụ gần hết (NDVI âm). Tông là yếu tố đầu tiên mắt nhận ra; thử đổi sang tổ hợp 8-4-3 ở Hình 8.1 để thấy sông tối hẳn.',
-            en: 'The Han River is darker than the streets on both banks. The water is turbid, so it is not very dark in visible light, but water absorbs almost all near-infrared (negative NDVI). Tone is the first thing the eye picks up; switch to 8-4-3 in Figure 8.1 to see the river turn black.' } },
+    text: { vi: 'Sông Hàn tối hơn phố hai bên. Nước sông đục nên ở kênh nhìn thấy không tối hẳn, nhưng ở cận hồng ngoại nước hấp thụ gần hết (NDVI âm). Tông là yếu tố đầu tiên mắt nhận ra; thử đổi sang tổ hợp 8-4-3 ở Hình 13.1 để thấy sông tối hẳn.',
+            en: 'The Han River is darker than the streets on both banks. The water is turbid, so it is not very dark in visible light, but water absorbs almost all near-infrared (negative NDVI). Tone is the first thing the eye picks up; switch to 8-4-3 in Figure 13.1 to see the river turn black.' } },
   { id: 'colour', name: { vi: 'Màu sắc', en: 'Colour' }, scene: 'dalat', preset: 'nir', row: 440, col: 440, zoom: 14,
     text: { vi: 'Trong tổ hợp giả màu 8-4-3, rừng hiện màu đỏ sẫm vì phản xạ cận hồng ngoại mạnh; đô thị xám xanh. Màu chỉ có nghĩa khi biết tổ hợp kênh.',
             en: 'In the 8-4-3 false colour, forest is deep red because it reflects near-infrared strongly; the town is blue-grey. Colour means nothing until you know the band combination.' } },
@@ -24,8 +24,8 @@ export const KEYS: Key[] = [
     text: { vi: 'Các ô hẹp, dài, song song nhau và vuông góc với kênh rạch: mẫu hình của đầm nuôi tôm xen dải cây (mô hình tôm – rừng). Đây là diễn giải, chưa kiểm tra thực địa.',
             en: 'Narrow, long, parallel plots at right angles to the creeks: the pattern of shrimp ponds alternating with tree strips (shrimp–mangrove farming). This is an interpretation, not field-checked.' } },
   { id: 'shadow', name: { vi: 'Bóng', en: 'Shadow' }, scene: 'hanoi', preset: 'true', row: 235, col: 261, zoom: 14,
-    text: { vi: 'Bóng mây nằm về phía tây bắc đám mây vì Mặt Trời chiếu từ hướng 147° (đông nam). Bóng cho biết hướng chiếu sáng và độ cao vật thể (Chương 7).',
-            en: 'The cloud shadow lies north-west of its cloud because the Sun shines from azimuth 147° (south-east). Shadows reveal the light direction and object height (Chapter 7).' } },
+    text: { vi: 'Bóng mây nằm về phía tây bắc đám mây vì Mặt Trời chiếu từ hướng 147° (đông nam). Bóng cho biết hướng chiếu sáng và độ cao vật thể (Chương 12).',
+            en: 'The cloud shadow lies north-west of its cloud because the Sun shines from azimuth 147° (south-east). Shadows reveal the light direction and object height (Chapter 12).' } },
   { id: 'site', name: { vi: 'Vị trí', en: 'Site' }, scene: 'angiang', preset: 'true', row: 323, col: 456, zoom: 14.5,
     text: { vi: 'Nhà cửa tập trung thành dải trên đất bằng chân núi, dọc theo đường. Vị trí địa hình giúp đoán: khu dân cư hiếm khi nằm trên sườn dốc.',
             en: 'Houses cluster in a strip on the flat land at the foot of the mountain, along the road. Site helps: settlements rarely sit on steep slopes.' } },

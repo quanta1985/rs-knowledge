@@ -1,5 +1,5 @@
 /**
- * Lab 12 — Mô hình số độ cao / Elevation models · Sổ tay Viễn thám & GIS
+ * Lab 17 — Mô hình số độ cao / Elevation models · Sổ tay Viễn thám & GIS
  * Dán vào https://code.earthengine.google.com và bấm Run.
  * Paste into https://code.earthengine.google.com and press Run.
  *

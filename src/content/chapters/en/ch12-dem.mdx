@@ -1,6 +1,6 @@
 ---
 title: Photogrammetry & elevation models
-n: 12
+n: 17
 summary: Heights are measured from space through the parallax between two images or through radar interferometry. This chapter uses real Copernicus and SRTM DEMs around Fansipan to compute hillshade, slope and profiles, compare the two DEMs, and predict where radar images are distorted.
 objectives:
   - Explain stereo parallax and compute height error from the B/H ratio and pixel size.
@@ -13,23 +13,33 @@ import Term from '../../../components/Term.astro';
 import Depth from '../../../components/Depth.astro';
 import Figure from '../../../components/Figure.astro';
 import LabLinks from '../../../components/LabLinks.astro';
+import Note from '../../../components/Note.astro';
+import Formula from '../../../components/Formula.astro';
+import Stats from '../../../components/Stats.astro';
 import StereoParallax from '../../../islands/StereoParallax.tsx';
 import DemExplorer from '../../../islands/DemExplorer.tsx';
 import ProfileTool from '../../../islands/ProfileTool.tsx';
 import Quiz from '../../../islands/Quiz.tsx';
 import quiz from '../../../data/quiz/ch12.json';
 
-## 12.1 Height from two images
+## 17.1 Height from two images
 
 Look at a mountain with your left eye, then your right: the summit jumps more than the foot. That shift is <Term id="stereo-parallax">parallax</Term>, and it is proportional to height. Satellites do the same: they image an area from two positions along the orbit, separated by a **base B**, flying at height **H**.
 
 <Figure
-  title="Figure 12.1 — Parallax in a stereo pair"
+  title="Figure 17.1 — Parallax in a stereo pair"
   try="Set B/H = 0.5, a 100 m object and 0.5 m pixels: how many pixels of parallax? Change the pixel to 30 m (Landsat-like): how many times larger is the height error?"
   source="Two-ray geometry, H = 694 km (the orbit of very-high-resolution optical satellites such as Pléiades). Δp = B·h/(H − h); σh = σp·GSD/(B/H). Not to scale."
 >
   <StereoParallax client:visible lang="en" />
 </Figure>
+
+<Formula label="Parallax and height error" tex="\begin{gathered} \Delta p = \frac{B\,h}{H - h} \cr \sigma_h = \frac{\sigma_p \cdot \mathrm{GSD}}{B/H} \end{gathered}" where="
+B,\ H :: baseline and flying height
+h :: object height
+\sigma_p :: image-matching error (pixels)
+\mathrm{GSD} :: ground pixel size
+" />
 
 <div class="worked">
 
@@ -42,9 +52,19 @@ Look at a mountain with your left eye, then your right: the summit jumps more th
 
 </div>
 
-A <Term id="dem">DEM</Term> from optical or radar imagery is a **DSM**: it measures the top surface, including canopies and roofs. A **DTM** (bare earth) needs trees and buildings removed, usually with LiDAR.
+<Note kind="key">
 
-The two free global DEMs in this handbook were both measured by **radar interferometry** (Chapter 11), not by optical stereo:
+Height error grows with pixel size and shrinks as the B/H ratio grows. With the same 0.3-pixel matching error, 0.5 m imagery gives 0.3 m and 30 m imagery gives 18 m.
+
+</Note>
+
+<Note kind="myth">
+
+"A DEM gives the height of the ground." In fact a <Term id="dem">DEM</Term> from optical or radar imagery is a **DSM**: it measures the top surface, including canopies and roofs. A **DTM** (bare earth) needs trees and buildings removed, usually with LiDAR.
+
+</Note>
+
+The two free global DEMs in this handbook were both measured by **radar interferometry** (Chapter 16), not by optical stereo:
 
 | | SRTM 1″ | Copernicus DEM GLO-30 |
 |---|---|---|
@@ -53,12 +73,12 @@ The two free global DEMs in this handbook were both measured by **radar interfer
 | Pixel | 1″ (~30 m) | 1″ (~30 m) |
 | Heights relative to | <Term id="geoid">Geoid</Term> EGM96 | Geoid EGM2008 |
 
-## 12.2 The DEM around Fansipan
+## 17.2 The DEM around Fansipan
 
 The 18 × 18 km frame covers the Fansipan summit and Sa Pa town, from **605 m** to **3111 m** in the Copernicus DEM. The highest pixel lies 67 m from the summit coordinates. It is lower than the commonly published 3143 m because each 30 m pixel represents the whole cell, which grinds a sharp summit down.
 
 <Figure
-  title="Figure 12.2 — Elevation model of Fansipan – Sa Pa on the map"
+  title="Figure 17.2 — Elevation model of Fansipan – Sa Pa on the map"
   try="In the Hillshade layer, move the sun azimuth from 315° to 135°: do the mountains look raised or sunken? Choose Slope: where is it steeper than 45°? Choose Cop − SRTM: where do the DEMs disagree most?"
   source="Copernicus DEM GLO-30 (release 2024_1) and SRTM 1″ v3, bilinearly resampled onto a 30 m UTM 48N grid in Earth Engine, rounded to metres. Slope and aspect: Horn (1981). Hillshade computed in the browser. Copernicus DEM © DLR e.V. 2010–2014 and © Airbus Defence and Space GmbH 2014–2018, provided under COPERNICUS; SRTM: NASA/USGS. Basemap © Esri, Maxar, Earthstar Geographics."
 >
@@ -73,24 +93,42 @@ The 18 × 18 km frame covers the Fansipan summit and Sa Pa town, from **605 m** 
 
 **How far apart are the two DEMs?** Copernicus minus SRTM averages **+3.5 m** with a standard deviation of **11.8 m**, and 21.8 % of pixels differ by more than 10 m. At least four causes contribute: the measurements are more than ten years apart (forest growth, new roads); different wavelengths penetrate canopies to different depths; the geoids differ (EGM96 versus EGM2008); and SRTM voids were filled from other sources. The handbook has no field GNSS heights to say which DEM is closer to the truth here.
 
+<Stats items={[
+  { v: '+3.5', u: 'm', l: 'Copernicus minus SRTM, mean' },
+  { v: '11.8', u: 'm', l: 'standard deviation of the difference' },
+  { v: '21.8', u: '%', l: 'pixels differing by more than 10 m' },
+]} caption="Two 30 m DEMs over the Fansipan – Sa Pa frame." />
+
+<Note kind="key">
+
+Two DEMs with the same 30 m pixel do not give the same height: different dates, different wavelengths, different geoids. Without GNSS field measurements you cannot tell which one is closer to the truth.
+
+</Note>
+
 <Depth level="advanced" title="Slope and hillshade formulas">
 
 For the 3 × 3 window (a b c / d e f / g h i) around a pixel of size r:
 
-<p class="formula">∂z/∂x = [(c + 2f + i) − (a + 2d + g)] / 8r     ∂z/∂y = [(a + 2b + c) − (g + 2h + i)] / 8r</p>
+<Formula label="Horn (1981) derivatives" tex="\begin{gathered} \frac{\partial z}{\partial x} = \frac{(c + 2f + i) - (a + 2d + g)}{8r} \cr \frac{\partial z}{\partial y} = \frac{(a + 2b + c) - (g + 2h + i)}{8r} \end{gathered}" />
 
-<p class="formula">slope = arctan √((∂z/∂x)² + (∂z/∂y)²)     hillshade = cos Z · cos S + sin Z · sin S · cos(A − aspect)</p>
+<Formula label="Slope and hillshade" tex="\begin{gathered} S = \arctan\sqrt{\left(\frac{\partial z}{\partial x}\right)^2 + \left(\frac{\partial z}{\partial y}\right)^2} \cr \text{hs} = \cos Z \cos S \cr + \sin Z \sin S \cos(A - \varphi) \end{gathered}" where="
+S :: slope
+\text{hs} :: hillshade
+Z :: sun zenith angle (90° − elevation)
+A :: sun azimuth
+\varphi :: aspect
+" />
 
-Z is the sun's zenith angle (90° − elevation), A the sun azimuth, S the slope. Negative values (slopes facing away from the sun) are clipped to 0.
+Negative values (slopes facing away from the sun) are clipped to 0.
 
 </Depth>
 
-## 12.3 Terrain profiles
+## 17.3 Terrain profiles
 
 A profile shows the shape of the terrain along a line, useful when planning roads, power lines or hiking routes.
 
 <Figure
-  title="Figure 12.3 — Profile from the Fansipan summit to Sa Pa"
+  title="Figure 17.3 — Profile from the Fansipan summit to Sa Pa"
   try="Click two points on the map to draw a new line. Find a line about 2 km long with a stretch steeper than 45°. Where do the Copernicus and SRTM lines differ most: summit, slopes or valley floor?"
   source="240 bilinear samples along the line on Copernicus DEM GLO-30 and SRTM 1″ (30 m grid). Steepest stretch over 90 m (3-pixel) segments. Sa Pa town position is approximate."
 >
@@ -99,13 +137,24 @@ A profile shows the shape of the terrain along a line, useful when planning road
 
 The sample line from the Fansipan summit (3102 m in the pixel holding the summit coordinates) to Sa Pa (1504 m) is **7.98 km** long. It does not descend steadily: its lowest point is 1237 m, below Sa Pa itself, so the total ascent is still **654 m**. The steepest 90 m stretch is inclined at **50°**.
 
-## 12.4 Terrain and radar images
+<Note kind="key">
 
-Chapter 11 showed that slopes steeper than the incidence angle θ fall into **layover**, and back slopes steeper than 90° − θ into **radar shadow**. With a DEM we can compute this for every pixel. Only the slope component along the radar's look direction matters:
+The height difference between the two ends of a line does not tell the whole story. The profile shows that going from Fansipan to Sa Pa still involves 654 m of climbing, because the line dips below Sa Pa before rising again.
 
-<p class="formula">tan(α_r) = tan(slope) · cos(aspect − direction towards the radar)</p>
+</Note>
 
-Choose the **Radar distortion** layer in Figure 12.2. For an ascending Sentinel-1 pass at Fansipan's latitude the radar looks towards azimuth ≈ 78° (east-north-east); for a descending pass ≈ 282°.
+## 17.4 Terrain and radar images
+
+Chapter 16 showed that slopes steeper than the incidence angle θ fall into **layover**, and back slopes steeper than 90° − θ into **radar shadow**. With a DEM we can compute this for every pixel. Only the slope component along the radar's look direction matters:
+
+<Formula label="Slope along the radar look direction" tex="\tan\alpha_r = \tan S \cdot \cos(\varphi - \varphi_r)" where="
+\alpha_r :: slope along the radar look direction
+S :: slope
+\varphi :: aspect
+\varphi_r :: direction towards the radar
+" />
+
+Choose the **Radar distortion** layer in Figure 17.2. For an ascending Sentinel-1 pass at Fansipan's latitude the radar looks towards azimuth ≈ 78° (east-north-east); for a descending pass ≈ 282°.
 
 | Pass, incidence | Layover | Radar shadow | Foreshortening |
 |---|---|---|---|
@@ -114,15 +163,21 @@ Choose the **Radar distortion** layer in Figure 12.2. For an ascending Sentinel-
 | Ascending, θ = 45° | 1.5 % | 0.7 % | 47.1 % |
 | Descending, θ = 37° | 2.7 % | 0.4 % | 49.2 % |
 
-Larger incidence angles reduce layover but increase shadow. The two passes see the slopes from opposite sides, so combining ascending and descending images shrinks the area without information. That is why flood mapping in mountains (Chapter 11 exercise) needs both a DEM and both passes.
+Larger incidence angles reduce layover but increase shadow. The two passes see the slopes from opposite sides, so combining ascending and descending images shrinks the area without information. That is why flood mapping in mountains (Chapter 16 exercise) needs both a DEM and both passes.
+
+<Note kind="key">
+
+With a DEM you know in advance where a radar image will suffer layover or shadow. Combining ascending and descending passes shrinks the area without information.
+
+</Note>
 
 <Depth level="advanced" title="Why is radar shadow rare here?">
 
-Radar shadow needs a back slope steeper than 90° − θ, i.e. more than 53° at θ = 37°, measured along the look direction. Such slopes are rare in a 30 m DEM because each pixel already averages the cliffs. A finer DEM (1–5 m from stereo imagery) would show more shadow. Terrain analysis results depend on resolution (Chapter 4).
+Radar shadow needs a back slope steeper than 90° − θ, i.e. more than 53° at θ = 37°, measured along the look direction. Such slopes are rare in a 30 m DEM because each pixel already averages the cliffs. A finer DEM (1–5 m from stereo imagery) would show more shadow. Terrain analysis results depend on resolution (Chapter 9).
 
 </Depth>
 
-## 12.5 Lab
+## 17.5 Lab
 
 The notebook loads Copernicus DEM and SRTM for the same Fansipan frame from Earth Engine, computes slope, hillshade and the DEM difference, draws a profile and maps layover/shadow. The GEE script uses `ee.Terrain` to make terrain maps for any area.
 
@@ -134,7 +189,7 @@ The notebook loads Copernicus DEM and SRTM for the same Fansipan frame from Eart
 2. Draw a profile across a hydropower reservoir. Is the water surface flat in both DEMs?
 3. Compare the height of a national benchmark (if you have its value) with both DEMs.
 
-## 12.6 Review
+## 17.6 Review
 
 <Quiz client:visible lang="en" items={quiz} />
 

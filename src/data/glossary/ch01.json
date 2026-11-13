@@ -43,5 +43,68 @@
    "vi": "Mức xử lý của sản phẩm ảnh: L0 thô, L1 đã hiệu chuẩn và nắn hình học (ví dụ L1C: phản xạ đỉnh khí quyển), L2 đã hiệu chỉnh khí quyển (ví dụ L2A: phản xạ bề mặt).",
    "en": "How far a product has been processed: L0 raw, L1 calibrated and geometrically corrected (e.g. L1C top-of-atmosphere reflectance), L2 atmospherically corrected (e.g. L2A surface reflectance)."
   }
+ },
+ {
+  "id": "ch01-microgravity",
+  "vi": "Vi trọng lực",
+  "en": "Microgravity",
+  "def": {
+   "vi": "Trạng thái mọi vật trong tàu vũ trụ cùng rơi tự do với cùng gia tốc nên như không có trọng lượng. Trọng lực vẫn còn: ở độ cao ISS khoảng 88 % so với mặt đất.",
+   "en": "The state in which everything in a spacecraft falls freely with the same acceleration, so it seems weightless. Gravity is still there: about 88 % of the surface value at ISS altitude."
+  }
+ },
+ {
+  "id": "ch01-meo",
+  "vi": "Quỹ đạo tầm trung (MEO)",
+  "en": "Medium Earth orbit (MEO)",
+  "def": {
+   "vi": "Vùng quỹ đạo giữa khoảng 2000 km và quỹ đạo địa tĩnh 35 786 km. Các hệ định vị GPS, GLONASS, Galileo, BeiDou bay ở 19 100–23 200 km.",
+   "en": "The orbit region between about 2,000 km and geostationary altitude (35,786 km). GPS, GLONASS, Galileo and BeiDou fly at 19,100–23,200 km."
+  }
+ },
+ {
+  "id": "ch01-heo",
+  "vi": "Quỹ đạo elip cao (HEO)",
+  "en": "Highly elliptical orbit (HEO)",
+  "def": {
+   "vi": "Quỹ đạo elip dẹt, cận điểm thấp và viễn điểm rất cao (ví dụ Molniya, độ nghiêng 63,4°), cho vệ tinh lưu lâu trên vùng vĩ độ cao.",
+   "en": "A strongly elliptical orbit with a low perigee and a very high apogee (e.g. Molniya, inclination 63.4°), letting a satellite dwell over high latitudes."
+  }
+ },
+ {
+  "id": "ch01-upstream",
+  "vi": "Thượng nguồn (ngành vũ trụ)",
+  "en": "Upstream (space sector)",
+  "def": {
+   "vi": "Phần ngành vũ trụ thiết kế, chế tạo vệ tinh và linh kiện, cung cấp dịch vụ phóng và xây hạ tầng mặt đất.",
+   "en": "The part of the space sector that designs and builds satellites and components, provides launch services and builds ground infrastructure."
+  }
+ },
+ {
+  "id": "ch01-downstream",
+  "vi": "Hạ nguồn (ngành vũ trụ)",
+  "en": "Downstream (space sector)",
+  "def": {
+   "vi": "Phần ngành vũ trụ vận hành vệ tinh và bán dịch vụ: viễn thông, truyền hình, định vị, dữ liệu ảnh và dịch vụ giá trị gia tăng.",
+   "en": "The part of the space sector that operates satellites and sells services: communications, broadcasting, navigation, imagery and value-added services."
+  }
+ },
+ {
+  "id": "ch01-mission-phase",
+  "vi": "Pha dự án vũ trụ",
+  "en": "Space project phase",
+  "def": {
+   "vi": "Các giai đoạn của một sứ mệnh theo NASA (Pre-A, A–F) hoặc ESA (0, A–F): ý tưởng, khả thi, thiết kế sơ bộ, thiết kế chi tiết, chế tạo và phóng, khai thác, kết thúc. Mỗi pha khép lại bằng một kỳ đánh giá như PDR, CDR.",
+   "en": "The stages of a mission in NASA (Pre-A, A–F) or ESA (0, A–F) terms: concept, feasibility, preliminary design, detailed design, build and launch, operations, close-out. Each ends with a review such as PDR or CDR."
+  }
+ },
+ {
+  "id": "ch01-satcat",
+  "vi": "Danh mục vệ tinh (SATCAT)",
+  "en": "Satellite catalogue (SATCAT)",
+  "def": {
+   "vi": "Danh mục mọi vật thể nhân tạo được theo dõi trên quỹ đạo, mỗi vật thể có số NORAD và mã quốc tế dạng YYYY-NNNA (năm, số thứ tự lần phóng, mảnh). CelesTrak phát hành công khai.",
+   "en": "The catalogue of every tracked artificial object in orbit; each has a NORAD number and an international designator YYYY-NNNA (year, launch number, piece). Published by CelesTrak."
+  }
  }
 ]

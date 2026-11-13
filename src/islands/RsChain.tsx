@@ -16,9 +16,9 @@ const STEPS: Step[] = [
             thermal: { vi: 'Năng lượng nhiệt không đi xuống: nguồn nằm ngay tại bề mặt.', en: 'No downward path: the source is the surface itself.' },
             radar: { vi: 'Sóng 5,5 cm đi qua mây gần như không suy hao.', en: '5.5 cm waves cross clouds almost unattenuated.' } } },
   { x: 320, y: 220, icon: '▦', name: { vi: '3. Đối tượng', en: '3. Target' }, ch: '6, 11',
-    what: { optical: { vi: 'Lá phản xạ mạnh NIR, nước hấp thụ NIR: NDVI ruộng 0,86, Hồ Tây −0,10 (Chương 6).', en: 'Leaves reflect NIR, water absorbs it: NDVI 0.86 on crops, −0.10 on West Lake (Ch. 6).' },
-            thermal: { vi: 'Hồ Tây 15,8 °C, đất trống 22,8 °C lúc 10:23 ngày 22/12/2023 (Landsat 9, mục 3.5).', en: 'West Lake 15.8 °C, bare soil 22.8 °C at 10:23 on 22 Dec 2023 (Landsat 9, §3.5).' },
-            radar: { vi: 'Mặt nước dội ít (sông Hồng −20,4 dB), mái nhà dội nhiều (−3,0 dB) (Chương 11).', en: 'Water returns little (Red River −20.4 dB), roofs a lot (−3.0 dB) (Ch. 11).' } } },
+    what: { optical: { vi: 'Lá phản xạ mạnh NIR, nước hấp thụ NIR: NDVI ruộng 0,86, Hồ Tây −0,10 (Chương 11).', en: 'Leaves reflect NIR, water absorbs it: NDVI 0.86 on crops, −0.10 on West Lake (Ch. 11).' },
+            thermal: { vi: 'Hồ Tây 15,8 °C, đất trống 22,8 °C lúc 10:23 ngày 22/12/2023 (Landsat 9, mục 8.5).', en: 'West Lake 15.8 °C, bare soil 22.8 °C at 10:23 on 22 Dec 2023 (Landsat 9, §8.5).' },
+            radar: { vi: 'Mặt nước dội ít (sông Hồng −20,4 dB), mái nhà dội nhiều (−3,0 dB) (Chương 16).', en: 'Water returns little (Red River −20.4 dB), roofs a lot (−3.0 dB) (Ch. 16).' } } },
   { x: 450, y: 120, icon: '≋', name: { vi: '4. Khí quyển (đi lên)', en: '4. Atmosphere (up)' }, ch: '7',
     what: { optical: { vi: 'Ánh sáng tán xạ cộng thêm vào tín hiệu: phải hiệu chỉnh từ TOA về phản xạ bề mặt.', en: 'Scattered skylight is added to the signal: correct TOA to surface reflectance.' },
             thermal: { vi: 'Hơi nước hấp thụ và phát xạ lại: nhiệt độ sáng khác nhiệt độ bề mặt.', en: 'Water vapour absorbs and re-emits: brightness temperature differs from surface temperature.' },
@@ -37,7 +37,7 @@ const STEPS: Step[] = [
             radar: { vi: 'Bản đồ ngập sau bão Yagi, lịch vụ lúa, sụt lún (InSAR).', en: 'Yagi flood map, rice calendars, subsidence (InSAR).' } } },
 ];
 const PATH = STEPS.map((s, i) => `${i ? 'L' : 'M'}${s.x},${s.y}`).join(' ');
-const COLOR: Record<Mode, string> = { optical: '#e3b25a', thermal: '#f7867a', radar: '#4fc3cd' };
+const COLOR: Record<Mode, string> = { optical: 'var(--st-warn)', thermal: 'var(--st-bad)', radar: 'var(--st-accent)' };
 
 const TXT = {
   vi: { mode: 'Loại viễn thám', optical: 'Quang học', thermal: 'Nhiệt', radar: 'Radar', what: 'Ở khâu này', ch: 'Chương', passive: 'Thụ động', active: 'Chủ động',
@@ -59,7 +59,7 @@ export default function RsChain({ lang }: { lang: Lang }) {
   return (
     <div className="dark-card">
       <svg className="chart" viewBox="0 0 780 330" width="100%" role="img" aria-label={`${T.fig}: ${T[mode]}`}>
-        <path d={PATH} fill="none" stroke="#94a3b8" strokeWidth={1} strokeDasharray="3 5" opacity={0.5} />
+        <path d={PATH} fill="none" stroke="var(--st-muted)" strokeWidth={1} strokeDasharray="3 5" opacity={0.5} />
         <path d={path} fill="none" stroke={c} strokeWidth={2.5} opacity={0.8} />
         {!still && [0, 0.33, 0.66].map((b) => (
           <circle key={`${mode}${b}`} r={5} fill={c}>
@@ -71,9 +71,9 @@ export default function RsChain({ lang }: { lang: Lang }) {
           return (
             <g key={i} role="button" tabIndex={0} aria-label={p.name[lang]} style={{ cursor: 'pointer' }} opacity={off ? 0.35 : 1}
               onClick={() => setK(i)} onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setK(i)}>
-              <circle cx={p.x} cy={p.y} r={26} fill="#0d1424" stroke={i === k ? c : '#94a3b8'} strokeWidth={i === k ? 3 : 1.5} />
-              <text x={p.x} y={p.y + 7} textAnchor="middle" style={{ fontSize: 20, fill: '#e2e8f0' }}>{i === 0 && mode === 'radar' ? '⌁' : p.icon}</text>
-              <text x={p.x} y={p.y + 46} textAnchor="middle" style={{ fontSize: 12, fill: i === k ? c : '#94a3b8' }}>{p.name[lang]}</text>
+              <circle cx={p.x} cy={p.y} r={26} fill="var(--st-bg)" stroke={i === k ? c : 'var(--st-muted)'} strokeWidth={i === k ? 3 : 1.5} />
+              <text x={p.x} y={p.y + 7} textAnchor="middle" style={{ fontSize: 20, fill: 'var(--st-fg)' }}>{i === 0 && mode === 'radar' ? '⌁' : p.icon}</text>
+              <text x={p.x} y={p.y + 46} textAnchor="middle" style={{ fontSize: 12, fill: i === k ? c : 'var(--st-muted)' }}>{p.name[lang]}</text>
             </g>
           );
         })}

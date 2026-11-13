@@ -4,7 +4,7 @@ import { utmToLonLat } from '../lib/geo';
 import { band, percentile, stretchByte } from '../lib/raster';
 import { frameQuad, loadProduct, type Product } from './cube';
 
-/** Chapter 8 scenes (public/data/ch08-*, plus the cloudy Hanoi image of Ch. 7 for the shadow key). */
+/** Chapter 13 scenes (public/data/ch08-*, plus the cloudy Hanoi image of Ch. 12 for the shadow key). */
 export const SCENES: { id: string; dir: string; name: Bi }[] = [
   { id: 'camau', dir: 'ch08-camau', name: { vi: 'Cà Mau', en: 'Ca Mau' } },
   { id: 'angiang', dir: 'ch08-angiang', name: { vi: 'An Giang', en: 'An Giang' } },
